@@ -1,0 +1,39 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"command": "./compile_debug.sh",
+			"type": "shell",
+			"label": "Build the kernel in debug mode.",
+			"promptOnClose": true,
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"command": "./compile.sh",
+			"type": "shell",
+			"label": "Build the kernel in release mode.",
+			"promptOnClose": true,
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			}
+		},
+		{
+			"command": "./generate_iso.sh",
+			"type": "shell",
+			"label": "Generate the operating system's iso",
+			"promptOnClose": true,
+			"problemMatcher": [],
+			"group": "none"
+		}
+	]
+}

@@ -1,0 +1,13 @@
+[KERNEL_INFO] Found memory block for the table.
+[KERNEL_INFO] kmeminit->for_loop2-debug_log
+[KERNEL_INFO] kmeminit->for_loop2-debug_log
+[KERNEL_INFO] kmeminit->for_loop2-debug_log
+[KERNEL_INFO] Found valid memory block.
+[KERNEL_INFO] kmeminit->for_loop2-debug_log
+[KERNEL_INFO] kmeminit->for_loop2-debug_log
+[KERNEL_INFO] kmeminit->for_loop2-debug_log
+[KERNEL_INFO] Found all memory blocks.
+[KERNEL_INFO] Finding the biggest memory block.
+[KERNEL_INFO] Initalizing the heap.
+[KERNEL_INFO] Zeroing header...
+[KERNEL_INFO] Allocating a memory block on heap.

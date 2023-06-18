@@ -1,0 +1,5 @@
+/mnt/c/Users/omark/Documents/obos/CMakeFiles/edit_cache.dir
+/mnt/c/Users/omark/Documents/obos/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/omark/Documents/obos/out/CMakeFiles/oboskrnl.dir
+/mnt/c/Users/omark/Documents/obos/out/CMakeFiles/edit_cache.dir
+/mnt/c/Users/omark/Documents/obos/out/CMakeFiles/rebuild_cache.dir

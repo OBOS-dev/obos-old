@@ -1,0 +1,9 @@
+# ninja log v5
+296	1371	1687110009156925500	out/CMakeFiles/oboskrnl.dir/inline-asm.c.o	ab625edd60b32dd6
+239	1599	1687110009228049100	out/CMakeFiles/oboskrnl.dir/kmain.c.o	a8b30c69b2db8f08
+250	1787	1687110009172927200	out/CMakeFiles/oboskrnl.dir/acpi.c.o	6b324a0a8f2cb723
+267	1914	1687110009246940200	out/CMakeFiles/oboskrnl.dir/kalloc.c.o	ee7e9f7a95c18245
+286	2020	1687110009202098800	out/CMakeFiles/oboskrnl.dir/terminal.c.o	c07fc043e80c68c8
+313	2167	1687110009177919700	out/CMakeFiles/oboskrnl.dir/klog.c.o	b88945ecfa9f312f
+341	2260	1687110009263951900	out/CMakeFiles/oboskrnl.dir/kserial.c.o	e96f207527e22390
+2345	4501	1687110012146379200	out/oboskrnl	3e855eafa265e01c
