@@ -66,9 +66,9 @@ int main(int argc, char** argv)
 		std::cout << "Usage: kssh ip:port\n";
 		return -1;
 	}
-	std::string argument = argv[0];
+	std::string argument = argv[1];
 	std::string ip = argument.substr(0, argument.find(':'));
-	short port = std::stoi(argument.substr(argument.find(':')));
+	short port = std::stoi(argument.substr(argument.find(':') + 1));
 #else
 	std::string ip = "127.0.0.1";
 	short port = 1534;

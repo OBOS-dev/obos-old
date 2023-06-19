@@ -1,0 +1,34 @@
+{
+  "DevContainersInfoBarHidden": true,
+  "OutputFoldersPerTargetSystem": {
+    "WSL: Ubuntu": [
+      "out\\Ubuntu\\build\\linux-debug",
+      "out\\Ubuntu\\install\\linux-debug"
+    ],
+    "Local Machine": [
+      "out\\build\\x64-debug",
+      "out\\install\\x64-debug",
+      "out\\build\\x64-release",
+      "out\\install\\x64-release",
+      "out\\build\\x86-debug",
+      "out\\install\\x86-debug",
+      "out\\build\\x86-release",
+      "out\\install\\x86-release"
+    ]
+  },
+  "ActiveTargetSystem": "WSL: Ubuntu",
+  "MRUPresetsPerTargetSystem": {
+    "WSL: Ubuntu": {
+      "configure": "x64-debug"
+    },
+    "Local Machine": {
+      "configure": "x64-debug"
+    }
+  },
+  "ExpandedNodes": [
+    "",
+    "\\kernel_terminal"
+  ],
+  "SelectedNode": "\\kernel_terminal\\kernel_terminal.cpp",
+  "PreviewInSolutionExplorer": false
+}

@@ -10,11 +10,7 @@ typedef enum __serialPort
     COM1 = 0x3F8,
     COM2 = 0x2F8,
     COM3 = 0x3E8,
-    COM4 = 0x2E8,
-    COM5 = 0x5F8,
-    COM6 = 0x4F8,
-    COM7 = 0x5E8,
-    COM8 = 0x4E8,
+    COM4 = 0x2E8
 } SERIALPORT;
 typedef enum __parityBit
 {
@@ -38,12 +34,15 @@ typedef enum __stopBits
     TWO_STOPBIT = 0b0100
 } STOPBITS;
 
+void kinitserialports();
+
 int InitSerialPort(
     SERIALPORT port,
     UINT16_T baudRateDivisior,
     DATABITS dataBits,
     STOPBITS stopBits,
-    PARITYBIT paritybit);
-void writeSerialPort(CSTRING buf, SIZE_T sizeBuf);
-
+    PARITYBIT paritybit,
+    SIZE_T inputBufferSize,
+    SIZE_T outputBufferSize);
+int writeSerialPort(SERIALPORT port, CSTRING buf, SIZE_T sizeBuf);
 #endif

@@ -5,6 +5,7 @@
 #include "klog.h"
 #include "kalloc.h"
 #include "inline-asm.h"
+#include "kserial.h"
 
 #include "multiboot/mutliboot.h"
 
@@ -51,6 +52,11 @@ static void onKernelPanic()
 	acpiPowerOff();
 }
 
+static void defaultInterruptHandler()
+{
+	nop();
+}
+
 void kmain(multiboot_info_t* mbd, UINT32_T magic)
 {
 	g_multibootInfo = mbd;
@@ -64,6 +70,15 @@ void kmain(multiboot_info_t* mbd, UINT32_T magic)
 	kassert(magic == MULTIBOOT_BOOTLOADER_MAGIC, "Invalid magic number for multiboot.\r\n", 37);
 	kassert(mbd->flags >> 6 & 0x1, "No memory map provided from GRUB.\r\n", 35);
 	kassert(mbd->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT, KSTR_LITERAL("The video type isn't MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT\r\n"));
+
+
+	{
+		void(**interrupt_vector_table)() = 0x00000000;
+		for(int i = 0; i <= 0x3FF / 4; interrupt_vector_table[++i] = defaultInterruptHandler);
+		__asm__("sti");
+	}
+
+	kinitserialports();
 
 	kmeminit();
 	{
