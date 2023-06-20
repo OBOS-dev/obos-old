@@ -65,11 +65,6 @@
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
               "CMAKE_BUILD_TYPE": "Debug",
-              "CMAKE_C_COMPILER": "/home/omar/opt/cross/bin/i686-elf-gcc",
-              "CMAKE_ASM-ATT_COMPILER": "/home/omar/opt/cross/bin/i686-elf-as",
-              "CMAKE_C_COMPILER_WORKS": true,
-              "CMAKE_CXX_COMPILER_WORKS": true,
-              "CMAKE_ASM-ATT_COMPILER_WORKS": true,
               "LINKER_SCRIPT": "kernel/linker.ld",
               "OUTPUT_DIR": "/mnt/c/Users/omark/Documents/obos/out/"
             },

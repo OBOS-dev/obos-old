@@ -73,7 +73,9 @@
         "kalloc.h": "c",
         "hash_map": "c",
         "string_view": "c",
-        "inline-asm.h": "c"
+        "inline-asm.h": "c",
+        "stdarg.h": "c",
+        "kserial.h": "c"
     },
     "cmake.configureOnOpen": false,
     "C_Cpp.errorSquiggles": "enabled"
