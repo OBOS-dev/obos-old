@@ -1,8 +1,9 @@
 #include "terminal.h"
 #include "types.h"
 #include "inline-asm.h"
+#include "interrupts.h"
 
-#include "multiboot/mutliboot.h"
+#include "multiboot.h"
 
 #define vga_entry(uc, color) ((UINT16_T) uc | (UINT16_T) color << 8)
 #define terminal_putentryat(c, color, x,y) terminal_buffer[(y) * VGA_WIDTH + (x)] = vga_entry((c), (color))
@@ -16,6 +17,56 @@ static UINT8_T terminal_color;
 static UINT16_T* terminal_buffer;
 
 extern multiboot_info_t* g_multibootInfo;
+
+static BOOL soundStarted = FALSE;
+static int irqInterations = 0;
+
+void irq0(int interrupt, isr_registers registers)
+{
+	if (!soundStarted)
+		return;
+	soundStarted = irqInterations++ != 5;
+	if(!soundStarted)
+	{
+		int irq0 = 0;
+		resetPICInterruptHandlers(&irq0, 1);
+		UINT8_T tmp = inb(0x61) & 0xFC;
+
+		outb(0x61, tmp);
+	}
+}
+void beep()
+{
+	{
+		int _irq0 = 0;
+		setPICInterruptHandlers(&_irq0, 1, irq0);
+
+		UINT32_T divisor = 1193180 / 50;
+
+		outb(0x43, 0x36);
+
+		UINT8_T l = (UINT8_T)(divisor & 0xFF);
+		UINT8_T h = (UINT8_T)((divisor >> 8) & 0xFF);
+
+		// Send the frequency divisor.
+		outb(0x40, l);
+		outb(0x40, h);
+	}
+	UINT32_T div = 0;
+	UINT8_T tmp;
+
+	div = 1193180 / 1000;
+	outb(0x43, 0xb6);
+	outb(0x42, (UINT8_T)(div));
+	outb(0x42, (UINT8_T)(div >> 8));
+
+	tmp = inb(0x61);
+	if (tmp != (tmp | 3))
+		outb(0x61, tmp | 3);
+	soundStarted = TRUE;
+	while(soundStarted)
+		asm("hlt");
+}
 
 static inline void* memsetb(void* destination, BYTE value, SIZE_T countBytes)
 {
@@ -103,7 +154,7 @@ static void newline_handler()
 
 void TerminalOutputCharacter(CHAR c)
 {
-	if(c == '\n')
+	if (c == '\n')
 	{
 		newline_handler();
 		return;
@@ -115,9 +166,38 @@ void TerminalOutputCharacter(CHAR c)
 	}
 	else if (c == '\t')
 	{
-		for(int i = 0; i < 5 && terminal_column < VGA_WIDTH; i++)
+		CONSOLEPOINT point;
+		point.x = (terminal_column / 8 + 1) * 8;
+		if (!g_reachedEndTerminal)
+			point.y = terminal_row;
+		else
+			point.y = VGA_HEIGHT - 1;
+		SetTerminalCursorPosition(point);
+		for (int i = 0; i <	point.x && terminal_column < VGA_WIDTH; i++)
 			terminal_putentryat(' ', terminal_color, ++terminal_column, terminal_row);
 		return;
+	}
+	else if (c == '\b')
+	{
+		if (terminal_column == 0)
+		{
+			beep();
+			return;
+		}
+		terminal_putentryat(' ', terminal_color, --terminal_column, terminal_row);
+		CONSOLEPOINT point;
+		point.x = terminal_column;
+		if (!g_reachedEndTerminal)
+			point.y = terminal_row;
+		else
+			point.y = VGA_HEIGHT - 1;
+		SetTerminalCursorPosition(point);
+		return;
+	}
+	else if (c == '\07')
+	{
+		beep();
+		return; // Ignore the beep ascii code for now.
 	}
 	else if (c == '\0')
 		return;
@@ -132,6 +212,8 @@ void TerminalOutputCharacter(CHAR c)
 	point.x = terminal_column;
 	if(!g_reachedEndTerminal)
     	point.y = terminal_row;
+	else
+		point.y = VGA_HEIGHT - 1;
     SetTerminalCursorPosition(point);
 }
 void TerminalOutputCharacterAt(CONSOLEPOINT point, CHAR c)
@@ -145,7 +227,6 @@ void TerminalOutput(CSTRING data, SIZE_T size)
 }
 void TerminalOutputString(CSTRING data)
 {
-	SIZE_T i = 0;
-	for(; data[i]; i++);
-	TerminalOutput(data, i);
+	for(SIZE_T i = 0; data[i]; i++)
+		TerminalOutputCharacter(data[i]);
 }

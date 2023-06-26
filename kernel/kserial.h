@@ -3,7 +3,8 @@
 
 #include "types.h"
 
-#define MAKE_BAUDRATE(x) ((int)(115200 / x))
+#define MAKE_BAUDRATE_DIVISOR(x) ((int)(115200 / x))
+#define MAKE_BAUDRATE_FROM_DIVISOR(x) ((int)(115200 * x))
 
 typedef enum __serialPort
 {
@@ -36,7 +37,13 @@ typedef enum __stopBits
 
 void kinitserialports();
 
-int InitSerialPort(
+// Returns zero if it 'port' is not initalized, one if it is, and -1 if 'port' has an invalid value.
+INT IsSerialPortInitialized(SERIALPORT port);
+// Returns -1 on error. Otherwise it returns the last error for the serial port.
+DWORD GetSerialPortError(SERIALPORT port);
+// Returns zero on success, one if loopback isn't working, two if 'port' has an invalid value, three if "kinitserialports" wasn't called (kernel dev only!), and four if the serial
+// port was already initialized.
+INT InitSerialPort(
     SERIALPORT port,
     UINT16_T baudRateDivisior,
     DATABITS dataBits,
@@ -44,5 +51,5 @@ int InitSerialPort(
     PARITYBIT paritybit,
     SIZE_T inputBufferSize,
     SIZE_T outputBufferSize);
-int writeSerialPort(SERIALPORT port, CSTRING buf, SIZE_T sizeBuf);
+INT writeSerialPort(SERIALPORT port, CSTRING buf, SIZE_T sizeBuf);
 #endif

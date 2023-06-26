@@ -21,9 +21,14 @@ stack_top:
 
 .section .text
 .global _start
+.global _int
 .type _start, @function
+.type _int, @function
 _start:
+    cli
+
     mov $stack_top, %esp
+    xor %ebp, %ebp
 
 //  Call the kernel's main.
     push %eax
@@ -31,6 +36,6 @@ _start:
     call kmain
 
 //  Hold the machine
-    loop:
-        jmp loop
+    cli
+    hlt
     ret

@@ -13,10 +13,8 @@ typedef struct __memory_block
 void kmeminit();
 // Gets a block for use by the kernel
 void* kfindmemblock(SIZE_T size, SIZE_T* real_size);
-// Initalizes the heap.
-void kheapinit(PVOID block, SIZE_T blockSize);
-// Allocates a block of memory.
-// expectedResize is the size to expect the block to be reallocated to. This is used the next time a block is allocated.
-// Returns 0xFFFFFFFF on failure.
-PVOID kheapalloc(SIZE_T size, SIZE_T expectedResize);
+
+void kInitializePaging();
+void* alloc_pages(SIZE_T nPages);
+
 #endif

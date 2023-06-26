@@ -58,9 +58,11 @@ std::string GetIPFromURL(const char* url)
 
 int fd = 0;
 
+//#define DEBUG 1
+
 int main(int argc, char** argv)
 {
-#ifndef _DEBUG
+#ifndef DEBUG
 	if (argc != 2)
 	{
 		std::cout << "Usage: kssh ip:port\n";
@@ -107,23 +109,40 @@ int main(int argc, char** argv)
 			std::cout << read;
 		}
 	} }.detach();
-	char c;
-	for (c = 0; true; c = getche())
-		if(c != '\n')
-			if(write(fd, &c, 1) == -1)
+	char c = 0;
+	for (c = 0; true; c = getch())
+	{
+		if (c != '\n' && c != 127)
+			if (write(fd, &c, 1) == -1)
 			{
 				err = errno;
 				fprintf(stderr, "write: %s", strerror(err));
 				exit(err);
 			}
 			else {}
-		else
+		// The user probably intended to type a backspace, not "^?".
+		else if (c == 127)
+		{
+			if (write(fd, "\b", 1) == -1)
+			{
+				err = errno;
+				fprintf(stderr, "write: %s", strerror(err));
+				exit(err);
+			}
+			else {}
+			fputs("\b \b", stdout);
+			continue;
+		}
+		else if (c == '\n')
 			if (write(fd, "\r\n", 2) == -1)
 			{
 				err = errno;
 				fprintf(stderr, "write: %s", strerror(err));
 				exit(err);
 			}
+			else {}
+		putc(c, stdout);
+	}
 	shutdown(fd, SHUT_RDWR);
 	close(fd);
 	return 0;

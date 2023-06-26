@@ -1,6 +1,7 @@
 #include "kserial.h"
 
 #include "inline-asm.h"
+#include "interrupts.h"
 
 typedef struct __serialPortData
 {
@@ -23,7 +24,7 @@ BOOL zeroedSerialPortData = FALSE;
 
 static SIZE_T getPortIndex(SERIALPORT port)
 {
-    int index = 0;
+    INT index = 0;
     switch(port)
     {
         case COM1:
@@ -39,7 +40,7 @@ static SIZE_T getPortIndex(SERIALPORT port)
             index = 3;
             break;
         default:
-            return -1;
+            index = -1;
     }
     return index;
 }
@@ -92,7 +93,7 @@ enum lineStatusRegister
 //static void com1Com3ISR()
 //{
 //    // IRQ4 (COM1 and COM3)
-//    /*const int irq = 4;
+//    /*const INT irq = 4;
 //    SERIALPORT port;
 //    BYTE COM1_lineStatus = inb(COM1 + 5);
 //    BYTE COM3_lineStatus = inb(COM3 + 5);*/
@@ -102,7 +103,7 @@ enum lineStatusRegister
 static void* memset(PVOID destination, CHAR data, SIZE_T size)
 {
     PCHAR _dest = destination;
-    for (int i = 0; i < size; i++)
+    for (INT i = 0; i < size; i++)
         _dest[i] = data;
     return destination;
 }
@@ -112,13 +113,28 @@ void kinitserialports()
     if (zeroedSerialPortData)
         return;
     serialPortData serialPortDatum;
+
     memset(&serialPortDatum, 0, sizeof(serialPortData));
-    for(int i = 0; i < sizeof(s_serialPortData) / sizeof(serialPortData); i++)
+    for(INT i = 0; i < sizeof(s_serialPortData) / sizeof(serialPortData); i++)
         s_serialPortData[i] = serialPortDatum;
     zeroedSerialPortData = TRUE;
 }
 
-int InitSerialPort(
+INT IsSerialPortInitialized(SERIALPORT port)
+{
+    int index = getPortIndex(port);
+    if (index == -1)
+        return -1;
+    return s_serialPortData[index].initalized;
+}
+DWORD GetSerialPortError(SERIALPORT port)
+{
+    int index = getPortIndex(port);
+    if (index == -1)
+        return -1;
+    return s_serialPortData[index].errorState;
+}
+INT InitSerialPort(
     SERIALPORT port,
     UINT16_T baudRateDivisior,
     DATABITS dataBits,
@@ -129,11 +145,14 @@ int InitSerialPort(
 {
     if(!zeroedSerialPortData)
         return 3;
-    int index = getPortIndex(port);
-    if  (port == -1)
+    INT index = getPortIndex(port);
+    if (index == -1)
         return 2;
     if (s_serialPortData[index].initalized)
+    {
+        s_serialPortData[index].errorState = 4;
         return 4;
+    }
 
     // Disable all interrupts
     outb(port + 1, 0x00);
@@ -153,16 +172,36 @@ int InitSerialPort(
     // Check if the serial port is working correctly. 
     outb(port, 0xAE);
     if (inb(port) != 0xAE)
+    {
+        s_serialPortData[index].errorState = 1;
         return 1;
+    }
     
     // Set the serial chip to "normal operation mode."
     outb(port + 4, 0x0F);
+    // Enable all interrupts for the serial port.
+    outb(port + 2, 0x0F);
+
+    switch (port)
+    {
+    case COM1:
+    case COM3:
+        enablePICInterrupt(4);
+        break;
+    case COM2:
+    case COM4:
+        enablePICInterrupt(3);
+        break;
+    default:
+        break;
+    }
 
     s_serialPortData[index].baudRateDivisior = baudRateDivisior;
     s_serialPortData[index].dataBits = dataBits;
     s_serialPortData[index].stopBits = stopBits;
     s_serialPortData[index].paritybit = paritybit;
     s_serialPortData[index].initalized = TRUE;
+    s_serialPortData[index].errorState = 0;
     // kheapalloc needs to be tested with multiple blocks.
     s_serialPortData[index].buf = 0x00;
     s_serialPortData[index].inputBufferOffset = 0x00;
@@ -171,12 +210,12 @@ int InitSerialPort(
     s_serialPortData[index].outputBufferSize = outputBufferSize;
     return 0;
 }
-int writeSerialPort(SERIALPORT port, CSTRING buf, SIZE_T sizeBuf)
+INT writeSerialPort(SERIALPORT port, CSTRING buf, SIZE_T sizeBuf)
 {
-    int index = getPortIndex(port);
+    INT index = getPortIndex(port);
     if(!s_serialPortData[index].initalized)
         return -1;
-    //for(int i = 0; i < sizeBuf; i++)
+    //for(INT i = 0; i < sizeBuf; i++)
 
     return 0;
 }

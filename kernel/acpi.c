@@ -3,6 +3,7 @@
 #include "types.h"
 #include "klog.h"
 #include "terminal.h"
+#include "inline-asm.h"
 
 DWORD *SMI_CMD;
 BYTE ACPI_ENABLE;
@@ -25,9 +26,6 @@ struct RSDPtr
 	BYTE Revision;
 	DWORD *RsdtAddress;
 };
-
-void outb(UINT16_T port, UINT8_T val);
-void outw(UINT16_T port, UINT16_T val);
 
 typedef struct _FACP
 {
@@ -136,8 +134,8 @@ int acpiCheckHeader(unsigned int *ptr, char *sig)
 
 int acpiEnable(void)
 {
-	// Check if ACPI is supported on the current computer.
-	if ( (inw((UINTPTR_T)PM1a_CNT), &SCI_EN) == 0 )
+	// Check if ACPI is enabled on the current computer.
+	if ((inw((UINTPTR_T)PM1a_CNT), &SCI_EN) == 0)
 	{
 		if (SMI_CMD != 0 && ACPI_ENABLE != 0)
 		{
@@ -150,40 +148,40 @@ int acpiEnable(void)
 				sleep(10);
 			}
 			if (PM1b_CNT != 0)
-				for (; i < 300; i++ )
+				for (; i < 300; i++)
 				{
 					if (inw((UINTPTR_T)PM1b_CNT & SCI_EN) == 1)
 						break;
 					sleep(10);
 				}
 			kassert(i < 300, "Could not enable ACPI.", 23);
-			}
-			else
-			{}
+		}
+		else
+			kpanic(KSTR_LITERAL("ACPI cannot be enabled on the current computer.\r\n"));
 	}
 	return 0;
 }
 
 int initAcpi(void)
 {
-	UINT32_T *ptr = acpiGetRSDPtr();
+	UINT32_T* ptr = acpiGetRSDPtr();
 
 	if (ptr != NULL && acpiCheckHeader(ptr, "RSDT") == 0)
 	{
 		int entrys = *(ptr + 1);
 		entrys = (entrys - 36) / 4;
-		ptr += 36/4;
+		ptr += 36 / 4;
 
 		while (0 < entrys--)
 		{
 			if (acpiCheckHeader((UINT32_T*)((UINTPTR_T)(*ptr)), "FACP") == 0)
 			{
 				entrys = -2;
-				FACP *facp = (FACP*)((UINTPTR_T)*ptr);
+				FACP* facp = (FACP*)((UINTPTR_T)*ptr);
 				if (acpiCheckHeader(facp->DSDT, "DSDT") == 0)
 				{
-					char *S5Addr = (char*)facp->DSDT + 36;
-					int dsdtLength = *(facp->DSDT + 1) -36;
+					char* S5Addr = (char*)facp->DSDT + 36;
+					int dsdtLength = *(facp->DSDT + 1) - 36;
 					while (0 < dsdtLength--)
 					{
 						if (memcmp(S5Addr, "_S5_", 4) == 0)
@@ -195,24 +193,24 @@ int initAcpi(void)
 					if (dsdtLength > 0)
 					{
 						// check for valid AML structure
-						if ((*(S5Addr - 1) == 0x08 || (*(S5Addr-2) == 0x08 && *(S5Addr - 1) == '\\') ) && *(S5Addr + 4) == 0x12)
+						if ((*(S5Addr - 1) == 0x08 || (*(S5Addr - 2) == 0x08 && *(S5Addr - 1) == '\\')) && *(S5Addr + 4) == 0x12)
 						{
 							S5Addr += 5;
-							S5Addr += ((*S5Addr &0xC0)>>6) +2;   // calculate PkgLength size
+							S5Addr += ((*S5Addr & 0xC0) >> 6) + 2;   // calculate PkgLength size
 							if (*S5Addr == 0x0A)
 								S5Addr++;   // skip byteprefix
-							SLP_TYPa = *(S5Addr)<<10;
+							SLP_TYPa = *(S5Addr) << 10;
 							S5Addr++;
 							if (*S5Addr == 0x0A)
 								S5Addr++;   // skip byteprefix
-							 SLP_TYPb = *(S5Addr)<<10;
+							SLP_TYPb = *(S5Addr) << 10;
 							SMI_CMD = facp->SMI_CMD;
 							ACPI_ENABLE = facp->ACPI_ENABLE;
 							ACPI_DISABLE = facp->ACPI_DISABLE;
 							PM1a_CNT = facp->PM1a_CNT_BLK;
 							PM1b_CNT = facp->PM1b_CNT_BLK;
 							PM1_CNT_LEN = facp->PM1_CNT_LEN;
-							SLP_EN = 1<<13;
+							SLP_EN = 1 << 13;
 							SCI_EN = 1;
 							return 0;
 						}
@@ -226,17 +224,17 @@ int initAcpi(void)
 			ptr++;
 		}
 		kassert(0, "No valid FACP present.\r\n", 24);
-		} 
-		else
-			kassert(0, "Computer doesn't support ACPI.\r\n", 32);
-
-		return -1;
+	}
+	else
+		kassert(0, "Computer doesn't support ACPI.\r\n", 32);
+	kpanic(KSTR_LITERAL("Unspecified ACPI error\r\n"));
+	return -1;
 }
 
 void acpiPowerOff(void)
 {
 	resetOnKernelPanic();
-	kassert(SCI_EN != 0, "ACPI power off failed.\r\n", 24);
+	kassert(SCI_EN != 0, "ACPI poweroff failed.\r\n", 24);
 
 	acpiEnable();
 
@@ -244,5 +242,10 @@ void acpiPowerOff(void)
 	outw((UINTPTR_T)PM1a_CNT, SLP_TYPa | SLP_EN);
 	if (PM1b_CNT != 0)
 		outw((UINTPTR_T)PM1b_CNT, SLP_TYPb | SLP_EN);
+	io_wait();
+	io_wait();
+	io_wait();
+	io_wait();
+	io_wait();
 	kpanic("ACPI power off failed.\r\n", 24);
 }
