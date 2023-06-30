@@ -18,29 +18,29 @@ git clone https://github.com/oberrow/obos.git
 <br>
 - Second, enter the directory that the repository was cloned into.
 <br>
-```bash
+```sh
 cd obos
 ```
 <br>
 - Third, configure CMake with this command if you want to compile in debug mode:
 <br>
-```bash
+```sh
 cmake ./ -G Ninja -DLINKER_SCRIPT=kernel/linker.ld "-DOUTPUT_DIR=./out" -DCMAKE_BUILD_TYPE=Debug
 ```
 <br>
 or like this to compile in release mode:
 <br>
-```bash
+```sh
 cmake ./ -G Ninja -DLINKER_SCRIPT=kernel/linker.ld "-DOUTPUT_DIR=./out" -DCMAKE_BUILD_TYPE=Release
 ```
 <br>
 - Fourth, build everything with this command:
-```bash
+```sh
 ninja -j 0 all
 ```
 <br>
 - Finally, generate an iso with this command:
-```bash
+```sh
 ./generate_iso.sh
 ```
 <br>
