@@ -17,13 +17,13 @@ void printStackTrace();
 void kpanic(CSTRING message, SIZE_T size);
 void kassert(BOOL expression, CSTRING message, SIZE_T size);
 
-void printf(CSTRING format, ...);
+void printf(CSTRING format, ...) attribute(format(printf, 1, 2));
 void vprintf(CSTRING format, va_list list);
 // For the format string, do not use it like printf. Look in the code to see how to make the format string.
-void klog_info(CSTRING format, ...);
+void klog_info(CSTRING format, ...) attribute(format(printf, 1, 2));
 // For the format string, do not use it like printf. Look in the code to see how to make the format string.
-void klog_warning(CSTRING format, ...);
+void klog_warning(CSTRING format, ...) attribute(format(printf, 1, 2));
 // For the format string, do not use it like printf. Look in the code to see how to make the format string.
-void klog_error(CSTRING format, ...);
+void klog_error(CSTRING format, ...) attribute(format(printf, 1, 2));
 
 #endif

@@ -8,8 +8,12 @@
 #include "kserial.h"
 #include "gdt.h"
 #include "interrupts.h"
+#include "bitfields.h"
+#include "hashTable.h"
 
 #include "multiboot.h"
+
+#include "liballoc/liballoc_1_1.h"
 
 #if defined(__linux__)
 #error Must be compiled with a cross compiler.
@@ -25,6 +29,7 @@ _Static_assert (sizeof(INT8_T) == 1, "INT8_T needs to be one byte.");
 _Static_assert (sizeof(INT16_T) == 2, "INT16_T needs to be two bytes.");
 _Static_assert (sizeof(INT32_T) == 4, "INT32_T needs to be four bytes.");
 _Static_assert (sizeof(INT64_T) == 8, "INT64_T needs to be eight bytes.");
+_Static_assert (sizeof(BOOL) == 1, "BOOL needs to be one byte.");
 
 extern int acpiEnable(void);
 extern int initAcpi(void);
@@ -72,7 +77,7 @@ static void onKernelPanic()
 	outb(COM1, '\n');
 	outb(COM2, '\r');
 	outb(COM2, '\n');
-	klog_info("Shuting down the computer in five seconds.\r\n");
+	klog_info("Shutting down the computer in five seconds.\r\n");
 	{
 		int _irq0 = 0;
 		setPICInterruptHandlers(&_irq0, 1, shutdownComputerInterrupt);
@@ -88,8 +93,10 @@ static void onKernelPanic()
 		outb(0x40, l);
 		outb(0x40, h);
 		shutdownTimerInitialized = TRUE;
+		sti();
+		enablePICInterrupt(0);
 	}
-	while (shutdownTimerInitialized)
+ 	while (shutdownTimerInitialized)
 		asm volatile ("hlt");
 }
 
@@ -103,7 +110,7 @@ static void testHandler(int interrupt, int ec, isr_registers registers)
 
 static void int3Handler(int interrupt, int ec, isr_registers registers)
 {
-	klog_info("Breakpoint interrupt at %p.\r\n", registers.eip, registers.ebp);
+	klog_info("Breakpoint interrupt at %p.\r\n", (PVOID)registers.eip);
 	klog_info("Dumping registers...\r\n"
 		"\tEDI: 0x%X\r\n\tESI: 0x%X\r\n\tEBP: 0x%X\r\n\tESP: 0x%X\r\n\tEBX: 0x%X\r\n\tEDX: 0x%X\r\n\tECX: 0x%X\r\n\tEAX: 0x%X\r\n"
 		"\tEIP: 0x%X\r\n\tCS: 0x%X\r\n\tEFLAGS: 0x%X\r\n\tUSERESP: 0x%X\r\n\tSS: 0x%X\r\n"
@@ -115,9 +122,77 @@ static void int3Handler(int interrupt, int ec, isr_registers registers)
 	nop();
 }
 
+extern PVOID getCR2();
+
+void pageFaultHandler(int interrupt, int ec, isr_registers registers)
+{
+	const char* action = NULLPTR;
+	const char* mode = "kernel";
+	BOOL isPresent = getBitFromBitfield(ec, 0);
+	PVOID address = getCR2();
+	if (getBitFromBitfield(ec, 4))
+		action = "execute";
+	else if (getBitFromBitfield(ec, 1) && !getBitFromBitfield(ec, 4))
+		action = "write";
+	else if (!getBitFromBitfield(ec, 1) && !getBitFromBitfield(ec, 4))
+		action = "read";
+	if (getBitFromBitfield(ec, 2))
+		mode = "user";
+	klog_error("Page fault at %p while trying to %s a %s page, the address of said page being %p in %s-mode.\r\n", 
+		(PVOID)registers.eip,
+		action,
+		isPresent ? "present" : "not-present",
+		address, 
+		mode);
+	klog_error("Dumping registers...\r\n\tEDI: 0x%X\r\n\tESI: 0x%X\r\n\tEBP: 0x%X\r\n\tESP: 0x%X\r\n\tEBX: 0x%X\r\n\tEDX: 0x%X\r\n\tECX: 0x%X\r\n\tEAX: 0x%X\r\n"
+		"\tEIP: 0x%X\r\n\tCS: 0x%X\r\n\tEFLAGS: 0x%X\r\n\tUSERESP: 0x%X\r\n\tSS: 0x%X\r\n"
+		"\tDS: 0x%X\r\n",
+		registers.edi, registers.esi, registers.ebp, registers.esp, registers.ebx, registers.edx, registers.ecx, registers.eax,
+		registers.eip, registers.cs, registers.eflags, registers.useresp, registers.ss,
+		registers.ds);
+	printStackTrace();
+	kpanic(NULLPTR, 0);
+}
+
 static void irq1Handler(int interrupt, isr_registers registers)
 {
 	(void)inb(0x60);
+}
+
+int hash(struct key* key)
+{
+	const char* str = *(CSTRING*)key->key;
+	int hash = 5381;
+	char c;
+
+	while ((c = *str++))
+		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+	return hash;
+}
+int compare(struct key* left, struct key* right)
+{
+	const char* str1 = *(CSTRING*)left->key;
+	const char* str2 = *(CSTRING*)right->key;
+	
+	SIZE_T size1 = 0;
+
+	{
+		SIZE_T size2 = 0;
+		for (; str1[size1]; size1++);
+		for (; str2[size2]; size2++);
+		if (size1 != size2)
+			return 1;
+	}
+
+	for (int i = 0; i < size1; i++)
+		if (str1[i] > str2[i])
+			return 1;
+		else if (str1[i] < str2[i])
+			return -1;
+		else
+			continue;
+	return 0;
 }
 
 void kmain(multiboot_info_t* mbd, UINT32_T magic)
@@ -126,17 +201,31 @@ void kmain(multiboot_info_t* mbd, UINT32_T magic)
 
 	initGdt();
 	initInterrupts();
+	
+	{
+		int interrupt = 14;
+		setExceptionHandlers(&interrupt, 1, pageFaultHandler);
+	}
+
+	setOnKernelPanic(onKernelPanic);
+
+	kinitserialports();
+
+	if (InitSerialPort(COM1, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 1024, 1024) != 0)
+		klog_warning("Could not initialize COM1.\r\n");
+	if (InitSerialPort(COM2, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 1024, 1024) != 0)
+		klog_warning("Could not initialize COM2.\r\n");
+
+	kmeminit();
 
 	InitializeTeriminal(TERMINALCOLOR_COLOR_WHITE | TERMINALCOLOR_COLOR_BLACK << 4);
 	initAcpi();
 	acpiEnable();
+
+	kInitializePaging();
 	
-	setOnKernelPanic(onKernelPanic);
-
-	kpanic(KSTR_LITERAL("Testing panic."));
-
 	if (mbd->flags & MULTIBOOT_INFO_BOOT_LOADER_NAME)
-		klog_info("The bootloader's name is, \"%s.\"\r\n", mbd->boot_loader_name);
+		klog_info("The bootloader's name is, \"%s.\"\r\n", (STRING)mbd->boot_loader_name);
 
 	{
 		int interrupt = 3;
@@ -149,21 +238,14 @@ void kmain(multiboot_info_t* mbd, UINT32_T magic)
 	}
 	
 	kassert(magic == MULTIBOOT_BOOTLOADER_MAGIC, KSTR_LITERAL("Invalid magic number for multiboot.\r\n"));
-	kassert(mbd->flags & MULTIBOOT_INFO_MEM_MAP, KSTR_LITERAL("No memory map provided from the bootloader.\r\n"));
-	kassert(mbd->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO, KSTR_LITERAL("No framebuffer info provided from the bootloader.\r\n"));
+	kassert(getBitFromBitfield(mbd->flags, 6), KSTR_LITERAL("No memory map provided from the bootloader.\r\n"));
+	kassert(getBitFromBitfield(mbd->flags, 12), KSTR_LITERAL("No framebuffer info provided from the bootloader.\r\n"));
 	kassert(mbd->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT, KSTR_LITERAL("The video type isn't MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT\r\n"));
 
-	kinitserialports();
-
-	if (InitSerialPort(COM1, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 1024, 1024) != 0)
-		klog_warning("Could not initalize COM1.\r\n");
-	if (InitSerialPort(COM2, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 1024, 1024) != 0)
-		klog_warning("Could not initalize COM2.\r\n");
-
-	kmeminit();
-	{
-		
-	}
+	PCHAR bytes = kcalloc(1024, 1);
+	strcpy(bytes, KSTR_LITERAL("Hello, world!\r\n"));
+	printf("%s", bytes);
+	kfree(bytes);
 
 	while(IsSerialPortInitialized(COM2) == TRUE)
 		if(inb(0x2F8 + 5) & 0x1)

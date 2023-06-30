@@ -3,16 +3,50 @@
 #include "terminal.h"
 #include "inline-asm.h"
 #include "kserial.h"
+#include "interrupts.h"
 
 #include "multiboot.h"
 
+static BOOL resetTimerInitialized = FALSE;
+static INT irqIterations = 0;
+
+static void resetComputerInterrupt(int interrupt, isr_registers registers)
+{
+    if (!resetTimerInitialized)
+        return;
+    resetTimerInitialized = irqIterations++ != 500;
+    if (!resetTimerInitialized)
+    {
+        int irq0 = 0;
+        resetPICInterruptHandlers(&irq0, 1);
+
+        while (inb(0x64) == 0b10);
+        outb(0x64, 0xFE);
+        while (1);
+    }
+}
+
 static void defaultKernelPanic()
 {
-    klog_info("Forcefully resetting the computer in some time (hopefully some time today).\r\n");
-    for (unsigned short int i = 0; i < 0x10000; i++);
-    while (inb(0x64) == 0b10);
-    outb(0x64, 0xFE);
-    while (1);
+    klog_info("Forcefully resetting the computer in ten seconds.\r\n");
+    {
+        int _irq0 = 0;
+        setPICInterruptHandlers(&_irq0, 1, resetComputerInterrupt);
+
+        UINT32_T divisor = 1193180 / 50;
+
+        outb(0x43, 0x36);
+
+        UINT8_T l = (UINT8_T)(divisor & 0xFF);
+        UINT8_T h = (UINT8_T)((divisor >> 8) & 0xFF);
+
+        // Send the frequency divisor.
+        outb(0x40, l);
+        outb(0x40, h);
+        resetTimerInitialized = TRUE;
+    }
+    while (resetTimerInitialized)
+        asm volatile ("hlt");
 }
 
 static void(*onKernelPanic)() = defaultKernelPanic;
@@ -295,7 +329,7 @@ void kassert(BOOL expression, CSTRING message, SIZE_T size)
         kpanic(message, size);
 }
 
-void printf(CSTRING format, ...)
+void  attribute(format(printf, 1, 2)) printf(CSTRING format, ...)
 {
     va_list list = NULLPTR;
     va_start(list, format);
@@ -307,7 +341,7 @@ void vprintf(CSTRING format, va_list list)
     _vprintf(format, list, callback1_terminal, callback2_terminal);
 }
 
-void klog_info(CSTRING format, ...)
+void attribute(format(printf, 1, 2)) klog_info(CSTRING format, ...)
 {
     UINT8_T oldColor = TerminalGetColor();
     const char prefix[] = "[KERNEL_INFO] ";
@@ -322,7 +356,7 @@ void klog_info(CSTRING format, ...)
 
     TerminalSetColor(oldColor);
 }
-void klog_warning(CSTRING format, ...)
+void attribute(format(printf, 1, 2)) klog_warning(CSTRING format, ...)
 {
     UINT8_T oldColor = TerminalGetColor();
     const char prefix[] = "[KERNEL_WARNING] ";
@@ -337,7 +371,7 @@ void klog_warning(CSTRING format, ...)
 
     TerminalSetColor(oldColor);
 }
-void klog_error(CSTRING format, ...)
+void  attribute(format(printf, 1, 2)) klog_error(CSTRING format, ...)
 {
     UINT8_T oldColor = TerminalGetColor();
     const char prefix[] = "[KERNEL_ERROR] ";

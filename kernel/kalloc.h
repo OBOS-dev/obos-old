@@ -15,6 +15,8 @@ void kmeminit();
 void* kfindmemblock(SIZE_T size, SIZE_T* real_size);
 
 void kInitializePaging();
-void* alloc_pages(SIZE_T nPages);
+void* kalloc_pages(SIZE_T nPages);
+int kfree_pages(PVOID start, SIZE_T nPages);
+void reloadPages();
 
 #endif

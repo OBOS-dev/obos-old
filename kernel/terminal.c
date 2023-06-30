@@ -33,6 +33,7 @@ void irq0(int interrupt, isr_registers registers)
 		UINT8_T tmp = inb(0x61) & 0xFC;
 
 		outb(0x61, tmp);
+		irqInterations = 0;
 	}
 }
 void beep()
@@ -154,6 +155,8 @@ static void newline_handler()
 
 void TerminalOutputCharacter(CHAR c)
 {
+	if (terminal_buffer != (PVOID)(UINTPTR_T)g_multibootInfo->framebuffer_addr)
+		return;
 	if (c == '\n')
 	{
 		newline_handler();

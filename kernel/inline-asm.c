@@ -31,3 +31,12 @@ void io_wait(void)
 {
     outb(0x80, 0);
 }
+
+void cli()
+{
+    asm volatile("cli");
+}
+void sti()
+{
+    asm volatile("sti");
+}

@@ -3,8 +3,12 @@
 #include "types.h"
 #include "terminal.h"
 #include "inline-asm.h"
+#include "bitfields.h"
+#include "interrupts.h"
 
 #include "multiboot.h"
+
+#include <stddef.h>
 
 extern multiboot_info_t* g_multibootInfo;
 
@@ -164,27 +168,26 @@ PVOID memset(PVOID block, BYTE value, SIZE_T size)
 {
     PCHAR _block = block;
     for (int i = 0; i < size; _block[i++] = value);
+    return block;
 }
 
 #define MAX_COUNT_PAGES 1048576
 #define BITFIELD_SIZE 32768
 
-static UINT32_T s_pageDirectory[1024] __attribute__((aligned(4096)));
-static UINT32_T s_pageTable[1024][1024] __attribute__((aligned(4096)));
+static UINT32_T __attribute__((aligned(4096))) s_pageDirectory[1024];
+static UINT32_T __attribute__((aligned(4096))) s_pageTable[1024][1024];
 // A bit field.
 static UINT32_T g_usedPages[BITFIELD_SIZE];
 
 void kInitializePaging()
 {
-    extern void* endKernel;
-
     memset(g_usedPages, 0, BITFIELD_SIZE * sizeof(int));
 
     for (int i = 0; i < 1024; i++)
     {
         for (int j = 0; j < 1024; j++)
             s_pageTable[i][j] = 0x00000002;
-        s_pageDirectory[i] = ((UINT32_T)s_pageTable[i]) | 3;
+        s_pageDirectory[i] = 0x00000002;
     }
 
     SIZE_T i;
@@ -194,15 +197,19 @@ void kInitializePaging()
         // Supervisor level, read/write, not present.
         s_pageDirectory[i] = 0x00000002;
         // Supervisor level, read/write, present.
-        s_pageTable[0][i] = (i * 0x1000) | 3;
+        s_pageTable[0][i] = ((0 * 1024 + i) * 4096) | 3;
+        s_pageTable[1][i] = ((1 * 1024 + i) * 4096) | 3;
+        s_pageTable[2][i] = ((2 * 1024 + i) * 4096) | 3;
     }
 
     // Supervisor level, read/write, present.
-    s_pageDirectory[0] = ((UINT32_T)s_pageTable[0]) | 3;
+    s_pageDirectory[0] = ((UINTPTR_T)s_pageTable[0]) | 3;
+    s_pageDirectory[1] = ((UINTPTR_T)s_pageTable[1]) | 3;
+    s_pageDirectory[2] = ((UINTPTR_T)s_pageTable[2]) | 3;
 
-    memset(g_usedPages, 1, 32 * sizeof(int));
+    memset(g_usedPages, 0xFF, (SIZE_T)(32 * 3 * sizeof(int)));
 
-    loadPageDirectory(s_pageDirectory);
+    loadPageDirectory(&s_pageDirectory[0]);
     enablePaging();
 }
 
@@ -223,25 +230,137 @@ int liballoc_lock() { return 0; }
  */
 int liballoc_unlock() { return 0; }
 
-void* alloc_pages(SIZE_T nPages)
+static void updatePageTable()
 {
-    unsigned short usedPagesIndex = 0;
-    for (; usedPagesIndex < BITFIELD_SIZE; usedPagesIndex++)
+    disablePICInterrupt(0);
+    for (int i = 96; i < BITFIELD_SIZE; i++)
+        for (unsigned int j = 0, address = ((i / 32 * 1024 + j + i * 32) * 4096); j < 32; j++, address = ((i / 32 * 1024 + j + i * 32) * 4096))
+            if (getBitFromBitfield(g_usedPages[i], j))
+            {
+                int pageTableIndex = address / 4194304;
+                int pageIndex = (address - (address / 4194304 * 4194304)) / 4096;
+                UINT32_T* pageTableEntry = &s_pageTable[pageTableIndex][pageIndex];
+                address = (pageTableIndex * 1024 + pageIndex) * 4096;
+                *pageTableEntry = address | 3;
+            }
+    enablePICInterrupt(0);
+}
+static void updatePageDirectory()
+{
+    disablePICInterrupt(0);
+    for (int i = 0; i < 1024; i++)
     {
-        if (g_usedPages[usedPagesIndex] == 0xFFFFFFFF)
-            continue;
+        BOOL hasAllocatedPages = FALSE;
+        for(int j = 0; j < 1024 && !hasAllocatedPages; j++)
+            if (s_pageTable[i][j] != 3)
+                hasAllocatedPages = TRUE;
+        if (hasAllocatedPages)
+            s_pageDirectory[i] = ((UINTPTR_T)s_pageTable[i]) | 0x00000003;
         else
-            break;
+            s_pageDirectory[i] = 0x00000002;
     }
-    if (usedPagesIndex == BITFIELD_SIZE - 1 && g_usedPages[usedPagesIndex] == 0xFFFFFFFF)
-        return NULLPTR;
+    enablePICInterrupt(0);
+}
+
+void* kalloc_pages(SIZE_T nPages)
+{
+    int tries = 0;
+    unsigned short usedPagesIndex = 0;
+    for(; tries < 4; tries++)
+    {
+        for (; usedPagesIndex < BITFIELD_SIZE; usedPagesIndex++)
+        {
+            if (g_usedPages[usedPagesIndex] == 0xFFFFFFFF)
+                continue;
+            else
+                break;
+        }
+        if (usedPagesIndex == BITFIELD_SIZE - 1 && g_usedPages[usedPagesIndex] == 0xFFFFFFFF)
+            return NULLPTR;
+        UINT32_T* usedPageBitfield = &g_usedPages[usedPagesIndex];
+        // Count available pages in *usedPageBitfield and check if it has enough space to store nPages continuously. If not, check
+        // there is enough space to get to the end and continue the allocation in g_usedPages[usedPagesIndex + i].
+        // If all that fails, find a new place to store the pages.
+        BOOL foundEnoughSpace = FALSE;
+        int amountIncreased = 0;
+        int i;
+        for (i = 0; i < 32 && !foundEnoughSpace; i++)
+        {
+            if (!getBitFromBitfield(*usedPageBitfield, i))
+            {
+                int i2 = i;
+                BOOL foundEmptyPages = TRUE;
+                for (int j = 0; j < nPages; j++, i2++)
+                {
+                    if (i2 == 31)
+                    {
+                        amountIncreased++;
+                        i2 = 0;
+                        usedPageBitfield = &g_usedPages[usedPagesIndex++];
+                    }
+                    foundEmptyPages = foundEmptyPages && !getBitFromBitfield(*usedPageBitfield, i2);
+                    if (!foundEmptyPages)
+                        break;
+                }
+                foundEnoughSpace = foundEmptyPages;
+            }
+        }
+        if (!foundEnoughSpace)
+            continue;
+        usedPageBitfield = &g_usedPages[usedPagesIndex -= amountIncreased];
+        setBitInBitfield(usedPageBitfield, i);
+        for (int x = i; x < nPages; x++)
+        {
+            if (x == 31)
+            {
+                x = 0;
+                usedPageBitfield = &g_usedPages[++usedPagesIndex];
+            }
+            setBitInBitfield(usedPageBitfield, x);
+        }
+        updatePageTable();
+        updatePageDirectory();
+        usedPagesIndex -= amountIncreased;
+        return (PVOID)((usedPagesIndex / 32 * 1024 + i + usedPagesIndex * 32) * 4096);
+    }
+    // We ran out of tries.
+    return NULLPTR;
+}
+int kfree_pages(PVOID start, SIZE_T nPages)
+{
+    if ((UINTPTR_T)start % 4096 != 0)
+        start -= ((UINTPTR_T)start % 4096);
+    UINTPTR_T block = (UINTPTR_T)start;
+    SIZE_T usedPagesIndex = block / 262144;
+    SIZE_T i = (block / 4096 - usedPagesIndex * 32) % 32;
     UINT32_T* usedPageBitfield = &g_usedPages[usedPagesIndex];
-    // TODO: Count available pages in *usedPageBitfield and check if it has enough space to store nPages continuously. If not, check
-    // there is enough space to get to the end and continue the allocation in g_usedPages[usedPagesIndex + i].
-    // If all that fails, find a new place to store the pages.
-    BYTE bitmask = 1;
-    for (; bitmask != 0xFFFFFFFF && *usedPageBitfield & bitmask == bitmask; bitmask <<= 1);
-    *usedPageBitfield | bitmask;
+    {
+        UINTPTR_T address = (UINTPTR_T)start;
+        int pageTableIndex = address / 4194304;
+        int pageIndex = (address - (address / 4194304 * 4194304)) / 4096;
+        if ((s_pageTable[pageTableIndex][pageIndex] & 3) != 3)
+            return -1;
+    }
+    clearBitInBitfield(usedPageBitfield, i);
+    for (; i < nPages; i++)
+    {
+        if (i == 31)
+        {
+            i = 0;
+            usedPageBitfield = &g_usedPages[++usedPagesIndex];
+        }
+        clearBitInBitfield(usedPageBitfield, i);
+    }
+    memset(start, 0, nPages * 4096 - 1);
+    updatePageTable();
+    updatePageDirectory();
+    return 0;
+}
+
+void reloadPages()
+{
+    updatePageTable();
+    updatePageDirectory();
 }
 
 /** This is the hook into the local system which allocates pages. It
@@ -251,9 +370,9 @@ void* alloc_pages(SIZE_T nPages)
  * \return NULL if the pages were not allocated.
  * \return A pointer to the allocated memory.
  */
-void* liballoc_alloc(SIZE_T nPages)
+void* liballoc_alloc(size_t nPages)
 {
-    return alloc_pages(nPages);
+    return kalloc_pages(nPages);
 }
 
 /** This frees previously allocated memory. The void* parameter passed
@@ -264,7 +383,7 @@ void* liballoc_alloc(SIZE_T nPages)
  *
  * \return 0 if the memory was successfully freed.
  */
-int liballoc_free(void* _block, SIZE_T nPages)
+int liballoc_free(void* block, size_t nPages)
 {
-    return 0;
+    return kfree_pages(block, nPages);
 }

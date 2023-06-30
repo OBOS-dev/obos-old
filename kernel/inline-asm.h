@@ -11,4 +11,7 @@ UINT8_T inb(UINT16_T port);
 UINT16_T inw(UINT16_T port);
 void io_wait(void);
 
+void cli();
+void sti();
+
 #endif
