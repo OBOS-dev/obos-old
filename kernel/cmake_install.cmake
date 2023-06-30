@@ -39,6 +39,6 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "/home/omar/opt/cross/bin/i686-elf-objdump")
+  set(CMAKE_OBJDUMP "/usr/bin/objdump")
 endif()
 
