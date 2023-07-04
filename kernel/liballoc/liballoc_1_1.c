@@ -182,10 +182,6 @@ static void liballoc_dump()
 #endif
 
 
-// ** Extension to the library **
-// Defined in kalloc.c
-extern void reloadPages();
-
 
 // ***************************************************************
 
@@ -408,9 +404,6 @@ void *PREFIX(malloc)(size_t req_size)
 			#endif
 			liballoc_unlock();		// release the lock
 
-			// ** Extension to the library **
-			reloadPages();
-
 			return p;
 		}
 
@@ -447,9 +440,6 @@ void *PREFIX(malloc)(size_t req_size)
 			FLUSH();
 			#endif
 			liballoc_unlock();		// release the lock
-
-			// ** Extension to the library **
-			reloadPages();
 
 			return p;
 		}
@@ -578,9 +568,6 @@ void *PREFIX(malloc)(size_t req_size)
 #endif
 
 		maj = maj->next;
-
-		// ** Extension to the library **
-		reloadPages();
 	} // while (maj != NULL)
 
 
@@ -745,7 +732,8 @@ void* PREFIX(calloc)(size_t nobj, size_t size)
        
        p = PREFIX(malloc)( real_size );
 
-       liballoc_memset( p, 0, real_size );
+	   if(p != NULL)
+			liballoc_memset( p, 0, real_size );
 
        return p;
 }
@@ -819,6 +807,7 @@ void*   PREFIX(realloc)(void *p, size_t size)
 			
 			// being lied to...
 			liballoc_unlock();		// release the lock
+
 			return NULL;
 		}	
 		
@@ -830,7 +819,9 @@ void*   PREFIX(realloc)(void *p, size_t size)
 		{
 			min->req_size = size;
 			liballoc_unlock();
+			
 			return p;
+
 		}
 
 	liballoc_unlock();

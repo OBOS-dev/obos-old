@@ -2,20 +2,48 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "windows-base",
-            "hidden": true,
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
-            }
+          "name": "windows-base",
+          "hidden": true,
+          "generator": "Ninja",
+          "binaryDir": "${sourceDir}/out/build/${presetName}",
+          "installDir": "${sourceDir}/out/install/${presetName}",
+          "cacheVariables": {
+          },
+          "condition": {
+            "type": "equals",
+            "lhs": "${hostSystemName}",
+            "rhs": "Windows"
+          }
+        },
+        {
+          "name": "i686-elf",
+          "hidden": false,
+          "generator": "Ninja",
+          "binaryDir": "${sourceDir}/out/build/${presetName}",
+          "installDir": "${sourceDir}/out/install/${presetName}",
+          "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Debug",
+            "LINKER_SCRIPT": "kernel/linker.ld",
+            "OUTPUT_DIR": "C:/Users/omark/Documents/obos/out/",
+            "CMAKE_C_COMPILER": "i686-elf-gcc",
+            "CMAKE_ASM_COMPILER": "i686-elf-gcc",
+            "CMAKE_ASM-ATT_COMPILER": "i686-elf-gcc",
+            "CMAKE_NASM_COMPILER": "nasm",
+            "CMAKE_C_COMPILER_WORKS": "true",
+            "CMAKE_ASM_COMPILER_WORKS": "true",
+            "CMAKE_ASM-ATT_COMPILER_WORKS": "true",
+            "CMAKE_NASM_COMPILER_WORKS": "true",
+            "CMAKE_SYSTEM_NAME": "Generic",
+            "CMAKE_SYSTEM_PROCESSOR": "i686",
+            "CMAKE_FIND_ROOT_PATH_MODE_LIBRARY": "ONLY",
+            "CMAKE_FIND_ROOT_PATH_MODE_INCLUDE": "ONLY",
+            "CMAKE_FIND_ROOT_PATH_MODE_PROGRAM": "NEVER"
+          },
+          "condition": {
+            "type": "equals",
+            "lhs": "${hostSystemName}",
+            "rhs": "Windows"
+          }
         },
         {
             "name": "x64-debug",

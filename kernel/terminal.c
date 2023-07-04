@@ -8,8 +8,8 @@
 #define vga_entry(uc, color) ((UINT16_T) uc | (UINT16_T) color << 8)
 #define terminal_putentryat(c, color, x,y) terminal_buffer[(y) * VGA_WIDTH + (x)] = vga_entry((c), (color))
 
-static const SIZE_T VGA_WIDTH = 80;
-static const SIZE_T VGA_HEIGHT = 25;
+static SIZE_T VGA_WIDTH = 80;
+static SIZE_T VGA_HEIGHT = 25;
  
 static SIZE_T terminal_row;
 static SIZE_T terminal_column;
@@ -113,6 +113,8 @@ void InitializeTeriminal(UINT8_T color)
 	terminal_column = 0;
 	terminal_color = color;
 	terminal_buffer = (UINT16_T*)(UINTPTR_T)g_multibootInfo->framebuffer_addr;
+	VGA_HEIGHT = g_multibootInfo->framebuffer_height;
+	VGA_WIDTH  = g_multibootInfo->framebuffer_width;
 	for (SIZE_T y = 0; y < VGA_HEIGHT; y++) {
 		for (SIZE_T x = 0; x < VGA_WIDTH; x++)
 			terminal_buffer[y * VGA_WIDTH + x] = vga_entry(' ', terminal_color);

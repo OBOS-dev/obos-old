@@ -1,7 +1,5 @@
 #include "hashTable.h"
 
-#include "kalloc.h"
-
 #include "liballoc/liballoc_1_1.h"
 
 struct hash_table_node
@@ -33,7 +31,6 @@ hash_table* hash_table_create(SIZE_T initialCapacity, int(*hash)(struct key* _th
 	ret->size = 0;
 	ret->hash = hash;
 	ret->compare = compare;
-	reloadPages();
 	return ret;
 }
 BOOL hash_table_emplace(hash_table* table, struct key key, PVOID data, SIZE_T size)

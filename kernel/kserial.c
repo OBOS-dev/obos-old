@@ -2,6 +2,8 @@
 
 #include "inline-asm.h"
 #include "interrupts.h"
+#include "bitfields.h"
+#include "liballoc/liballoc_1_1.h"
 
 typedef struct __serialPortData
 {
@@ -9,12 +11,11 @@ typedef struct __serialPortData
     // be for the output buffer.
     char* buf;
     SIZE_T inputBufferSize;
+    SIZE_T inputBufferCount;
     char*  inputBufferOffset;
-    SIZE_T outputBufferSize;
-    char*  outputBufferOffset;
     DWORD errorState;
     BOOL initalized : 1;
-    UINT16_T baudRateDivisior;
+    UINT16_T baudRateDivisor;
     DATABITS dataBits;
     STOPBITS stopBits;
     PARITYBIT paritybit;
@@ -49,56 +50,72 @@ static SIZE_T getPortIndex(SERIALPORT port)
 enum lineStatusRegister
 {
     // Data ready
-    LSTATUS_DR,
+    LSTATUS_DR = 1,
     // Overrun Error
-    LSTATUS_OE,
+    LSTATUS_OE = 2,
     // Parity error
-    LSTATUS_PE,
+    LSTATUS_PE = 4,
     // Framing error
-    LSTATUS_FE,
+    LSTATUS_FE = 8,
     // Break indicator
-    LSTATUS_BI,
+    LSTATUS_BI = 16,
     // Transmitter holding register empty (Data can now be sent)
-    LSTATUS_THRE,
+    LSTATUS_THRE = 32,
     // Transmitter empty
-    LSTATUS_TEMT,
+    LSTATUS_TEMT = 64,
     // An impending error.
-    LSTATUS_IMPENDING_ERROR
+    LSTATUS_IMPENDING_ERROR = 128
 };
 
-//static void comInterrupt(SERIALPORT port, enum lineStatusRegister lineStatus)
-//{
-//    switch (lineStatus)
-//    {
-//    case LSTATUS_DR:
-//        break;
-//    case LSTATUS_OE:
-//        break;
-//    case LSTATUS_PE:
-//        break;
-//    case LSTATUS_FE:
-//        break;
-//    case LSTATUS_BI:
-//        break;
-//    case LSTATUS_THRE:
-//        break;
-//    case LSTATUS_TEMT:
-//        break;
-//    case LSTATUS_IMPENDING_ERROR:    
-//        break;
-//    default:
-//        break;
-//    }
-//}
-//static void com1Com3ISR()
-//{
-//    // IRQ4 (COM1 and COM3)
-//    /*const INT irq = 4;
-//    SERIALPORT port;
-//    BYTE COM1_lineStatus = inb(COM1 + 5);
-//    BYTE COM3_lineStatus = inb(COM3 + 5);*/
-//    
-//}
+static void comInterrupt(SERIALPORT port, enum lineStatusRegister lineStatus)
+{
+    int index = getPortIndex(port);
+    if (getBitFromBitfield(lineStatus, 0) && !getBitFromBitfield(lineStatus, 7))
+    {
+        *(s_serialPortData[index].inputBufferOffset) = inb(port);
+        s_serialPortData[index].inputBufferOffset++;
+        s_serialPortData[index].inputBufferCount++;
+    }
+    if (getBitFromBitfield(lineStatus, 1))
+        s_serialPortData[index].errorState |= 32;
+    if (getBitFromBitfield(lineStatus, 2))
+        s_serialPortData[index].errorState |= 64;
+    if (getBitFromBitfield(lineStatus, 3))
+        s_serialPortData[index].errorState |= 128;
+    if (getBitFromBitfield(lineStatus, 4)); // Not implemented.
+    if (getBitFromBitfield(lineStatus, 5) || getBitFromBitfield(lineStatus, 6)); // Not needed.
+    if (getBitFromBitfield(lineStatus, 7))
+        s_serialPortData[index].errorState |= 256;
+}
+static void com1Com3ISR(int interrupt, isr_registers registers)
+{
+    // IRQ4 (COM1 and COM3)
+    BYTE COM1_lineStatus = inb(COM1 + 5);
+    BYTE COM3_lineStatus = inb(COM3 + 5);
+    if (COM1_lineStatus != 0 && IsSerialPortInitialized(COM1))
+        comInterrupt(COM1, COM1_lineStatus);
+    else
+        (void)inb(COM1);
+    if (COM3_lineStatus != 0 && IsSerialPortInitialized(COM3))
+        comInterrupt(COM3, COM3_lineStatus);
+    else
+        (void)inb(COM3);
+    
+}
+static void com2Com4ISR(int interrupt, isr_registers registers)
+{
+    // IRQ3 (COM2 and COM4)
+    BYTE COM2_lineStatus = inb(COM2 + 5);
+    BYTE COM4_lineStatus = inb(COM4 + 5);
+    if (COM2_lineStatus != 0 && IsSerialPortInitialized(COM2))
+        comInterrupt(COM2, COM2_lineStatus);
+    else
+        (void)inb(COM2);
+    if (COM4_lineStatus != 0 && IsSerialPortInitialized(COM4))
+        comInterrupt(COM4, COM4_lineStatus);
+    else
+        (void)inb(COM4);
+}
 
 static void* memset(PVOID destination, CHAR data, SIZE_T size)
 {
@@ -118,6 +135,11 @@ void kinitserialports()
     for(INT i = 0; i < sizeof(s_serialPortData) / sizeof(serialPortData); i++)
         s_serialPortData[i] = serialPortDatum;
     zeroedSerialPortData = TRUE;
+
+    int interrupt = 3;
+    setPICInterruptHandlers(&interrupt, 1, com2Com4ISR);
+    interrupt = 4;
+    setPICInterruptHandlers(&interrupt, 1, com1Com3ISR);
 }
 
 INT IsSerialPortInitialized(SERIALPORT port)
@@ -134,14 +156,20 @@ DWORD GetSerialPortError(SERIALPORT port)
         return -1;
     return s_serialPortData[index].errorState;
 }
+void ClearSerialPortError(SERIALPORT port)
+{
+    int index = getPortIndex(port);
+    if (index == -1)
+        return;
+    s_serialPortData[index].errorState = 0;
+}
 INT InitSerialPort(
     SERIALPORT port,
-    UINT16_T baudRateDivisior,
+    UINT16_T baudRateDivisor,
     DATABITS dataBits,
     STOPBITS stopBits,
     PARITYBIT paritybit,
-    SIZE_T inputBufferSize,
-    SIZE_T outputBufferSize)
+    SIZE_T inputBufferSize)
 {
     if(!zeroedSerialPortData)
         return 3;
@@ -154,13 +182,13 @@ INT InitSerialPort(
         return 4;
     }
 
-    // Disable all interrupts
-    outb(port + 1, 0x00);
+    // Make sure interrupts are enabled.
+    outb(port + 1, 0x01);
     // Enable DLAB
     outb(port + 3, 0x80);
     // Set the baud rate divisor
-    outb(port, baudRateDivisior & 0xFF);
-    outb(port + 1, (baudRateDivisior & 0xFF00) >> 16);
+    outb(port, baudRateDivisor & 0xFF);
+    outb(port + 1, (baudRateDivisor & 0xFF00) >> 16);
     // Set the data bits, stop bits, and parity bit
     outb(port + 3, dataBits | stopBits | paritybit);
 
@@ -177,10 +205,11 @@ INT InitSerialPort(
         return 1;
     }
     
-    // Set the serial chip to "normal operation mode."
-    outb(port + 4, 0x0F);
     // Enable all interrupts for the serial port.
     outb(port + 2, 0x0F);
+
+    // Exit loopback mode.
+    outb(port + 4, 0x0B);
 
     switch (port)
     {
@@ -196,26 +225,49 @@ INT InitSerialPort(
         break;
     }
 
-    s_serialPortData[index].baudRateDivisior = baudRateDivisior;
+    s_serialPortData[index].baudRateDivisor = baudRateDivisor;
     s_serialPortData[index].dataBits = dataBits;
     s_serialPortData[index].stopBits = stopBits;
     s_serialPortData[index].paritybit = paritybit;
     s_serialPortData[index].initalized = TRUE;
     s_serialPortData[index].errorState = 0;
-    // kheapalloc needs to be tested with multiple blocks.
-    s_serialPortData[index].buf = 0x00;
-    s_serialPortData[index].inputBufferOffset = 0x00;
-    s_serialPortData[index].outputBufferOffset = 0x00;
+    s_serialPortData[index].buf = kcalloc(inputBufferSize, sizeof(char));
+    s_serialPortData[index].inputBufferOffset = s_serialPortData[index].buf;
     s_serialPortData[index].inputBufferSize = inputBufferSize;
-    s_serialPortData[index].outputBufferSize = outputBufferSize;
     return 0;
 }
-INT writeSerialPort(SERIALPORT port, CSTRING buf, SIZE_T sizeBuf)
+INT WriteSerialPort(SERIALPORT port, CSTRING buf, SIZE_T sizeBuf)
 {
     INT index = getPortIndex(port);
     if(!s_serialPortData[index].initalized)
         return -1;
-    //for(INT i = 0; i < sizeBuf; i++)
-
+    for (int i = 0; i < sizeBuf; i++)
+    {
+        while (!getBitFromBitfield(inb(port + 5), 5));
+        outb(port, buf[i]);
+    }
     return 0;
+}
+INT ReadSerialPort(SERIALPORT port, STRING outbuf, SIZE_T bytesToRead)
+{
+    int index = getPortIndex(port);
+    if (index == -1)
+        return -1;
+    int bytesInBuffer = s_serialPortData[index].inputBufferCount;
+    if (!bytesInBuffer)
+        return 0;
+    disablePICInterrupt(port == COM2 || port == COM4 ? 3 : 4);
+    PCHAR currentCharacter = s_serialPortData[index].buf;
+    int i;
+    s_serialPortData[index].inputBufferOffset = currentCharacter;
+    for (i = 0; i < bytesToRead; i++, currentCharacter++)
+    {
+        if (i > bytesInBuffer)
+            break;
+        s_serialPortData[index].inputBufferCount--;
+        outbuf[i] = *(currentCharacter);
+        *currentCharacter = 0;
+    }
+    enablePICInterrupt(port == COM2 || port == COM4 ? 3 : 4);
+    return i;
 }

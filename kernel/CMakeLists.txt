@@ -5,14 +5,15 @@ enable_language(C ASM ASM_NASM)
 set_property (SOURCE kernel_bootstrap-i686.S PROPERTY LANGUAGE ASM)
 set_property (SOURCE gdtUpdate.asm PROPERTY LANGUAGE ASM_NASM)
 
-set(oboskrnl_sources "kernel_bootstrap-i686.S" "gdtUpdate.asm" "paging.asm"
-                     "kmain.c"                 "acpi.c"        "kalloc.c"                 "terminal.c"
+set(oboskrnl_sources "kernel_bootstrap-i686.S" "gdtUpdate.asm" "paging.asm"               "virtual8086.asm"
+                     "kmain.c"                 "acpi.c"        "paging.c"                 "terminal.c"
                      "inline-asm.c"            "klog.c"        "kserial.c"                "interrupts.c"
                      "gdt.c"                   "keyboard.c"    "hashTable.c"              "liballoc/liballoc_1_1.c"
-                     "bitfields.c"
-                     "inline-asm.h"            "kalloc.h"      "klog.h"                   "kserial.h"
+                     "bitfields.c"             "multitasking.c"
+                     "inline-asm.h"            "paging.h"      "klog.h"                   "kserial.h"
                      "types.h"                 "gdt.h"         "interrupts.h"             "keyboard.h" 
-                     "hashTable.h"             "multiboot.h"   "liballoc/liballoc_1_1.h"  "bitfields.h")
+                     "hashTable.h"             "multiboot.h"   "liballoc/liballoc_1_1.h"  "bitfields.h"
+                     "multitasking.h")
 
 add_executable(oboskrnl ${oboskrnl_sources})
 

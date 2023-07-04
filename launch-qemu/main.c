@@ -7,7 +7,9 @@
 int main(int argc, char** argv, char** envp)
 {
 	if (execlp("qemu-system-i386", "qemu-system-i386", 
+		"-drive", "file=emulator_files/disk.img,format=vdi",
 		"-drive", "file=release/obos.iso,format=raw",
+		"-boot", "order=d",
 		"-s",
 		"-m", "1G",
 		"-mem-prealloc",

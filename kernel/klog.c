@@ -4,6 +4,7 @@
 #include "inline-asm.h"
 #include "kserial.h"
 #include "interrupts.h"
+#include "kserial.h"
 
 #include "multiboot.h"
 
@@ -265,23 +266,16 @@ static void callback2_terminal(CSTRING string)
 static void callback1_klog(char ch)
 {
     TerminalOutputCharacter(ch);
-    if (IsSerialPortInitialized(COM1) == TRUE || IsSerialPortInitialized(COM2) == TRUE)
-    {
-        outb(0x3F8, ch);
-        outb(0x2F8, ch);
-    }
+    WriteSerialPort(COM1, &ch, 1);
+    WriteSerialPort(COM2, &ch, 1);
 }
 static void callback2_klog(CSTRING string)
 {
     TerminalOutputString(string);
-    if (IsSerialPortInitialized(COM1) == TRUE || IsSerialPortInitialized(COM2) == TRUE)
-    {
-        for (int i = 0; string[i]; i++)
-        {
-            outb(COM1, string[i]);
-            outb(COM2, string[i]);
-        }
-    }
+    int i;
+    for (i = 0; string[i]; i++);
+    WriteSerialPort(COM1, string, i);
+    WriteSerialPort(COM2, string, i);
 }
 
 static void kpanic_printf(CSTRING format, ...)

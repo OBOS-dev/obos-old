@@ -3,7 +3,7 @@
 #include "terminal.h"
 #include "types.h"
 #include "klog.h"
-#include "kalloc.h"
+#include "paging.h"
 #include "inline-asm.h"
 #include "kserial.h"
 #include "gdt.h"
@@ -35,8 +35,6 @@ extern int acpiEnable(void);
 extern int initAcpi(void);
 extern int acpiEnable(void);
 extern void acpiPowerOff(void);
-
-multiboot_info_t* g_multibootInfo = (multiboot_info_t*)0;
 
 static inline char* strcpy(char* destination, const char* source, int bytesToCopy)
 {
@@ -122,10 +120,9 @@ static void int3Handler(int interrupt, int ec, isr_registers registers)
 	nop();
 }
 
-extern PVOID getCR2();
-
 void pageFaultHandler(int interrupt, int ec, isr_registers registers)
 {
+	extern PVOID getCR2();
 	const char* action = NULLPTR;
 	const char* mode = "kernel";
 	BOOL isPresent = getBitFromBitfield(ec, 0);
@@ -195,6 +192,10 @@ int compare(struct key* left, struct key* right)
 	return 0;
 }
 
+extern UINT32_T __attribute__((aligned(4096))) g_pageTable[1024][1024];
+
+multiboot_info_t* g_multibootInfo = (multiboot_info_t*)0;
+
 void kmain(multiboot_info_t* mbd, UINT32_T magic)
 {
 	g_multibootInfo = mbd;
@@ -209,20 +210,24 @@ void kmain(multiboot_info_t* mbd, UINT32_T magic)
 
 	setOnKernelPanic(onKernelPanic);
 
-	kinitserialports();
-
-	if (InitSerialPort(COM1, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 1024, 1024) != 0)
-		klog_warning("Could not initialize COM1.\r\n");
-	if (InitSerialPort(COM2, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 1024, 1024) != 0)
-		klog_warning("Could not initialize COM2.\r\n");
-
-	kmeminit();
-
 	InitializeTeriminal(TERMINALCOLOR_COLOR_WHITE | TERMINALCOLOR_COLOR_BLACK << 4);
 	initAcpi();
 	acpiEnable();
 
+	kassert(magic == MULTIBOOT_BOOTLOADER_MAGIC, KSTR_LITERAL("Invalid magic number for multiboot.\r\n"));
+	kassert(getBitFromBitfield(mbd->flags, 6), KSTR_LITERAL("No memory map provided from the bootloader.\r\n"));
+	kassert(getBitFromBitfield(mbd->flags, 12), KSTR_LITERAL("No framebuffer info provided from the bootloader.\r\n"));
+	kassert(mbd->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT, KSTR_LITERAL("The video type isn't MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT\r\n"));
+
+	kmeminit();
 	kInitializePaging();
+	
+	kinitserialports();
+	
+	if (InitSerialPort(COM1, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 2048) != 0)
+		klog_warning("Could not initialize COM1.\r\n");
+	if (InitSerialPort(COM2, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 2048) != 0)
+		klog_warning("Could not initialize COM2.\r\n");
 	
 	if (mbd->flags & MULTIBOOT_INFO_BOOT_LOADER_NAME)
 		klog_info("The bootloader's name is, \"%s.\"\r\n", (STRING)mbd->boot_loader_name);
@@ -237,22 +242,6 @@ void kmain(multiboot_info_t* mbd, UINT32_T magic)
 		setPICInterruptHandlers(&interrupt, 1, irq1Handler);
 	}
 	
-	kassert(magic == MULTIBOOT_BOOTLOADER_MAGIC, KSTR_LITERAL("Invalid magic number for multiboot.\r\n"));
-	kassert(getBitFromBitfield(mbd->flags, 6), KSTR_LITERAL("No memory map provided from the bootloader.\r\n"));
-	kassert(getBitFromBitfield(mbd->flags, 12), KSTR_LITERAL("No framebuffer info provided from the bootloader.\r\n"));
-	kassert(mbd->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT, KSTR_LITERAL("The video type isn't MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT\r\n"));
-
-	PCHAR bytes = kcalloc(1024, 1);
-	strcpy(bytes, KSTR_LITERAL("Hello, world!\r\n"));
-	printf("%s", bytes);
-	kfree(bytes);
-
-	while(IsSerialPortInitialized(COM2) == TRUE)
-		if(inb(0x2F8 + 5) & 0x1)
-			TerminalOutputCharacter(inb(0x2F8));
-
-	while (1);
-
 	acpiPowerOff();
 
 	klog_warning("Control flow reaches end of kmain.");

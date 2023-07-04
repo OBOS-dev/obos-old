@@ -1,16 +1,30 @@
+#define ASM_FILE 1
+#include "multiboot.h"
+
 // Set the constants for the multiboot header.
-.set ALIGN,    1<<0
-.set MEMINFO,  1<<1
-.set FLAGS,    ALIGN | MEMINFO
-.set MAGIC,    0x1BADB002
-.set CHECKSUM, -(MAGIC + FLAGS)
+.set FLAGS,    MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO | MULTIBOOT_VIDEO_MODE
+.set CHECKSUM, -(MULTIBOOT_HEADER_MAGIC + FLAGS)
 
 // Declare a multiboot header. GRUB will now identify this program as a kernel.
 .section .multiboot
 .align 4
-.long MAGIC
+multiboot_header:
+.long MULTIBOOT_HEADER_MAGIC
 .long FLAGS
 .long CHECKSUM
+// This is need for some reason.
+.long 0
+.long 0
+.long 0
+.long 0
+.long 0
+// EGA Text mode.
+.long 1
+// 40x12 Characters
+.long 40
+.long 12
+// BPP needs to be zero in text mode.
+.long   0
 
 // Set up the stack.
 .section .bss
@@ -21,9 +35,7 @@ stack_top:
 
 .section .text
 .global _start
-.global _int
 .type _start, @function
-.type _int, @function
 _start:
     cli
 

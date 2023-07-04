@@ -138,6 +138,10 @@ void initPIC()
 	io_wait();
 	outb(PIC2_DATA, ICW4_8086);
 	io_wait();
+
+	// Disable all PIC interrupts.
+	outb(PIC1_DATA, 0xFF);
+	outb(PIC2_DATA, 0xFF);
 }
 
 typedef struct __idtEntry

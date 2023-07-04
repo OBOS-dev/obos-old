@@ -4,6 +4,6 @@
 #include "types.h"
 
 // Zero on success, and -1 if the driver was already initialized.
-INT kKeyboardInit(SIZE_T bufferSize);
+INT kKeyboardInit();
 
 #endif
