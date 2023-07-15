@@ -1,0 +1,5 @@
+# ninja log v5
+19	172	7101973000926841	kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.obj	289fba77cbbaf029
+29	208	7101973001062622	kernel/CMakeFiles/oboskrnl.dir/paging.asm.obj	24638b8603044a55
+5	1799	7101973018362017	kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.S.obj	3f8d69d0b356da77
+43	223	7101973001510031	kernel/CMakeFiles/oboskrnl.dir/virtual8086.asm.obj	98741296f563cfc9
