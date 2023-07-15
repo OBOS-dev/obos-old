@@ -1,3 +1,9 @@
+/*
+	keyboard.c
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #include "keyboard.h"
 
 #include "interrupts.h"

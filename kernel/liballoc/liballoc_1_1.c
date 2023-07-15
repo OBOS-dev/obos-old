@@ -610,6 +610,8 @@ void PREFIX(free)(void *ptr)
 		return;
 	}
 
+	void* savedPtr = ptr;
+
 	UNALIGN( ptr );
 
 	liballoc_lock();		// lockit
@@ -670,6 +672,8 @@ void PREFIX(free)(void *ptr)
 	FLUSH();
 	#endif
 	
+		// clear the block...	
+		liballoc_memset(savedPtr, 0, min->size);
 
 		maj = min->block;
 

@@ -1,0 +1,5 @@
+[KERNEL_INFO] The bootloader's name is, "GRUB 2.06-2ubuntu7.2."
+[KERNEL_INFO] Software interrupts work.
+[KERNEL_INFO] The main thread's id is 0.
+
+[KERNEL_INFO] Shutting down the computer in five seconds.

@@ -1,5 +1,11 @@
-#ifndef __OBOS_INTERRUPTS
-#define __OBOS_INTERRUPTS
+/*
+	interrupts.h
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
+#ifndef __OBOS_INTERRUPTS_H
+#define __OBOS_INTERRUPTS_H
 
 #include "types.h"
 

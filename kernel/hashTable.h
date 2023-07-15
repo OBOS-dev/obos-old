@@ -1,3 +1,9 @@
+/*
+	hashTable.h
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #ifndef __OBOS_HASHTABLE_H
 #define __OBOS_HASHTABLE_H
 

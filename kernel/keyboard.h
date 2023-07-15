@@ -1,3 +1,9 @@
+/*
+	keyboard.h
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #ifndef __OBOS_KEYBOARD_H
 #define __OBOS_KEYBOARD_H
 

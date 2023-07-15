@@ -1,3 +1,9 @@
+/*
+	gdt.c
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #include "gdt.h"
 
 struct __gdt_ptr

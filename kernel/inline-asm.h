@@ -1,3 +1,9 @@
+/*
+	inline-asm.h
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #ifndef __OBOS_INLINE_ASM_H
 #define __OBOS_INLINE_ASM_H
 
@@ -13,5 +19,13 @@ void io_wait(void);
 
 void cli();
 void sti();
+void hlt();
+
+void _int(BYTE interrupt);
+
+// Disables interrupts and makes sure they can't be enabled until LeaveKernelSection is called.
+void EnterKernelSection();
+// Enables interrupts if this call matches the first call to EnterKernelSection. (Like a stack)
+void LeaveKernelSection();
 
 #endif

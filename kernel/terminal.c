@@ -1,3 +1,9 @@
+/*
+	terminal.c
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #include "terminal.h"
 #include "types.h"
 #include "inline-asm.h"
@@ -30,6 +36,7 @@ void irq0(int interrupt, isr_registers registers)
 	{
 		int irq0 = 0;
 		resetPICInterruptHandlers(&irq0, 1);
+		disablePICInterrupt(0);
 		UINT8_T tmp = inb(0x61) & 0xFC;
 
 		outb(0x61, tmp);
@@ -52,6 +59,8 @@ void beep()
 		// Send the frequency divisor.
 		outb(0x40, l);
 		outb(0x40, h);
+		
+		enablePICInterrupt(0);
 	}
 	UINT32_T div = 0;
 	UINT8_T tmp;

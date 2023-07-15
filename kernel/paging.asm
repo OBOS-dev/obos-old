@@ -1,3 +1,7 @@
+;	paging.asm
+;
+;	Copyright (c) 2023 Omar Berrow
+
 [BITS 32]
 
 ; void loadPageDirectory(UINT32_T* address);

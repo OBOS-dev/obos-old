@@ -1,3 +1,9 @@
+/*
+    kmain.c
+
+    Copyright (c) 2023 Omar Berrow
+*/
+
 #include <stdbool.h>
 
 #include "terminal.h"
@@ -9,7 +15,8 @@
 #include "gdt.h"
 #include "interrupts.h"
 #include "bitfields.h"
-#include "hashTable.h"
+#include "multitasking.h"
+#include "initrd.h"
 
 #include "multiboot.h"
 
@@ -38,9 +45,9 @@ extern void acpiPowerOff(void);
 
 static inline char* strcpy(char* destination, const char* source, int bytesToCopy)
 {
-	for(int i = 0; i < bytesToCopy; i++)
-		destination[i] = source[i];
-	return destination;
+    for(int i = 0; i < bytesToCopy; i++)
+        destination[i] = source[i];
+    return destination;
 }
 
 // int pow(int a, int b)
@@ -56,193 +63,206 @@ static SIZE_T irqIterations = 0;
 
 static void shutdownComputerInterrupt(int interrupt, isr_registers registers)
 {
-	if (!shutdownTimerInitialized)
-		return;
-	shutdownTimerInitialized = irqIterations++ != 250;
-	if (!shutdownTimerInitialized)
-	{
-		int irq0 = 0;
-		resetPICInterruptHandlers(&irq0, 1);
+    if (!shutdownTimerInitialized)
+        return;
+    shutdownTimerInitialized = irqIterations++ != 250;
+    if (!shutdownTimerInitialized)
+    {
+        int irq0 = 0;
+        resetPICInterruptHandlers(&irq0, 1);
 
-		acpiPowerOff();
-	}
+        acpiPowerOff();
+    }
 }
 static void onKernelPanic()
 {
-	TerminalSetColor(TERMINALCOLOR_COLOR_WHITE | TERMINALCOLOR_COLOR_BLACK >> 4);
-	TerminalOutputString("\r\n");
-	outb(COM1, '\r');
-	outb(COM1, '\n');
-	outb(COM2, '\r');
-	outb(COM2, '\n');
-	klog_info("Shutting down the computer in five seconds.\r\n");
-	{
-		int _irq0 = 0;
-		setPICInterruptHandlers(&_irq0, 1, shutdownComputerInterrupt);
+    TerminalSetColor(TERMINALCOLOR_COLOR_WHITE | TERMINALCOLOR_COLOR_BLACK >> 4);
+    TerminalOutputString("\r\n");
+    outb(COM1, '\r');
+    outb(COM1, '\n');
+    outb(COM2, '\r');
+    outb(COM2, '\n');
+    klog_info("Shutting down the computer in five seconds.\r\n");
+    {
+        int _irq0 = 0;
+        setPICInterruptHandlers(&_irq0, 1, shutdownComputerInterrupt);
 
-		UINT32_T divisor = 1193180 / 50;
+        UINT32_T divisor = 1193180 / 50;
 
-		outb(0x43, 0x36);
+        outb(0x43, 0x36);
 
-		UINT8_T l = (UINT8_T)(divisor & 0xFF);
-		UINT8_T h = (UINT8_T)((divisor >> 8) & 0xFF);
+        UINT8_T l = (UINT8_T)(divisor & 0xFF);
+        UINT8_T h = (UINT8_T)((divisor >> 8) & 0xFF);
 
-		// Send the frequency divisor.
-		outb(0x40, l);
-		outb(0x40, h);
-		shutdownTimerInitialized = TRUE;
-		sti();
-		enablePICInterrupt(0);
-	}
- 	while (shutdownTimerInitialized)
-		asm volatile ("hlt");
+        // Send the frequency divisor.
+        outb(0x40, l);
+        outb(0x40, h);
+        shutdownTimerInitialized = TRUE;
+        sti();
+        enablePICInterrupt(0);
+    }
+    while (shutdownTimerInitialized)
+        asm volatile ("hlt");
 }
 
 volatile BOOL interruptsWork = FALSE;
 
 static void testHandler(int interrupt, int ec, isr_registers registers)
 {
-	klog_info("Software interrupts work.\r\n");
-	interruptsWork = TRUE;
+    klog_info("Software interrupts work.\r\n");
+    interruptsWork = TRUE;
 }
 
 static void int3Handler(int interrupt, int ec, isr_registers registers)
 {
-	klog_info("Breakpoint interrupt at %p.\r\n", (PVOID)registers.eip);
-	klog_info("Dumping registers...\r\n"
-		"\tEDI: 0x%X\r\n\tESI: 0x%X\r\n\tEBP: 0x%X\r\n\tESP: 0x%X\r\n\tEBX: 0x%X\r\n\tEDX: 0x%X\r\n\tECX: 0x%X\r\n\tEAX: 0x%X\r\n"
-		"\tEIP: 0x%X\r\n\tCS: 0x%X\r\n\tEFLAGS: 0x%X\r\n\tUSERESP: 0x%X\r\n\tSS: 0x%X\r\n"
-		"\tDS: 0x%X\r\n",
-		registers.edi, registers.esi, registers.ebp, registers.esp, registers.ebx, registers.edx, registers.ecx, registers.eax,
-		registers.eip, registers.cs, registers.eflags, registers.useresp, registers.ss,
-		registers.ds);
-	printStackTrace();
-	nop();
+    klog_info("Breakpoint interrupt at %p.\r\n", (PVOID)registers.eip);
+    klog_info("Dumping registers...\r\n"
+        "\tEDI: 0x%X\r\n\tESI: 0x%X\r\n\tEBP: 0x%X\r\n\tESP: 0x%X\r\n\tEBX: 0x%X\r\n\tEDX: 0x%X\r\n\tECX: 0x%X\r\n\tEAX: 0x%X\r\n"
+        "\tEIP: 0x%X\r\n\tCS: 0x%X\r\n\tEFLAGS: 0x%X\r\n\tSS: 0x%X\r\n"
+        "\tDS: 0x%X\r\n",
+        registers.edi, registers.esi, registers.ebp, registers.esp, registers.ebx, registers.edx, registers.ecx, registers.eax,
+        registers.eip, registers.cs, registers.eflags, registers.ss,
+        registers.ds);
+    printStackTrace();
+    nop();
 }
 
 void pageFaultHandler(int interrupt, int ec, isr_registers registers)
 {
-	extern PVOID getCR2();
-	const char* action = NULLPTR;
-	const char* mode = "kernel";
-	BOOL isPresent = getBitFromBitfield(ec, 0);
-	PVOID address = getCR2();
-	if (getBitFromBitfield(ec, 4))
-		action = "execute";
-	else if (getBitFromBitfield(ec, 1) && !getBitFromBitfield(ec, 4))
-		action = "write";
-	else if (!getBitFromBitfield(ec, 1) && !getBitFromBitfield(ec, 4))
-		action = "read";
-	if (getBitFromBitfield(ec, 2))
-		mode = "user";
-	klog_error("Page fault at %p while trying to %s a %s page, the address of said page being %p in %s-mode.\r\n", 
-		(PVOID)registers.eip,
-		action,
-		isPresent ? "present" : "not-present",
-		address, 
-		mode);
-	klog_error("Dumping registers...\r\n\tEDI: 0x%X\r\n\tESI: 0x%X\r\n\tEBP: 0x%X\r\n\tESP: 0x%X\r\n\tEBX: 0x%X\r\n\tEDX: 0x%X\r\n\tECX: 0x%X\r\n\tEAX: 0x%X\r\n"
-		"\tEIP: 0x%X\r\n\tCS: 0x%X\r\n\tEFLAGS: 0x%X\r\n\tUSERESP: 0x%X\r\n\tSS: 0x%X\r\n"
-		"\tDS: 0x%X\r\n",
-		registers.edi, registers.esi, registers.ebp, registers.esp, registers.ebx, registers.edx, registers.ecx, registers.eax,
-		registers.eip, registers.cs, registers.eflags, registers.useresp, registers.ss,
-		registers.ds);
-	printStackTrace();
-	kpanic(NULLPTR, 0);
+    extern PVOID getCR2();
+    const char* action = NULLPTR;
+    const char* mode = "kernel";
+    BOOL isPresent = getBitFromBitfield(ec, 0);
+    PVOID address = getCR2();
+    if (getBitFromBitfield(ec, 4))
+        action = "execute";
+    else if (getBitFromBitfield(ec, 1) && !getBitFromBitfield(ec, 4))
+        action = "write";
+    else if (!getBitFromBitfield(ec, 1) && !getBitFromBitfield(ec, 4))
+        action = "read";
+    if (getBitFromBitfield(ec, 2))
+        mode = "user";
+    klog_error("Page fault in %s-mode, tid %d at %p while trying to %s a %s page, the address of said page being %p.\r\n",
+        mode,
+        GetTid(),
+        (PVOID)registers.eip,
+        action,
+        isPresent ? "present" : "non-present",
+        address);
+    klog_error("Dumping registers...\r\n"
+        "\tEDI: 0x%X\r\n\tESI: 0x%X\r\n\tEBP: 0x%X\r\n\tESP: 0x%X\r\n\tEBX: 0x%X\r\n\tEDX: 0x%X\r\n\tECX: 0x%X\r\n\tEAX: 0x%X\r\n"
+        "\tEIP: 0x%X\r\n\tCS: 0x%X\r\n\tEFLAGS: 0x%X\r\n\tSS: 0x%X\r\n"
+        "\tDS: 0x%X\r\n",
+        registers.edi, registers.esi, registers.ebp, registers.esp, registers.ebx, registers.edx, registers.ecx, registers.eax,
+        registers.eip, registers.cs, registers.eflags, registers.ss,
+        registers.ds);
+    printStackTrace();
+    kpanic(NULLPTR, 0);
 }
 
 static void irq1Handler(int interrupt, isr_registers registers)
 {
-	(void)inb(0x60);
+    (void)inb(0x60);
 }
-
-int hash(struct key* key)
+static void isr1Handler(int interrupt, int ec, isr_registers registers)
 {
-	const char* str = *(CSTRING*)key->key;
-	int hash = 5381;
-	char c;
-
-	while ((c = *str++))
-		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-	return hash;
-}
-int compare(struct key* left, struct key* right)
-{
-	const char* str1 = *(CSTRING*)left->key;
-	const char* str2 = *(CSTRING*)right->key;
-	
-	SIZE_T size1 = 0;
-
-	{
-		SIZE_T size2 = 0;
-		for (; str1[size1]; size1++);
-		for (; str2[size2]; size2++);
-		if (size1 != size2)
-			return 1;
-	}
-
-	for (int i = 0; i < size1; i++)
-		if (str1[i] > str2[i])
-			return 1;
-		else if (str1[i] < str2[i])
-			return -1;
-		else
-			continue;
-	return 0;
+    return;
 }
 
 extern UINT32_T __attribute__((aligned(4096))) g_pageTable[1024][1024];
 
 multiboot_info_t* g_multibootInfo = (multiboot_info_t*)0;
 
+DWORD testThread(PVOID userData)
+{
+    UINTPTR_T parameters[2];
+    SIZE_T size = 0;
+    for (; ((PCHAR)userData)[size]; size++);
+    parameters[0] = (UINTPTR_T)userData;
+    parameters[1] = size;
+    asm volatile("mov %0, %%ebx\r\n"
+                 "mov $0, %%eax\r\n"
+                 "int $0x40"
+                 :
+                 : "r"(parameters));
+    return GetTid();
+}
+
+void kmain_thread()
+{
+    klog_info("The main thread's id is %d.\r\n", GetTid());
+
+    InitializeInitRD((PVOID)(((multiboot_module_t*)g_multibootInfo->mods_addr)->mod_start));
+
+    // Shutdowns the computer.
+    onKernelPanic();
+
+    klog_warning("Control flow reaches end of kmain.");
+}
+
 void kmain(multiboot_info_t* mbd, UINT32_T magic)
 {
-	g_multibootInfo = mbd;
+    g_multibootInfo = mbd;
 
-	initGdt();
-	initInterrupts();
-	
-	{
-		int interrupt = 14;
-		setExceptionHandlers(&interrupt, 1, pageFaultHandler);
-	}
+    initGdt();
+    initInterrupts();
 
-	setOnKernelPanic(onKernelPanic);
+    {
+        int interrupt = 14;
+        setExceptionHandlers(&interrupt, 1, pageFaultHandler);
+    }
 
-	InitializeTeriminal(TERMINALCOLOR_COLOR_WHITE | TERMINALCOLOR_COLOR_BLACK << 4);
-	initAcpi();
-	acpiEnable();
+    InitializeTeriminal(TERMINALCOLOR_COLOR_WHITE | TERMINALCOLOR_COLOR_BLACK << 4);
+    initAcpi();
+    acpiEnable();
 
-	kassert(magic == MULTIBOOT_BOOTLOADER_MAGIC, KSTR_LITERAL("Invalid magic number for multiboot.\r\n"));
-	kassert(getBitFromBitfield(mbd->flags, 6), KSTR_LITERAL("No memory map provided from the bootloader.\r\n"));
-	kassert(getBitFromBitfield(mbd->flags, 12), KSTR_LITERAL("No framebuffer info provided from the bootloader.\r\n"));
-	kassert(mbd->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT, KSTR_LITERAL("The video type isn't MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT\r\n"));
+    setOnKernelPanic(onKernelPanic);
 
-	kmeminit();
-	kInitializePaging();
-	
-	kinitserialports();
-	
-	if (InitSerialPort(COM1, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 2048) != 0)
-		klog_warning("Could not initialize COM1.\r\n");
-	if (InitSerialPort(COM2, MAKE_BAUDRATE_DIVISOR(115200), SEVEN_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 2048) != 0)
-		klog_warning("Could not initialize COM2.\r\n");
-	
-	if (mbd->flags & MULTIBOOT_INFO_BOOT_LOADER_NAME)
-		klog_info("The bootloader's name is, \"%s.\"\r\n", (STRING)mbd->boot_loader_name);
+    kassert(magic == MULTIBOOT_BOOTLOADER_MAGIC, KSTR_LITERAL("Invalid magic number for multiboot.\r\n"));
+    kassert(getBitFromBitfield(mbd->flags, 6), KSTR_LITERAL("No memory map provided from the bootloader.\r\n"));
+    kassert(getBitFromBitfield(mbd->flags, 12), KSTR_LITERAL("No framebuffer info provided from the bootloader.\r\n"));
+    kassert(mbd->framebuffer_type == MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT, KSTR_LITERAL("The video type isn't MULTIBOOT_FRAMEBUFFER_TYPE_EGA_TEXT\r\n"));
 
-	{
-		int interrupt = 3;
-		setExceptionHandlers(&interrupt, 1, testHandler);
-		asm volatile("int3");
-		kassert(interruptsWork, KSTR_LITERAL("Software interrupts do not work on this computer!\r\n"));
-		setExceptionHandlers(&interrupt, 1, int3Handler);
-		interrupt = 1;
-		setPICInterruptHandlers(&interrupt, 1, irq1Handler);
-	}
-	
-	acpiPowerOff();
+    kmeminit();
+    kInitializePaging();
 
-	klog_warning("Control flow reaches end of kmain.");
+    kinitserialports();
+    
+    if (InitSerialPort(COM1, MAKE_BAUDRATE_DIVISOR(115200), EIGHT_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 2048) != 0)
+        klog_warning("Could not initialize COM1.\r\n");
+    if (InitSerialPort(COM2, MAKE_BAUDRATE_DIVISOR(115200), EIGHT_DATABITS, ONE_STOPBIT, PARITYBIT_EVEN, 2048) != 0)
+        klog_warning("Could not initialize COM2.\r\n");
+
+    /*extern SIZE_T g_kPhysicalMemorySize;
+    extern SIZE_T g_kAvailablePhysicalMemorySize;
+    extern SIZE_T g_kSystemPhysicalMemorySize;
+
+    klog_info("%fmib of available memory, %fmib of reserved memory. %fmib total.\r\n",
+        g_kAvailablePhysicalMemorySize / 1048576.0,
+        g_kSystemPhysicalMemorySize / 1048576.0,
+        g_kPhysicalMemorySize / 1048576.0);*/
+    
+    if (mbd->flags & MULTIBOOT_INFO_BOOT_LOADER_NAME)
+        klog_info("The bootloader's name is, \"%s.\"\r\n", (STRING)mbd->boot_loader_name);
+
+    {
+        int interrupt = 3;
+        setExceptionHandlers(&interrupt, 1, testHandler);
+        _int(3);
+        kassert(interruptsWork, KSTR_LITERAL("Software interrupts do not work!\r\n"));
+        setExceptionHandlers(&interrupt, 1, int3Handler);
+        interrupt = 1;
+        setPICInterruptHandlers(&interrupt, 1, irq1Handler);
+        setExceptionHandlers(&interrupt, 1, isr1Handler);
+    }
+
+    extern void kinitmultitasking();
+    kinitmultitasking();
+    // control flow continues in kmain_thread.
+    // If the control flow doesn't continue in kmain_thread:
+    while (1)
+    {
+        hlt();
+        kmain_thread();
+    }
 }

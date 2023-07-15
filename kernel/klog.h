@@ -1,3 +1,9 @@
+/*
+	klog.h
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #ifndef __KASSERT_H
 #define __KASSERT_H
 

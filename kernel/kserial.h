@@ -1,3 +1,9 @@
+/*
+    kserial.h
+
+    Copyright (c) 2023 Omar Berrow
+*/
+
 #ifndef __OBOS_KSERIAL_H
 #define __OBOS_KSERIAL_H
 
@@ -87,7 +93,6 @@ INT InitSerialPort(
 /// <param name="port"> - The serial port to write to.</param>
 /// <param name="buf"> - The buffer to write.</param>
 /// <param name="sizeBuf"> - The size of the buffer.</param>
-/// <param name="sendNow"> - If the data can be buffered, or does it have to be sent now.</param>
 /// <returns> * -1 if the serial port wasn't initialzed.<para/>
 ///           *  0 on success.</returns>
 INT WriteSerialPort(SERIALPORT port, CSTRING buf, SIZE_T sizeBuf);

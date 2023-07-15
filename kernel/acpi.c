@@ -1,3 +1,9 @@
+/*
+	acpi.c
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #include <stddef.h>
 
 #include "types.h"

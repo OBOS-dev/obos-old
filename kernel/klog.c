@@ -1,3 +1,9 @@
+/*
+    klog.c
+
+    Copyright (c) 2023 Omar Berrow
+*/
+
 #include "klog.h"
 
 #include "terminal.h"
@@ -45,6 +51,7 @@ static void defaultKernelPanic()
         outb(0x40, l);
         outb(0x40, h);
         resetTimerInitialized = TRUE;
+        sti();
     }
     while (resetTimerInitialized)
         asm volatile ("hlt");
@@ -130,6 +137,110 @@ char* itoa_unsigned(unsigned int value, char* result, int base)
     return result;
 
 }
+#define MAX_PRECISION	(10)
+static const double rounders[MAX_PRECISION + 1] =
+{
+    0.5,				// 0
+    0.05,				// 1
+    0.005,				// 2
+    0.0005,				// 3
+    0.00005,			// 4
+    0.000005,			// 5
+    0.0000005,			// 6
+    0.00000005,			// 7
+    0.000000005,		// 8
+    0.0000000005,		// 9
+    0.00000000005		// 10
+};
+
+char* ftoa(double f, char* buf, int precision)
+{
+    char* ptr = buf;
+    char* p = ptr;
+    char* p1;
+    char c;
+    long intPart;
+
+    // check precision bounds
+    if (precision > MAX_PRECISION)
+        precision = MAX_PRECISION;
+
+    // sign stuff
+    if (f < 0)
+    {
+        f = -f;
+        *ptr++ = '-';
+    }
+
+    if (precision < 0)  // negative precision == automatic precision guess
+    {
+        if (f < 1.0) precision = 6;
+        else if (f < 10.0) precision = 5;
+        else if (f < 100.0) precision = 4;
+        else if (f < 1000.0) precision = 3;
+        else if (f < 10000.0) precision = 2;
+        else if (f < 100000.0) precision = 1;
+        else precision = 0;
+    }
+
+    // round value according the precision
+    if (precision)
+        f += rounders[precision];
+
+    // integer part...
+    intPart = f;
+    f -= intPart;
+
+    if (!intPart)
+        *ptr++ = '0';
+    else
+    {
+        // save start pointer
+        p = ptr;
+
+        // convert (reverse order)
+        while (intPart)
+        {
+            *p++ = '0' + intPart % 10;
+            intPart /= 10;
+        }
+
+        // save end pos
+        p1 = p;
+
+        // reverse result
+        while (p > ptr)
+        {
+            c = *--p;
+            *p = *ptr;
+            *ptr++ = c;
+        }
+
+        // restore end pos
+        ptr = p1;
+    }
+
+    // decimal part
+    if (precision)
+    {
+        // place decimal point
+        *ptr++ = '.';
+
+        // convert
+        while (precision--)
+        {
+            f *= 10.0;
+            c = f;
+            *ptr++ = '0' + c;
+            f -= c;
+        }
+    }
+
+    // terminating zero
+    *ptr = 0;
+
+    return buf;
+}
 
 // Simplified version of vprintf
 static void _vprintf(CSTRING format, va_list list, void(*character_print_callback)(char ch), void(*string_print_callback)(CSTRING string))
@@ -195,6 +306,15 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
                 for (int i = 0; buf[i]; i++)
                     if (buf[i] >= 'a' && buf[i] <= 'z')
                         buf[i] = (buf[i] - 'a') + 'A';
+                string_print_callback(buf);
+                break;
+            }
+            // A floating-point number.
+            case 'f':
+            {
+                char buf[65] = { 0 };
+                double val = va_arg(list, double);
+                ftoa(val, buf, MAX_PRECISION);
                 string_print_callback(buf);
                 break;
             }
@@ -271,11 +391,8 @@ static void callback1_klog(char ch)
 }
 static void callback2_klog(CSTRING string)
 {
-    TerminalOutputString(string);
-    int i;
-    for (i = 0; string[i]; i++);
-    WriteSerialPort(COM1, string, i);
-    WriteSerialPort(COM2, string, i);
+    for (int i = 0; string[i]; i++)
+        callback1_klog(string[i]);
 }
 
 static void kpanic_printf(CSTRING format, ...)

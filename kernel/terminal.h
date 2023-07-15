@@ -1,3 +1,9 @@
+/*
+	terminal.h
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #ifndef __OBOS_TERMINAL_H
 #define __OBOS_TERMINAL_H
 

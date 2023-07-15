@@ -1,3 +1,9 @@
+/*
+    kserial.c
+
+    Copyright (c) 2023 Omar Berrow
+*/
+
 #include "kserial.h"
 
 #include "inline-asm.h"

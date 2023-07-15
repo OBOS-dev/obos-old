@@ -1,3 +1,9 @@
+/*
+	hashTable.c
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
 #include "hashTable.h"
 
 #include "liballoc/liballoc_1_1.h"
