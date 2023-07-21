@@ -9,23 +9,24 @@ enable_language(C ASM ASM_NASM)
 set_property (SOURCE kernel_bootstrap-i686.S PROPERTY LANGUAGE ASM)
 set_property (SOURCE gdtUpdate.asm PROPERTY LANGUAGE ASM_NASM)
 
-set(oboskrnl_cSources "kmain.c"      "acpi.c"         "paging.c"         "terminal.c"
-                      "inline-asm.c" "klog.c"         "kserial.c"        "interrupts.c"
-                      "gdt.c"        "keyboard.c"     "hashTable.c"      "liballoc/liballoc_1_1.c"
-                      "bitfields.c"  "multitasking.c" "error.c"          "mutexes.c"
-                      "syscall.c"    "list/list.c"    "list/list_node.c" "list/list_iterator.c"
-                      "initrd.c")
+set(oboskrnl_cSources "kmain.c"      "acpi.c"           "paging.c"         "terminal.c"
+                      "inline-asm.c" "klog.c"           "kserial.c"        "interrupts.c"
+                      "gdt.c"        "keyboard.c"       "hashTable.c"      "liballoc/liballoc_1_1.c"
+                      "bitfields.c"  "multitasking.c"   "error.c"          "mutexes.c"
+                      "syscall.c"    "list/list.c"      "list/list_node.c" "list/list_iterator.c"
+                      "initrd.c"     "driver_syscall.c" "elf.c")
 
 set(oboskrnl_headers  "inline-asm.h"   "paging.h"    "klog.h"                  "kserial.h"
                       "types.h"        "gdt.h"       "interrupts.h"            "keyboard.h" 
                       "hashTable.h"    "multiboot.h" "liballoc/liballoc_1_1.h" "bitfields.h"
                       "multitasking.h" "mutexes.h"   "error.h"                 "list/list.h"
-                      "initrd.h")
+                      "initrd.h"       "elf.h")
 set(oboskrnl_asmSources "kernel_bootstrap-i686.asm" "gdtUpdate.asm" "paging.asm" "virtual8086.asm"
                         "multitasking.asm")
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cSources} ${oboskrnl_headers})
 
 add_executable(oboskrnl ${oboskrnl_files})
+add_executable(oboskrnl_analyzer ${oboskrnl_files})
 
 target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror>
                                 PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-error=misleading-indentation> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-builtin-declaration-mismatch> 
@@ -35,6 +36,11 @@ target_link_options(oboskrnl PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/${LINKER_SC
 # target_link_libraries(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/kernel/kernel_bootstrap.o")
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/kernel")
+
+target_compile_options(oboskrnl_analyzer PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror>
+                                         PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-error=misleading-indentation> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-builtin-declaration-mismatch> 
+                                         PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-error=unknown-pragmas> 
+                                         PRIVATE $<$<COMPILE_LANGUAGE:C>:-fanalyzer>)
 
 message("Using linker script at " ${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT})
 

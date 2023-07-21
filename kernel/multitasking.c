@@ -17,7 +17,6 @@
 #include "list/list.h"
 
 // Warning: this function does not return.
-extern void OBOS_ThreadEntryPoint();
 
 struct thr_registers
 {
@@ -33,7 +32,7 @@ struct thr_registers
 struct kThreadStructure
 {
 	/// <summary>
-	/// The thread id of the thread. Depending on when the thread was made, this could be equal to the handle.
+	/// The thread id of the thread.
 	/// </summary>
 	DWORD tid;
 	/// <summary>
@@ -70,9 +69,22 @@ struct kThreadStructure
 	/// When to wake up the thread. This used for the Sleep function.
 	/// </summary>
 	QWORD timerEnd;
-// TODO: Add a callback so the scheduler can know when to wake up the thread if the thread is blocked, and not sleeping, as that is technically something different.
+	/// <summary>
+	/// The function to check whether the thread should continue running.
+	/// </summary>
 	BOOL(*checkIfBlocked)(HANDLE hThread, PVOID userData);
+	/// <summary>
+	/// The user data for the callback.
+	/// </summary>
 	PVOID checkIfBlockedUserData;
+	/// <summary>
+	/// Whether the thread was made in user mode.
+	/// </summary>
+	BOOL isUserMode;
+	/// <summary>
+	/// The kernel stack.
+	/// </summary>
+	UINTPTR_T kernelStack;
 };
 static list_t* s_kThreadHandles;
 /// <summary>
@@ -87,92 +99,14 @@ static struct kThreadStructure* s_currentThread;
 static BOOL skipThreadSet = FALSE;
 static HANDLE skipThreadHandle = OBOS_INVALID_HANDLE_VALUE;
 
+extern void changeKernelStack(UINTPTR_T stack);
+
 static PVOID memset(PVOID ptr, CHAR ch, SIZE_T size)
 {
 	PCHAR tmp = (PCHAR)ptr;
 	for (int i = 0; i < size; tmp[i++] = ch);
 	return ptr;
 }
-
-//static void bubbleSort(struct kThreadStructure* first, struct kThreadStructure* last, 
-//	BOOL(*lessThan)(struct kThreadStructure* a, struct kThreadStructure* b), 
-//	VOID(*swap)(struct kThreadStructure* a, struct kThreadStructure* b))
-//{
-//	if (first == last)
-//		return;
-//
-//	--last;
-//
-//	if (first == last)
-//		return;
-//
-//	BOOL swapped;
-//	do
-//	{
-//		swapped = FALSE;
-//
-//		struct kThreadStructure* current = first;
-//		while (current != last)
-//		{
-//			struct kThreadStructure* next = current;
-//			++next;
-//
-//			if (lessThan(next, current))
-//			{
-//				swap(next, current);
-//				swapped = TRUE;
-//			}
-//
-//			++current;
-//		}
-//
-//		--last;
-//
-//	} while (swapped && first != last);
-//}
-//static BOOL areThreadHandlesInRightPlace()
-//{
-//	for (int i = 0; i < s_nextThreadHandleValue; i++)
-//		if (s_kThreadHandles[i].handle != i)
-//			return FALSE;
-//	return TRUE;
-//}
-//
-//static BOOL thr_compare(struct kThreadStructure* left, struct kThreadStructure* right)
-//{
-//	// The idle thread has the tid 1, so we always return true to make sure it's at the bottom.
-//	if (left->tid == 1)
-//		return TRUE;
-//	return left->priority < right->priority;
-//}
-//static BOOL memcmp(PVOID left, PVOID right, SIZE_T size)
-//{
-//	PCHAR _left = left;
-//	PCHAR _right = right;
-//	for (int i = 0; i < size; i++)
-//		if (_left[i] != _right[i])
-//			return FALSE;
-//	return TRUE;
-//}
-//static BOOL thrHandleCmp(struct kThreadStructure* left, struct kThreadStructure* right)
-//{
-//	return  left->exitCode == right->exitCode &&
-//			left->status == right->status &&
-//			left->owner == right->owner &&
-//			left->priority == right->priority &&
-//			//memcmp(&left->registers, &right->registers, sizeof(right->registers)) &&
-//			left->tid == right->tid;
-//}
-
-//static BOOL memcmp(PVOID left, PVOID right, SIZE_T size)
-//{
-//	PCHAR _left = left;
-//	PCHAR _right = right;
-//	for (int i = 0; i < size; i++)
-//		if (_left[i] != _right[i])
-//			return FALSE;
-//	return TRUE;
-//}
 
 static struct thr_registers isr_registers_To_thr_registers(isr_registers registers)
 {
@@ -194,7 +128,9 @@ static struct thr_registers isr_registers_To_thr_registers(isr_registers registe
 }
 
 // Warning: Function doesn't return.
-void switchTaskToAsm();
+void attribute(noreturn) switchTaskToAsm();
+// Warning: Function doesn't return.
+void attribute(noreturn) switchTaskToAsmUserMode();
 
 static QWORD s_millisecondsSinceInitialization = 0;
 
@@ -208,26 +144,20 @@ static BOOL canRunThread(struct kThreadStructure* thr)
 			thr->iterations < thr->priority;
 }
 
-//static BOOL thr_compare(struct kThreadStructure* this, struct kThreadStructure* other)
-//{
-//	return  this->tid == other->tid &&
-//			this->owner == other->owner &&
-//			this->exitCode == other->exitCode &&
-//			this->handle == other->handle &&
-//			this->status == other->status && 
-//			this->priority == other->priority &&
-//			this->iterations == other->iterations &&
-//			memcmp(&this->registers, &other->registers, sizeof(struct kThreadStructure)) &&
-//			this->stackStart == other->stackStart &&
-//			this->timerEnd == other->timerEnd;
-//}
-
-static void switchTaskTo(int newTask)
+static void attribute(noreturn) switchTaskTo(int newTask)
 {
+	kassert(((struct kThreadStructure*)newTask)->tid != 1, KSTR_LITERAL("Attempt to switch to the idle task. See multitasking.c:kinitmultitasking()\r\n"));
 	s_currentThread = (PVOID)newTask;
+	changeKernelStack(s_currentThread->kernelStack);
 	struct thr_registers* tmp = &s_currentThread->registers;
+	if (s_currentThread->isUserMode)
+	{
+		asm volatile ("mov %%eax, %0" :
+									  : "r"(tmp));
+		switchTaskToAsmUserMode();
+	}
 	asm volatile ("mov %%eax, %0" :
-							: "r"(tmp));
+								  : "r"(tmp));
 	switchTaskToAsm();
 }
 static void findNewTask(isr_registers registers)
@@ -235,7 +165,9 @@ static void findNewTask(isr_registers registers)
 	// If only the kernel main thread exists, continue execution.
 	if (s_nextThreadTidValue == 1)
 		return;
-	s_currentThread->registers = isr_registers_To_thr_registers(registers);
+	if(s_currentThread)
+		s_currentThread->registers = isr_registers_To_thr_registers(registers);
+label1:
 	list_node_t* newTask = NULLPTR;
 	// Check if all the tasks have been run.
 	BOOL ranAllTasks = FALSE;
@@ -250,6 +182,15 @@ static void findNewTask(isr_registers registers)
 				if (realIndex != 1)
 					continue;
 				struct kThreadStructure* currentHandle = (struct kThreadStructure*)node->val;
+				if (!(!getBitFromBitfieldBitmask(currentHandle->status, THREAD_BLOCKED) &&
+					  !getBitFromBitfieldBitmask(currentHandle->status, THREAD_PAUSED) &&
+					  !getBitFromBitfieldBitmask(currentHandle->status, THREAD_DEAD) &&
+					  !getBitFromBitfieldBitmask(currentHandle->status, THREAD_SLEEPING) &&
+					   getBitFromBitfieldBitmask(currentHandle->status, THREAD_RUNNING)))
+				{
+					realIndex--;
+					continue;
+				}
 				ranAllTasks = currentHandle->iterations >= currentHandle->priority;
 				shouldBreak = TRUE;
 				break;
@@ -298,6 +239,13 @@ static void findNewTask(isr_registers registers)
 		}
 		list_iterator_destroy(iter);
 	}
+	kassert(newTask != NULLPTR, KSTR_LITERAL("The new task is nullptr."));
+	if (((struct kThreadStructure*)newTask->val)->tid == 1)
+	{
+		// Note: Do not use the sti() function, as if the thread was interrupted in a kernel section (see kernel/inline-asm.c), sti() will do nothing.
+		asm volatile("sti");
+		goto label1;
+	}
 	if (newTask->val == s_currentThread)
 		return;
 	switchTaskTo((UINTPTR_T)newTask->val);
@@ -331,18 +279,21 @@ void kinitmultitasking()
 	current->registers.esp = (UINTPTR_T)&stack_top_thread;
 	current->registers.ebp = 0;
 	current->stackStart	   = (UINTPTR_T)&stack_top_thread;
+	current->kernelStack   = (UINTPTR_T)kalloc_pages(2, FALSE, TRUE) + 8192;
+	current->isUserMode = FALSE;
 	//s_currentThread = current;
 	extern void idleTask();
+	// The idle task doesn't actually exist, the scheduler uses it for reasons. Do not remove it.
 	current = list_rpush(s_kThreadHandles, list_node_new(kcalloc(1, sizeof(struct kThreadStructure))))->val;
 	list_rpush(s_kThreadPriorities[0], list_node_new(current));
 	current->tid = s_nextThreadTidValue++;
 	current->priority = PRIORITY_IDLE;
 	current->status = THREAD_RUNNING;
-	current->registers.eip = (UINTPTR_T)idleTask;
-	// The idle task doesn't need a stack.
+	current->registers.eip = (UINTPTR_T)0;
 	current->registers.esp = (UINTPTR_T)0;
 	current->registers.ebp = (UINTPTR_T)0;
 	current->stackStart    = (UINTPTR_T)0;
+	current->isUserMode = FALSE;
 	LeaveKernelSection();
 	{
 		int _irq0 = 0;
@@ -395,12 +346,14 @@ HANDLE MakeThread(DWORD* tid,
 	ret->tid = s_nextThreadTidValue++;
 	if (tid) *tid = ret->tid;
 	ret->owner = /*GetPid()*/0;
-	ret->registers.eip = (UINTPTR_T)OBOS_ThreadEntryPoint;
-	ret->stackStart = ret->registers.esp = (UINTPTR_T)kalloc_pages(2) + 2 * 4096;
+	// See paging.c:kInitializePaging.
+	ret->registers.eip = 0x800000;
+	ret->stackStart = ret->registers.esp = (UINTPTR_T)kalloc_pages(2, FALSE, TRUE) + 2 * 4096;
+	ret->kernelStack = (UINTPTR_T)kalloc_pages(2, FALSE, TRUE) + 8192;
 	ret->registers.ebp = 0;
 	ret->registers.eax = (UINTPTR_T)function;
 	ret->registers.edi = (UINTPTR_T)userdata;
-
+	ret->isUserMode = TRUE;
 	list_t* list = NULLPTR;
 	switch (priority)
 	{
@@ -437,7 +390,7 @@ DWORD GetHandleTid(HANDLE hThread)
 	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 	if (thread->owner != /*GetPid()*/0)
 	{
-		SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+		SetLastError(OBOS_ERROR_ACCESS_DENIED);
 		return 0xFFFFFFFF;
 	}
 	return thread->tid;
@@ -453,7 +406,7 @@ BOOL TerminateThread(HANDLE hThread, DWORD exitCode)
 	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 	if (thread->owner != /*GetPid()*/0)
 	{
-		SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+		SetLastError(OBOS_ERROR_ACCESS_DENIED);
 		return FALSE;
 	}
 	if (getBitFromBitfieldBitmask(thread->status, THREAD_DEAD))
@@ -503,7 +456,7 @@ UINT32_T GetThreadStatus(HANDLE hThread)
 	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 	if (thread->owner != /*GetPid()*/0)
 	{
-		SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+		SetLastError(OBOS_ERROR_ACCESS_DENIED);
 		return FALSE;
 	}
 	return thread->status;
@@ -519,7 +472,7 @@ BOOL ResumeThread(HANDLE hThread)
 	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 	if (thread->owner != /*GetPid()*/0)
 	{
-		SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+		SetLastError(OBOS_ERROR_ACCESS_DENIED);
 		return FALSE;
 	}
 	if (getBitFromBitfieldBitmask(thread->status, THREAD_DEAD))
@@ -543,7 +496,7 @@ BOOL PauseThread(HANDLE hThread)
 	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 	if (thread->owner != /*GetPid()*/0)
 	{
-		SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+		SetLastError(OBOS_ERROR_ACCESS_DENIED);
 		return FALSE;
 	}
 	if (getBitFromBitfieldBitmask(thread->status, THREAD_DEAD))
@@ -567,7 +520,7 @@ BOOL DestroyThread(HANDLE hThread)
 	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 	if (thread->owner != /*GetPid()*/0)
 	{
-		SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+		SetLastError(OBOS_ERROR_ACCESS_DENIED);
 		return FALSE;
 	}
 	if ((UINTPTR_T)s_currentThread == hThread)
@@ -600,13 +553,18 @@ BOOL DestroyThread(HANDLE hThread)
 	list_remove(list, list_find(list, thread));
 	memset(thread, 0, sizeof(struct kThreadStructure));
 	kfree_pages((PVOID)(thread->stackStart - 2 * 4096), 2);
+	kfree_pages((PVOID)(thread->kernelStack - 2 * 4096), 2);
 	kfree(thread);
 	LeaveKernelSection();
 	return TRUE;
 }
 
 DWORD GetTid()
-{ return s_currentThread->tid; }
+{
+	if (s_currentThread) 
+		return s_currentThread->tid; 
+	return (DWORD)-1;
+}
 DWORD GetThreadHandle()
 { return (UINTPTR_T)s_currentThread; }
 void YieldExecution()
@@ -628,21 +586,14 @@ void Sleep(DWORD milliseconds)
 	LeaveKernelSection();
 	YieldExecution();
 }
-void ExitThread(DWORD exitCode)
+void attribute(noreturn) ExitThread(DWORD exitCode)
 {
 	TerminateThread((UINTPTR_T)s_currentThread, exitCode);
+	while (1)
+		__builtin_ia32_pause();
 }
 static BOOL WaitForThreadsCallback(HANDLE hThread, PVOID userData)
 {
-	struct liballoc_minor
-	{
-		struct liballoc_minor* prev;		///< Linked list information.
-		struct liballoc_minor* next;		///< Linked list information.
-		struct liballoc_major* block;		///< The owning block. A pointer to the major structure.
-		unsigned int magic;					///< A magic number to idenfity correctness.
-		unsigned int size; 					///< The size of the memory allocated. Could be 1 byte or more.
-		unsigned int req_size;				///< The size of memory requested.
-	};
 	HANDLE* handles = *(HANDLE**)userData;
 	if (!handles)
 		return FALSE; // We were lied to...
@@ -690,7 +641,7 @@ BOOL WaitForThreads(SIZE_T nThreads, HANDLE* handles)
 			struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 			if (thread->owner != /*GetPid()*/0)
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				SetLastError(OBOS_ERROR_ACCESS_DENIED);
 				return FALSE;
 			}
 		}
@@ -731,7 +682,7 @@ DWORD ksetblockstate(HANDLE hThread)
 		return OBOS_ERROR_INVALID_HANDLE;
 	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 	if (thread->owner != /*GetPid()*/0)
-		return OBOS_ERROR_INVALID_HANDLE;
+		return OBOS_ERROR_ACCESS_DENIED;
 	EnterKernelSection();
 	thread->status = generateBitfieldBitmask(2, THREAD_RUNNING, THREAD_BLOCKED);
 	LeaveKernelSection();
@@ -744,7 +695,7 @@ DWORD kclearblockstate(HANDLE hThread)
 		return OBOS_ERROR_INVALID_HANDLE;
 	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 	if (thread->owner != /*GetPid()*/0)
-		return OBOS_ERROR_INVALID_HANDLE;
+		return OBOS_ERROR_ACCESS_DENIED;
 	EnterKernelSection();
 	thread->status = generateBitfieldBitmask(1, THREAD_RUNNING);
 	LeaveKernelSection();
@@ -757,10 +708,24 @@ DWORD ksetblockcallback(HANDLE hThread, BOOL(*callback)(HANDLE hThread, PVOID us
 		return OBOS_ERROR_INVALID_HANDLE;
 	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
 	if (thread->owner != /*GetPid()*/0)
-		return OBOS_ERROR_INVALID_HANDLE;
+		return OBOS_ERROR_ACCESS_DENIED;
 	EnterKernelSection();
 	thread->checkIfBlocked = callback;
 	thread->checkIfBlockedUserData = userData;
+	LeaveKernelSection();
+	return 0;
+}
+
+DWORD kMakeThreadKernelMode(HANDLE hThread)
+{
+	if (!list_find(s_kThreadHandles, (struct kThreadStructure*)hThread))
+		return OBOS_ERROR_INVALID_HANDLE;
+	struct kThreadStructure* thread = (struct kThreadStructure*)hThread;
+	if (thread->owner != /*GetPid()*/0)
+		return OBOS_ERROR_ACCESS_DENIED;
+	EnterKernelSection();
+	thread->isUserMode = FALSE;
+	thread->registers.ds = 0x10;
 	LeaveKernelSection();
 	return 0;
 }

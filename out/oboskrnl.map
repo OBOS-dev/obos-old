@@ -32,367 +32,391 @@ LOAD kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
 LOAD kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
 LOAD kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
 LOAD kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+LOAD kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+LOAD kernel/CMakeFiles/oboskrnl.dir/elf.c.o
                 0x00100000                        . = 0x100000
 
-.text           0x00100000     0x8a70
+.text           0x00100000     0x9892
  *(.multiboot)
  .multiboot     0x00100000       0x30 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
  *(.text)
- .text          0x00100030       0x18 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+ .text          0x00100030       0x16 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
                 0x00100030                _start
                 0x00100044                idleTask
- *fill*         0x00100048        0x8 
- .text          0x00100050      0x239 kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.o
+ *fill*         0x00100046        0xa 
+ .text          0x00100050      0x28d kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.o
                 0x00100056                gdtUpdate
-                0x00100098                isr0
-                0x0010009f                isr1
-                0x001000a6                isr2
-                0x001000ad                isr3
-                0x001000b4                isr4
-                0x001000bb                isr5
-                0x001000c2                isr6
-                0x001000c9                isr7
-                0x001000d0                isr8
-                0x001000d5                isr9
-                0x001000dc                isr10
-                0x001000e1                isr11
-                0x001000e6                isr12
-                0x001000eb                isr13
-                0x001000f0                isr14
-                0x001000f8                isr15
-                0x00100102                isr16
-                0x0010010c                isr17
-                0x00100114                isr18
-                0x0010011e                isr19
-                0x00100128                isr20
-                0x00100132                isr21
-                0x0010013a                isr22
-                0x00100144                isr23
-                0x0010014e                isr24
-                0x00100158                isr25
-                0x00100162                isr26
-                0x0010016c                isr27
-                0x00100176                isr28
-                0x00100180                isr29
-                0x0010018a                isr30
-                0x00100194                isr31
-                0x0010019e                isr32
-                0x001001a8                isr33
-                0x001001b2                isr34
-                0x001001bc                isr35
-                0x001001c6                isr36
-                0x001001d0                isr37
-                0x001001da                isr38
-                0x001001e4                isr39
-                0x001001ee                isr40
-                0x001001f8                isr41
-                0x00100202                isr42
-                0x0010020c                isr43
-                0x00100216                isr44
-                0x00100220                isr45
-                0x0010022a                isr46
-                0x00100234                isr47
-                0x0010023e                isr48
-                0x00100248                isr64
-                0x00100281                idtUpdate
- *fill*         0x00100289        0x7 
- .text          0x00100290       0x24 kernel/CMakeFiles/oboskrnl.dir/paging.asm.o
-                0x00100290                loadPageDirectory
-                0x0010029e                enablePaging
-                0x001002b0                getCR2
- *fill*         0x001002b4        0xc 
- .text          0x001002c0       0x17 kernel/CMakeFiles/oboskrnl.dir/virtual8086.asm.o
-                0x001002c0                enter_v8086
- *fill*         0x001002d7        0x9 
- .text          0x001002e0       0x40 kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
-                0x001002e0                switchTaskToAsm
-                0x00100315                OBOS_ThreadEntryPoint
- .text          0x00100320      0x6b7 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
-                0x00100538                pageFaultHandler
-                0x001006e1                testThread
-                0x00100722                kmain_thread
-                0x001007b0                kmain
- .text          0x001009d7      0x53c kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
-                0x001009d7                memcmp
-                0x00100a48                acpiCheckRSDPtr
-                0x00100ab0                acpiGetRSDPtr
-                0x00100b45                acpiCheckHeader
-                0x00100bac                acpiEnable
-                0x00100bcd                initAcpi
-                0x00100e59                acpiPowerOff
- .text          0x00100f13     0x1225 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
-                0x00100f13                itoa
-                0x001012d8                kmeminit
-                0x0010156e                kfindmemblock
-                0x0010177b                memset
-                0x001017b9                kInitializePaging
-                0x00101c1c                liballoc_lock
-                0x00101c57                liballoc_unlock
-                0x00101c92                kalloc_pages
-                0x00101f8e                kfree_pages
-                0x001020d9                reloadPages
-                0x001020ec                liballoc_alloc
-                0x0010211f                liballoc_free
- .text          0x00102138      0x83e kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
-                0x00102138                irq0
-                0x001021c6                beep
-                0x00102311                SetTerminalCursorPosition
-                0x00102398                GetTerminalCursorPosition
-                0x001023c3                InitializeTeriminal
-                0x001024f3                TerminalSetColor
-                0x0010250b                TerminalGetColor
-                0x00102632                TerminalOutputCharacter
-                0x001028b7                TerminalOutputCharacterAt
-                0x001028fd                TerminalOutput
-                0x00102936                TerminalOutputString
- .text          0x00102976      0x7c7 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
-                0x00102976                outb
-                0x00102997                outw
-                0x001029b8                inb
-                0x001029d5                inw
-                0x001029f4                io_wait
-                0x00102a09                cli
-                0x00102a1d                sti
-                0x00102a31                hlt
-                0x00102a38                _int
-                0x001030f0                EnterKernelSection
-                0x0010310b                LeaveKernelSection
- .text          0x0010313d      0xd40 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
-                0x0010337a                itoa_unsigned
-                0x001033f1                ftoa
-                0x00103a42                setOnKernelPanic
-                0x00103a50                resetOnKernelPanic
-                0x00103b53                printStackTrace
-                0x00103be6                kpanic
-                0x00103c81                kassert
-                0x00103ca7                printf
-                0x00103cd6                vprintf
-                0x00103cf7                klog_info
-                0x00103d79                klog_warning
-                0x00103dfe                klog_error
- .text          0x00103e7d      0xa6d kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
-                0x00104290                kinitserialports
-                0x00104357                IsSerialPortInitialized
-                0x00104396                GetSerialPortError
-                0x001043cd                ClearSerialPortError
-                0x00104404                InitSerialPort
-                0x00104712                WriteSerialPort
-                0x001047b2                ReadSerialPort
- .text          0x001048ea      0xab3 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
-                0x001048ea                defaultPicInterruptCallback
-                0x0010491f                defaultExceptionHandler
-                0x001049af                defaultInterruptHandler
-                0x00104ade                initPIC
-                0x00104c29                initIDT
-                0x001050ea                setIdtEntry
-                0x00105133                initInterrupts
-                0x00105189                enablePICInterrupt
-                0x001051f3                disablePICInterrupt
-                0x0010525b                setPICInterruptHandlers
-                0x001052ab                resetPICInterruptHandlers
-                0x001052fc                setExceptionHandlers
-                0x0010534c                resetExceptionHandlers
- .text          0x0010539d      0x13e kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
-                0x0010543b                initGdt
- .text          0x001054db      0x24d kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
-                0x00105514                keyboardIrqHandler
-                0x00105537                kKeyboardInit
- .text          0x00105728      0x66b kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
-                0x00105728                hash_table_create
-                0x001057a2                hash_table_emplace
-                0x00105aa9                hash_table_lookup
-                0x00105be8                hash_table_contains
-                0x00105ceb                hash_table_destroy
- .text          0x00105d93      0xc40 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
-                0x00105f39                kmalloc
-                0x001065c5                kfree
-                0x0010683f                kcalloc
-                0x00106880                krealloc
- .text          0x001069d3      0x129 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
-                0x001069d3                getBitFromBitfield
-                0x001069f8                setBitInBitfield
-                0x00106a1c                clearBitInBitfield
-                0x00106a40                getBitFromBitfieldBitmask
-                0x00106a51                setBitInBitfieldBitmask
-                0x00106a66                clearBitInBitfieldBitmask
-                0x00106a7b                generateBitfield
-                0x00106ac1                generateBitfieldBitmask
- .text          0x00106afc     0x1332 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
-                0x00107083                kinitmultitasking
-                0x0010729d                MakeThread
-                0x00107471                GetHandleTid
-                0x001074cf                TerminateThread
-                0x001075a3                GetThreadExitCode
-                0x0010763c                GetThreadStatus
-                0x0010769f                ResumeThread
-                0x0010774e                PauseThread
-                0x001077ff                DestroyThread
-                0x00107994                GetTid
-                0x001079a0                GetThreadHandle
-                0x001079aa                YieldExecution
-                0x001079d1                Sleep
-                0x00107a2b                ExitThread
-                0x00107b2c                WaitForThreads
-                0x00107c89                WaitForThreadsVariadic
-                0x00107d02                ksetblockstate
-                0x00107d69                kclearblockstate
-                0x00107dce                ksetblockcallback
- .text          0x00107e2e       0x18 kernel/CMakeFiles/oboskrnl.dir/error.c.o
-                0x00107e2e                GetLastError
-                0x00107e38                SetLastError
- .text          0x00107e46      0x407 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
-                0x00107e46                MakeMutex
-                0x00107f92                LockMutex
-                0x00108075                UnlockMutex
-                0x00108135                DestroyMutex
- .text          0x0010824d       0x70 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
-                0x0010824d                syscall_handler
- .text          0x001082bd      0x48d kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
-                0x001082bd                list_new
-                0x00108316                list_destroy
-                0x00108389                list_rpush
-                0x0010840c                list_rpop
-                0x0010848c                list_lpop
-                0x0010850a                list_lpush
-                0x00108589                list_find
-                0x00108627                list_at
-                0x001086bd                list_remove
- .text          0x0010874a       0x44 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
-                0x0010874a                list_node_new
- .text          0x0010878e       0xbb kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
-                0x0010878e                list_iterator_new
-                0x001087bd                list_iterator_new_from_node
-                0x001087f6                list_iterator_next
-                0x0010882b                list_iterator_destroy
- .text          0x00108849      0x227 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
-                0x001089b2                InitializeInitRD
-                0x001089c0                ReadInitRDFile
-                0x00108a70                        __etext = .
+                0x00100073                tssUpdate
+                0x001000a0                isr0
+                0x001000a7                isr1
+                0x001000ae                isr2
+                0x001000b5                isr3
+                0x001000bc                isr4
+                0x001000c3                isr5
+                0x001000ca                isr6
+                0x001000d1                isr7
+                0x001000d8                isr8
+                0x001000dd                isr9
+                0x001000e4                isr10
+                0x001000e9                isr11
+                0x001000ee                isr12
+                0x001000f3                isr13
+                0x001000f8                isr14
+                0x00100100                isr15
+                0x0010010a                isr16
+                0x00100114                isr17
+                0x0010011c                isr18
+                0x00100126                isr19
+                0x00100130                isr20
+                0x0010013a                isr21
+                0x00100142                isr22
+                0x0010014c                isr23
+                0x00100156                isr24
+                0x00100160                isr25
+                0x0010016a                isr26
+                0x00100174                isr27
+                0x0010017e                isr28
+                0x00100188                isr29
+                0x00100192                isr30
+                0x0010019c                isr31
+                0x001001a6                isr32
+                0x001001b0                isr33
+                0x001001ba                isr34
+                0x001001c4                isr35
+                0x001001ce                isr36
+                0x001001d8                isr37
+                0x001001e2                isr38
+                0x001001ec                isr39
+                0x001001f6                isr40
+                0x00100200                isr41
+                0x0010020a                isr42
+                0x00100214                isr43
+                0x0010021e                isr44
+                0x00100228                isr45
+                0x00100232                isr46
+                0x0010023c                isr47
+                0x00100246                isr48
+                0x00100250                isr64
+                0x00100291                isr80
+                0x001002d5                idtUpdate
+ *fill*         0x001002dd        0x3 
+ .text          0x001002e0       0x24 kernel/CMakeFiles/oboskrnl.dir/paging.asm.o
+                0x001002e0                loadPageDirectory
+                0x001002ee                enablePaging
+                0x00100300                getCR2
+ *fill*         0x00100304        0xc 
+ .text          0x00100310       0x17 kernel/CMakeFiles/oboskrnl.dir/virtual8086.asm.o
+                0x00100310                enter_v8086
+ *fill*         0x00100327        0x9 
+ .text          0x00100330       0x91 kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
+                0x00100330                switchTaskToAsm
+                0x00100368                switchTaskToAsmUserMode
+                0x001003b2                OBOS_ThreadEntryPoint
+ .text          0x001003c1      0x7c6 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
+                0x001005d9                pageFaultHandler
+                0x001007c0                kmain_thread
+                0x00100964                kmain
+ .text          0x00100b87      0x53c kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
+                0x00100b87                memcmp
+                0x00100bf8                acpiCheckRSDPtr
+                0x00100c60                acpiGetRSDPtr
+                0x00100cf5                acpiCheckHeader
+                0x00100d5c                acpiEnable
+                0x00100d7d                initAcpi
+                0x00101009                acpiPowerOff
+ .text          0x001010c3     0x13a2 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+                0x001010c3                itoa
+                0x001014e4                kmeminit
+                0x0010177a                kfindmemblock
+                0x00101987                memset
+                0x001019d2                kInitializePaging
+                0x00101d1f                liballoc_lock
+                0x00101d5a                liballoc_unlock
+                0x00101d95                kalloc_pages
+                0x00101ecf                kalloc_pagesAt
+                0x0010214c                kfree_pages
+                0x001022b1                ksetPagesProtection
+                0x001023d8                reloadPages
+                0x001023eb                liballoc_alloc
+                0x0010244c                liballoc_free
+ .text          0x00102465      0x83e kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
+                0x00102465                irq0
+                0x001024f3                beep
+                0x0010263e                SetTerminalCursorPosition
+                0x001026c5                GetTerminalCursorPosition
+                0x001026f0                InitializeTeriminal
+                0x00102820                TerminalSetColor
+                0x00102838                TerminalGetColor
+                0x0010295f                TerminalOutputCharacter
+                0x00102be4                TerminalOutputCharacterAt
+                0x00102c2a                TerminalOutput
+                0x00102c63                TerminalOutputString
+ .text          0x00102ca3      0x7c7 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
+                0x00102ca3                outb
+                0x00102cc4                outw
+                0x00102ce5                inb
+                0x00102d02                inw
+                0x00102d21                io_wait
+                0x00102d36                cli
+                0x00102d4a                sti
+                0x00102d5e                hlt
+                0x00102d65                _int
+                0x0010341d                EnterKernelSection
+                0x00103438                LeaveKernelSection
+ .text          0x0010346a      0xe75 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
+                0x001036a7                itoa_unsigned
+                0x0010371e                ftoa
+                0x00103d96                setOnKernelPanic
+                0x00103da4                resetOnKernelPanic
+                0x00103f3e                printStackTrace
+                0x00103fd3                kpanic
+                0x00104072                kassert
+                0x00104098                printf
+                0x001040ce                sprintf
+                0x00104116                vprintf
+                0x0010413e                klog_info
+                0x001041c9                klog_warning
+                0x00104257                klog_error
+ .text          0x001042df      0xa6d kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
+                0x001046f2                kinitserialports
+                0x001047b9                IsSerialPortInitialized
+                0x001047f8                GetSerialPortError
+                0x0010482f                ClearSerialPortError
+                0x00104866                InitSerialPort
+                0x00104b74                WriteSerialPort
+                0x00104c14                ReadSerialPort
+ .text          0x00104d4c      0xaca kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
+                0x00104d4c                defaultPicInterruptCallback
+                0x00104d81                defaultExceptionHandler
+                0x00104e11                defaultInterruptHandler
+                0x00104f40                initPIC
+                0x0010508b                initIDT
+                0x00105563                setIdtEntry
+                0x001055ac                initInterrupts
+                0x00105602                enablePICInterrupt
+                0x0010566c                disablePICInterrupt
+                0x001056d4                setPICInterruptHandlers
+                0x00105724                resetPICInterruptHandlers
+                0x00105775                setExceptionHandlers
+                0x001057c5                resetExceptionHandlers
+ .text          0x00105816      0x20a kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
+                0x001058ec                initGdt
+                0x00105a12                changeKernelStack
+ .text          0x00105a20      0x251 kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
+                0x00105a59                keyboardIrqHandler
+                0x00105a7c                kKeyboardInit
+ .text          0x00105c71      0x66b kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
+                0x00105c71                hash_table_create
+                0x00105ceb                hash_table_emplace
+                0x00105ff2                hash_table_lookup
+                0x00106131                hash_table_contains
+                0x00106234                hash_table_destroy
+ .text          0x001062dc      0xc40 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
+                0x00106482                kmalloc
+                0x00106b0e                kfree
+                0x00106d88                kcalloc
+                0x00106dc9                krealloc
+ .text          0x00106f1c      0x129 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
+                0x00106f1c                getBitFromBitfield
+                0x00106f41                setBitInBitfield
+                0x00106f65                clearBitInBitfield
+                0x00106f89                getBitFromBitfieldBitmask
+                0x00106f9a                setBitInBitfieldBitmask
+                0x00106faf                clearBitInBitfieldBitmask
+                0x00106fc4                generateBitfield
+                0x0010700a                generateBitfieldBitmask
+ .text          0x00107045     0x1527 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+                0x001076ed                kinitmultitasking
+                0x0010792b                MakeThread
+                0x00107b26                GetHandleTid
+                0x00107b84                TerminateThread
+                0x00107c58                GetThreadExitCode
+                0x00107cf1                GetThreadStatus
+                0x00107d54                ResumeThread
+                0x00107e03                PauseThread
+                0x00107eb4                DestroyThread
+                0x00108062                GetTid
+                0x0010807e                GetThreadHandle
+                0x00108088                YieldExecution
+                0x001080af                Sleep
+                0x00108109                ExitThread
+                0x0010820b                WaitForThreads
+                0x00108368                WaitForThreadsVariadic
+                0x001083e1                ksetblockstate
+                0x00108448                kclearblockstate
+                0x001084ad                ksetblockcallback
+                0x0010850d                kMakeThreadKernelMode
+ .text          0x0010856c       0x18 kernel/CMakeFiles/oboskrnl.dir/error.c.o
+                0x0010856c                GetLastError
+                0x00108576                SetLastError
+ .text          0x00108584      0x407 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
+                0x00108584                MakeMutex
+                0x001086d0                LockMutex
+                0x001087b3                UnlockMutex
+                0x00108873                DestroyMutex
+ .text          0x0010898b       0x6c kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
+                0x0010898b                syscall_handler
+ .text          0x001089f7      0x48d kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
+                0x001089f7                list_new
+                0x00108a50                list_destroy
+                0x00108ac3                list_rpush
+                0x00108b46                list_rpop
+                0x00108bc6                list_lpop
+                0x00108c44                list_lpush
+                0x00108cc3                list_find
+                0x00108d61                list_at
+                0x00108df7                list_remove
+ .text          0x00108e84       0x44 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
+                0x00108e84                list_node_new
+ .text          0x00108ec8       0xbb kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
+                0x00108ec8                list_iterator_new
+                0x00108ef7                list_iterator_new_from_node
+                0x00108f30                list_iterator_next
+                0x00108f65                list_iterator_destroy
+ .text          0x00108f83      0x323 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+                0x0010917a                InitializeInitRD
+                0x00109188                ReadInitRDFile
+                0x00109238                GetInitRDFileSize
+ .text          0x001092a6      0x1b8 kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+                0x00109341                driver_syscall_handler
+ .text          0x0010945e      0x434 kernel/CMakeFiles/oboskrnl.dir/elf.c.o
+                0x00109546                elf_load
+                0x001097fe                LoadElfFile
+                0x00109892                        __etext = .
 
-.iplt           0x00108a70        0x0
- .iplt          0x00108a70        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+.iplt           0x00109892        0x0
+ .iplt          0x00109892        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
 
-.rodata         0x00109000      0xc8a
+.rodata         0x0010a000      0xde3
  *(.rodata)
- .rodata        0x00109000      0x35b kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
- *fill*         0x0010935b        0x1 
- .rodata        0x0010935c       0xdb kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
- *fill*         0x00109437        0x1 
- .rodata        0x00109438       0x59 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
- *fill*         0x00109491        0x3 
- .rodata        0x00109494      0x400 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
- *fill*         0x00109894        0xc 
- .rodata        0x001098a0      0x298 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
- .rodata        0x00109b38      0x119 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
- *fill*         0x00109c51        0x3 
- .rodata        0x00109c54       0x2a kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
- *fill*         0x00109c7e        0x2 
- .rodata        0x00109c80        0x4 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
- .rodata        0x00109c84        0x6 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .rodata        0x0010a000      0x433 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
+ *fill*         0x0010a433        0x1 
+ .rodata        0x0010a434       0xdb kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
+ *fill*         0x0010a50f        0x1 
+ .rodata        0x0010a510       0x59 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+ *fill*         0x0010a569        0x3 
+ .rodata        0x0010a56c      0x400 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
+ *fill*         0x0010a96c       0x14 
+ .rodata        0x0010a980      0x298 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
+ .rodata        0x0010ac18      0x119 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
+ *fill*         0x0010ad31        0x3 
+ .rodata        0x0010ad34       0x2a kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
+ *fill*         0x0010ad5e        0x2 
+ .rodata        0x0010ad60        0x4 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
+ .rodata        0x0010ad64       0x66 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+ .rodata        0x0010adca        0x6 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .rodata        0x0010add0       0x13 kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+                0x0010ade3                        __erodata = .
 
-.rel.dyn        0x00109c8c        0x0
- .rel.got       0x00109c8c        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
- .rel.iplt      0x00109c8c        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
- .rel.text      0x00109c8c        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+.rel.dyn        0x0010ade4        0x0
+ .rel.got       0x0010ade4        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+ .rel.iplt      0x0010ade4        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+ .rel.text      0x0010ade4        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
 
-.data           0x0010a000       0x34
+.data           0x0010b000       0x3c
  *(.data)
- .data          0x0010a000        0xc kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
- .data          0x0010a00c        0x4 kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.o
- .data          0x0010a010        0x8 kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
- .data          0x0010a018        0x0 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
- .data          0x0010a018        0x0 kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
- .data          0x0010a018        0x4 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
- .data          0x0010a01c        0x8 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
- .data          0x0010a024        0x0 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
- .data          0x0010a024        0x4 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
- .data          0x0010a028        0x0 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
- .data          0x0010a028        0x0 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
- .data          0x0010a028        0x0 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
- .data          0x0010a028        0x0 kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
- .data          0x0010a028        0x0 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
- .data          0x0010a028        0x8 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
- .data          0x0010a030        0x0 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
- .data          0x0010a030        0x4 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
- .data          0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/error.c.o
- .data          0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
- .data          0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
- .data          0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
- .data          0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
- .data          0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
- .data          0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .data          0x0010b000        0xc kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+ .data          0x0010b00c        0x4 kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.o
+ .data          0x0010b010        0x8 kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
+ .data          0x0010b018        0x0 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
+ .data          0x0010b018        0x0 kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
+ .data          0x0010b018        0xc kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+ .data          0x0010b024        0x8 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
+ .data          0x0010b02c        0x0 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
+ .data          0x0010b02c        0x4 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
+ .data          0x0010b030        0x0 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
+ .data          0x0010b030        0x0 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
+ .data          0x0010b030        0x0 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
+ .data          0x0010b030        0x0 kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
+ .data          0x0010b030        0x0 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
+ .data          0x0010b030        0x8 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
+ .data          0x0010b038        0x0 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
+ .data          0x0010b038        0x4 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+ .data          0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/error.c.o
+ .data          0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
+ .data          0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
+ .data          0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
+ .data          0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
+ .data          0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
+ .data          0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .data          0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+ .data          0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/elf.c.o
 
-.got            0x0010a034        0x0
- .got           0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+.got            0x0010b03c        0x0
+ .got           0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
 
-.got.plt        0x0010a034        0x0
- .got.plt       0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+.got.plt        0x0010b03c        0x0
+ .got.plt       0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
 
-.igot.plt       0x0010a034        0x0
- .igot.plt      0x0010a034        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+.igot.plt       0x0010b03c        0x0
+ .igot.plt      0x0010b03c        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
 
-.bss            0x0010b000   0x42baa0
+.bss            0x0010c000   0x42bb0c
  *(COMMON)
  *(.bss)
- .bss           0x0010b000     0x8000 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
-                0x0010b000                stack_bottom
-                0x0010f000                stack_top
-                0x0010f000                stack_bottom_thread
-                0x00113000                stack_top_thread
- .bss           0x00113000       0x10 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
-                0x00113000                interruptsWork
-                0x00113004                g_multibootInfo
- .bss           0x00113010       0x19 kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
-                0x00113010                SMI_CMD
-                0x00113014                ACPI_ENABLE
-                0x00113015                ACPI_DISABLE
-                0x00113018                PM1a_CNT
-                0x0011301c                PM1b_CNT
-                0x00113020                SLP_TYPa
-                0x00113022                SLP_TYPb
-                0x00113024                SLP_EN
-                0x00113026                SCI_EN
-                0x00113028                PM1_CNT_LEN
- *fill*         0x00113029      0xfd7 
- .bss           0x00114000   0x422000 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
-                0x00114000                g_kMemoryTable
-                0x00114004                g_kMemoryTableBlockSize
-                0x00114008                g_kMemoryTableSize
-                0x0011400c                g_kPhysicalMemorySize
-                0x00114010                g_kAvailablePhysicalMemorySize
-                0x00114014                g_kSystemPhysicalMemorySize
-                0x00115000                g_pageDirectory
-                0x00116000                g_pageTable
- .bss           0x00536000       0x19 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
- *fill*         0x00536019        0x3 
- .bss           0x0053601c        0x8 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
- .bss           0x00536024        0x8 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
- *fill*         0x0053602c       0x14 
- .bss           0x00536040       0xb0 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
-                0x00536040                zeroedSerialPortData
- *fill*         0x005360f0       0x10 
- .bss           0x00536100      0x8c6 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
- *fill*         0x005369c6       0x1a 
- .bss           0x005369e0       0x48 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
- .bss           0x00536a28        0xc kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
-                0x00536a28                keyboardFlags
- .bss           0x00536a34        0x0 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
- *fill*         0x00536a34        0x4 
- .bss           0x00536a38       0x30 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
- .bss           0x00536a68        0x0 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
- .bss           0x00536a68       0x28 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
- .bss           0x00536a90        0x4 kernel/CMakeFiles/oboskrnl.dir/error.c.o
-                0x00536a90                g_kErrorCode
- .bss           0x00536a94        0x8 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
- .bss           0x00536a9c        0x0 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
- .bss           0x00536a9c        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
- .bss           0x00536a9c        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
- .bss           0x00536a9c        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
- .bss           0x00536a9c        0x4 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
-                0x00536aa0                        endKernel = .
+ .bss           0x0010c000     0x8000 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+                0x0010c000                stack_bottom
+                0x00110000                stack_top
+                0x00110000                stack_bottom_thread
+                0x00114000                stack_top_thread
+ .bss           0x00114000       0x10 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
+                0x00114000                interruptsWork
+                0x00114004                g_multibootInfo
+ .bss           0x00114010       0x19 kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
+                0x00114010                SMI_CMD
+                0x00114014                ACPI_ENABLE
+                0x00114015                ACPI_DISABLE
+                0x00114018                PM1a_CNT
+                0x0011401c                PM1b_CNT
+                0x00114020                SLP_TYPa
+                0x00114022                SLP_TYPb
+                0x00114024                SLP_EN
+                0x00114026                SCI_EN
+                0x00114028                PM1_CNT_LEN
+ *fill*         0x00114029      0xfd7 
+ .bss           0x00115000   0x422000 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+                0x00115000                g_kMemoryTable
+                0x00115004                g_kMemoryTableBlockSize
+                0x00115008                g_kMemoryTableSize
+                0x0011500c                g_kPhysicalMemorySize
+                0x00115010                g_kAvailablePhysicalMemorySize
+                0x00115014                g_kSystemPhysicalMemorySize
+                0x00116000                g_pageDirectory
+                0x00117000                g_pageTable
+ .bss           0x00537000       0x19 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
+ *fill*         0x00537019        0x3 
+ .bss           0x0053701c        0x8 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
+ .bss           0x00537024        0x8 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
+ *fill*         0x0053702c       0x14 
+ .bss           0x00537040       0xb0 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
+                0x00537040                zeroedSerialPortData
+ *fill*         0x005370f0       0x10 
+ .bss           0x00537100      0x8c6 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
+ *fill*         0x005379c6       0x1a 
+ .bss           0x005379e0       0xb0 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
+                0x005379e0                g_tssEntry
+ .bss           0x00537a90        0xc kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
+                0x00537a90                keyboardFlags
+ .bss           0x00537a9c        0x0 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
+ *fill*         0x00537a9c        0x4 
+ .bss           0x00537aa0       0x30 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
+ .bss           0x00537ad0        0x0 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
+ .bss           0x00537ad0       0x28 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+ .bss           0x00537af8        0x4 kernel/CMakeFiles/oboskrnl.dir/error.c.o
+                0x00537af8                g_kErrorCode
+ .bss           0x00537afc        0x8 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
+ .bss           0x00537b04        0x0 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
+ .bss           0x00537b04        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
+ .bss           0x00537b04        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
+ .bss           0x00537b04        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
+ .bss           0x00537b04        0x4 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .bss           0x00537b08        0x4 kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+                0x00537b08                drivers
+ .bss           0x00537b0c        0x0 kernel/CMakeFiles/oboskrnl.dir/elf.c.o
+                0x00537b0c                        endKernel = .
 OUTPUT(/mnt/c/Users/omark/Documents/obos/out/oboskrnl elf32-i386)
 
-.debug_aranges  0x00000000      0x340
+.debug_aranges  0x00000000      0x380
  .debug_aranges
                 0x00000000       0x20 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
  .debug_aranges
@@ -445,6 +469,10 @@ OUTPUT(/mnt/c/Users/omark/Documents/obos/out/oboskrnl elf32-i386)
                 0x00000300       0x20 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
  .debug_aranges
                 0x00000320       0x20 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_aranges
+                0x00000340       0x20 kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+ .debug_aranges
+                0x00000360       0x20 kernel/CMakeFiles/oboskrnl.dir/elf.c.o
 
 .debug_pubnames
                 0x00000000        0x0
@@ -459,117 +487,125 @@ OUTPUT(/mnt/c/Users/omark/Documents/obos/out/oboskrnl elf32-i386)
  .debug_pubnames
                 0x00000000        0x0 kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
 
-.debug_info     0x00000000     0xc9c0
+.debug_info     0x00000000     0xe32c
  .debug_info    0x00000000       0x66 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
  .debug_info    0x00000066       0x5a kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.o
  .debug_info    0x000000c0       0x57 kernel/CMakeFiles/oboskrnl.dir/paging.asm.o
  .debug_info    0x00000117       0x5c kernel/CMakeFiles/oboskrnl.dir/virtual8086.asm.o
  .debug_info    0x00000173       0x5d kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
- .debug_info    0x000001d0     0x15cb kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
- .debug_info    0x0000179b      0x89d kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
- .debug_info    0x00002038     0x16f9 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
- .debug_info    0x00003731      0xfb0 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
- .debug_info    0x000046e1      0x3c3 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
- .debug_info    0x00004aa4     0x1251 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
- .debug_info    0x00005cf5      0xcd8 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
- .debug_info    0x000069cd     0x1034 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
- .debug_info    0x00007a01      0x3c4 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
- .debug_info    0x00007dc5      0x5f2 kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
- .debug_info    0x000083b7      0x6cc kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
- .debug_info    0x00008a83      0x75b kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
- .debug_info    0x000091de      0x4d6 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
- .debug_info    0x000096b4     0x16ac kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
- .debug_info    0x0000ad60      0x268 kernel/CMakeFiles/oboskrnl.dir/error.c.o
- .debug_info    0x0000afc8      0x5ce kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
- .debug_info    0x0000b596      0x3a6 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
- .debug_info    0x0000b93c      0x57f kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
- .debug_info    0x0000bebb      0x1cc kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
- .debug_info    0x0000c087      0x3d9 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
- .debug_info    0x0000c460      0x560 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_info    0x000001d0     0x1781 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
+ .debug_info    0x00001951      0x89d kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
+ .debug_info    0x000021ee     0x1a0a kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+ .debug_info    0x00003bf8      0xfb0 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
+ .debug_info    0x00004ba8      0x3c3 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
+ .debug_info    0x00004f6b     0x142b kernel/CMakeFiles/oboskrnl.dir/klog.c.o
+ .debug_info    0x00006396      0xcd8 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
+ .debug_info    0x0000706e     0x1054 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
+ .debug_info    0x000080c2      0x619 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
+ .debug_info    0x000086db      0x5fc kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
+ .debug_info    0x00008cd7      0x6cc kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
+ .debug_info    0x000093a3      0x75b kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
+ .debug_info    0x00009afe      0x4d6 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
+ .debug_info    0x00009fd4     0x177d kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+ .debug_info    0x0000b751      0x268 kernel/CMakeFiles/oboskrnl.dir/error.c.o
+ .debug_info    0x0000b9b9      0x5ce kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
+ .debug_info    0x0000bf87      0x3a8 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
+ .debug_info    0x0000c32f      0x57f kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
+ .debug_info    0x0000c8ae      0x1cc kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
+ .debug_info    0x0000ca7a      0x3d9 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
+ .debug_info    0x0000ce53      0x5fb kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_info    0x0000d44e      0x685 kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+ .debug_info    0x0000dad3      0x859 kernel/CMakeFiles/oboskrnl.dir/elf.c.o
 
-.debug_abbrev   0x00000000     0x2743
+.debug_abbrev   0x00000000     0x2c27
  .debug_abbrev  0x00000000       0x1b kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
  .debug_abbrev  0x0000001b       0x1b kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.o
  .debug_abbrev  0x00000036       0x1b kernel/CMakeFiles/oboskrnl.dir/paging.asm.o
  .debug_abbrev  0x00000051       0x1b kernel/CMakeFiles/oboskrnl.dir/virtual8086.asm.o
  .debug_abbrev  0x0000006c       0x1b kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
- .debug_abbrev  0x00000087      0x2f6 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
- .debug_abbrev  0x0000037d      0x1df kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
- .debug_abbrev  0x0000055c      0x34a kernel/CMakeFiles/oboskrnl.dir/paging.c.o
- .debug_abbrev  0x000008a6      0x251 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
- .debug_abbrev  0x00000af7      0x139 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
- .debug_abbrev  0x00000c30      0x32a kernel/CMakeFiles/oboskrnl.dir/klog.c.o
- .debug_abbrev  0x00000f5a      0x290 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
- .debug_abbrev  0x000011ea      0x243 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
- .debug_abbrev  0x0000142d      0x124 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
- .debug_abbrev  0x00001551      0x1a1 kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
- .debug_abbrev  0x000016f2      0x178 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
- .debug_abbrev  0x0000186a      0x201 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
- .debug_abbrev  0x00001a6b      0x11c kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
- .debug_abbrev  0x00001b87      0x354 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
- .debug_abbrev  0x00001edb       0xb6 kernel/CMakeFiles/oboskrnl.dir/error.c.o
- .debug_abbrev  0x00001f91      0x185 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
- .debug_abbrev  0x00002116      0x10e kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
- .debug_abbrev  0x00002224      0x1ae kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
- .debug_abbrev  0x000023d2       0xbd kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
- .debug_abbrev  0x0000248f      0x174 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
- .debug_abbrev  0x00002603      0x140 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_abbrev  0x00000087      0x2df kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
+ .debug_abbrev  0x00000366      0x1df kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
+ .debug_abbrev  0x00000545      0x3ad kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+ .debug_abbrev  0x000008f2      0x251 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
+ .debug_abbrev  0x00000b43      0x139 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
+ .debug_abbrev  0x00000c7c      0x360 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
+ .debug_abbrev  0x00000fdc      0x290 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
+ .debug_abbrev  0x0000126c      0x243 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
+ .debug_abbrev  0x000014af      0x1b0 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
+ .debug_abbrev  0x0000165f      0x1a1 kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
+ .debug_abbrev  0x00001800      0x178 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
+ .debug_abbrev  0x00001978      0x201 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
+ .debug_abbrev  0x00001b79      0x11c kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
+ .debug_abbrev  0x00001c95      0x3b2 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+ .debug_abbrev  0x00002047       0xb6 kernel/CMakeFiles/oboskrnl.dir/error.c.o
+ .debug_abbrev  0x000020fd      0x185 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
+ .debug_abbrev  0x00002282      0x125 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
+ .debug_abbrev  0x000023a7      0x1ae kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
+ .debug_abbrev  0x00002555       0xbd kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
+ .debug_abbrev  0x00002612      0x174 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
+ .debug_abbrev  0x00002786      0x169 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_abbrev  0x000028ef      0x1a0 kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+ .debug_abbrev  0x00002a8f      0x198 kernel/CMakeFiles/oboskrnl.dir/elf.c.o
 
-.debug_line     0x00000000     0xbd6b
- .debug_line    0x00000000       0x6e kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
- .debug_line    0x0000006e      0x161 kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.o
- .debug_line    0x000001cf       0x65 kernel/CMakeFiles/oboskrnl.dir/paging.asm.o
- .debug_line    0x00000234       0x5f kernel/CMakeFiles/oboskrnl.dir/virtual8086.asm.o
- .debug_line    0x00000293       0x71 kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
- .debug_line    0x00000304      0x792 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
- .debug_line    0x00000a96      0x867 kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
- .debug_line    0x000012fd     0x18c8 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
- .debug_line    0x00002bc5      0xb00 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
- .debug_line    0x000036c5      0xcc9 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
- .debug_line    0x0000438e     0x1024 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
- .debug_line    0x000053b2      0xad0 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
- .debug_line    0x00005e82      0x9bb kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
- .debug_line    0x0000683d      0x1b7 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
- .debug_line    0x000069f4      0x33d kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
- .debug_line    0x00006d31      0xa87 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
- .debug_line    0x000077b8     0x112f kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
- .debug_line    0x000088e7      0x2ee kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
- .debug_line    0x00008bd5     0x18d9 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
- .debug_line    0x0000a4ae       0xe9 kernel/CMakeFiles/oboskrnl.dir/error.c.o
- .debug_line    0x0000a597      0x640 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
- .debug_line    0x0000abd7      0x159 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
- .debug_line    0x0000ad30      0x847 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
- .debug_line    0x0000b577      0x18b kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
- .debug_line    0x0000b702      0x229 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
- .debug_line    0x0000b92b      0x440 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+.debug_line     0x00000000     0xd164
+ .debug_line    0x00000000       0x6d kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
+ .debug_line    0x0000006d      0x17c kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.o
+ .debug_line    0x000001e9       0x65 kernel/CMakeFiles/oboskrnl.dir/paging.asm.o
+ .debug_line    0x0000024e       0x5f kernel/CMakeFiles/oboskrnl.dir/virtual8086.asm.o
+ .debug_line    0x000002ad       0x8c kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
+ .debug_line    0x00000339      0x823 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
+ .debug_line    0x00000b5c      0x867 kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
+ .debug_line    0x000013c3     0x1b13 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+ .debug_line    0x00002ed6      0xb00 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
+ .debug_line    0x000039d6      0xcc9 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
+ .debug_line    0x0000469f     0x1170 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
+ .debug_line    0x0000580f      0xad0 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
+ .debug_line    0x000062df      0x9c5 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
+ .debug_line    0x00006ca4      0x2e5 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
+ .debug_line    0x00006f89      0x33d kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
+ .debug_line    0x000072c6      0xa87 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
+ .debug_line    0x00007d4d     0x112f kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
+ .debug_line    0x00008e7c      0x2ee kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
+ .debug_line    0x0000916a     0x1b5b kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+ .debug_line    0x0000acc5       0xe9 kernel/CMakeFiles/oboskrnl.dir/error.c.o
+ .debug_line    0x0000adae      0x640 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
+ .debug_line    0x0000b3ee      0x14f kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
+ .debug_line    0x0000b53d      0x847 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
+ .debug_line    0x0000bd84      0x18b kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
+ .debug_line    0x0000bf0f      0x229 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
+ .debug_line    0x0000c138      0x58e kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_line    0x0000c6c6      0x36d kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+ .debug_line    0x0000ca33      0x731 kernel/CMakeFiles/oboskrnl.dir/elf.c.o
 
-.debug_frame    0x00000000     0x21d4
+.debug_frame    0x00000000     0x250c
  .debug_frame   0x00000000        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
  .debug_frame   0x00000000        0x0 kernel/CMakeFiles/oboskrnl.dir/gdtUpdate.asm.o
  .debug_frame   0x00000000        0x0 kernel/CMakeFiles/oboskrnl.dir/paging.asm.o
  .debug_frame   0x00000000        0x0 kernel/CMakeFiles/oboskrnl.dir/virtual8086.asm.o
  .debug_frame   0x00000000        0x0 kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
- .debug_frame   0x00000000      0x1f8 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
- .debug_frame   0x000001f8      0x148 kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
- .debug_frame   0x00000340      0x2a0 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
- .debug_frame   0x000005e0      0x270 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
- .debug_frame   0x00000850      0x1f8 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
- .debug_frame   0x00000a48      0x3f8 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
- .debug_frame   0x00000e40      0x224 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
- .debug_frame   0x00001064      0x2a8 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
- .debug_frame   0x0000130c       0x6c kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
- .debug_frame   0x00001378       0x98 kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
- .debug_frame   0x00001410       0xf8 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
- .debug_frame   0x00001508      0x160 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
- .debug_frame   0x00001668      0x184 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
- .debug_frame   0x000017ec      0x4a8 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
- .debug_frame   0x00001c94       0x6c kernel/CMakeFiles/oboskrnl.dir/error.c.o
- .debug_frame   0x00001d00       0xd4 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
- .debug_frame   0x00001dd4       0x40 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
- .debug_frame   0x00001e14      0x1a0 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
- .debug_frame   0x00001fb4       0x40 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
- .debug_frame   0x00001ff4       0xc4 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
- .debug_frame   0x000020b8      0x11c kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_frame   0x00000000      0x1d8 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
+ .debug_frame   0x000001d8      0x148 kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
+ .debug_frame   0x00000320      0x300 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+ .debug_frame   0x00000620      0x270 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
+ .debug_frame   0x00000890      0x1f8 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
+ .debug_frame   0x00000a88      0x47c kernel/CMakeFiles/oboskrnl.dir/klog.c.o
+ .debug_frame   0x00000f04      0x224 kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
+ .debug_frame   0x00001128      0x2a8 kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
+ .debug_frame   0x000013d0       0xc4 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
+ .debug_frame   0x00001494       0x98 kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
+ .debug_frame   0x0000152c       0xf8 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
+ .debug_frame   0x00001624      0x160 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
+ .debug_frame   0x00001784      0x184 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
+ .debug_frame   0x00001908      0x4b0 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+ .debug_frame   0x00001db8       0x6c kernel/CMakeFiles/oboskrnl.dir/error.c.o
+ .debug_frame   0x00001e24       0xd4 kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
+ .debug_frame   0x00001ef8       0x40 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
+ .debug_frame   0x00001f38      0x1a0 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
+ .debug_frame   0x000020d8       0x40 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
+ .debug_frame   0x00002118       0xc4 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
+ .debug_frame   0x000021dc      0x174 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_frame   0x00002350       0x98 kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+ .debug_frame   0x000023e8      0x124 kernel/CMakeFiles/oboskrnl.dir/elf.c.o
 
 .debug_loc      0x00000000        0x0
  .debug_loc     0x00000000        0x0 kernel/CMakeFiles/oboskrnl.dir/kernel_bootstrap-i686.asm.o
@@ -578,28 +614,30 @@ OUTPUT(/mnt/c/Users/omark/Documents/obos/out/oboskrnl elf32-i386)
  .debug_loc     0x00000000        0x0 kernel/CMakeFiles/oboskrnl.dir/virtual8086.asm.o
  .debug_loc     0x00000000        0x0 kernel/CMakeFiles/oboskrnl.dir/multitasking.asm.o
 
-.debug_str      0x00000000      0x28b
+.debug_str      0x00000000      0x315
  .debug_str     0x00000000       0x26 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
  .debug_str     0x00000026       0x2f kernel/CMakeFiles/oboskrnl.dir/acpi.c.o
- .debug_str     0x00000055       0x62 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
- .debug_str     0x000000b7        0x6 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
- .debug_str     0x000000bd        0x0 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
- .debug_str     0x000000bd       0x22 kernel/CMakeFiles/oboskrnl.dir/klog.c.o
- .debug_str     0x000000df       0x5b kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
- .debug_str     0x0000013a       0x2b kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
- .debug_str     0x00000165        0xc kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
- .debug_str     0x00000171        0xa kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
- .debug_str     0x0000017b        0x6 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
- .debug_str     0x00000181       0x26 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
- .debug_str     0x000001a7       0x11 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
- .debug_str     0x000001b8       0x6d kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
- .debug_str     0x00000225        0x0 kernel/CMakeFiles/oboskrnl.dir/error.c.o
- .debug_str     0x00000225       0x3f kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
- .debug_str     0x00000264        0x9 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
- .debug_str     0x0000026d       0x14 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
- .debug_str     0x00000281        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
- .debug_str     0x00000281        0xa kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
- .debug_str     0x0000028b        0x0 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_str     0x00000055       0xa1 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+ .debug_str     0x000000f6        0x6 kernel/CMakeFiles/oboskrnl.dir/terminal.c.o
+ .debug_str     0x000000fc        0x0 kernel/CMakeFiles/oboskrnl.dir/inline-asm.c.o
+ .debug_str     0x000000fc       0x3b kernel/CMakeFiles/oboskrnl.dir/klog.c.o
+ .debug_str     0x00000137       0x5b kernel/CMakeFiles/oboskrnl.dir/kserial.c.o
+ .debug_str     0x00000192       0x2b kernel/CMakeFiles/oboskrnl.dir/interrupts.c.o
+ .debug_str     0x000001bd       0x16 kernel/CMakeFiles/oboskrnl.dir/gdt.c.o
+ .debug_str     0x000001d3        0xa kernel/CMakeFiles/oboskrnl.dir/keyboard.c.o
+ .debug_str     0x000001dd        0x6 kernel/CMakeFiles/oboskrnl.dir/hashTable.c.o
+ .debug_str     0x000001e3       0x26 kernel/CMakeFiles/oboskrnl.dir/liballoc/liballoc_1_1.c.o
+ .debug_str     0x00000209       0x11 kernel/CMakeFiles/oboskrnl.dir/bitfields.c.o
+ .debug_str     0x0000021a       0x64 kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+ .debug_str     0x0000027e        0x0 kernel/CMakeFiles/oboskrnl.dir/error.c.o
+ .debug_str     0x0000027e       0x3f kernel/CMakeFiles/oboskrnl.dir/mutexes.c.o
+ .debug_str     0x000002bd        0x9 kernel/CMakeFiles/oboskrnl.dir/syscall.c.o
+ .debug_str     0x000002c6       0x14 kernel/CMakeFiles/oboskrnl.dir/list/list.c.o
+ .debug_str     0x000002da        0x0 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
+ .debug_str     0x000002da        0xa kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
+ .debug_str     0x000002e4       0x1b kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .debug_str     0x000002ff        0xc kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+ .debug_str     0x0000030b        0xa kernel/CMakeFiles/oboskrnl.dir/elf.c.o
 
 .comment        0x00000000       0x12
  .comment       0x00000000       0x12 kernel/CMakeFiles/oboskrnl.dir/kmain.c.o
@@ -624,10 +662,12 @@ OUTPUT(/mnt/c/Users/omark/Documents/obos/out/oboskrnl elf32-i386)
  .comment       0x00000012       0x13 kernel/CMakeFiles/oboskrnl.dir/list/list_node.c.o
  .comment       0x00000012       0x13 kernel/CMakeFiles/oboskrnl.dir/list/list_iterator.c.o
  .comment       0x00000012       0x13 kernel/CMakeFiles/oboskrnl.dir/initrd.c.o
+ .comment       0x00000012       0x13 kernel/CMakeFiles/oboskrnl.dir/driver_syscall.c.o
+ .comment       0x00000012       0x13 kernel/CMakeFiles/oboskrnl.dir/elf.c.o
 
 .debug_rnglists
-                0x00000000       0x51
+                0x00000000       0x64
  .debug_rnglists
-                0x00000000       0x32 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
+                0x00000000       0x45 kernel/CMakeFiles/oboskrnl.dir/paging.c.o
  .debug_rnglists
-                0x00000032       0x1f kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o
+                0x00000045       0x1f kernel/CMakeFiles/oboskrnl.dir/multitasking.c.o

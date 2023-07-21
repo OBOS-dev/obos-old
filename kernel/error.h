@@ -50,6 +50,10 @@
 ///	The file was not found.
 /// </summary>
 #define OBOS_ERROR_FILE_NOT_FOUND ((DWORD)8)
+/// <summary>
+///	The address is in use.
+/// </summary>
+#define OBOS_ERROR_ADDRESS_NOT_AVAILABLE ((DWORD)9)
 
 /// <summary>
 /// Gets the last error.

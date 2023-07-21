@@ -24,5 +24,12 @@ VOID InitializeInitRD(PVOID startAddress);
 /// <param name="offset">The file offset.</param>
 /// <returns>TRUE on success, FALSE on failure. Use GetLastError for the error code.</returns>
 BOOL ReadInitRDFile(CSTRING filePath, SIZE_T bytesToRead, SIZE_T* bytesRead, STRING output, SIZE_T offset);
+/// <summary>
+/// Gets the filesize of the file on the initial ramdisk.
+/// </summary>
+/// <param name="filePath">The file path.</param>
+/// <param name="filesize">The file size.</param>
+/// <returns>TRUE on success, FALSE on failure. Use GetLastError for the error code.</returns>
+BOOL GetInitRDFileSize(CSTRING filePath, SIZE_T* filesize);
 
 #endif

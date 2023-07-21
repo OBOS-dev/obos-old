@@ -13,7 +13,7 @@
 /// Syscall table:
 ///	SYSCALL_TERMINAL_OUTPUT - 0x00: void TerminalOutput(CSTRING data, SIZE_T size);
 /// SYSCALL_YIELD			- 0x01: void YieldExecution();
-/// SYSCALL_EXIT_THREAD		- 0x02: void ExiTThread(DWORD exitCode);
+/// SYSCALL_EXIT_THREAD		- 0x02: void ExitThread(DWORD exitCode);
 /// </summary>
 enum
 {

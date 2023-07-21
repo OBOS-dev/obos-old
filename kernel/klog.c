@@ -243,7 +243,8 @@ char* ftoa(double f, char* buf, int precision)
 }
 
 // Simplified version of vprintf
-static void _vprintf(CSTRING format, va_list list, void(*character_print_callback)(char ch), void(*string_print_callback)(CSTRING string))
+static void _vprintf(CSTRING format, va_list list, void(*character_print_callback)(char ch, PVOID userData), void(*string_print_callback)(CSTRING string, PVOID userData),
+    PVOID userDataCallback1, PVOID userDataCallback2)
 {
     BOOL wasPercent = FALSE;
     for (int i = 0; format[i]; i++)
@@ -267,7 +268,7 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
                 char buf[13] = { 0 };
                 int value = va_arg(list, int);
                 itoa(value, buf, 10);
-                string_print_callback(buf);
+                string_print_callback(buf, userDataCallback2);
                 break;
             }
             // An unsigned 32-bit integer.
@@ -276,7 +277,7 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
                 char buf[12] = { 0 };
                 unsigned int value = va_arg(list, unsigned int);
                 itoa_unsigned(value, buf, 10);
-                string_print_callback(buf);
+                string_print_callback(buf, userDataCallback2);
                 break;
             }
             // An unsigned 32-bit integer (but printed in octal).
@@ -285,7 +286,7 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
                 char buf[10] = { 0 };
                 unsigned int value = va_arg(list, unsigned int);
                 itoa_unsigned(value, buf, 8);
-                string_print_callback(buf);
+                string_print_callback(buf, userDataCallback2);
             }
             // An unsigned 32-bit integer (but printed in lowercase hex).
             case 'x':
@@ -293,7 +294,7 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
                 char buf[9] = { 0 };
                 unsigned int value = va_arg(list, unsigned int);
                 itoa_unsigned(value, buf, 16);
-                string_print_callback(buf);
+                string_print_callback(buf, userDataCallback2);
                 break;
             }
             // An unsigned 32-bit integer (but printed in uppercase hex).
@@ -306,7 +307,7 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
                 for (int i = 0; buf[i]; i++)
                     if (buf[i] >= 'a' && buf[i] <= 'z')
                         buf[i] = (buf[i] - 'a') + 'A';
-                string_print_callback(buf);
+                string_print_callback(buf, userDataCallback2);
                 break;
             }
             // A floating-point number.
@@ -315,7 +316,7 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
                 char buf[65] = { 0 };
                 double val = va_arg(list, double);
                 ftoa(val, buf, MAX_PRECISION);
-                string_print_callback(buf);
+                string_print_callback(buf, userDataCallback2);
                 break;
             }
             // A pointer.
@@ -323,9 +324,9 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
             {
                 char buf[9] = { 0 };
                 UINTPTR_T value = va_arg(list, UINTPTR_T);
-                if (value == 0)
+                if (!value)
                 {
-                    string_print_callback("(nil)");
+                    string_print_callback("(nil)", userDataCallback2);
                     break;
                 }
                 itoa_unsigned(value, buf, 16);
@@ -333,28 +334,28 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
                 for (int i = 0; buf[i]; i++)
                     if (buf[i] >= 'a' && buf[i] <= 'z')
                         buf[i] = (buf[i] - 'a') + 'A';
-                string_print_callback("0x");
-                string_print_callback(buf);
+                string_print_callback("0x", userDataCallback2);
+                string_print_callback(buf, userDataCallback2);
                 break;
             }
             // A character.
             case 'c':
             {
                 char ch = va_arg(list, int);
-                character_print_callback(ch);
+                character_print_callback(ch, userDataCallback1);
                 break;
             }
             // A string of characters.
             case 's':
             {
                 char* str = va_arg(list, char*);
-                string_print_callback(str);
+                string_print_callback(str, userDataCallback2);
                 break;
             }
             // A percentage sign.
             case '%':
             {
-                character_print_callback('%');
+                character_print_callback('%', userDataCallback1);
                 break;
             }
             default:
@@ -362,7 +363,7 @@ static void _vprintf(CSTRING format, va_list list, void(*character_print_callbac
             }
             continue;
         }
-        character_print_callback(ch);
+        character_print_callback(ch, userDataCallback1);
     }
 }
 
@@ -375,36 +376,50 @@ void resetOnKernelPanic()
     onKernelPanic = defaultKernelPanic;
 }
 
-static void callback1_terminal(char ch)
+static void callback1_terminal(char ch, PVOID __unused)
 {
     TerminalOutputCharacter(ch);
 }
-static void callback2_terminal(CSTRING string)
+static void callback2_terminal(CSTRING string, PVOID __unused)
 {
     TerminalOutputString(string);
 }
-static void callback1_klog(char ch)
+static void callback1_klog(char ch, PVOID __unused)
 {
     TerminalOutputCharacter(ch);
     WriteSerialPort(COM1, &ch, 1);
     WriteSerialPort(COM2, &ch, 1);
 }
-static void callback2_klog(CSTRING string)
+static void callback2_klog(CSTRING string, PVOID __unused)
 {
     for (int i = 0; string[i]; i++)
-        callback1_klog(string[i]);
+        callback1_klog(string[i], NULLPTR);
+}
+static void callback1_string(char ch, PVOID userData)
+{
+    UINTPTR_T* data = (UINTPTR_T*)userData;
+    STRING out = (STRING)data[0];
+    SIZE_T* size = (SIZE_T*)data[1];
+    if (out)
+        out[*size] = ch;
+    (*size)++;
+}
+static void callback2_string(CSTRING string, PVOID userData)
+{
+    for (int i = 0; string[i]; i++)
+        callback1_klog(string[i], userData);
 }
 
 static void kpanic_printf(CSTRING format, ...)
 {
     va_list list = NULLPTR; va_start(list, format);
-    _vprintf(format, list, callback1_klog, callback2_klog);
+    _vprintf(format, list, callback1_klog, callback2_klog, NULLPTR, NULLPTR);
     va_end(list);
 }
 
 void printStackTrace()
 {
-    callback2_klog("Stack trace: \r\n");
+    callback2_klog("Stack trace: \r\n", NULLPTR);
     struct stackframe {
         struct stackframe* ebp;
         UINTPTR_T eip;
@@ -427,8 +442,8 @@ void kpanic(CSTRING message, SIZE_T size)
         UINT8_T oldColor = TerminalGetColor();
         const char prefix[] = "Kernel panic! Message: \r\n";
         TerminalSetColor(TERMINALCOLOR_COLOR_RED | TERMINALCOLOR_COLOR_BLACK << 4);
-        callback2_klog(prefix);
-        callback2_klog(message);
+        callback2_klog(prefix, NULLPTR);
+        callback2_klog(message, NULLPTR);
         printStackTrace();
         TerminalSetColor(oldColor);
     }
@@ -444,12 +459,24 @@ void  attribute(format(printf, 1, 2)) printf(CSTRING format, ...)
 {
     va_list list = NULLPTR;
     va_start(list, format);
-    _vprintf(format, list, callback1_terminal, callback2_terminal);
+    _vprintf(format, list, callback1_terminal, callback2_terminal, NULLPTR, NULLPTR);
     va_end(list);
+}
+int attribute(format(printf, 2, 3)) sprintf(STRING output, CSTRING format, ...)
+{
+    SIZE_T size = 0;
+    UINTPTR_T userData[2] = {
+        (UINTPTR_T)output,
+        (UINTPTR_T)&size
+    };
+    va_list list; va_start(list, format);
+    _vprintf(format, list, callback1_string, callback2_string, (PVOID)userData, (PVOID)userData);
+    va_end(list);
+    return size;
 }
 void vprintf(CSTRING format, va_list list)
 {
-    _vprintf(format, list, callback1_terminal, callback2_terminal);
+    _vprintf(format, list, callback1_terminal, callback2_terminal, NULLPTR, NULLPTR);
 }
 
 void attribute(format(printf, 1, 2)) klog_info(CSTRING format, ...)
@@ -458,11 +485,11 @@ void attribute(format(printf, 1, 2)) klog_info(CSTRING format, ...)
     const char prefix[] = "[KERNEL_INFO] ";
     TerminalSetColor(TERMINALCOLOR_COLOR_GREEN | TERMINALCOLOR_COLOR_BLACK << 4);
     
-    callback2_klog(prefix);
+    callback2_klog(prefix, NULLPTR);
 
     va_list list = NULLPTR;
     va_start(list, format);
-    _vprintf(format, list, callback1_klog, callback2_klog);
+    _vprintf(format, list, callback1_klog, callback2_klog, NULLPTR, NULLPTR);
     va_end(list);
 
     TerminalSetColor(oldColor);
@@ -473,11 +500,11 @@ void attribute(format(printf, 1, 2)) klog_warning(CSTRING format, ...)
     const char prefix[] = "[KERNEL_WARNING] ";
     TerminalSetColor(TERMINALCOLOR_COLOR_YELLOW | TERMINALCOLOR_COLOR_BLACK << 4);
     
-    callback2_klog(prefix);
+    callback2_klog(prefix, NULLPTR);
 
     va_list list = NULLPTR;
     va_start(list, format);
-    _vprintf(format, list, callback1_klog, callback2_klog);
+    _vprintf(format, list, callback1_klog, callback2_klog, NULLPTR, NULLPTR);
     va_end(list);
 
     TerminalSetColor(oldColor);
@@ -488,11 +515,11 @@ void  attribute(format(printf, 1, 2)) klog_error(CSTRING format, ...)
     const char prefix[] = "[KERNEL_ERROR] ";
     TerminalSetColor(TERMINALCOLOR_COLOR_LIGHT_RED | TERMINALCOLOR_COLOR_BLACK << 4);
     
-    callback2_klog(prefix);
+    callback2_klog(prefix, NULLPTR);
 
     va_list list = NULLPTR;
     va_start(list, format);
-    _vprintf(format, list, callback1_klog, callback2_klog);
+    _vprintf(format, list, callback1_klog, callback2_klog, NULLPTR, NULLPTR);
     va_end(list);
 
     TerminalSetColor(oldColor);

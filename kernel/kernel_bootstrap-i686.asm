@@ -64,8 +64,8 @@ _start:
     ret
 global idleTask
 idleTask:
-._loop:  pause
-         jmp ._loop
+; Jumps to the same address. (JMP rel8)
+    db 0xEB, 0xFE
 ; test_program:
 ; ;   Print the message.
 ;     mov eax, [esp+0x4]
@@ -77,5 +77,5 @@ idleTask:
 ;     mov eax, 2
 ;     mov ebx, exit_code
 ;     int 0x40
-; ;   We're returning somewhere mysterious...
+; ;   Undefined-Behaviour
 ;     ret

@@ -7,26 +7,32 @@
 segment .text
 
 global gdtUpdate
+global tssUpdate
 global idtUpdate
 
 extern defaultInterruptHandler
 extern syscall_handler
+extern driver_syscall_handler
 
 gdtr DW 0
      DD 0
  
 gdtUpdate:
-    mov eax, [esp+4]  ; Get the pointer to the GDT, passed as a parameter.
-    lgdt [eax]        ; Load the new GDT pointer
+    mov eax, [esp+4]
+    lgdt [eax]
 
-    mov ax, 0x10      ; 0x10 is the offset in the GDT to our data segment
-    mov ds, ax        ; Load all data segment selectors
+    mov ax, 0x10
+    mov ds, ax
     mov es, ax
     mov fs, ax
     mov gs, ax
     mov ss, ax
-    jmp 0x08:.flush   ; 0x08 is the offset to our code segment: Far jump!
+    jmp 0x08:.flush
 .flush:
+    ret
+tssUpdate:
+    mov ax, 0x2B
+    ltr ax
     ret
 isr_common_stub:
    pusha                    ; Pushes edi,esi,ebp,esp,ebx,edx,ecx,eax
@@ -122,13 +128,16 @@ ISR_NOERRCODE 48
 segment .data
     temp: dd 0
 segment .text
+extern EnterKernelSection
+extern LeaveKernelSection
 ; Syscalls
 ; The syscall number is in eax, and a pointer to a continuous block of memory with the arguments is in ebx, and the return value is stored in eax.
 global isr64
 isr64:
-    cli
-
     mov [temp], eax
+
+;   Enter a kernel section so the syscall doesn't get interrupted.
+    call EnterKernelSection
     
     mov ax, ds
     push eax
@@ -157,10 +166,47 @@ isr64:
     mov fs, ax
     mov gs, ax
 
+    call LeaveKernelSection
+
+    mov eax, [temp]
+    iret
+; The syscall number is in eax, a pointer to a continuous block of memory with the arguments is in ebx, ecx having the driver id, and the return value is stored in eax.
+global isr80
+isr80:
+    mov [temp], eax
+
+    call EnterKernelSection
+    
+    mov ax, ds
+    push eax
+
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    
     mov eax, [temp]
 
-    sti
+    push ebx
+    push ecx
+    push eax
+    
+    call driver_syscall_handler
+    
+    mov [temp], eax
+    ;  Use lea instead of add, as it's a bit faster.
+    lea esp, [esp+12]
 
+    pop eax
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+
+    call LeaveKernelSection
+
+    mov eax, [temp]
     iret
 ; TODO: Make a linux syscall layer so we can support linux natively.
 ; ISR_NOERRCODE 128

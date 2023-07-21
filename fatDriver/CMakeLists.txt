@@ -17,9 +17,14 @@ add_executable(obos_fat ${fat_driver_files})
 target_compile_options(obos_fat PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror>
                                 PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-error=misleading-indentation> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-builtin-declaration-mismatch> 
                                 PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wno-error=unknown-pragmas>)
-target_link_options(obos_fat PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}" PUBLIC "-nostdlib" PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/oboskrnl.map" PUBLIC "-ffreestanding")
+target_link_options(obos_fat 
+    PRIVATE "-T" PUBLIC "${CMAKE_SOURCE_DIR}/fatDriver/linker.ld" 
+    PRIVATE "-Xlinker" PRIVATE "-e" PRIVATE "OBOS_DriverEntry" 
+    PRIVATE "-ffreestanding")
 set_target_properties(obos_fat PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
-target_include_directories(obos_fat PUBLIC "${CMAKE_SOURCE_DIR}/kernel")
+target_include_directories(obos_fat PUBLIC "${CMAKE_SOURCE_DIR}/kernel" PUBLIC "${CMAKE_SOURCE_DIR}")
+target_link_libraries(obos_fat PUBLIC obos_driverapi)
+# set_target_properties(obos_fat PROPERTIES LINK_DEPENDS "${CMAKE_SOURCE_DIR}/fatDriver/linker.ld")
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     message("Debug configuration.")

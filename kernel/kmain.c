@@ -17,6 +17,7 @@
 #include "bitfields.h"
 #include "multitasking.h"
 #include "initrd.h"
+#include "elf.h"
 
 #include "multiboot.h"
 
@@ -138,6 +139,8 @@ void pageFaultHandler(int interrupt, int ec, isr_registers registers)
         action = "execute";
     else if (getBitFromBitfield(ec, 1) && !getBitFromBitfield(ec, 4))
         action = "write";
+    else if (!getBitFromBitfield(ec, 1) && !getBitFromBitfield(ec, 4) && address == (PVOID)registers.eip)
+        action = "read (possibly during an instruction fetch)";
     else if (!getBitFromBitfield(ec, 1) && !getBitFromBitfield(ec, 4))
         action = "read";
     if (getBitFromBitfield(ec, 2))
@@ -173,26 +176,49 @@ extern UINT32_T __attribute__((aligned(4096))) g_pageTable[1024][1024];
 
 multiboot_info_t* g_multibootInfo = (multiboot_info_t*)0;
 
-DWORD testThread(PVOID userData)
-{
-    UINTPTR_T parameters[2];
-    SIZE_T size = 0;
-    for (; ((PCHAR)userData)[size]; size++);
-    parameters[0] = (UINTPTR_T)userData;
-    parameters[1] = size;
-    asm volatile("mov %0, %%ebx\r\n"
-                 "mov $0, %%eax\r\n"
-                 "int $0x40"
-                 :
-                 : "r"(parameters));
-    return GetTid();
-}
-
 void kmain_thread()
 {
     klog_info("The main thread's id is %d.\r\n", GetTid());
 
     InitializeInitRD((PVOID)(((multiboot_module_t*)g_multibootInfo->mods_addr)->mod_start));
+
+    SIZE_T size = 0;
+    kassert(GetInitRDFileSize("/drivers/obos_fat", &size) == TRUE, KSTR_LITERAL("File \"/initrd/drivers/obos_fat\" doesn't exist."));
+
+    PBYTE data = kcalloc(size, sizeof(char));
+    ReadInitRDFile("/drivers/obos_fat", size, &size, (STRING)data, 0);
+
+    DWORD(*driverEntry)(PVOID multibootInfo) = (DWORD(*)(PVOID))LoadElfFile(data, size);
+
+    DWORD tid = 0;
+
+    HANDLE driverThread = MakeThread(&tid, PRIORITY_NORMAL, driverEntry, g_multibootInfo, TRUE);
+    //kMakeThreadKernelMode(driverThread);
+    ResumeThread(driverThread);
+    WaitForThreadsVariadic(1, driverThread);
+    DWORD driverExitCodes = 0;
+    GetThreadExitCode(driverThread, &driverExitCodes);
+    switch (driverExitCodes)
+    {
+    case 1:
+        klog_warning("The %s driver isn't needed.\r\n", "\"fat\"");
+        break;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnonnull"
+#pragma GCC diagnostic ignored "-Wformat-overflow"
+    case 2:
+    {
+        CSTRING format = "A driver-specific error occurred in the %s driver's entry point. Driver error: %d.\r\n";
+        int size = sprintf(NULLPTR, format, "\"fat\"", /*GetSymbolFromFile("g_driverErrorCode")*/0);
+        STRING string = kcalloc(size + 1, sizeof(CHAR));
+        sprintf(string, format, /*GetSymbolFromFile("g_driverErrorCode")*/0);
+        kpanic(string, size);
+        break;
+    }
+#pragma GCC diagnostic pop
+    default:
+        break;
+    }
 
     // Shutdowns the computer.
     onKernelPanic();
@@ -260,9 +286,5 @@ void kmain(multiboot_info_t* mbd, UINT32_T magic)
     kinitmultitasking();
     // control flow continues in kmain_thread.
     // If the control flow doesn't continue in kmain_thread:
-    while (1)
-    {
-        hlt();
-        kmain_thread();
-    }
+    kmain_thread();
 }

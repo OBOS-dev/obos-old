@@ -24,6 +24,7 @@ void kpanic(CSTRING message, SIZE_T size);
 void kassert(BOOL expression, CSTRING message, SIZE_T size);
 
 void printf(CSTRING format, ...) attribute(format(printf, 1, 2));
+int sprintf(STRING output, CSTRING format, ...) attribute(format(printf, 2, 3));
 void vprintf(CSTRING format, va_list list);
 // For the format string, do not use it like printf. Look in the code to see how to make the format string.
 void klog_info(CSTRING format, ...) attribute(format(printf, 1, 2));

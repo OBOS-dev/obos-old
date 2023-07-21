@@ -54,7 +54,7 @@ INT kKeyboardInit()
 	if (keyboardFlags.initialized)
 		return -1;
 	disablePICInterrupt(1);
-	s_keyboardBufferLocation = s_keyboardBuffer = kalloc_pages(2);
+	s_keyboardBufferLocation = s_keyboardBuffer = kalloc_pages(2, FALSE, FALSE);
 	int interrupt = 1;
 	setPICInterruptHandlers(&interrupt, 1, keyboardIrqHandler);
 

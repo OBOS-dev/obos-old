@@ -22,6 +22,7 @@ SECTIONS
 	{
 		*(.rodata)
 	}
+	__erodata = .;
  
 	.data BLOCK(4K) : ALIGN(4K)
 	{

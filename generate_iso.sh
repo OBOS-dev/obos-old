@@ -8,6 +8,7 @@ mkdir boot
 cd boot
 mkdir grub
 cd ../../
+cp out/obos_fat archive_dir/drivers/obos_fat
 cd archive_dir
 tar -cf ../initrd.tar *
 cd ..

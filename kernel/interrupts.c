@@ -130,7 +130,7 @@ static void _setIdtEntry(UINT8_T index, UINT32_T base, UINT16_T sel, UINT8_T fla
 
 	idtEntries[index].sel = sel;
 	idtEntries[index].always0 = 0;
-	idtEntries[index].flags = flags  | 0x60 ;
+	idtEntries[index].flags = flags | 0x60;
 }
 
 #define _setInterruptHandler(interrupt) extern void isr ##interrupt(); \
@@ -196,6 +196,7 @@ void initIDT()
 	_setInterruptHandler(47);
 	_setInterruptHandler(48);
 	_setInterruptHandler(64);
+	_setInterruptHandler(80);
 #pragma endregion
 
 	idtUpdate((UINT32_T)&idt_ptr);

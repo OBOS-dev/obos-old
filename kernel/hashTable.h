@@ -30,8 +30,8 @@
 	struct key ___temp_key;\
 	___temp_key.key = kcalloc(1, key_size);\
 	*(key_type*)___temp_key.key = _key;\
-	hash_table_contains(_table, ___temp_key, out);\
-	free_function(___temp_key.key);\
+	hash_table_contains(_table, ___temp_key, &out);\
+	kfree(___temp_key.key);\
 }
 
 typedef struct __hash_table hash_table;

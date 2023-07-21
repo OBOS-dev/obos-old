@@ -91,6 +91,18 @@ static int __Impl_Readfile(const char* filename, char** out) {
 	}
 	return -1;
 }
+static int __Impl_USTAR_Filesize(const char* filename) {
+	unsigned char* ptr = s_initRDPointer;
+
+	while (memcmp(ptr + 257, "ustar", 5))
+	{
+		int filesize = oct2bin(ptr + 0x7c, 11);
+		if (memcmp((PVOID)ptr, (PVOID)filename, strlen(filename, 100) + 1))
+			return filesize;
+		ptr += (((filesize + 511) / 512) + 1) * 512;
+	}
+	return -1;
+}
 
 
 VOID InitializeInitRD(PVOID startAddress)
@@ -123,5 +135,27 @@ BOOL ReadInitRDFile(CSTRING filePath, SIZE_T bytesToRead, SIZE_T* bytesRead, STR
 			output[i - offset] = buf[i];
 		*bytesRead = i;
 	}
+	return TRUE;
+}
+BOOL GetInitRDFileSize(CSTRING filePath, SIZE_T* filesize)
+{
+	if (filePath[0] == '/')
+		filePath++;
+	int ret = __Impl_USTAR_Filesize(filePath);
+	if (ret == -1)
+	{
+		if (!s_initRDPointer)
+		{
+			SetLastError(OBOS_ERROR_INVALID_HANDLE);
+			return FALSE;
+		}
+		else
+		{
+			SetLastError(OBOS_ERROR_FILE_NOT_FOUND);
+			return FALSE;
+		}
+	}
+	if (filesize)
+		*filesize = ret;
 	return TRUE;
 }

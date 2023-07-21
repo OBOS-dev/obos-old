@@ -145,7 +145,7 @@ void Sleep(DWORD milliseconds);
 /// Does not release any resources allocated by the thread.
 /// </summary>
 /// <param name="exitCode">The exit code.</param>
-void ExitThread(DWORD exitCode);
+void attribute(noreturn) ExitThread(DWORD exitCode);
 /// <summary>
 /// Waits for the threads to exit passed to the function. This a blocking function.
 /// </summary>
@@ -175,5 +175,10 @@ DWORD kclearblockstate(HANDLE hThread);
 /// </summary>
 /// <param name="hThread"></param>
 DWORD ksetblockcallback(HANDLE hThread, BOOL(*callback)(HANDLE hThread, PVOID userData), PVOID userData);
+/// <summary>
+/// For internal use for the kernel. Cannot be accessed outside the kernel (I hope, or bad stuff can happen).
+/// </summary>
+/// <param name="hThread"></param>
+DWORD kMakeThreadKernelMode(HANDLE hThread);
 
 #endif

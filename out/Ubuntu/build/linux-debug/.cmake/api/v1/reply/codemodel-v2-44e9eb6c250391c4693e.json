@@ -1,0 +1,160 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "kernel",
+					"jsonFile" : "directory-kernel-Debug-63291c6cc366f65a85d4.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "kernel",
+					"targetIndexes" : 
+					[
+						3,
+						4
+					]
+				},
+				{
+					"build" : "fatDriver",
+					"jsonFile" : "directory-fatDriver-Debug-a5a06dbf3801d0d30084.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "fatDriver",
+					"targetIndexes" : 
+					[
+						2
+					]
+				},
+				{
+					"build" : "DriverAPI",
+					"jsonFile" : "directory-DriverAPI-Debug-d2cd5659d01a132532b0.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "DriverAPI",
+					"targetIndexes" : 
+					[
+						1
+					]
+				},
+				{
+					"build" : "launch-qemu",
+					"jsonFile" : "directory-launch-qemu-Debug-d5fff1a020a1aec47472.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "launch-qemu",
+					"targetIndexes" : 
+					[
+						0
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					],
+					"name" : "obos",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 4,
+					"id" : "launch-qemu::@427cac9ad371ec52446e",
+					"jsonFile" : "target-launch-qemu-Debug-b93440d2976023a59491.json",
+					"name" : "launch-qemu",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "obos_driverapi::@dc413635e902c1c98842",
+					"jsonFile" : "target-obos_driverapi-Debug-791a2b1890ad0b5c0460.json",
+					"name" : "obos_driverapi",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "obos_fat::@1b330cd3fe5cc3f02410",
+					"jsonFile" : "target-obos_fat-Debug-283e8cbd0d0cadb8f1d4.json",
+					"name" : "obos_fat",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "oboskrnl::@d34574df80ad0dbead4c",
+					"jsonFile" : "target-oboskrnl-Debug-797eef0b5040741f9ef7.json",
+					"name" : "oboskrnl",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "oboskrnl_analyzer::@d34574df80ad0dbead4c",
+					"jsonFile" : "target-oboskrnl_analyzer-Debug-3a172cec54db172b24e2.json",
+					"name" : "oboskrnl_analyzer",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/omar/.vs/obos/out/build/linux-debug",
+		"source" : "/home/omar/.vs/obos"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 3
+	}
+}

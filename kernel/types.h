@@ -30,7 +30,7 @@ typedef short				INT16_T;
 typedef int					INT32_T;
 typedef long long			INT64_T;
 typedef	UINT32_T			SIZE_T;
-typedef UINT8_T				BYTE;
+typedef UINT8_T				BYTE, *PBYTE;
 typedef UINT16_T			WORD;
 typedef UINT32_T			DWORD;
 typedef UINT64_T			QWORD;

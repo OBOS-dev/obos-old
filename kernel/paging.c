@@ -13,6 +13,7 @@
 #include "interrupts.h"
 #include "error.h"
 #include "mutexes.h"
+#include "multitasking.h"
 
 #include "multiboot.h"
 
@@ -76,7 +77,7 @@ static void updatePageTable()
             if (getBitFromBitfield(g_usedPages[i], j))
             {
                 int pageTableIndex = address / 4194304;
-                int pageIndex = (address - (address / 4194304 * 4194304)) / 4096;
+                int pageIndex = (address >> 12) % 1024;
                 UINT32_T* pageTableEntry = &g_pageTable[pageTableIndex][pageIndex];
                 address = (pageTableIndex * 1024 + pageIndex) * 4096;
                 BOOL isMemoryReserved = FALSE;
@@ -90,7 +91,8 @@ static void updatePageTable()
             else
             {
                 int pageTableIndex = address / 4194304;
-                int pageIndex = (address - (address / 4194304 * 4194304)) / 4096;
+                // address / 4096 % 1024
+                int pageIndex = (address >> 12) % 1024;
                 UINT32_T* pageTableEntry = &g_pageTable[pageTableIndex][pageIndex];
                 *pageTableEntry = 2;
             }
@@ -102,13 +104,23 @@ static void updatePageDirectory()
     for (int i = 0; i < 1024; i++)
     {
         BOOL hasAllocatedPages = FALSE;
+        BOOL hasUserModePages = FALSE;
         for (int j = 0; j < 1024 && !hasAllocatedPages; j++)
-            if (g_pageTable[i][j] != 3)
-                hasAllocatedPages = TRUE;
+        {
+            // Is the page present?
+            if (getBitFromBitfield(g_pageTable[i][j], 0))
+                hasAllocatedPages = TRUE; // If so, set 'hasAllocatedPages' to true.
+            // Is the page supervisor?
+            if (getBitFromBitfield(g_pageTable[i][j], 2))
+                hasUserModePages = TRUE; // If not, set 'hasUserModePages' to true
+            // For performance reasons, exit if both 'hasAllocatedPages' and 'hasUserModePages' are true, exit the loop.
+            if (hasUserModePages && hasAllocatedPages)
+                break;
+        }
         if (hasAllocatedPages)
-            g_pageDirectory[i] = ((UINTPTR_T)g_pageTable[i]) | 0x00000003;
+            g_pageDirectory[i] = ((UINTPTR_T)g_pageTable[i]) | 3 | (hasUserModePages << 2);
         else
-            g_pageDirectory[i] = 0x00000002;
+            g_pageDirectory[i] = 2;
     }
     enablePICInterrupt(0);
 }
@@ -229,13 +241,15 @@ extern void enablePaging();
 
 PVOID memset(PVOID block, BYTE value, SIZE_T size)
 {
+    if (!block)
+        return NULL;
     PCHAR _block = block;
     for (int i = 0; i < size; _block[i++] = value);
     return block;
 }
 
-// The end of .text
-extern char __etext;
+// The end of .rodata
+extern char __erodata;
 
 void kInitializePaging()
 {
@@ -255,11 +269,10 @@ void kInitializePaging()
     for (i = 0; i < 1024; i++)
     {
         // Supervisor level, read-only, not present.
-        g_pageDirectory[i] = 0x00000002;
+        g_pageDirectory[i] = ((UINTPTR_T)&g_pageTable[i]) | 3;
         
         BOOL isAvailableOne = FALSE;
         BOOL isAvailableTwo = FALSE;
-        BOOL isAvailableThree = FALSE;
 
         for (int i2 = 0; i2 < g_kMemoryTableSize; i2++)
         {
@@ -267,22 +280,19 @@ void kInitializePaging()
                 isAvailableOne = TRUE;
             if (inRange((UINTPTR_T)g_kMemoryTable[i2].start, (UINTPTR_T)g_kMemoryTable[i2].end, ((1 * 1024 + i) * 4096)))
                 isAvailableTwo = TRUE;
-            if (inRange((UINTPTR_T)g_kMemoryTable[i2].start, (UINTPTR_T)g_kMemoryTable[i2].end, ((2 * 1024 + i) * 4096)))
-                isAvailableThree = TRUE;
-            if (isAvailableOne && isAvailableTwo && isAvailableThree)
+            if (isAvailableOne && isAvailableTwo)
                 break;
         }
 
         // TODO: And an else condition that finds a 4096-byte block of memory at a physical address that isn't being used.
 
-        if(isAvailableOne)
+        if(isAvailableOne && ((0 * 1024 + i) * 4096) > 0x5000)
         {
             UINTPTR_T address = ((0 * 1024 + i) * 4096);
-            if(inRange((UINTPTR_T)0x100000, (UINTPTR_T)&__etext, address))
+            if(inRange((UINTPTR_T)0x100000, (UINTPTR_T)&__erodata, address))
                 g_pageTable[0][i] = address | 1;
             else
                 g_pageTable[0][i] = address | 3;
-            setBitInBitfield(&g_usedPages[i / 32], i % 32);
         }
         else
             setBitInBitfield(&g_usedPages[i / 32], i % 32); // If the page is reserved, mark it as allocated so it doesn't get allocated.
@@ -296,22 +306,10 @@ void kInitializePaging()
         if(isAvailableTwo)
         {
             UINTPTR_T address = ((1 * 1024 + i) * 4096);
-            if (inRange((UINTPTR_T)0x100000, (UINTPTR_T)&__etext, address))
+            if (inRange((UINTPTR_T)0x100000, (UINTPTR_T)&__erodata, address))
                 g_pageTable[1][i] = address | 1;
             else
                 g_pageTable[1][i] = address | 3;
-            setBitInBitfield(&g_usedPages[i / 32 + 32], i % 32);
-        }
-        else
-            setBitInBitfield(&g_usedPages[i / 32], i % 32); // If the page is reserved, mark it as allocated so it doesn't get allocated.
-        if(isAvailableThree)
-        {
-            UINTPTR_T address = ((2 * 1024 + i) * 4096);
-            if (inRange((UINTPTR_T)0x100000, (UINTPTR_T)&__etext, address))
-                g_pageTable[2][i] = address | 1;
-            else
-                g_pageTable[2][i] = address | 3;
-            setBitInBitfield(&g_usedPages[i / 32 + 64], i % 32);
         }
         else
             setBitInBitfield(&g_usedPages[i / 32], i % 32); // If the page is reserved, mark it as allocated so it doesn't get allocated.
@@ -324,14 +322,24 @@ void kInitializePaging()
     setBitInBitfield(&g_usedPages[5], 25);
 
     // Supervisor level, read/write, present.
-    g_pageDirectory[0] = ((UINTPTR_T)g_pageTable[0]) | 3;
+    /*g_pageDirectory[0] = ((UINTPTR_T)g_pageTable[0]) | 3;
     g_pageDirectory[1] = ((UINTPTR_T)g_pageTable[1]) | 3;
-    g_pageDirectory[2] = ((UINTPTR_T)g_pageTable[2]) | 3;
-
-    s_liballocMutex = MakeMutex();
+    g_pageDirectory[2] = ((UINTPTR_T)g_pageTable[2]) | 3;*/
 
     loadPageDirectory(&g_pageDirectory[0]);
     enablePaging();
+
+    s_liballocMutex = MakeMutex();
+
+    extern void OBOS_ThreadEntryPoint();
+    // Allocate the thread entry point at 0x800000.
+    kalloc_pagesAt((PVOID)0x800000, 1, TRUE, TRUE);
+    PBYTE threadEntryPoint = (PBYTE)0x800000;
+    PBYTE realThreadEntryPoint = (PBYTE)OBOS_ThreadEntryPoint;
+    // c3 is ret instruction.
+    for (i = 0; realThreadEntryPoint[i] != 0xc3; i++)
+        threadEntryPoint[i] = realThreadEntryPoint[i];
+    threadEntryPoint[i] = 0xc3;
 }
 
 /** This function is supposed to lock the memory data structures. It
@@ -365,119 +373,191 @@ int liballoc_unlock()
     return 0;
 }
 
-void* kalloc_pages(SIZE_T nPages)
+static int cachedPageTableIndex = 2;
+static int cachedPageTable = 1;
+void* kalloc_pages(SIZE_T nPages, BOOL isReadOnly, BOOL canBeAccessedUserMode)
 {
+    // TODO: Change g_pageTable[pageTableIndex][(index)] to use the page directory instead to access page tables.
     int tries = 0;
-    unsigned short usedPagesIndex = 0;
+    int x = cachedPageTableIndex;
+    int y = cachedPageTable;
     for(; tries < 6; tries++)
     {
-        for (; usedPagesIndex < BITFIELD_SIZE; usedPagesIndex++)
+        UINTPTR_T startAddress = 0;
+        for (; x < 1024 && startAddress == 0; x++)
         {
-            if (g_usedPages[usedPagesIndex] != 0xFFFFFFFF)
-                break;
-        }
-        if (usedPagesIndex == BITFIELD_SIZE - 1 && g_usedPages[usedPagesIndex] == 0xFFFFFFFF)
-            break;
-        UINT32_T* usedPageBitfield = &g_usedPages[usedPagesIndex];
-        // Count available pages in *usedPageBitfield and check if it has enough space to store nPages continuously. If not, check
-        // there is enough space to get to the end and continue the allocation in g_usedPages[usedPagesIndex + i].
-        // If all that fails, find a new place to store the pages.
-        BOOL foundEnoughSpace = FALSE;
-        int amountIncreased = 0;
-        int i;
-        for (i = 0; i < 32 && !foundEnoughSpace; i++)
-        {
-            if (!getBitFromBitfield(*usedPageBitfield, i))
+            for (; y < 1024; y++)
             {
-                int i2 = i;
-                BOOL foundEmptyPages = TRUE;
-                for (int j = 0; j < nPages; j++, i2++)
+                if (g_pageTable[x][y] == 2)
                 {
-                    if (i2 == 31)
-                    {
-                        amountIncreased++;
-                        i2 = 0;
-                        usedPageBitfield = &g_usedPages[usedPagesIndex++];
-                    }
-                    foundEmptyPages = foundEmptyPages && !getBitFromBitfield(*usedPageBitfield, i2);
-                    if (!foundEmptyPages)
-                        break;
+                    // startAddress = x * 4194304 + y * 4096
+                    startAddress = (x << 22) + (y << 12);
+                    break;
                 }
-                foundEnoughSpace = foundEmptyPages;
+                else
+                    continue;
             }
         }
-        if (!foundEnoughSpace)
-            continue;
-        UINTPTR_T startAddress = ((usedPagesIndex / 32 * 1024 + i + usedPagesIndex * 32) * 4096);
-        // There is no more physical memory, so exit the loop
-        if (startAddress > g_kPhysicalMemorySize)
-            break;
-        usedPageBitfield = &g_usedPages[usedPagesIndex -= amountIncreased];
-        setBitInBitfield(usedPageBitfield, i);
-        for (int x = i, currentPage = 0; currentPage < nPages; x++, currentPage++)
+        BOOL foundEnoughSpace = TRUE;
+        for(UINTPTR_T vAddress = startAddress + 4096, i = 0; i < nPages; vAddress += 4096, i++)
         {
-            if (x == 31)
+            // vAddress / 4194304
+            int pageTableIndex = vAddress >> 22;
+            // address / 4096 % 1024
+            int pageIndex = (vAddress >> 12) % 1024;
+            if (g_pageTable[pageTableIndex][pageIndex] != 2)
             {
-                x = 0;
-                usedPageBitfield = &g_usedPages[++usedPagesIndex];
-            }
-            setBitInBitfield(usedPageBitfield, x);
-        }
-        BOOL isAvailable = FALSE;
-        for (int index = 0; index < nPages; index++)
-        {
-            UINTPTR_T address = startAddress + index * 4096;
-            for (int j = 0; j < g_kMemoryTableSize && !isAvailable; j++)
-                isAvailable = inRange((UINTPTR_T)g_kMemoryTable[j].start, (UINTPTR_T)g_kMemoryTable[j].end, address);
-            if (!isAvailable)
+                foundEnoughSpace = FALSE;
                 break;
-            int pageTableIndex = address / 4194304;
-            int pageIndex = (address - (address / 4194304 * 4194304)) / 4096;
-            g_pageTable[pageTableIndex][pageIndex] = address | 3;
+            }
         }
-        if (!isAvailable)
+        if(!foundEnoughSpace)
             continue;
-        updatePageDirectory();
-        usedPagesIndex -= amountIncreased;
-        return (PVOID)startAddress;
+        PVOID ret = kalloc_pagesAt((PVOID)startAddress, nPages, isReadOnly, canBeAccessedUserMode);
+        if(!ret)
+            continue;
+        return ret;
     }
     // We ran out of tries.
     SetLastError(OBOS_ERROR_NO_MEMORY);
     return NULLPTR;
+}
+void* kalloc_pagesAt(PVOID virtualAddress, SIZE_T nPages, BOOL isReadOnly, BOOL canBeAccessedUserMode)
+{
+    // Is the virtual address available?
+    UINTPTR_T address = (UINTPTR_T)virtualAddress;
+    for (int i = 0; i < nPages; i++, address += 4096)
+    {
+        // address / 4194304
+        int pageTableIndex = address >> 22;
+        // address / 4096 % 1024
+        int pageIndex = (address >> 12) % 1024;
+        if (g_pageTable[pageTableIndex][pageIndex] != 2)
+        {
+            // The address is in use.
+            SetLastError(OBOS_ERROR_ADDRESS_NOT_AVAILABLE);
+            return NULLPTR;
+        }
+        //// address / 4096
+        //SIZE_T usedPagesIndex = address >> 12;
+        //SIZE_T bit = ((address >> 12) - 32) % 32;
+        //if (getBitFromBitfield(g_usedPages[usedPagesIndex], bit))
+        //{
+        //    SetLastError(OBOS_ERROR_ADDRESS_NOT_AVAILABLE);
+        //    return NULLPTR;
+        //}
+    }
+    // If so, find physical pages to map them to, and map the pages.
+    address = (UINTPTR_T)virtualAddress;
+    UINTPTR_T vAddress = address;
+    UINTPTR_T physicalAddress = 0;
+    UINTPTR_T physicalAddresses[nPages];
+    memset(physicalAddresses, 0, sizeof(UINTPTR_T) * nPages);
+    for (int i = 0; i < nPages; i++, vAddress += 4096)
+    {
+        //// address / 262144
+        //SIZE_T usedPagesIndex = address >> 18;
+        //// (address / 4096) % 32
+        //SIZE_T bit = (address >> 12) % 32;
+        for(int i2 = 96; i2 < BITFIELD_SIZE; i2++)
+        {
+            for (int j = 0; j < 32; j++)
+            {
+                if (!getBitFromBitfield(g_usedPages[i2], j))
+                {
+                    // i * 262144 + j * 4096
+                    // TODO: Add a for loop to check all the new allocated pages before this one.
+                    /*if (address == ((i << 18) + (j << 12)))
+                        continue;*/
+                    BOOL continueOut = FALSE;
+                    for(int x = 0; x <= i; x++)
+                        if(physicalAddresses[x] == (i2 << 18) + (j << 12))
+                        {
+                            continueOut = TRUE;
+                            break;
+                        }
+                    if (continueOut)
+                        continue;
+                    physicalAddresses[i] = address = physicalAddress = (i2 << 18) + (j << 12);
+                    goto foundPhysicalAddress;
+                }
+            }
+        }
+        foundPhysicalAddress:
+        if (!physicalAddress || physicalAddress > g_kAvailablePhysicalMemorySize)
+        {
+            SetLastError(OBOS_ERROR_NO_MEMORY);
+            return NULLPTR;
+        }
+        // vAddress / 4194304
+        int pageTableIndex = vAddress >> 22;
+        // address / 4096 % 1024
+        int pageIndex = (vAddress >> 12) % 1024;
+        g_pageTable[pageTableIndex][pageIndex] = physicalAddress | (1 | ((!isReadOnly) << 1) | (canBeAccessedUserMode << 2));
+        SIZE_T usedPagesIndex = address >> 18;
+        SIZE_T bit = ((address >> 12) - 32) % 32;
+        setBitInBitfield(&g_usedPages[usedPagesIndex], bit);
+        physicalAddress = 0;
+    }
+    updatePageDirectory();
+    return (PVOID)virtualAddress;
 }
 int kfree_pages(PVOID start, SIZE_T nPages)
 {
     if ((UINTPTR_T)start % 4096 != 0)
         start -= ((UINTPTR_T)start % 4096);
     UINTPTR_T block = (UINTPTR_T)start;
-    SIZE_T usedPagesIndex = block / 262144;
-    SIZE_T i = (block / 4096 - usedPagesIndex * 32) % 32;
-    UINT32_T* usedPageBitfield = &g_usedPages[usedPagesIndex];
+    for(UINTPTR_T i2 = 0, cblock = block; i2 < nPages; i2++, cblock += 4096)
     {
-        int pageTableIndex = block / 4194304;
-        int pageIndex = (block - (block / 4194304 * 4194304)) / 4096;
-        if ((g_pageTable[pageTableIndex][pageIndex] & 3) != 3)
+        // cblock / 4194304
+        int pageTableIndex = cblock >> 22;
+        // cblock / 4096 % 1024
+        int pageIndex = (cblock >> 12) % 1024;
+        if (getBitFromBitfield(g_pageTable[pageTableIndex][pageIndex], 0))
             return -1;
+        
     }
     memset(start, 0, nPages * 4096 - 1);
-    for (int x = i; x - i < nPages; x++)
-    {
-        if (x == 31)
-        {
-            x = 0;
-            usedPageBitfield = &g_usedPages[++usedPagesIndex];
-        }
-        clearBitInBitfield(usedPageBitfield, i);
-    }
     for (int index = 0; index < nPages; index++)
     {
         UINTPTR_T address = block + index * 4096;
-        int pageTableIndex = address / 4194304;
-        int pageIndex = (address - (address / 4194304 * 4194304)) / 4096;
+        // address / 4194304
+        int pageTableIndex = address >> 22;
+        // address / 4096 % 1024
+        int pageIndex = (address >> 12) % 1024;
+        SIZE_T usedPagesIndex = g_pageTable[pageTableIndex][pageIndex] >> 18;
+        SIZE_T bit = ((g_pageTable[pageTableIndex][pageIndex] >> 12) - 32) % 32;
+        setBitInBitfield(&g_usedPages[usedPagesIndex], bit);
         g_pageTable[pageTableIndex][pageIndex] = 2;
     }
+    cachedPageTableIndex = block >> 22;
     updatePageDirectory();
     return 0;
+}
+
+void ksetPagesProtection(PVOID start, SIZE_T nPages, BOOL isReadOnly)
+{
+    for (int i = 0; i < nPages; i++)
+    {
+        UINTPTR_T address = (UINTPTR_T)start + i * 4096;
+        // address / 4194304
+        int pageTableIndex = address >> 22;
+        // address / 4096 % 1024
+        int pageIndex = (address >> 12) % 1024;
+        if (g_pageTable[pageTableIndex][pageIndex] == 2)
+            return;
+    }
+    for(int i = 0; i < nPages; i++)
+    {
+        UINTPTR_T address = (UINTPTR_T)start + i * 4096;
+        // address / 4194304
+        int pageTableIndex = address >> 22;
+        // address / 4096 % 1024
+        int pageIndex = (address >> 12) % 1024;
+        BOOL isSupervisorPage = getBitFromBitfield(g_pageTable[pageTableIndex][pageIndex], 2);
+        UINTPTR_T physicalAddress = g_pageTable[pageTableIndex][pageIndex] & 0x7FFFF000;
+        g_pageTable[pageTableIndex][pageIndex] = physicalAddress | 1 | ((!isReadOnly) << 1) | (isSupervisorPage << 2);
+    }
 }
 
 void reloadPages()
@@ -495,8 +575,14 @@ void reloadPages()
  */
 void* liballoc_alloc(size_t nPages)
 {
-    PVOID block = kalloc_pages(nPages);
-    memset(block, 0, nPages * 4096);
+    PVOID block = kalloc_pages(nPages, FALSE, FALSE);
+    if (block)
+        memset(block, 0, nPages * 4096);
+    else
+        if (GetTid() != 0)
+            ExitThread((DWORD)(-((INT)OBOS_ERROR_NO_MEMORY)));
+        else
+            kpanic(NULLPTR, 0);
     return block;
 }
 

@@ -21,8 +21,10 @@ void kmeminit();
 void* kfindmemblock(SIZE_T size, SIZE_T* real_size);
 
 void kInitializePaging();
-void* kalloc_pages(SIZE_T nPages);
+void* kalloc_pages(SIZE_T nPages, BOOL isReadOnly, BOOL canBeAccessedUserMode);
+void* kalloc_pagesAt(PVOID virtualAddress, SIZE_T nPages, BOOL isReadOnly, BOOL canBeAccessedUserMode);
 int kfree_pages(PVOID start, SIZE_T nPages);
+void ksetPagesProtection(PVOID start, SIZE_T nPages, BOOL isReadOnly);
 void reloadPages();
 
 #endif
