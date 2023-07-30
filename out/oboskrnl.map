@@ -1,0 +1,428 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD /tmp/ccLXRuO9.o
+LOAD /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+LOAD /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+LOAD /tmp/ccXJa3PV.o
+LOAD /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+                0x00100000                        . = 0x100000
+
+.text           0x00100000     0x20f9
+ *(.multiboot)
+ .multiboot     0x00100000       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+ *(.text)
+ .text          0x00100030        0x0 /tmp/ccLXRuO9.o
+ .text          0x00100030      0x145 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+ *fill*         0x00100175        0xb 
+ .text          0x00100180       0x41 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+ .text          0x001001c1        0x0 /tmp/ccXJa3PV.o
+ *fill*         0x001001c1        0xf 
+ .text          0x001001d0       0x19 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+                0x001001d0                _start
+ *fill*         0x001001e9        0x7 
+ .text          0x001001f0       0x1d src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
+                0x001001f0                gdtFlush
+ *fill*         0x0010020d        0x3 
+ .text          0x00100210        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
+                0x00100210                idtFlush
+ *fill*         0x00100218        0x8 
+ .text          0x00100220      0x12e src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+                0x00100220                isr0
+                0x0010022a                isr1
+                0x00100234                isr2
+                0x0010023e                isr3
+                0x00100248                isr4
+                0x00100252                isr5
+                0x0010025c                isr6
+                0x00100266                isr7
+                0x00100270                isr8
+                0x00100278                isr9
+                0x00100282                isr10
+                0x0010028a                isr11
+                0x00100292                isr12
+                0x0010029a                isr13
+                0x001002a2                isr14
+                0x001002aa                isr15
+                0x001002b4                isr16
+                0x001002be                isr17
+                0x001002c8                isr18
+                0x001002d2                isr19
+                0x001002dc                isr20
+                0x001002e6                isr21
+                0x001002ee                isr22
+                0x001002f8                isr23
+                0x00100302                isr24
+                0x0010030c                isr25
+                0x00100316                isr26
+                0x00100320                isr27
+                0x0010032a                isr28
+                0x00100334                isr29
+                0x0010033c                isr30
+                0x00100344                isr31
+ .text          0x0010034e       0xb3 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+                0x0010034e                _ZN4obos5kmainEP14multiboot_infoj
+                0x001003e6                __cxa_pure_virtual
+ .text          0x00100401      0x5f5 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+                0x001005a4                _ZN4obos17InitializeConsoleENS_12ConsoleColorES0_
+                0x00100638                _ZN4obos9SetCursorEb
+                0x001006eb                _ZN4obos15SetConsoleColorENS_12ConsoleColorES0_
+                0x00100706                _ZN4obos15GetConsoleColorERNS_12ConsoleColorES1_
+                0x00100732                _ZN4obos13ConsoleOutputEPKcj
+                0x0010076d                _ZN4obos19ConsoleOutputStringEPKc
+                0x001007af                _ZN4obos22ConsoleOutputCharacterEc
+                0x0010096b                _ZN4obos25SetTerminalCursorPositionEjj
+ .text          0x001009f6       0x25 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+                0x001009f6                _ZN4obos7_kpanicEPKc
+ .text          0x00100a1b      0x7cc src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+                0x00100a1b                _Z4outbth
+                0x00100a3c                _Z4outwtt
+                0x00100a5d                _Z3inbt
+                0x00100a7a                _Z3inwt
+                0x00100a99                _Z7io_waitv
+                0x00100aae                _Z3cliv
+                0x00100ac2                _Z3stiv
+                0x00100ad6                _Z3hltv
+                0x00100add                _Z4_inth
+                0x00101195                _ZN4obos18EnterKernelSectionEv
+                0x001011b0                _ZN4obos18LeaveKernelSectionEv
+ *fill*         0x001011e7        0x1 
+ .text          0x001011e8      0x1ae src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+                0x001011e8                _ZN4obos8GdtEntryC2Ejjhh
+                0x001011e8                _ZN4obos8GdtEntryC1Ejjhh
+                0x00101261                _ZN4obos13InitializeGdtEv
+ .text          0x00101396      0x6b0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+                0x00101396                _ZN4obos8IdtEntryC2Ejth
+                0x00101396                _ZN4obos8IdtEntryC1Ejth
+                0x001013e9                _ZN4obos13InitializeIdtEv
+                0x001019f2                _ZN4obos24RegisterInterruptHandlerEhPFvPKNS_15interrupt_frameEE
+ .text          0x00101a46      0x499 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+                0x00101a7c                _ZN4obos6memory31InitializePhysicalMemoryManagerEv
+                0x00101c54                _ZN4obos6memory20kalloc_physicalPagesEj
+ *fill*         0x00101edf        0x1 
+ .text          0x00101ee0      0x219 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+                0x00101efe                _ZN4obos5utils12BitfieldBaseC2Ev
+                0x00101efe                _ZN4obos5utils12BitfieldBaseC1Ev
+                0x00101f18                _ZN4obos5utils12BitfieldBase6setBitEj
+                0x00101f30                _ZN4obos5utils12BitfieldBase8clearBitEj
+                0x00101f48                _ZNK4obos5utils12BitfieldBase6getBitEj
+                0x00101f5c                _ZNK4obos5utils12BitfieldBaseixEj
+                0x00101f7c                _ZN4obos5utils12BitfieldBasecvjEv
+                0x00101f88                _ZN4obos5utils12BitfieldBasecvbEv
+                0x00101f9a                _ZN4obos5utils8BitfieldC2Ev
+                0x00101f9a                _ZN4obos5utils8BitfieldC1Ev
+                0x00101fb6                _ZN4obos5utils8Bitfield6setBitEh
+                0x00101fec                _ZN4obos5utils8Bitfield8clearBitEh
+                0x00102022                _ZNK4obos5utils8Bitfield6getBitEh
+                0x0010206e                _ZNK4obos5utils8BitfieldixEh
+                0x00102096                _ZN4obos5utils8BitfieldcvbEv
+                0x001020a8                _ZN4obos5utils15IntegerBitfieldC2Ev
+                0x001020a8                _ZN4obos5utils15IntegerBitfieldC1Ev
+                0x001020c4                _ZN4obos5utils15IntegerBitfieldC2Ej
+                0x001020c4                _ZN4obos5utils15IntegerBitfieldC1Ej
+                0x001020ea                _ZN4obos5utils15IntegerBitfield11setBitfieldEj
+                0x001020f9                        _ZN4obos7__etextE = .
+
+.init           0x001020f9        0xf
+ .init          0x001020f9        0x3 /tmp/ccLXRuO9.o
+                0x001020f9                _init
+ .init          0x001020fc        0x5 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+ .init          0x00102101        0x5 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+ .init          0x00102106        0x2 /tmp/ccXJa3PV.o
+
+.fini           0x00102108        0xa
+ .fini          0x00102108        0x3 /tmp/ccLXRuO9.o
+                0x00102108                _fini
+ .fini          0x0010210b        0x5 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+ .fini          0x00102110        0x2 /tmp/ccXJa3PV.o
+
+.iplt           0x00102112        0x0
+ .iplt          0x00102112        0x0 /tmp/ccLXRuO9.o
+
+.gnu.linkonce.t._ZN4obos5utils12BitfieldBaseaSEOS1_
+                0x00102112       0x14
+ .gnu.linkonce.t._ZN4obos5utils12BitfieldBaseaSEOS1_
+                0x00102112       0x14 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+                0x00102112                _ZN4obos5utils12BitfieldBaseaSEOS1_
+
+.gnu.linkonce.t._ZN4obos5utils8BitfieldaSEOS1_
+                0x00102126       0x1e
+ .gnu.linkonce.t._ZN4obos5utils8BitfieldaSEOS1_
+                0x00102126       0x1e src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+                0x00102126                _ZN4obos5utils8BitfieldaSEOS1_
+
+.rodata         0x00103000      0x508
+ *(.rodata)
+ .rodata        0x00103000       0x37 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ *fill*         0x00103037        0x1 
+ .rodata        0x00103038       0x40 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .rodata        0x00103078      0x400 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .rodata        0x00103478       0x90 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+                0x00103508                        _ZN4obos9__erodataE = .
+
+data            0x00103508      0x400
+ data           0x00103508      0x400 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+                0x00103508                g_interruptHandlers
+
+text            0x00103908       0x28
+ text           0x00103908       0x28 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+
+.gnu.linkonce.r._ZTVN4obos5utils8BitfieldE
+                0x00103930       0x30
+ .gnu.linkonce.r._ZTVN4obos5utils8BitfieldE
+                0x00103930       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+                0x00103930                _ZTVN4obos5utils8BitfieldE
+
+.gnu.linkonce.r._ZTVN4obos5utils12BitfieldBaseE
+                0x00103960       0x20
+ .gnu.linkonce.r._ZTVN4obos5utils12BitfieldBaseE
+                0x00103960       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+                0x00103960                _ZTVN4obos5utils12BitfieldBaseE
+
+.gnu.linkonce.r._ZTVN4obos5utils15IntegerBitfieldE
+                0x00103980       0x30
+ .gnu.linkonce.r._ZTVN4obos5utils15IntegerBitfieldE
+                0x00103980       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+                0x00103980                _ZTVN4obos5utils15IntegerBitfieldE
+
+.rel.dyn        0x001039b0        0x0
+ .rel.got       0x001039b0        0x0 /tmp/ccLXRuO9.o
+ .rel.iplt      0x001039b0        0x0 /tmp/ccLXRuO9.o
+ .rel.text      0x001039b0        0x0 /tmp/ccLXRuO9.o
+ .rel.gnu.linkonce.t._ZN4obos5utils8BitfieldaSEOS1_
+                0x001039b0        0x0 /tmp/ccLXRuO9.o
+
+.data           0x00104000        0x8
+ *(.data)
+ .data          0x00104000        0x0 /tmp/ccLXRuO9.o
+ .data          0x00104000        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+                0x00104000                __dso_handle
+ .data          0x00104004        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+ .data          0x00104004        0x0 /tmp/ccXJa3PV.o
+ .data          0x00104004        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ .data          0x00104004        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .data          0x00104004        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+ .data          0x00104004        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .data          0x00104004        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ .data          0x00104004        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ .data          0x00104004        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+ .data          0x00104008        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+
+.got            0x00104008        0x0
+ .got           0x00104008        0x0 /tmp/ccLXRuO9.o
+
+.got.plt        0x00104008        0x0
+ .got.plt       0x00104008        0x0 /tmp/ccLXRuO9.o
+
+.igot.plt       0x00104008        0x0
+ .igot.plt      0x00104008        0x0 /tmp/ccLXRuO9.o
+
+.ctors          0x00104008       0x14
+ .ctors         0x00104008        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+ .ctors         0x0010400c        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+ .ctors         0x00104010        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ .ctors         0x00104014        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ .ctors         0x00104018        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+
+.dtors          0x0010401c        0x8
+ .dtors         0x0010401c        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+ .dtors         0x00104020        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+                0x00104020                __DTOR_END__
+
+.eh_frame       0x00104024      0x2f4
+ .eh_frame      0x00104024        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+ .eh_frame      0x00104024        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+                                  0x4 (size before relaxing)
+ .eh_frame      0x00104024       0x6c src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ .eh_frame      0x00104090      0x144 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+                                0x158 (size before relaxing)
+ .eh_frame      0x001041d4       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+                                 0x34 (size before relaxing)
+ .eh_frame      0x001041f4       0x2c src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+                                 0x40 (size before relaxing)
+ .eh_frame      0x00104220       0x2c src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+                                 0x40 (size before relaxing)
+ .eh_frame      0x0010424c       0x74 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+                                 0x88 (size before relaxing)
+ .eh_frame      0x001042c0       0x58 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+                                 0x6c (size before relaxing)
+
+.tm_clone_table
+                0x00104318        0x0
+ .tm_clone_table
+                0x00104318        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+ .tm_clone_table
+                0x00104318        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+
+.bss            0x00105000    0x448d0
+ *(COMMON)
+ *(.bss)
+ .bss           0x00105000        0x0 /tmp/ccLXRuO9.o
+ .bss           0x00105000       0x20 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+ .bss           0x00105020        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+ .bss           0x00105020        0x0 /tmp/ccXJa3PV.o
+ .bss           0x00105020     0x4000 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+                0x00105020                _ZN4obos12stack_bottomE
+                0x00109020                _ZN4obos9stack_topE
+ .bss           0x00109020        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+                0x00109020                _ZN4obos15g_multibootInfoE
+ .bss           0x00109024       0x14 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .bss           0x00109038        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+ .bss           0x00109038        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .bss           0x00109040       0x48 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ *fill*         0x00109088       0x18 
+ .bss           0x001090a0      0x806 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ *fill*         0x001098a6       0x1a 
+ .bss           0x001098c0    0x40010 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+                0x001098c0                _ZN4obos6memory16g_availablePagesE
+                0x001498c0                _ZN4obos6memory20g_physicalMemorySizeE
+                0x001498c4                _ZN4obos6memory34g_physicalMemoryManagerInitializedE
+ .bss           0x001498d0        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+                0x001498d0                        _ZN4obos9endKernelE = .
+OUTPUT(/mnt/c/Code/obos/out/oboskrnl elf32-i386)
+
+.comment        0x00000000       0x12
+ .comment       0x00000000       0x12 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+                                 0x13 (size before relaxing)
+ .comment       0x00000012       0x13 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+
+.debug_aranges  0x00000000      0x190
+ .debug_aranges
+                0x00000000       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+ .debug_aranges
+                0x00000020       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
+ .debug_aranges
+                0x00000040       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
+ .debug_aranges
+                0x00000060       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+ .debug_aranges
+                0x00000080       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ .debug_aranges
+                0x000000a0       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .debug_aranges
+                0x000000c0       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+ .debug_aranges
+                0x000000e0       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .debug_aranges
+                0x00000100       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ .debug_aranges
+                0x00000120       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ .debug_aranges
+                0x00000140       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+ .debug_aranges
+                0x00000170       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+
+.debug_pubnames
+                0x00000000        0x0
+ .debug_pubnames
+                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+ .debug_pubnames
+                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
+ .debug_pubnames
+                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
+ .debug_pubnames
+                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+
+.debug_info     0x00000000     0x4a04
+ .debug_info    0x00000000       0x71 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+ .debug_info    0x00000071       0x6a src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
+ .debug_info    0x000000db       0x6a src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
+ .debug_info    0x00000145       0x6f src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+ .debug_info    0x000001b4      0xab5 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ .debug_info    0x00000c69      0xf48 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .debug_info    0x00001bb1      0x315 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+ .debug_info    0x00001ec6      0x3e2 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .debug_info    0x000022a8      0x4c1 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ .debug_info    0x00002769      0x75d src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ .debug_info    0x00002ec6      0xedb src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+ .debug_info    0x00003da1      0xc63 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+
+.debug_abbrev   0x00000000      0xfd1
+ .debug_abbrev  0x00000000       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+ .debug_abbrev  0x0000001b       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
+ .debug_abbrev  0x00000036       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
+ .debug_abbrev  0x00000051       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+ .debug_abbrev  0x0000006c      0x1de src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ .debug_abbrev  0x0000024a      0x215 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .debug_abbrev  0x0000045f       0xbe src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+ .debug_abbrev  0x0000051d      0x12f src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .debug_abbrev  0x0000064c      0x1ab src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ .debug_abbrev  0x000007f7      0x1ff src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ .debug_abbrev  0x000009f6      0x304 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+ .debug_abbrev  0x00000cfa      0x2d7 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+
+.debug_line     0x00000000     0x2c09
+ .debug_line    0x00000000       0x78 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+ .debug_line    0x00000078       0x71 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
+ .debug_line    0x000000e9       0x6a src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
+ .debug_line    0x00000153       0xf1 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+ .debug_line    0x00000244      0x2fa src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ .debug_line    0x0000053e      0x8c1 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .debug_line    0x00000dff       0xfa src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+ .debug_line    0x00000ef9      0xcc9 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .debug_line    0x00001bc2      0x26b src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ .debug_line    0x00001e2d      0x333 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ .debug_line    0x00002160      0x720 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+ .debug_line    0x00002880      0x389 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+
+.debug_frame    0x00000000      0xb20
+ .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+ .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
+ .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
+ .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+ .debug_frame   0x00000000       0x6c src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ .debug_frame   0x0000006c      0x218 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .debug_frame   0x00000284       0x34 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+ .debug_frame   0x000002b8      0x1f8 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .debug_frame   0x000004b0       0xc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ .debug_frame   0x00000574       0xf0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ .debug_frame   0x00000664      0x1a4 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+ .debug_frame   0x00000808      0x318 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+
+.debug_loc      0x00000000        0x0
+ .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+ .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
+ .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
+ .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
+
+.debug_str      0x00000000       0x90
+ .debug_str     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+ .debug_str     0x00000000       0x16 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .debug_str     0x00000016        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+ .debug_str     0x00000016        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
+ .debug_str     0x00000016        0x9 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
+ .debug_str     0x0000001f        0x9 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
+ .debug_str     0x00000028       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
+ .debug_str     0x0000003b       0x55 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
+
+.debug_rnglists
+                0x00000000       0x6d
+ .debug_rnglists
+                0x00000000       0x32 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+ .debug_rnglists
+                0x00000032       0x3b src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
