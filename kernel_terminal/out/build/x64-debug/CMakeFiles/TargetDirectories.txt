@@ -1,5 +1,0 @@
-C:/Users/omark/Documents/obos/kernel_terminal/out/build/x64-debug/CMakeFiles/edit_cache.dir
-C:/Users/omark/Documents/obos/kernel_terminal/out/build/x64-debug/CMakeFiles/rebuild_cache.dir
-C:/Users/omark/Documents/obos/kernel_terminal/out/build/x64-debug/kernel_terminal/CMakeFiles/kssh.dir
-C:/Users/omark/Documents/obos/kernel_terminal/out/build/x64-debug/kernel_terminal/CMakeFiles/edit_cache.dir
-C:/Users/omark/Documents/obos/kernel_terminal/out/build/x64-debug/kernel_terminal/CMakeFiles/rebuild_cache.dir
