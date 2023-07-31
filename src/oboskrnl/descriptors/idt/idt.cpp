@@ -6,8 +6,6 @@
 
 #include "idt.h"
 
-extern "C" void idtFlush(UINTPTR_T base);
-extern "C" void(*g_interruptHandlers[256])(const obos::interrupt_frame* frame);
 
 extern "C" void isr0();
 extern "C" void isr1();
@@ -41,9 +39,27 @@ extern "C" void isr28();
 extern "C" void isr29();
 extern "C" void isr30();
 extern "C" void isr31();
+extern "C" void isr32();
+extern "C" void isr33();
+extern "C" void isr34();
+extern "C" void isr35();
+extern "C" void isr36();
+extern "C" void isr37();
+extern "C" void isr38();
+extern "C" void isr39();
+extern "C" void isr40();
+extern "C" void isr41();
+extern "C" void isr42();
+extern "C" void isr43();
+extern "C" void isr44();
+extern "C" void isr45();
+extern "C" void isr46();
+extern "C" void isr47();
 
 namespace obos
 {
+	extern void idtFlush(UINTPTR_T base);
+	extern void(*g_interruptHandlers[256])(const obos::interrupt_frame* frame);
 	struct IdtPointer
 	{
 		UINT16_T limit;
@@ -99,6 +115,22 @@ s_idtEntries[interrupt] = IdtEntry((UINTPTR_T)isr ##interrupt, 0x08, 0x8E);
 		REGISTER_INTERRUPT(29);
 		REGISTER_INTERRUPT(30);
 		REGISTER_INTERRUPT(31);
+		REGISTER_INTERRUPT(32);
+		REGISTER_INTERRUPT(33);
+		REGISTER_INTERRUPT(34);
+		REGISTER_INTERRUPT(35);
+		REGISTER_INTERRUPT(36);
+		REGISTER_INTERRUPT(37);
+		REGISTER_INTERRUPT(38);
+		REGISTER_INTERRUPT(39);
+		REGISTER_INTERRUPT(40);
+		REGISTER_INTERRUPT(41);
+		REGISTER_INTERRUPT(42);
+		REGISTER_INTERRUPT(43);
+		REGISTER_INTERRUPT(44);
+		REGISTER_INTERRUPT(45);
+		REGISTER_INTERRUPT(46);
+		REGISTER_INTERRUPT(47);
 
 		s_idtPointer.limit = sizeof(s_idtEntries) - 1;
 		s_idtPointer.base  = (UINTPTR_T)&s_idtEntries;

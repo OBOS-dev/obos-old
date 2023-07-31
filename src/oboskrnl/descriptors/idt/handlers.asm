@@ -49,14 +49,32 @@ ISR_NOERRCODE 28
 ISR_ERRCODE   29
 ISR_ERRCODE   30
 ISR_NOERRCODE 31
+ISR_NOERRCODE 32
+ISR_NOERRCODE 33
+ISR_NOERRCODE 34
+ISR_NOERRCODE 35
+ISR_NOERRCODE 36
+ISR_NOERRCODE 37
+ISR_NOERRCODE 38
+ISR_NOERRCODE 39
+ISR_NOERRCODE 40
+ISR_NOERRCODE 41
+ISR_NOERRCODE 42
+ISR_NOERRCODE 43
+ISR_NOERRCODE 44
+ISR_NOERRCODE 45
+ISR_NOERRCODE 46
+ISR_NOERRCODE 47
 
 segment data
-global g_interruptHandlers
-g_interruptHandlers:
+global _ZN4obos19g_interruptHandlersE
+_ZN4obos19g_interruptHandlersE:
     times 256-($-$$) dd 0
 segment text
 
 extern defaultInterruptHandler
+
+global isr_common_stub
 
 isr_common_stub:
     pushad
@@ -68,7 +86,7 @@ isr_common_stub:
     mov ebx, [esp+36]
     push eax
     lea ebx, [ebx*4]
-    lea eax, [g_interruptHandlers+ebx]
+    lea eax, [_ZN4obos19g_interruptHandlersE+ebx]
     call [eax]
     
     lea esp, [esp+4]

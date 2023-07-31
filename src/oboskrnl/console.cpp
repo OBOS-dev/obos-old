@@ -8,6 +8,7 @@
 #include <console.h>
 #include <inline-asm.h>
 
+#define UpdateCursorPosition() SetTerminalCursorPosition(s_terminalColumn, s_terminalRow)
 
 namespace obos
 {
@@ -64,11 +65,14 @@ namespace obos
 			s_framebuffer = (UINT16_T*)g_multibootInfo->framebuffer_addr;
 		else
 			s_framebuffer = (UINT16_T*)0xB8000; // Assume the frame buffer is at 0xB8000, which it probably it is at.
+		s_terminalColumn = 0;
+		s_terminalRow = 0;
 		SetConsoleColor(foreground, background);
 		for (SIZE_T y = 0; y < s_framebufferHeight; y++)
 			for (SIZE_T x = 0; x < s_framebufferWidth; x++)
 				putcharAt(x,y, ' ', s_consoleColor);
 		SetCursor(true);
+		UpdateCursorPosition();
 	}
 	void SetCursor(bool status)
 	{
@@ -155,6 +159,7 @@ namespace obos
 				on_newline();
 			}
 			putcharAt(s_terminalColumn - 1, s_terminalRow, ch, s_consoleColor);
+			UpdateCursorPosition();
 		}
 		}
 	}

@@ -28,7 +28,7 @@ namespace obos
 		}
 		void BitfieldBase::clearBit(UINT32_T bitmask)
 		{
-			m_bitfield &= bitmask;
+			m_bitfield &= ~(bitmask);
 		}
 		bool BitfieldBase::getBit(UINT32_T bitmask) const
 		{
@@ -100,6 +100,22 @@ namespace obos
 		void IntegerBitfield::setBitfield(UINT32_T newBitfield)
 		{
 			m_bitfield = newBitfield;
+		}
+		
+		// Bare functions. Use if polymorphism isn't working correctly.
+
+		void setBitInBitfield(UINT32_T& bitfield, UINT8_T bit)
+		{
+			bitfield |= (1 << bit);
+		}
+		void clearBitInBitfield(UINT32_T& bitfield, UINT8_T bit)
+		{
+			bitfield &= (1 << bit);
+		}
+		bool testBitInBitfield(const UINT32_T& bitfield, UINT8_T bit)
+		{
+			const UINT32_T bitmask = (1 << bit);
+			return (bitfield & bitmask) == bitmask;
 		}
 	}
 }

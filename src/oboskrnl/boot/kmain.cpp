@@ -19,8 +19,10 @@
 
 #include <descriptors/gdt/gdt.h>
 #include <descriptors/idt/idt.h>
+#include <descriptors/idt/pic.h>
 
 #include <memory_manager/physical.h>
+#include <memory_manager/paging/init.h>
 
 #if !defined(__cplusplus) && !defined(__i686__) && !defined(__ELF__)
 #error You must be using a C++ i686 compiler with elf. (i686-elf-g++, for example)
@@ -45,30 +47,89 @@ namespace obos
 		obos::InitializeGdt();
 		obos::InitializeIdt();
 
-		/*obos::utils::Bitfield bitfield;
-		bitfield.setBit(31);
-		bitfield.setBit(15);
-		bitfield.setBit(0);
-		bitfield.setBit(4);*/
+		obos::Pic currentPic{ obos::Pic::PIC1_CMD, obos::Pic::PIC1_DATA };
+		// Interrupt 30-37 (0x20-0x27)
+		currentPic.remap(0x20, 4);
+		currentPic.setPorts(obos::Pic::PIC2_CMD, obos::Pic::PIC2_DATA);
+		// Interrupt 40-47 (0x28-0x2f)
+		currentPic.remap(0x28, 2);
+
+		for(int i = 0x20; i < 0x30; i++)
+			obos::RegisterInterruptHandler(i, [](const obos::interrupt_frame* frame) {
+			if(frame->intNumber != 32)
+				obos::ConsoleOutputString("Unhandled external interrupt.");
+			int irqNumber = frame->intNumber - 32;
+			obos::Pic masterPic{ obos::Pic::PIC1_CMD, obos::Pic::PIC1_DATA };
+			if(irqNumber < 7 && masterPic.issuedInterrupt(irqNumber))
+				masterPic.sendEOI();
+			if(irqNumber > 7)
+			{
+				masterPic.setPorts(obos::Pic::PIC2_CMD, obos::Pic::PIC2_DATA);
+				// masterPic is now slavePic.
+				if(masterPic.issuedInterrupt(irqNumber))
+					masterPic.sendEOI();
+			}
+			});
+
+		sti();
 			
 		obos::memory::InitializePhysicalMemoryManager();
+		obos::memory::InitializePaging();
 
-		STRING base = (STRING)obos::memory::kalloc_physicalPages(4);
-		base[0] = 'H';
-		base[1] = 'e';
-		base[2] = 'l';
-		base[3] = 'l';
-		base[4] = 'o';
-		base[5] = '!';
-		base[6] = '\0';
-		obos::ConsoleOutputString(base);
+		obos::ConsoleOutputString("Hello, world!\r\n");
 	}
 }
 
 extern "C" void __cxa_pure_virtual()
 {
-	obos::ConsoleOutputString("Warning: Attempt to call a pure virtual function\r\n");
-	asm volatile("cli;"
-				 "hlt");
+	obos::kpanic("Attempt to call a pure virtual function.");
+}
 
+extern "C"
+{
+	typedef unsigned uarch_t;
+	
+	struct atexitFuncEntry_t {
+		void (*destructorFunc) (void*);
+		void* objPtr;
+		void* dsoHandle;
+	
+	};
+	
+	#define ATEXIT_FUNC_MAX 256
+	
+	atexitFuncEntry_t __atexitFuncs[ATEXIT_FUNC_MAX];
+	uarch_t __atexitFuncCount = 0;
+	
+	extern void* __dso_handle;
+	
+	int __cxa_atexit(void (*f)(void*), void* objptr, void* dso) {
+		if (__atexitFuncCount >= ATEXIT_FUNC_MAX) {
+			return -1;
+		}
+		__atexitFuncs[__atexitFuncCount].destructorFunc = f;
+		__atexitFuncs[__atexitFuncCount].objPtr = objptr;
+		__atexitFuncs[__atexitFuncCount].dsoHandle = dso;
+		__atexitFuncCount++;
+		return 0;
+	}
+	
+	void __cxa_finalize(void* f) {
+		signed i = __atexitFuncCount;
+		if (!f) {
+			while (i--) {
+				if (__atexitFuncs[i].destructorFunc) {
+					(*__atexitFuncs[i].destructorFunc)(__atexitFuncs[i].objPtr);
+				}
+			}
+			return;
+		}
+	
+		for (; i >= 0; i--) {
+			if (__atexitFuncs[i].destructorFunc == f) {
+				(*__atexitFuncs[i].destructorFunc)(__atexitFuncs[i].objPtr);
+				__atexitFuncs[i].destructorFunc = 0;
+			}
+		}
+	}
 }

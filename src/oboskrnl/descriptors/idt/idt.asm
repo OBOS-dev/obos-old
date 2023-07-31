@@ -3,10 +3,10 @@
 ; Copyright (c) 2023 Omar Berrow
 [BITS 32]
 
-; extern "C" void idtFlush(UINTPTR_T base);
-global idtFlush
+; namespace obos { void idtFlush(UINTPTR_T base); }
+global _ZN4obos8idtFlushEj
 
-idtFlush:
+_ZN4obos8idtFlushEj:
 	mov eax, [esp+4]
 	lidt [eax]
 	ret

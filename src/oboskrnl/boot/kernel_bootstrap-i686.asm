@@ -32,9 +32,11 @@ global _ZN4obos12stack_bottomE
 
 extern _ZN4obos5kmainEP14multiboot_infoj
 extern _init
+extern _fini
 
 segment .text
 global _start
+global nullptrStub
 _start:
     ; Disable interrupts.
     cli
@@ -51,6 +53,9 @@ _start:
 
     ; Call the kernel.
     call _ZN4obos5kmainEP14multiboot_infoj
+    
+    ; Call "_fini"
+    call _fini
 
     ; Hold the machine.
 .loop: pause

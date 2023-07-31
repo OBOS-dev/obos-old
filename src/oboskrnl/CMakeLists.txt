@@ -5,13 +5,14 @@
 set_source_files_properties(SOURCE "crti/src/crti.S" ASM-ATT)
 set_source_files_properties(SOURCE "crti/src/crte.S" ASM-ATT)
 
-set(oboskrnl_cxxSources "boot/kmain.cpp" "console.cpp"             "klog.cpp"                "inline-asm.cpp"
-                        "klog.cpp"       "descriptors/gdt/gdt.cpp" "descriptors/idt/idt.cpp" "memory_manager/physical.cpp"
-                        "utils/bitfields.cpp")
-set(oboskrnl_headers "types.h"      "boot/multiboot.h"      "console.h"             "klog.h"
-                     "inline-asm.h" "descriptors/gdt/gdt.h" "descriptors/idt/idt.h" "memory_manager/physical.h"
-                     "utils/bitfields.h")
-set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm" "descriptors/idt/idt.asm" "descriptors/idt/handlers.asm")
+set(oboskrnl_cxxSources "boot/kmain.cpp"      "console.cpp"             "klog.cpp"                     "inline-asm.cpp"
+                        "klog.cpp"            "descriptors/gdt/gdt.cpp" "descriptors/idt/idt.cpp"      "memory_manager/physical.cpp"
+                        "utils/bitfields.cpp" "descriptors/idt/pic.cpp" "memory_manager/paging/init.cpp")
+set(oboskrnl_headers "types.h"           "boot/multiboot.h"      "console.h"             "klog.h"
+                     "inline-asm.h"      "descriptors/gdt/gdt.h"                                "descriptors/idt/idt.h" "memory_manager/physical.h"
+                     "utils/bitfields.h" "descriptors/idt/pic.h" "memory_manager/paging/init.h")
+set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm" "descriptors/idt/idt.asm" "descriptors/idt/handlers.asm"
+                        "memory_manager/paging/init.asm")
 
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cxxSources} ${oboskrnl_headers})
 
@@ -19,7 +20,8 @@ add_executable(oboskrnl ${oboskrnl_files})
 target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=misleading-indentation> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-builtin-declaration-mismatch> 
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=unknown-pragmas>
-                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++17> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>)
+                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++17>
+                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>)
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}")
 target_link_options(oboskrnl 
     PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}"

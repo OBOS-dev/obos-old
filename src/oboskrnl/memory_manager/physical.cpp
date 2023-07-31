@@ -10,19 +10,24 @@
 
 #include <boot/multiboot.h>
 
-// Trigger warning.
-extern "C" char _ZN4obos5utils8Bitfield6setBitEh;
-// Trigger warning.
-static auto obos_utils_bitfield_setBit = (void(*)(obos::utils::Bitfield*, UINT8_T))GET_FUNC_ADDR(&_ZN4obos5utils8Bitfield6setBitEh);
+//// Trigger warning.
+//extern "C" char _ZN4obos5utils8Bitfield6setBitEh;
+//// Trigger warning.
+//static auto obos_utils_bitfield_setBit = (void(*)(obos::utils::Bitfield*, UINT8_T))GET_FUNC_ADDR(&_ZN4obos5utils8Bitfield6setBitEh);
+
+#define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && val <= ((UINTPTR_T)(rEnd)))
 
 namespace obos
 {
 	extern multiboot_info_t* g_multibootInfo;
 	namespace memory
 	{
-		utils::Bitfield g_availablePages[g_countPages / 32];
+		utils::RawBitfield g_availablePages[g_countPages / 32];
 		SIZE_T g_physicalMemorySize = 0;
 		bool g_physicalMemoryManagerInitialized = false;
+
+		static SIZE_T s_availablePagesIndex = 64;
+		static SIZE_T s_availablePagesBit = 0;
 
 		static SIZE_T addressToIndex(UINTPTR_T address, SIZE_T* bit)
 		{
@@ -34,6 +39,21 @@ namespace obos
 		{
 			return ((index << 5) << 12) + (bit << 12);
 		}
+		static bool isAddressUsed(UINTPTR_T address)
+		{
+			if (inRange(address, 0, &endImage - 1))
+				return false;
+			for (multiboot_memory_map_t* current = (multiboot_memory_map_t*)g_multibootInfo->mmap_addr;
+				current != (multiboot_memory_map_t*)(g_multibootInfo->mmap_addr + g_multibootInfo->mmap_length);
+				current++)
+			{
+				if (current->type != MULTIBOOT_MEMORY_AVAILABLE && current->addr >= (UINTPTR_T)&endImage)
+					if (inRange(address, current->addr, current->addr + ((((current->len >> 12) + 1) << 12))))
+						return false;
+			}
+			return true;
+		}
+
 
 		bool InitializePhysicalMemoryManager()
 		{
@@ -42,13 +62,13 @@ namespace obos
 			if (g_physicalMemoryManagerInitialized)
 				return false;
 			for (SIZE_T i = 0; i < g_countPages / 32; i++)
-				g_availablePages[i] = utils::Bitfield();
+				g_availablePages[i] = 0;
 			UINT32_T bit = 0;
 			for (multiboot_memory_map_t* current = (multiboot_memory_map_t*)g_multibootInfo->mmap_addr;
 				current != (multiboot_memory_map_t*)(g_multibootInfo->mmap_addr + g_multibootInfo->mmap_length);
 				current++)
 			{
-				if (current->type != MULTIBOOT_MEMORY_AVAILABLE || current->addr == 0x00000000)
+				if (current->type != MULTIBOOT_MEMORY_AVAILABLE && current->addr >= (UINTPTR_T)&endImage)
 				{
 					UINT64_T limit = (((current->len >> 12) + 1) << 12) + current->addr;
 					if (limit > 0xFFFFFFFF)
@@ -63,64 +83,97 @@ namespace obos
 						// Trigger warning.
 						if (*(UINT32_T*)obj == 0xFFFFFFFF)
 							continue;
-						obos_utils_bitfield_setBit(obj, bit);
+						utils::setBitInBitfield(*obj, bit);
 					}
 				}
 				g_physicalMemorySize += current->len;
 			}
-			// Takes too long.
-			/*const UINTPTR_T begin = ((g_physicalMemorySize >> 12) + 1) << 12;
-			for (UINTPTR_T addr = begin; addr < 0xFFFFFFFF && addr >= begin; addr += 4096, bit = 0)
+			for (UINTPTR_T addr = 0; addr < (UINTPTR_T)&endImage; addr += 4096, bit = 0)
 			{
 				auto index = addressToIndex(addr, &bit);
 				auto* obj = &g_availablePages[index];
 				if (*(UINT32_T*)obj == 0xFFFFFFFF)
 					continue;
-				obos_utils_bitfield_setBit(obj, bit);
-			}*/
+				utils::setBitInBitfield(*obj, bit);
+			}
+			s_availablePagesIndex = addressToIndex((UINTPTR_T)&endImage, &s_availablePagesBit);
 			return g_physicalMemoryManagerInitialized = true;
 		}
-
-		static SIZE_T s_avaliablePagesIndex = 0;
-		static SIZE_T s_avaliablePagesBit = 0;
 
 		PVOID kalloc_physicalPages(SIZE_T nPages)
 		{
 			for (int tries = 0; tries < 8 && g_physicalMemoryManagerInitialized; tries++)
 			{
-				for (; s_avaliablePagesIndex < g_countPages / 32; s_avaliablePagesIndex++)
+				if (tries)
 				{
-					if (g_availablePages[s_avaliablePagesIndex])
-						continue;
-					for (; s_avaliablePagesBit < 32; s_avaliablePagesBit++)
+					s_availablePagesBit++;
+					if (s_availablePagesBit > 31)
 					{
-						if (!g_availablePages[s_avaliablePagesIndex][s_avaliablePagesBit])
+						s_availablePagesBit = 0;
+						s_availablePagesIndex++;
+					}
+				}/*
+				if (s_availablePages && s_availablePages < nPages)
+				{
+					s_availablePagesBit += s_availablePages;
+					if (s_availablePagesBit > 31)
+					{
+						s_availablePagesBit -= 32;
+						s_availablePagesIndex++;
+					}
+				}*/
+				for (; s_availablePagesIndex < g_countPages / 32; s_availablePagesIndex++)
+				{
+					if (g_availablePages[s_availablePagesIndex] == 0xFFFFFFFF)
+						continue;
+					for (; s_availablePagesBit < 32; s_availablePagesBit++)
+					{
+						if (!utils::testBitInBitfield(g_availablePages[s_availablePagesIndex], s_availablePagesBit))
 							break;
 					}
-					if(!g_availablePages[s_avaliablePagesIndex][s_avaliablePagesBit])
+					if(!utils::testBitInBitfield(g_availablePages[s_availablePagesIndex], s_availablePagesBit))
 						break;
 				}
-				UINTPTR_T address = indexToAddress(s_avaliablePagesIndex, s_avaliablePagesBit);
+				UINTPTR_T address = indexToAddress(s_availablePagesIndex, s_availablePagesBit);
 				UINT32_T bit = 0;
 				for (SIZE_T i = 0; i < nPages; i++, address += 4096)
 				{
-					if (g_availablePages[addressToIndex(address, &bit)][bit])
+					if (!isAddressUsed(address) || utils::testBitInBitfield(g_availablePages[addressToIndex(address, &bit)], bit))
 					{
 						address = 0;
 						break;
 					}
 				}
-				if (!address ||
-					 address > ((g_physicalMemorySize >> 12) << 12))
+				if (!address)
 					continue;
 				UINTPTR_T base = 0;
-				for (base = address = indexToAddress(s_avaliablePagesIndex, s_avaliablePagesBit);
+				for (base = address = indexToAddress(s_availablePagesIndex, s_availablePagesBit);
 					address != (base + nPages * 4096);
 					address += 4096)
-					g_availablePages[s_avaliablePagesIndex = addressToIndex(address, &s_avaliablePagesBit)].setBit(s_avaliablePagesBit);
+					utils::setBitInBitfield(g_availablePages[s_availablePagesIndex = addressToIndex(address, &s_availablePagesBit)], s_availablePagesBit);
+				if (!base)
+					continue;
 				return (PVOID)base;
 			}
 			return nullptr;
+		}
+		INT kfree_physicalPages(PVOID _base, SIZE_T nPages)
+		{
+			UINTPTR_T base = (UINTPTR_T)_base;
+			base = (base << 12) << 12;
+			UINTPTR_T end = base + (nPages << 12);
+			UINT32_T bit = 0;
+			UINT32_T index = addressToIndex(base, &bit);
+			if (!nPages || !isAddressUsed(base))
+				return -1;
+			for (UINTPTR_T address = base; address < end; address += 4096, index = addressToIndex(base, &bit))
+				if (!utils::testBitInBitfield(g_availablePages[index], bit))
+					return -1;
+			s_availablePagesIndex = addressToIndex(base, &s_availablePagesBit);
+			//s_availablePages = nPages;
+			for (UINTPTR_T address = base; address < end; address += 4096, index = addressToIndex(base, &bit))
+				utils::clearBitInBitfield(g_availablePages[index], bit);
+			return nPages;
 		}
 	}
 	// namespace memory

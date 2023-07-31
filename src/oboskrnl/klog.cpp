@@ -11,8 +11,10 @@ namespace obos
 {
 	void _kpanic(CSTRING message)
 	{
-		SetConsoleColor(ConsoleColor::WHITE, ConsoleColor::RED);
+		// Does what we want to do, set the background colour to red, set the foreground colour to white, clear the screen, and reset the cursor position.
+		InitializeConsole(ConsoleColor::WHITE, ConsoleColor::RED);
 		ConsoleOutputString(message);
-		while (1);
+		asm volatile("cli;"
+					 "hlt");
 	}
 }

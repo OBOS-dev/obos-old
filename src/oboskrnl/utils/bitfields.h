@@ -4,6 +4,8 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
+#pragma once
+
 #include <types.h>
 
 #define GET_FUNC_ADDR(f) ((UINTPTR_T)(f))
@@ -12,6 +14,8 @@ namespace obos
 {
 	namespace utils
 	{
+		// Bare functions. Use if polymorphism isn't working correctly.
+
 		void setBitInBitfield(UINT32_T& bitfield, UINT8_T bit);
 		void clearBitInBitfield(UINT32_T& bitfield, UINT8_T bit);
 		bool testBitInBitfield(const UINT32_T& bitfield, UINT8_T bit);
@@ -27,7 +31,7 @@ namespace obos
 
 			virtual bool operator[](UINT32_T bitmask) const;
 
-			explicit virtual operator UINT32_T();
+			virtual explicit operator UINT32_T();
 			virtual operator bool();
 		protected:
 			UINT32_T m_bitfield;
@@ -55,5 +59,6 @@ namespace obos
 		};
 	
 		using BitfieldBitmask = BitfieldBase;
+		using RawBitfield = UINT32_T;
 	}
 }
