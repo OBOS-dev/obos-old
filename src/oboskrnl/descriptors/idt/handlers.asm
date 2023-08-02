@@ -88,14 +88,17 @@ isr_common_stub:
     lea ebx, [ebx*4]
     lea eax, [_ZN4obos19g_interruptHandlersE+ebx]
     call [eax]
-    
+    ; Pop the pointer.
     lea esp, [esp+4]
+    
+;   Restore the pushed registers.
+
     pop eax
     mov ds, ax
 
-;   Restore the pushed registers.
     popad
 ;   Pop the interrupt number and error code.
     lea esp, [esp+8]
+
 ;   Finally return from the interrupt.
     iret

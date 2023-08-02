@@ -132,4 +132,18 @@ namespace obos
 		UINT8_T isr_register = recvCommandByte();
 		return utils::testBitInBitfield(isr_register, interrupt);
 	}
+
+	void SendEOI(DWORD irqNumber)
+	{
+		Pic masterPic{ obos::Pic::PIC1_CMD, obos::Pic::PIC1_DATA };
+		if (irqNumber < 7 && masterPic.issuedInterrupt(irqNumber))
+			masterPic.sendEOI();
+		if (irqNumber > 7)
+		{
+			masterPic.setPorts(obos::Pic::PIC2_CMD, obos::Pic::PIC2_DATA);
+			// masterPic is now slavePic.
+			if (masterPic.issuedInterrupt(irqNumber))
+				masterPic.sendEOI();
+		}
+	}
 }

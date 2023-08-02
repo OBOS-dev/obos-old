@@ -5,14 +5,23 @@
 set_source_files_properties(SOURCE "crti/src/crti.S" ASM-ATT)
 set_source_files_properties(SOURCE "crti/src/crte.S" ASM-ATT)
 
-set(oboskrnl_cxxSources "boot/kmain.cpp"      "console.cpp"             "klog.cpp"                     "inline-asm.cpp"
-                        "klog.cpp"            "descriptors/gdt/gdt.cpp" "descriptors/idt/idt.cpp"      "memory_manager/physical.cpp"
-                        "utils/bitfields.cpp" "descriptors/idt/pic.cpp" "memory_manager/paging/init.cpp")
-set(oboskrnl_headers "types.h"           "boot/multiboot.h"      "console.h"             "klog.h"
-                     "inline-asm.h"      "descriptors/gdt/gdt.h"                                "descriptors/idt/idt.h" "memory_manager/physical.h"
-                     "utils/bitfields.h" "descriptors/idt/pic.h" "memory_manager/paging/init.h")
+set(oboskrnl_cxxSources "boot/kmain.cpp"            "console.cpp"                              "klog.cpp"                           "inline-asm.cpp"
+                        "klog.cpp"                  "descriptors/gdt/gdt.cpp"                  "descriptors/idt/idt.cpp"            "memory_manager/physical.cpp"
+                        "utils/bitfields.cpp"       "descriptors/idt/pic.cpp"                  "memory_manager/paging/init.cpp"     "memory_manager/paging/allocate.cpp"
+                        "utils/memory.cpp"          "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.c" "external/list/list_iterator.c"
+                        "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "multitasking/threadHandle.cpp"
+                        "multitasking/thread.cpp"
+)
+
+set(oboskrnl_headers "types.h"                            "boot/multiboot.h"      "console.h"             "klog.h"
+                     "inline-asm.h"                       "descriptors/gdt/gdt.h"                                "descriptors/idt/idt.h"            "memory_manager/physical.h"
+                     "utils/bitfields.h"                  "descriptors/idt/pic.h" "memory_manager/paging/init.h" "memory_manager/paging/allocate.h" "utils/memory.h"
+                     "memory_manager/liballoc/liballoc.h" "utils/list.h"          "external/list/list.h"         "multitasking/threadHandle.h"      "multitasking/multitasking.h"
+)
+
 set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm" "descriptors/idt/idt.asm" "descriptors/idt/handlers.asm"
-                        "memory_manager/paging/init.asm")
+                        "memory_manager/paging/init.asm" "multitasking/multitasking.asm"
+)
 
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cxxSources} ${oboskrnl_headers})
 
@@ -20,7 +29,7 @@ add_executable(oboskrnl ${oboskrnl_files})
 target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=misleading-indentation> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-builtin-declaration-mismatch> 
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=unknown-pragmas>
-                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++17>
+                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>)
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}")
 target_link_options(oboskrnl 
@@ -28,7 +37,7 @@ target_link_options(oboskrnl
     PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crti.S" 
     PUBLIC "${CRTBEGIN_DIRECTORY}/crtbegin.o"
     PUBLIC "${CRTBEGIN_DIRECTORY}/crtend.o"
-    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crte.S"
+    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crtn.S"
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/oboskrnl.map"
     PUBLIC "-ffreestanding"
     PUBLIC "-nostdlib"

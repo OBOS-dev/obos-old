@@ -8,8 +8,6 @@
 
 #include <types.h>
 
-#define GET_FUNC_ADDR(f) ((UINTPTR_T)(f))
-
 namespace obos
 {
 	namespace utils
@@ -49,7 +47,7 @@ namespace obos
 
 			virtual operator bool();
 		};
-		class IntegerBitfield final : public Bitfield
+		class IntegerBitfield : public Bitfield
 		{
 		public:
 			IntegerBitfield();

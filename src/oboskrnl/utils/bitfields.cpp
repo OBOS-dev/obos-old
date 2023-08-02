@@ -110,7 +110,7 @@ namespace obos
 		}
 		void clearBitInBitfield(UINT32_T& bitfield, UINT8_T bit)
 		{
-			bitfield &= (1 << bit);
+			bitfield &= ~(1 << bit);
 		}
 		bool testBitInBitfield(const UINT32_T& bitfield, UINT8_T bit)
 		{

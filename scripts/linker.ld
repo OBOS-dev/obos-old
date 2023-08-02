@@ -5,7 +5,7 @@
 */
 
 ENTRY(_start)
- 
+
 SECTIONS
 {
 	. = 1M;
@@ -35,6 +35,6 @@ SECTIONS
 		*(.bss)
 	}
 	
-	_ZN4obos6memory8endImageE = 0x800000;
-	_ZN4obos6memory9endKernelE = 0x1100000;
 }
+_ZN4obos6memory8endImageE = 0x800000;
+_ZN4obos6memory9endKernelE = 0x1100000;

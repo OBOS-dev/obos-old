@@ -12,8 +12,9 @@
 #	define attribute(exp)
 #endif
 
+#define NULLPTR nullptr
 #ifndef NULL
-#	define NULL 0
+#	define NULL ((DWORD)0)
 #endif
 #define NUL		((CHAR)0)
 

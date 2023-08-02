@@ -51,4 +51,5 @@ namespace obos
 
 		static inline constexpr UINT8_T s_picEOI = 0x20;
 	};
+	void SendEOI(DWORD irqNumber);
 }

@@ -138,7 +138,8 @@ namespace obos
 				UINT32_T bit = 0;
 				for (SIZE_T i = 0; i < nPages; i++, address += 4096)
 				{
-					if (!isAddressUsed(address) || utils::testBitInBitfield(g_availablePages[addressToIndex(address, &bit)], bit))
+					UINT32_T index = addressToIndex(address, &bit);
+					if (!isAddressUsed(address) || utils::testBitInBitfield(g_availablePages[index], bit))
 					{
 						address = 0;
 						break;
@@ -149,8 +150,8 @@ namespace obos
 				UINTPTR_T base = 0;
 				for (base = address = indexToAddress(s_availablePagesIndex, s_availablePagesBit);
 					address != (base + nPages * 4096);
-					address += 4096)
-					utils::setBitInBitfield(g_availablePages[s_availablePagesIndex = addressToIndex(address, &s_availablePagesBit)], s_availablePagesBit);
+					address += 4096, s_availablePagesIndex = addressToIndex(address, &s_availablePagesBit))
+					utils::setBitInBitfield(g_availablePages[s_availablePagesIndex], s_availablePagesBit);
 				if (!base)
 					continue;
 				return (PVOID)base;
@@ -160,7 +161,7 @@ namespace obos
 		INT kfree_physicalPages(PVOID _base, SIZE_T nPages)
 		{
 			UINTPTR_T base = (UINTPTR_T)_base;
-			base = (base << 12) << 12;
+			base = (base >> 12) << 12;
 			UINTPTR_T end = base + (nPages << 12);
 			UINT32_T bit = 0;
 			UINT32_T index = addressToIndex(base, &bit);

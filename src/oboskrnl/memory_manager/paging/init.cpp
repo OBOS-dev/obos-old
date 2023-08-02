@@ -12,13 +12,22 @@
 #define indexToAddress(index, pageTableIndex) ((UINTPTR_T)(((index) << 22) + ((pageTableIndex) << 12)))
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && val <= ((UINTPTR_T)(rEnd)))
 
+extern "C" char _ZN4obos6memory13PageDirectoryC1Ev;
+
 namespace obos
 {
 	namespace memory
 	{
+		bool g_enabledPaging = false;
+
 		PageDirectory::PageDirectory()
 		{
 			init();
+		}
+		PageDirectory::PageDirectory(UINTPTR_T* array)
+		{
+			m_array = array;
+			m_initialized = true;
 		}
 
 		void PageDirectory::init()
@@ -26,7 +35,14 @@ namespace obos
 			if (m_initialized)
 				destroy();
 			m_array = (UINTPTR_T*)kalloc_physicalPages(1);
-			m_initialized = true;
+			m_owns = m_initialized = true;
+		}
+
+		void PageDirectory::switchToThis()
+		{
+			if (!m_initialized)
+				return;
+			switchToThisAsm((UINTPTR_T)m_array);
 		}
 
 		UINTPTR_T* PageDirectory::getPageTableAddress(UINT16_T pageTable)
@@ -44,7 +60,7 @@ namespace obos
 
 		void PageDirectory::destroy()
 		{
-			if (m_initialized)
+			if (m_initialized && m_owns)
 			{
 				// the next two lines are fine, look in kfree_physicalPages before changing them.
 				for (int i = 0; i < 1024; i++)
@@ -62,26 +78,38 @@ namespace obos
 		{
 			return base >> 22;
 		}
+		UINT16_T PageDirectory::addressToPageTableIndex(UINTPTR_T base)
+		{
+			return (base >> 12) % 1024;
+		}
 
-		PageDirectory g_pageDirectory;
+		extern void enablePaging();
 		
+		PageDirectory* g_pageDirectory;
+		UINTPTR_T attribute(aligned(4096)) g_kernelPageDirectory[1024];
+
 		void InitializePaging()
 		{
-			// I should really stop doing this...
-			extern char _ZN4obos6memory13PageDirectoryC1Ev;
-			auto constructor = (void(*)(obos::memory::PageDirectory* _this))GET_FUNC_ADDR(_ZN4obos6memory13PageDirectoryC1Ev);
-			constructor(&g_pageDirectory);
-			*g_pageDirectory.getPageTableAddress(0) = (UINTPTR_T)kalloc_physicalPages(1);
+			/*auto constructor = (void(*)(obos::memory::PageDirectory* _this))GET_FUNC_ADDR(&_ZN4obos6memory13PageDirectoryC1Ev);
+			constructor(g_pageDirectory);*/
+			if (g_enabledPaging)
+				return;
+			*g_pageDirectory->getPageTableAddress(0) = (UINTPTR_T)kalloc_physicalPages(1);
+			*g_pageDirectory->getPageTableAddress(0) |= 3;
 			for(UINTPTR_T i = 0, address = 0; i < 1024; i++, address += 4096)
 			{
-				utils::IntegerBitfield flags = indexToAddress(0, i);
+				if (i != 1023)
+					*g_pageDirectory->getPageTableAddress(i + 1) = 2;
+				utils::IntegerBitfield flags;
+				flags.setBitfield(indexToAddress(0, i));
 				flags.setBit(0);
-				flags.setBit(1);
-				if (inRange(address, 0x100000, (UINTPTR_T)&__erodata))
-					flags.clearBit(1);
-				g_pageDirectory.getPageTable(0)[i] = flags;
+				if (!inRange(address, 0x100000, (UINTPTR_T)&__erodata))
+					flags.setBit(1);
+				g_pageDirectory->getPageTable(0)[i] = flags.operator UINT32_T();
 			}
-			g_pageDirectory.switchToThis();
+			g_pageDirectory->switchToThis();
+			enablePaging();
+			g_enabledPaging = true;
 		}
 	}
 }

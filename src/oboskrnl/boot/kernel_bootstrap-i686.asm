@@ -25,9 +25,14 @@ segment .bss
 _ZN4obos12stack_bottomE:
     RESB 16384
 _ZN4obos9stack_topE:
+_ZN4obos15thrstack_bottomE:
+    RESB 16384
+_ZN4obos12thrstack_topE:
 
 global _ZN4obos9stack_topE
 global _ZN4obos12stack_bottomE
+global _ZN4obos12thrstack_topE
+global _ZN4obos15thrstack_bottomE
 ; global test_program
 
 extern _ZN4obos5kmainEP14multiboot_infoj
@@ -58,8 +63,7 @@ _start:
     call _fini
 
     ; Hold the machine.
-.loop: pause
-       jmp .loop
+    db 0xEB, 0xFE
 
     ; Shouldn't get hit. Only here for completeness.
     ret
