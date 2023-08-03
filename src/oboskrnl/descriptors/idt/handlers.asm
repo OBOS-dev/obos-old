@@ -65,6 +65,7 @@ ISR_NOERRCODE 44
 ISR_NOERRCODE 45
 ISR_NOERRCODE 46
 ISR_NOERRCODE 47
+ISR_NOERRCODE 48
 
 segment data
 global _ZN4obos19g_interruptHandlersE
@@ -87,7 +88,14 @@ isr_common_stub:
     push eax
     lea ebx, [ebx*4]
     lea eax, [_ZN4obos19g_interruptHandlersE+ebx]
+
+    test eax, eax
+    jz .finished
+
     call [eax]
+
+.finished:
+
     ; Pop the pointer.
     lea esp, [esp+4]
     

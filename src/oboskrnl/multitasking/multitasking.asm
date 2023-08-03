@@ -11,6 +11,7 @@ segment .text
 _ZN4obos12multitasking15switchToTaskAsmEv:
     push dword [eax+52]
     popfd
+    sti
 
     mov edi, [eax+4]
     mov esi, [eax+8]

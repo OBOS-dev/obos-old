@@ -38,13 +38,12 @@ namespace obos
 		{
 			g_currentThread = newThread;
 			asm volatile("mov %0, %%eax" :
-										: "memory"(&g_currentThread->frame));
+										 : "memory"(&g_currentThread->frame));
 			switchToTaskAsm();
 		}
 
 		void findNewTask(const interrupt_frame* frame)
 		{
-			SendEOI(frame->intNumber - 32);
 			if (g_currentThread)
 				g_currentThread->frame = *frame;
 			else
@@ -52,6 +51,7 @@ namespace obos
 			
 			// Tf all threads were ran, then clear the amount of iterations.
 
+			EnterKernelSection();
 			Thread* currentThread = nullptr;
 			for (int i = 0; i < 4 && !currentThread; i++)
 			{
@@ -59,7 +59,6 @@ namespace obos
 				for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
 				{
 					currentThread = (Thread*)node->val;
-					list_iterator_destroy(iter);
 					break;
 				}
 				list_iterator_destroy(iter);
@@ -77,12 +76,21 @@ namespace obos
 			list_node_t* currentNode = nullptr;
 
 			// Find a new task.
-			for (int i = 4; i > -1; i--)
+			for (int i = 3; i > -1 && !currentNode; i--)
 			{
-				list_iterator_t* iter = list_iterator_new(g_threadPriorityList[i], LIST_HEAD);
+				list_iterator_t* iter = list_iterator_new(g_threadPriorityList[i], LIST_TAIL);
 				for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
 				{
 					currentThread = (Thread*)node->val;
+					if (utils::testBitInBitfield(currentThread->status, 3))
+					{
+						if (currentThread->isBlockedCallback)
+							if (currentThread->isBlockedCallback(currentThread, currentThread->isBlockedUserdata))
+								utils::clearBitInBitfield(currentThread->status, 3);
+							else {}
+						else
+							currentThread->status = (UINT32_T)Thread::status_t::DEAD;
+					}
 					if (canRanTask(currentThread))
 					{
 						currentNode = node;
@@ -94,9 +102,12 @@ namespace obos
 			}
 			if (!currentNode)
 				goto findNew;
+			LeaveKernelSection();
+			if (frame->intNumber != 0x30)
+				SendEOI(frame->intNumber - 32);
 			if (currentThread == g_currentThread)
 				return;
-
+			switchToTask(currentThread);
 		}
 
 		void InitializeMultitasking()
@@ -104,7 +115,7 @@ namespace obos
 			EnterKernelSection();
 			g_threads = list_new();
 			for(int i = 0; i < 4; g_threadPriorityList[i++] = list_new());
-			Thread* kmainThread = new Thread{};
+			Thread* kmainThread = g_currentThread = new Thread{};
 			kmainThread->tid = 0;
 			kmainThread->frame.eip = GET_FUNC_ADDR(kmainThr);
 			kmainThread->frame.esp = GET_FUNC_ADDR(&thrstack_top);
@@ -132,6 +143,7 @@ namespace obos
 			
 			masterPic.enableIrq(0);
 			RegisterInterruptHandler(0x20, findNewTask);
+			RegisterInterruptHandler(0x30, findNewTask);
 			LeaveKernelSection();
 			// Just in case.
 			asm volatile("mov %0, %%eax" :

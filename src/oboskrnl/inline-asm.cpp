@@ -4,8 +4,9 @@
     Copyright (c) 2023 Omar Berrow
 */
 
-#include "inline-asm.h"
-#include "types.h"
+#include <inline-asm.h>
+#include <types.h>
+#include <descriptors/idt/pic.h>
 
 void outb(UINT16_T port, UINT8_T val)
 {
@@ -328,6 +329,7 @@ namespace obos
     
     void EnterKernelSection()
     {
+        Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).disableIrq(0);
         asm volatile("cli");
         inKernelSection = true;
         countCalled++;
@@ -340,5 +342,6 @@ namespace obos
             return;
         inKernelSection = false;
         asm volatile("sti");
+        Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(0);
     }
 }

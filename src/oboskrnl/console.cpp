@@ -123,7 +123,7 @@ namespace obos
 		}
 		case '\t':
 		{
-			DWORD x = (s_terminalColumn / 8 + 1) * 8;
+			DWORD x = ((s_terminalColumn >> 2) + 1) << 2;
 			DWORD y = 0;
 			if (!s_reachedEndTerminal)
 				y = s_terminalRow;
@@ -153,7 +153,7 @@ namespace obos
 			break;
 		default:
 		{
-			if (++s_terminalColumn > s_framebufferWidth)
+			if (++s_terminalColumn >= s_framebufferWidth)
 			{
 				s_terminalColumn = 0;
 				on_newline();

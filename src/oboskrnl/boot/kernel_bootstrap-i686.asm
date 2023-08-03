@@ -50,18 +50,11 @@ _start:
     mov esp, _ZN4obos9stack_topE
     xor ebp, ebp
 
+    ; Call the kernel.
     push eax
     push ebx
-
-    ; Call "_init"
-    call _init
-
-    ; Call the kernel.
     call _ZN4obos5kmainEP14multiboot_infoj
     
-    ; Call "_fini"
-    call _fini
-
     ; Hold the machine.
     db 0xEB, 0xFE
 

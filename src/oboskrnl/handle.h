@@ -17,10 +17,11 @@ namespace obos
 		{
 			abstract,
 			thread,
+			mutex
 		};
 
 	public:
-		Handle();
+		Handle() = default;
 
 		constexpr static handleType getType()
 		{
@@ -29,11 +30,13 @@ namespace obos
 		virtual Handle* duplicate() = 0;
 		virtual int closeHandle() = 0;
 
+		SIZE_T& getReferences() { return m_origin->m_references; }
+		
 		virtual ~Handle() {}
 	protected:
-		[[maybe_unused]] void* m_value;
+		void* m_value;
 		Handle* m_origin;
 		// If m_origin != this this field is unused.
-		[[maybe_unused]] SIZE_T m_references = 0;
+		SIZE_T m_references = 0;
 	};
 }

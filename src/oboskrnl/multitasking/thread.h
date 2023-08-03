@@ -51,31 +51,30 @@ namespace obos
 
 			bool CreateThread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages);
 
-			void SetThreadPriority(priority_t newPriority)
-			{
-				priority = newPriority;
-			}
-			void SetThreadStatus(utils::RawBitfield newStatus)
-			{
-				status = newStatus;
-			}
-
-			priority_t GetThreadPriority()
-			{
-				return priority;
-			}
-			utils::RawBitfield GetThreadStatus()
-			{
-				return status;
-			}
-			Tid GetTid()
-			{
-				return tid;
-			}
-			DWORD GetExitCode()
-			{
-				return exitCode;
-			}
+			//void SetThreadPriority(priority_t newPriority)
+			//{
+			//	priority = newPriority;
+			//}
+			//void SetThreadStatus(utils::RawBitfield newStatus)
+			//{
+			//	status = newStatus;
+			//}
+			//priority_t GetThreadPriority()
+			//{
+			//	return priority;
+			//}
+			//utils::RawBitfield GetThreadStatus()
+			//{
+			//	return status;
+			//}
+			//Tid GetTid()
+			//{
+			//	return tid;
+			//}
+			//DWORD GetExitCode()
+			//{
+			//	return exitCode;
+			//}
 
 			virtual ~Thread()
 			{
@@ -92,6 +91,8 @@ namespace obos
 			DWORD lastError = 0;
 			priority_t priority = priority_t::IDLE;
 			utils::RawBitfield status;
+			bool(*isBlockedCallback)(Thread* _this, PVOID userData) = nullptr;
+			PVOID isBlockedUserdata = nullptr;
 			interrupt_frame frame;
 			SIZE_T iterations;
 		};

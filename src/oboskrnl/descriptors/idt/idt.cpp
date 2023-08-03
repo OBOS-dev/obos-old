@@ -55,6 +55,7 @@ extern "C" void isr44();
 extern "C" void isr45();
 extern "C" void isr46();
 extern "C" void isr47();
+extern "C" void isr48();
 
 namespace obos
 {
@@ -131,6 +132,7 @@ s_idtEntries[interrupt] = IdtEntry((UINTPTR_T)isr ##interrupt, 0x08, 0x8E);
 		REGISTER_INTERRUPT(45);
 		REGISTER_INTERRUPT(46);
 		REGISTER_INTERRUPT(47);
+		REGISTER_INTERRUPT(48);
 
 		s_idtPointer.limit = sizeof(s_idtEntries) - 1;
 		s_idtPointer.base  = (UINTPTR_T)&s_idtEntries;

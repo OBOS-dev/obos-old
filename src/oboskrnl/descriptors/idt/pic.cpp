@@ -135,6 +135,8 @@ namespace obos
 
 	void SendEOI(DWORD irqNumber)
 	{
+		if (irqNumber > 15)
+			return;
 		Pic masterPic{ obos::Pic::PIC1_CMD, obos::Pic::PIC1_DATA };
 		if (irqNumber < 7 && masterPic.issuedInterrupt(irqNumber))
 			masterPic.sendEOI();

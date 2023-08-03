@@ -8,6 +8,8 @@
 
 #include <utils/list.h>
 
+#include <multitasking/thread.h>
+
 namespace obos
 {
 	namespace multitasking
@@ -18,6 +20,8 @@ namespace obos
 		// g_threadPriorityList[2] is for normal-priority threads.
 		// g_threadPriorityList[3] is for high-priority threads.
 		extern list_t* g_threadPriorityList[4];
+		extern Thread* g_currentThread;
+
 		void InitializeMultitasking();
 	}
 }

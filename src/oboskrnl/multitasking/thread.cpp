@@ -58,15 +58,19 @@ namespace obos
 			exitCode = 0;
 
 			UINT32_T* stack = (UINT32_T*)memory::VirtualAlloc(nullptr, stackSizePages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
+			if (!stack)
+				return false;
 			stack += stackSizePages * 1024;
 			stack -= 1;
-			*stack = (UINT32_T)entry;
-			stack -= 1;
 			*stack = (UINT32_T)userData;
+			stack -= 1;
+			*stack = (UINT32_T)entry;
 
 			frame.esp = (UINTPTR_T)stack;
 			frame.ebp = (UINTPTR_T)stack;
 			frame.eip = (UINTPTR_T)entry;
+
+			utils::setBitInBitfield(frame.eflags, 9);
 
 			list_rpush(g_threads, list_node_new(this));
 			list_rpush(priorityList, list_node_new(this));

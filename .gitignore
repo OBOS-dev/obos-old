@@ -2,5 +2,3 @@
 .vs/*
 !.vs/launch.vs.json
 out/Ubuntu/*
-# Ignore the unused files in liballoc.
-src/oboskrnl/memory_manager/liballoc/unused/*

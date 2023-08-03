@@ -32,8 +32,9 @@ namespace obos
 			// Should we choose a base address?
 			if (inRange(base, nullptr, 0x3FFFFF))
 			{
-				for (int i = 0; i < 1024; i++)
+				for (int i = 1; i < 1024; i++)
 				{
+					bool breakOut = false;
 					if (*g_pageDirectory->getPageTableAddress(i) == 2)
 					{
 						base = indexToAddress(i, 0);
@@ -41,12 +42,15 @@ namespace obos
 					}
 					for(int j = 0; j < 1024; j++)
 					{
-						if (kmap_pageTable(g_pageDirectory->getPageTable(i))[j] == 2)
+						if (!utils::testBitInBitfield(kmap_pageTable(g_pageDirectory->getPageTable(i))[j], 0))
 						{
 							base = indexToAddress(i, j);
+							breakOut = true;
 							break;
 						}
 					}
+					if (breakOut)
+						break;
 				}
 			}
 			base = ROUND_ADDRESS_DOWN(base);
@@ -54,24 +58,8 @@ namespace obos
 			if (!isFree)
 				*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) = (UINTPTR_T)kalloc_physicalPages(1) | 3;
 			isFree = !isFree;
-			switch (true)
-			{
-			case true:
-			{
-				if (isFree)
-					break;
-				for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
-				{
-					UINTPTR_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address)));
-					if(pageTable[PageDirectory::addressToPageTableIndex(address)] != 2)
-					{
-						base = 0;
-						break;
-					}
-				}
-				break;
-			}
-			}
+			if (!isFree)
+				base = HasVirtualAddress((PCVOID)base, nPages) ? 0 : base;
 			if (!base)
 				return nullptr;
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
@@ -94,7 +82,7 @@ namespace obos
 			{
 				UINTPTR_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address)));
 				kfree_physicalPages((PVOID)(pageTable[PageDirectory::addressToPageTableIndex(address)] & 0xFFFFF000), 1);
-				pageTable[PageDirectory::addressToPageTableIndex(address)] = 2;
+				pageTable[PageDirectory::addressToPageTableIndex(address)] = 0;
 			}
 			UINTPTR_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(base)));
 			for (int i = 0; i < 1024; i++)
@@ -116,7 +104,7 @@ namespace obos
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
 			{
 				UINTPTR_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address)));
-				if (pageTable[PageDirectory::addressToPageTableIndex(address)] == 2)
+				if (!utils::testBitInBitfield(pageTable[PageDirectory::addressToPageTableIndex(address)], 0))
 					return false;
 			}
 			return true;
