@@ -39,6 +39,34 @@
 #error You must be using a C++ i686 compiler with elf (i686-elf-g++, for example). This compiler cannot be msvc.
 #endif
 
+constexpr char ascii_art[] = {
+ ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '_',  '_',  '_',  '_',  ' ',  ' ',  ' ',  '_',  '_',  '_',  '_',  ' ',  ' ',  ' ',
+	 ' ',  '_',  '_',  '_',  '_',  ' ',  ' ',  ' ',  ' ',  '_',  '_',  '_',  '_',  '_',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	  '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '/',  ' ',  '_',  '_',  ' ',  '\\',  ' ',  '|',  ' ',  ' ',  '_',  ' ',  '\\',
+	 ' ',  ' ',  '/',  ' ',  '_',  '_',  ' ',  '\\',  ' ',  ' ',  '/',  ' ',  '_',  '_',  '_',  '_',  '|',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',   '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '|',  ' ',  '|',  ' ',  ' ',  '|',  ' ',  '|',  '|',  ' ',  '|',  '_',
+	 ')',  ' ',  '|',  '|',  ' ',  '|',  ' ',  ' ',  '|',  ' ',  '|',  '|',  ' ',  '(',  '_',  '_',  '_',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',   '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '|',  ' ',  '|',  ' ',  ' ',  '|',  ' ',  '|',  '|',  ' ',
+	 ' ',  '_',  ' ',  '<',  ' ',  '|',  ' ',  '|',  ' ',  ' ',  '|',  ' ',  '|',  ' ',  '\\',  '_',  '_',  '_',  ' ',  '\\',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',   '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '|',  ' ',  '|',  '_',  '_',  '|',  ' ',  '|',
+	 '|',  ' ',  '|',  '_',  ')',  ' ',  '|',  '|',  ' ',  '|',  '_',  '_',  '|',  ' ',  '|',  ' ',  '_',  '_',  '_',  '_',
+	 ')',  ' ',  '|',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',   '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '\\',  '_',  '_',  '_',  '_',
+	 '/',  ' ',  '|',  '_',  '_',  '_',  '_',  '/',  ' ',  ' ',  '\\',  '_',  '_',  '_',  '_',  '/',  ' ',  '|',  '_',  '_',
+	 '_',  '_',  '_',  '/',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
+	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',   '\r', '\n'
+};
+
 namespace obos
 {
 	multiboot_info_t* g_multibootInfo = nullptr;
@@ -78,19 +106,19 @@ namespace obos
 			RegisterInterruptHandler(i, [](const interrupt_frame* frame) {
 					kpanic(kpanic_format(
 						"Unhandled exception %d at %p. Error code: %d. Dumping registers: \r\n"
-						"\tEDI: %p\r\n"
-						"\tESI: %p\r\n"
-						"\tEBP: %p\r\n"
-						"\tEBP: %p\r\n"
-						"\tEBX: %p\r\n"
-						"\tEDX: %p\r\n"
-						"\tECX: %p\r\n"
-						"\tEAX: %p\r\n"
-						"\tEIP: %p\r\n"
-						"\tEFLAGS: %p\r\n"
-						"\tSS: %p\r\n"
-						"\tDS: %p\r\n"
-						"\tCS: %p\r\n"),
+						"\\tEDI: %p\r\n"
+						"\\tESI: %p\r\n"
+						"\\tEBP: %p\r\n"
+						"\\tEBP: %p\r\n"
+						"\\tEBX: %p\r\n"
+						"\\tEDX: %p\r\n"
+						"\\tECX: %p\r\n"
+						"\\tEAX: %p\r\n"
+						"\\tEIP: %p\r\n"
+						"\\tEFLAGS: %p\r\n"
+						"\\tSS: %p\r\n"
+						"\\tDS: %p\r\n"
+						"\\tCS: %p\r\n"),
 						frame->intNumber,
 						frame->eip,
 						frame->errorCode,
@@ -108,19 +136,19 @@ namespace obos
 			UINTPTR_T location = (UINTPTR_T)memory::GetPageFaultAddress();
 			kpanic(kpanic_format(
 				"Page fault in %s-mode at %p while trying to %s a %s page. The address of that page is %p (Page directory index %d, page table index %d).\r\n Dumping registers: \r\n"
-				"\tEDI: %p\r\n"
-				"\tESI: %p\r\n"
-				"\tEBP: %p\r\n"
-				"\tESP: %p\r\n"
-				"\tEBX: %p\r\n"
-				"\tEDX: %p\r\n"
-				"\tECX: %p\r\n"
-				"\tEAX: %p\r\n"
-				"\tEIP: %p\r\n"
-				"\tEFLAGS: %p\r\n"
-				"\tSS: %p\r\n"
-				"\tDS: %p\r\n"
-				"\tCS: %p\r\n"),
+				"\\tEDI: %p\r\n"
+				"\\tESI: %p\r\n"
+				"\\tEBP: %p\r\n"
+				"\\tESP: %p\r\n"
+				"\\tEBX: %p\r\n"
+				"\\tEDX: %p\r\n"
+				"\\tECX: %p\r\n"
+				"\\tEAX: %p\r\n"
+				"\\tEIP: %p\r\n"
+				"\\tEFLAGS: %p\r\n"
+				"\\tSS: %p\r\n"
+				"\\tDS: %p\r\n"
+				"\\tCS: %p\r\n"),
 				privilegeLevel, frame->eip, action, isPresent, location,
 				memory::PageDirectory::addressToIndex(location), memory::PageDirectory::addressToPageTableIndex(location), 
 				frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
@@ -138,9 +166,11 @@ namespace obos
 
 		memory::InitializePaging();
 
-		multitasking::InitializeMultitasking();
+		ConsoleOutputString(ascii_art);
+
+		//multitasking::InitializeMultitasking();
 		// Oh no!
-		kpanic(kpanic_format("obos::kmain tried to return!"));
+		//kpanic(kpanic_format("obos::kmain tried to return!"));
 	}
 	void testThread(PVOID userData)
 	{

@@ -28,7 +28,7 @@
 - You must have an i686-elf-gcc cross-compiler. Instructions on how to get can be found here: https://wiki.osdev.org/GCC_Cross-Compiler
   You will need GCC 11.4.0 and binutils 2.40.
 - To generate the operating system's iso, you must have xorriso installed.
-______         _  _      _  _               
+--------------------------------------------
   ____        _ _     _ _             
  |  _ \      (_) |   | (_)            
  | |_) |_   _ _| | __| |_ _ __   __ _ 
@@ -42,10 +42,8 @@ ______         _  _      _  _
 git clone https://github.com/oberrow/obos.git
 
 * Second, enter the directory that the repository was cloned into.
-* Third, configure CMake with this command if you want to compile in debug mode:
-cmake ./ -G Ninja -DLINKER_SCRIPT=kernel/linker.ld "-DOUTPUT_DIR=./out" -DCMAKE_BUILD_TYPE=Debug
-or with this command for release mode:
-cmake ./ -G Ninja -DLINKER_SCRIPT=kernel/linker.ld "-DOUTPUT_DIR=./out" -DCMAKE_BUILD_TYPE=Release
+* Third, configure CMake with this command:
+cmake ./ -G Ninja -DLINKER_SCRIPT=kernel/linker.ld "-DOUTPUT_DIR=$PWD/out" -DCMAKE_BUILD_TYPE=Debug -DCRTBEGIN_DIRECTORY=$(i686-elf-g++ -print-file-name=crtbegin.o) -DCRTEND_DIRECTORY=$(i686-elf-g++ -print-file-name=crtend.o)
 
 * Fourth, build everything with this command:
 ninja -j 0 all

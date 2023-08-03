@@ -18,6 +18,7 @@ set(oboskrnl_headers "types.h"                            "boot/multiboot.h"    
                      "utils/bitfields.h"                  "descriptors/idt/pic.h"              "memory_manager/paging/init.h" "memory_manager/paging/allocate.h" 
                      "utils/memory.h"                     "memory_manager/liballoc/liballoc.h" "utils/list.h"                 "external/list/list.h"
                      "multitasking/threadHandle.h"        "multitasking/multitasking.h"        "multitasking/mutex/mutex.h"   "multitasking/mutex/mutexHandle.h"
+                     "external/font8x8_basic.h"
 )
 
 set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm" "descriptors/idt/handlers.asm"
@@ -37,8 +38,8 @@ set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${CMAKE_SOURCE_DIR}/${LI
 target_link_options(oboskrnl 
     PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}"
     PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crti.S" 
-    PUBLIC "${CRTBEGIN_DIRECTORY}/crtbegin.o"
-    PUBLIC "${CRTBEGIN_DIRECTORY}/crtend.o"
+    PUBLIC "${CRTBEGIN_DIRECTORY}"
+    PUBLIC "${CRTEND_DIRECTORY}"
     PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crtn.S"
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/oboskrnl.map"
     PUBLIC "-ffreestanding"
@@ -50,8 +51,8 @@ set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 
 message("Using linker script at " ${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT})
-message("crtbegin.o is at ${CRTBEGIN_DIRECTORY}/crtbegin.o")
-message("crtend.o is at ${CRTBEGIN_DIRECTORY}/crtend.o")
+message("crtbegin.o is at ${CRTBEGIN_DIRECTORY}")
+message("crtend.o is at ${CRTBEGIN_DIRECTORY}")
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     message("Debug configuration.")

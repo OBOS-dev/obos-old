@@ -8,6 +8,8 @@
 #include <console.h>
 #include <inline-asm.h>
 
+#include <external/font8x8_basic.h>
+
 #define UpdateCursorPosition() SetTerminalCursorPosition(s_terminalColumn, s_terminalRow)
 
 namespace obos
