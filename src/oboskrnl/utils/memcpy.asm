@@ -1,3 +1,9 @@
+; utils/memcpy.asm
+; 
+; 2023 Omar Berrow 
+;
+; This source file (this one specifically, none other, unless otherwise specified by Omar Berrow) is released into the public domain.
+
 [BITS 32]
 
 ; void* obos::utils::memcpy(PVOID dest, PCVOID src, SIZE_T size)
