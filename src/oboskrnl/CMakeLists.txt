@@ -18,11 +18,11 @@ set(oboskrnl_headers "types.h"                            "boot/multiboot.h"    
                      "utils/bitfields.h"                  "descriptors/idt/pic.h"              "memory_manager/paging/init.h" "memory_manager/paging/allocate.h" 
                      "utils/memory.h"                     "memory_manager/liballoc/liballoc.h" "utils/list.h"                 "external/list/list.h"
                      "multitasking/threadHandle.h"        "multitasking/multitasking.h"        "multitasking/mutex/mutex.h"   "multitasking/mutex/mutexHandle.h"
-                     "external/font8x8_basic.h"
+                     "new"
 )
 
-set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm" "descriptors/idt/handlers.asm"
-                        "memory_manager/paging/init.asm" "multitasking/multitasking.asm"
+set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm"  "descriptors/idt/handlers.asm"
+                        "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"
 )
 
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cxxSources} ${oboskrnl_headers})

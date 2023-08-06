@@ -67,8 +67,8 @@ namespace obos
 			*stack = (UINT32_T)entry;
 
 			frame.esp = (UINTPTR_T)stack;
-			frame.ebp = (UINTPTR_T)stack;
 			frame.eip = (UINTPTR_T)entry;
+			frame.ebp = 0;
 
 			utils::setBitInBitfield(frame.eflags, 9);
 

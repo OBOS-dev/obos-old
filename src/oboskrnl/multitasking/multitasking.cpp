@@ -25,6 +25,7 @@ namespace obos
 			nullptr, nullptr, nullptr, nullptr,
 		};
 		Thread* g_currentThread = nullptr;
+		bool g_initialized = false;
 
 		bool canRanTask(Thread* thread)
 		{
@@ -100,7 +101,7 @@ namespace obos
 				}
 				list_iterator_destroy(iter);
 			}
-			if (!currentNode)
+			if (!currentNode && (utils::testBitInBitfield(g_currentThread->status, 2) || utils::testBitInBitfield(g_currentThread->status, 3) || utils::testBitInBitfield(g_currentThread->status, 0)))
 				goto findNew;
 			LeaveKernelSection();
 			if (frame->intNumber != 0x30)
@@ -144,6 +145,7 @@ namespace obos
 			masterPic.enableIrq(0);
 			RegisterInterruptHandler(0x20, findNewTask);
 			RegisterInterruptHandler(0x30, findNewTask);
+			g_initialized = true;
 			LeaveKernelSection();
 			// Just in case.
 			asm volatile("mov %0, %%eax" :

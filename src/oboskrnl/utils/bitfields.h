@@ -16,7 +16,7 @@ namespace obos
 
 		void setBitInBitfield(UINT32_T& bitfield, UINT8_T bit);
 		void clearBitInBitfield(UINT32_T& bitfield, UINT8_T bit);
-		bool testBitInBitfield(const UINT32_T& bitfield, UINT8_T bit);
+		bool testBitInBitfield(const UINT32_T bitfield, UINT8_T bit);
 
 		class BitfieldBase
 		{

@@ -1,0 +1,22 @@
+/*
+	new
+
+	Copyright (c) 2023 Omar Berrow
+*/
+
+#pragma once
+
+#include <types.h>
+
+[[nodiscard]] PVOID operator new(size_t, void* ptr) noexcept
+{
+	return ptr;
+}
+[[nodiscard]] PVOID operator new[](size_t, void* ptr) noexcept
+{
+	return ptr;
+}
+VOID operator delete(PVOID, PVOID) noexcept
+{}
+VOID operator delete[](PVOID, PVOID) noexcept
+{}

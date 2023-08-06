@@ -21,6 +21,7 @@ namespace obos
 		// g_threadPriorityList[3] is for high-priority threads.
 		extern list_t* g_threadPriorityList[4];
 		extern Thread* g_currentThread;
+		extern bool g_initialized;
 
 		void InitializeMultitasking();
 	}

@@ -6,6 +6,7 @@
 
 #include <klog.h>
 #include <console.h>
+#include <inline-asm.h>
 
 #include <utils/memory.h>
 
@@ -33,7 +34,7 @@ static char* itoa(int value, char* result, int base) {
 	}
 	return result;
 }
-static void strreverse(char* begin, int size)
+void strreverse(char* begin, int size)
 {
 	int i = 0;
 	char tmp = 0;
@@ -90,7 +91,11 @@ static char toupper(char ch)
 
 namespace obos
 {
-	static void(*s_consoleOutputCharacter)(BYTE ch, PVOID userdata) = [](BYTE ch, PVOID) { obos::ConsoleOutputCharacter(ch); };
+	static void(*s_consoleOutputCharacter)(BYTE ch, PVOID userdata) = [](BYTE ch, PVOID) 
+	{ 
+		obos::ConsoleOutputCharacter(ch, false);
+		outb(0x3f8, ch);
+	};
 	void _vprintf(void(*printChar)(BYTE ch, PVOID userdata), PVOID printCharUserdata, CSTRING format, va_list list)
 	{
 		CSTRING _format = format;
@@ -193,20 +198,36 @@ namespace obos
 		va_list list; va_start(list, format);
 		_vprintf(s_consoleOutputCharacter, nullptr, format, list);
 		va_end(list);
+		swapBuffers();
 	}
 	void vprintf(CSTRING format, va_list list)
 	{
 		_vprintf(s_consoleOutputCharacter, nullptr, format, list);
+		swapBuffers();
 	}
 
 	void kpanic(CSTRING format, ...)
 	{
-		// Does what we want to do, set the background colour to red, set the foreground colour to white, clear the screen, and reset the cursor position.
-		InitializeConsole(ConsoleColor::LIGHT_GREY, ConsoleColor::RED);
-		
+		asm volatile("cli");
+		EnterKernelSection();
+
+		SetConsoleColor(0x00C0C0C0, 0x00FF0000);
+		extern SIZE_T s_framebufferWidth;
+		extern SIZE_T s_framebufferHeight;
+		extern DWORD s_terminalRow;
+		extern DWORD s_terminalColumn;
+		extern UINT32_T* s_framebuffer;
+		extern UINT32_T* s_backbuffer;
+		utils::dwMemset(s_framebuffer, 0x00FF0000, s_framebufferWidth * s_framebufferHeight);
+		utils::dwMemset(s_backbuffer, 0x00FF0000, s_framebufferWidth * s_framebufferHeight);
+		s_terminalRow = 0;
+		s_terminalColumn = 0;
+
 		va_list list; va_start(list, format);
 		_vprintf(s_consoleOutputCharacter, nullptr, format, list);
 		va_end(list);
+
+		swapBuffers();
 
 		asm volatile("cli;"
 					 "hlt");

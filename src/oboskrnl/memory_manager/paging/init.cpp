@@ -44,17 +44,20 @@ namespace obos
 				return;
 			switchToThisAsm((UINTPTR_T)m_array);
 		}
+		extern UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
 
 		UINTPTR_T* PageDirectory::getPageTableAddress(UINT16_T pageTable)
 		{
 			if (pageTable > 1023 || !m_initialized)
 				return nullptr;
+			//return (g_enabledPaging ? kmap_pageTable(m_array) : m_array) + pageTable;
 			return m_array + pageTable;
 		}
 		UINTPTR_T* PageDirectory::getPageTable(UINT16_T pageTable)
 		{
 			if (pageTable > 1023 || !m_initialized)
 				return nullptr;
+			//return (UINTPTR_T*)((g_enabledPaging ? kmap_pageTable(m_array) : m_array)[pageTable] & 0xFFFFF000);
 			return (UINTPTR_T*)(m_array[pageTable] & 0xFFFFF000);
 		}
 
@@ -94,8 +97,10 @@ namespace obos
 			constructor(g_pageDirectory);*/
 			if (g_enabledPaging)
 				return;
-			*g_pageDirectory->getPageTableAddress(0) = (UINTPTR_T)kalloc_physicalPages(1);
-			*g_pageDirectory->getPageTableAddress(0) |= 3;
+			UINTPTR_T* firstPageTable = g_pageDirectory->getPageTableAddress(0);
+			*firstPageTable = (UINTPTR_T)kalloc_physicalPages(1);
+			*firstPageTable |= 3;
+			UINT32_T* pageTable = (UINT32_T*)(*firstPageTable & (~3));
 			for(UINTPTR_T i = 0, address = 0; i < 1024; i++, address += 4096)
 			{
 				if (i != 1023)
@@ -105,8 +110,10 @@ namespace obos
 				flags.setBit(0);
 				if (!inRange(address, 0x100000, (UINTPTR_T)&__erodata))
 					flags.setBit(1);
-				g_pageDirectory->getPageTable(0)[i] = flags.operator UINT32_T();
+				pageTable[i] = flags.operator UINT32_T();
 			}
+			extern UINTPTR_T s_lastPageTable[1024] attribute(aligned(4096));
+			*g_pageDirectory->getPageTableAddress(1023) = (UINTPTR_T)&s_lastPageTable | 3;
 			g_pageDirectory->switchToThis();
 			enablePaging();
 			g_enabledPaging = true;

@@ -24,15 +24,19 @@ extern "C" {
 		return 0;
 	}
 
+	static size_t s_nPagesAllocated = 0;
+
 	void* liballoc_alloc(size_t nPages)
 	{
-		PVOID block = obos::memory::VirtualAlloc(0x00000000, nPages, obos::memory::VirtualAllocFlags::WRITE_ENABLED);
+		s_nPagesAllocated += nPages;
+		PVOID block = obos::memory::VirtualAlloc(nullptr, nPages, obos::memory::VirtualAllocFlags::WRITE_ENABLED);
 		if (block)
 			obos::utils::memset(block, 0, nPages * 4096);
 		return block;
 	}
 	int liballoc_free(void* block, size_t nPages)
 	{
+		s_nPagesAllocated -= nPages;
 		return obos::memory::VirtualFree(block, nPages);
 	}
 }
@@ -63,18 +67,3 @@ VOID operator delete[](PVOID block, size_t) noexcept
 {
 	kfree(block);
 }
-
-// Placement new and delete.
-
-[[nodiscard]] PVOID operator new(size_t, void* ptr) noexcept
-{
-	return ptr;
-}
-[[nodiscard]] PVOID operator new[](size_t, void* ptr) noexcept
-{
-	return ptr;
-}
-VOID operator delete(PVOID, PVOID) noexcept
-{}
-VOID operator delete[](PVOID, PVOID) noexcept
-{}

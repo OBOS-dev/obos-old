@@ -21,20 +21,23 @@ namespace obos
 
 		void Mutex::Lock(bool waitIfLocked)
 		{
-			if (m_locked && waitIfLocked)
+			if ((m_locked && !waitIfLocked) || !g_initialized)
 				return;
-			EnterKernelSection();
-			g_currentThread->isBlockedUserdata = this;
-			g_currentThread->isBlockedCallback = MutexLockCallback;
-			g_currentThread->status |= (UINT32_T)Thread::status_t::BLOCKED;
-			LeaveKernelSection();
-			_int(0x30);
+			if (m_locked)
+			{
+				EnterKernelSection();
+				g_currentThread->isBlockedUserdata = this;
+				g_currentThread->isBlockedCallback = MutexLockCallback;
+				g_currentThread->status |= (UINT32_T)Thread::status_t::BLOCKED;
+				LeaveKernelSection();
+				_int(0x30);
+			}
 			m_locked = true;
 			m_lockOwner = g_currentThread->tid;
 		}
 		void Mutex::Unlock()
 		{
-			if (g_currentThread->tid != m_lockOwner)
+			if (g_currentThread->tid != m_lockOwner || !g_initialized)
 				return;
 			m_lockOwner = (DWORD)-1;
 			m_locked = false;

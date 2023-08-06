@@ -19,9 +19,9 @@ multiboot_header:
     dd 0
 ; VGA Linear graphics mode.
     dd 0
-    dd 600
-    dd 300
-    dd 0
+    dd 1024
+    dd 768
+    dd 32
 segment .bss
 _ZN4obos12stack_bottomE:
     RESB 16384

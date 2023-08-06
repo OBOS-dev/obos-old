@@ -34,6 +34,7 @@ namespace obos
 			static UINT16_T addressToIndex(UINTPTR_T base);
 			static UINT16_T addressToPageTableIndex(UINTPTR_T base);
 		private:
+			// NOTE: Do not change the position of this variable. Don't to do it if you don't want to have a bad time.
 			UINTPTR_T* m_array = nullptr;
 			bool m_owns = false;
 			bool m_initialized = false;

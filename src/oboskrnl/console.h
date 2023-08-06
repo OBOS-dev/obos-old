@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "types.h"
+#include <types.h>
 
 namespace obos
 {
@@ -30,12 +30,15 @@ namespace obos
 		YELLOW = LIGHT_BROWN,
 		WHITE,
 	};
-	void InitializeConsole(ConsoleColor foreground, ConsoleColor background);
+	void InitializeConsole(UINT32_T foreground, UINT32_T background);
 	void SetCursor(bool status);
-	void SetConsoleColor(ConsoleColor foreground, ConsoleColor background);
-	void GetConsoleColor(ConsoleColor& foreground, ConsoleColor& background);
-	void ConsoleOutputCharacter(CHAR ch);
-	void ConsoleOutput(CSTRING message, SIZE_T size);
-	void ConsoleOutputString(CSTRING message);
+	void SetConsoleColor(UINT32_T foreground, UINT32_T background);
+	void GetConsoleColor(UINT32_T& foreground, UINT32_T& background);
+	void ConsoleOutputCharacter(CHAR ch, bool swapBuffers = true);
+	void ConsoleOutput(CSTRING message, SIZE_T size, bool swapBuffers = true);
+	void ConsoleOutputString(CSTRING message, bool swapBuffers = true);
+	void ConsoleFillLine(char ch = '-', bool _swapBuffers = true);
 	void SetTerminalCursorPosition(DWORD x, DWORD y);
+
+	void swapBuffers();
 }

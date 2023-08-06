@@ -2,4 +2,3 @@
 .vs/*
 !.vs/launch.vs.json
 out/Ubuntu/*
-/src/oboskrnl/external/bdf2c

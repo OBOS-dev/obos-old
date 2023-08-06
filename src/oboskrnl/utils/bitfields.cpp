@@ -112,10 +112,14 @@ namespace obos
 		{
 			bitfield &= ~(1 << bit);
 		}
-		bool testBitInBitfield(const UINT32_T& bitfield, UINT8_T bit)
+		bool testBitInBitfield(const UINT32_T bitfield, UINT8_T bit)
 		{
-			const UINT32_T bitmask = (1 << bit);
-			return (bitfield & bitmask) == bitmask;
+			if (!bitfield)
+				return false;
+			if (bit == 0)
+				return (bool)(bitfield & 1);
+			UINT32_T val = bitfield >> bit;
+			return val & 0b1;
 		}
 	}
 }

@@ -23,11 +23,14 @@
 
 #include <memory_manager/physical.h>
 #include <memory_manager/paging/init.h>
+#include <memory_manager/paging/allocate.h>
 
 #include <multitasking/multitasking.h>
 #include <multitasking/thread.h>
 
 #include <utils/memory.h>
+
+#include <new>
 
 #ifdef __INTELLISENSE__
 #define __i686__ 1
@@ -39,49 +42,22 @@
 #error You must be using a C++ i686 compiler with elf (i686-elf-g++, for example). This compiler cannot be msvc.
 #endif
 
-constexpr char ascii_art[] = {
- ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '_',  '_',  '_',  '_',  ' ',  ' ',  ' ',  '_',  '_',  '_',  '_',  ' ',  ' ',  ' ',
-	 ' ',  '_',  '_',  '_',  '_',  ' ',  ' ',  ' ',  ' ',  '_',  '_',  '_',  '_',  '_',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	  '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '/',  ' ',  '_',  '_',  ' ',  '\\',  ' ',  '|',  ' ',  ' ',  '_',  ' ',  '\\',
-	 ' ',  ' ',  '/',  ' ',  '_',  '_',  ' ',  '\\',  ' ',  ' ',  '/',  ' ',  '_',  '_',  '_',  '_',  '|',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',   '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '|',  ' ',  '|',  ' ',  ' ',  '|',  ' ',  '|',  '|',  ' ',  '|',  '_',
-	 ')',  ' ',  '|',  '|',  ' ',  '|',  ' ',  ' ',  '|',  ' ',  '|',  '|',  ' ',  '(',  '_',  '_',  '_',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',   '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '|',  ' ',  '|',  ' ',  ' ',  '|',  ' ',  '|',  '|',  ' ',
-	 ' ',  '_',  ' ',  '<',  ' ',  '|',  ' ',  '|',  ' ',  ' ',  '|',  ' ',  '|',  ' ',  '\\',  '_',  '_',  '_',  ' ',  '\\',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',   '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '|',  ' ',  '|',  '_',  '_',  '|',  ' ',  '|',
-	 '|',  ' ',  '|',  '_',  ')',  ' ',  '|',  '|',  ' ',  '|',  '_',  '_',  '|',  ' ',  '|',  ' ',  '_',  '_',  '_',  '_',
-	 ')',  ' ',  '|',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',   '\r',   '\n',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  '\\',  '_',  '_',  '_',  '_',
-	 '/',  ' ',  '|',  '_',  '_',  '_',  '_',  '/',  ' ',  ' ',  '\\',  '_',  '_',  '_',  '_',  '/',  ' ',  '|',  '_',  '_',
-	 '_',  '_',  '_',  '/',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',
-	 ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',  ' ',   '\r', '\n'
-};
+#define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
 
 namespace obos
 {
-	multiboot_info_t* g_multibootInfo = nullptr;
-	extern void* stack_top;
+	multiboot_info_t* g_multibootInfo;
+	memory::PageDirectory g_pageDirectory;
 
-	// I just love name mangling.
-	// _ZN4obos5kmainEP14multiboot_infoj
+	// Initial boot sequence (Initializes the gdt, the idt, paging, the console, the physical memory manager, the pic, and software multitasking.
 	void kmain(multiboot_info_t* header, DWORD magic)
 	{
-		if (magic != MULTIBOOT_BOOTLOADER_MAGIC)
-			return;
 		obos::g_multibootInfo = header;
 
-		// Initialize the console.
-		obos::InitializeConsole(obos::ConsoleColor::LIGHT_GREY, obos::ConsoleColor::BLACK);
+		if (magic != MULTIBOOT_BOOTLOADER_MAGIC)
+			return;
+		
+		EnterKernelSection();
 
 		obos::InitializeGdt();
 		obos::InitializeIdt();
@@ -92,6 +68,12 @@ namespace obos
 		currentPic.setPorts(obos::Pic::PIC2_CMD, obos::Pic::PIC2_DATA);
 		// Interrupt 40-47 (0x28-0x2f)
 		currentPic.remap(0x28, 2);
+
+		memory::InitializePhysicalMemoryManager();
+		
+		memory::g_pageDirectory = new (&g_pageDirectory) memory::PageDirectory{ (UINTPTR_T*)&memory::g_kernelPageDirectory };
+
+		memory::InitializePaging();
 
 		for(int i = 0x20; i < 0x30; i++)
 			RegisterInterruptHandler(i, [](const obos::interrupt_frame* frame) {
@@ -106,19 +88,19 @@ namespace obos
 			RegisterInterruptHandler(i, [](const interrupt_frame* frame) {
 					kpanic(kpanic_format(
 						"Unhandled exception %d at %p. Error code: %d. Dumping registers: \r\n"
-						"\\tEDI: %p\r\n"
-						"\\tESI: %p\r\n"
-						"\\tEBP: %p\r\n"
-						"\\tEBP: %p\r\n"
-						"\\tEBX: %p\r\n"
-						"\\tEDX: %p\r\n"
-						"\\tECX: %p\r\n"
-						"\\tEAX: %p\r\n"
-						"\\tEIP: %p\r\n"
-						"\\tEFLAGS: %p\r\n"
-						"\\tSS: %p\r\n"
-						"\\tDS: %p\r\n"
-						"\\tCS: %p\r\n"),
+						"\tEDI: %p\r\n"
+						"\tESI: %p\r\n"
+						"\tEBP: %p\r\n"
+						"\tEBP: %p\r\n"
+						"\tEBX: %p\r\n"
+						"\tEDX: %p\r\n"
+						"\tECX: %p\r\n"
+						"\tEAX: %p\r\n"
+						"\tEIP: %p\r\n"
+						"\tEFLAGS: %p\r\n"
+						"\tSS: %p\r\n"
+						"\tDS: %p\r\n"
+						"\tCS: %p\r\n"),
 						frame->intNumber,
 						frame->eip,
 						frame->errorCode,
@@ -134,41 +116,52 @@ namespace obos
 			const char* privilegeLevel = utils::testBitInBitfield(frame->errorCode, 2) ? "user" : "kernel";
 			const char* isPresent = utils::testBitInBitfield(frame->errorCode, 0) ? "present" : "non-present";
 			UINTPTR_T location = (UINTPTR_T)memory::GetPageFaultAddress();
-			kpanic(kpanic_format(
-				"Page fault in %s-mode at %p while trying to %s a %s page. The address of that page is %p (Page directory index %d, page table index %d).\r\n Dumping registers: \r\n"
-				"\\tEDI: %p\r\n"
-				"\\tESI: %p\r\n"
-				"\\tEBP: %p\r\n"
-				"\\tESP: %p\r\n"
-				"\\tEBX: %p\r\n"
-				"\\tEDX: %p\r\n"
-				"\\tECX: %p\r\n"
-				"\\tEAX: %p\r\n"
-				"\\tEIP: %p\r\n"
-				"\\tEFLAGS: %p\r\n"
-				"\\tSS: %p\r\n"
-				"\\tDS: %p\r\n"
-				"\\tCS: %p\r\n"),
-				privilegeLevel, frame->eip, action, isPresent, location,
-				memory::PageDirectory::addressToIndex(location), memory::PageDirectory::addressToPageTableIndex(location), 
-				frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
-				frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
-				frame->eflags,
-				frame->ss, frame->ds, frame->cs);
+			extern UINT32_T* s_backbuffer;
+			if(!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
+				kpanic(kpanic_format(
+					"Page fault in %s-mode at %p while trying to %s a %s page. The address of that page is %p (Page directory index %d, page table index %d).\r\n Dumping registers: \r\n"
+					"\tEDI: %p\r\n"
+					"\tESI: %p\r\n"
+					"\tEBP: %p\r\n"
+					"\tESP: %p\r\n"
+					"\tEBX: %p\r\n"
+					"\tEDX: %p\r\n"
+					"\tECX: %p\r\n"
+					"\tEAX: %p\r\n"
+					"\tEIP: %p\r\n"
+					"\tEFLAGS: %p\r\n"
+					"\tSS: %p\r\n"
+					"\tDS: %p\r\n"
+					"\tCS: %p\r\n"),
+					privilegeLevel, frame->eip, action, isPresent, location,
+					memory::PageDirectory::addressToIndex(location), memory::PageDirectory::addressToPageTableIndex(location), 
+					frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
+					frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
+					frame->eflags,
+					frame->ss, frame->ds, frame->cs);
+			asm volatile("cli; hlt");
 			});
 
-		asm volatile("sti");
-			
-		memory::InitializePhysicalMemoryManager();
 		
-		memory::PageDirectory g_pageDirectory{ (UINTPTR_T*)&memory::g_kernelPageDirectory };
-		memory::g_pageDirectory = &g_pageDirectory;
+		if ((g_multibootInfo->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) != MULTIBOOT_INFO_FRAMEBUFFER_INFO)
+			kpanic("No framebuffer info from the bootloader.\r\n");
+		if (g_multibootInfo->framebuffer_height != 768 || g_multibootInfo->framebuffer_width != 1024)
+			kpanic("The framebuffer set up by the bootloader is not 1024x768. Instead, it is %dx%d\r\n", g_multibootInfo->framebuffer_width, g_multibootInfo->framebuffer_height);
 
-		memory::InitializePaging();
+		UINTPTR_T limit = 0xFFFFF000;
 
-		ConsoleOutputString(ascii_art);
+		for (UINTPTR_T physAddress = g_multibootInfo->framebuffer_addr, virtAddress = 0xFFCFF000;
+			virtAddress < limit;
+			virtAddress += 4096, physAddress += 4096)
+			memory::kmap_physical((PVOID)virtAddress, 1, memory::VirtualAllocFlags::WRITE_ENABLED, (PVOID)physAddress);
 
-		//multitasking::InitializeMultitasking();
+		// Initialize the console.
+		InitializeConsole(0xFFFFFFFF, 0x00000000);
+		
+		asm volatile("sti");
+		LeaveKernelSection();
+
+		multitasking::InitializeMultitasking();
 		// Oh no!
 		//kpanic(kpanic_format("obos::kmain tried to return!"));
 	}
@@ -183,10 +176,17 @@ namespace obos
 	{
 		memory::g_pageDirectory = new memory::PageDirectory{ memory::g_kernelPageDirectory };
 
-		multitasking::Thread* newThread1 = new multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #1!\r\n", 0, 2 };
-		multitasking::Thread* newThread2 = new multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #2!\r\n", 0, 2 };
-		multitasking::Thread* newThread3 = new multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #3!\r\n", 0, 2 };
-		multitasking::Thread* newThread4 = new multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #4!\r\n", 0, 2 };
+		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
+
+		ConsoleOutput(ascii_art, ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start, false);
+		ConsoleFillLine();
+		
+		multitasking::Thread* threads = (multitasking::Thread*)kcalloc(4, sizeof(multitasking::Thread));
+
+		multitasking::Thread* newThread1 = new (threads) multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #1!\r\n", 0, 2 };
+		multitasking::Thread* newThread2 = new (threads+1) multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #2!\r\n", 0, 2 };
+		multitasking::Thread* newThread3 = new (threads+2) multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #3!\r\n", 0, 2 };
+		multitasking::Thread* newThread4 = new (threads+3) multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #4!\r\n", 0, 2 };
 
 		asm volatile(".byte 0xEB; .byte 0xFE;");
 

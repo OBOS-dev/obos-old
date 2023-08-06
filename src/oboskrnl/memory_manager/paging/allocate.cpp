@@ -17,13 +17,42 @@ namespace obos
 {
 	namespace memory
 	{
-		static UINTPTR_T s_lastPageTable[1024] attribute(aligned(4096));
-		static UINTPTR_T* kmap_pageTable(PVOID physicalAddress)
+		UINTPTR_T s_lastPageTable[1024] attribute(aligned(4096));
+		UINTPTR_T* kmap_pageTable(PVOID physicalAddress)
 		{
-			*g_pageDirectory->getPageTableAddress(1023) = (UINTPTR_T)&s_lastPageTable | 3;
+			UINT32_T* pageDirectory = *(UINT32_T**)g_pageDirectory;
+			pageDirectory[1023] = (UINTPTR_T)&s_lastPageTable | 3;
 			s_lastPageTable[1023] = (UINTPTR_T)physicalAddress;
 			s_lastPageTable[1023] |= 3;
 			return (UINTPTR_T*)0xFFFFF000;
+		}
+		void kfree_pageTable()
+		{
+			UINT32_T* pageDirectory = *(UINT32_T**)g_pageDirectory;
+			pageDirectory[1023] = (UINTPTR_T)&s_lastPageTable | 3;
+			s_lastPageTable[1023] = 0;
+		}
+		UINT32_T* kmap_physical(PVOID _base, SIZE_T nPages, utils::RawBitfield flags, PVOID physicalAddress, bool force)
+		{
+			UINTPTR_T base = ROUND_ADDRESS_DOWN(GET_FUNC_ADDR(_base));
+			bool isFree = utils::testBitInBitfield(*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)), 0);
+			if (!isFree)
+				*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) = (UINTPTR_T)kalloc_physicalPages(1) | 3;
+			isFree = !isFree;
+			if (!isFree && !force)
+				base = HasVirtualAddress((PCVOID)base, nPages) ? 0 : base;
+			if (!base)
+				return nullptr;
+			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
+			{
+				UINTPTR_T* pageTable = PageDirectory::addressToIndex(address) != 1023 ? kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address))) : 
+					(UINTPTR_T*)&s_lastPageTable;
+				pageTable[PageDirectory::addressToPageTableIndex(address)] = (UINTPTR_T)physicalAddress;
+				pageTable[PageDirectory::addressToPageTableIndex(address)] |= 1;
+				pageTable[PageDirectory::addressToPageTableIndex(address)] |= flags;
+				pageTable[PageDirectory::addressToPageTableIndex(address)] &= 0xFFFFFE07;
+			}
+			return (UINT32_T*)base;
 		}
 
 		PVOID VirtualAlloc(PVOID _base, SIZE_T nPages, utils::RawBitfield flags)
@@ -35,14 +64,15 @@ namespace obos
 				for (int i = 1; i < 1024; i++)
 				{
 					bool breakOut = false;
-					if (*g_pageDirectory->getPageTableAddress(i) == 2)
+					if (!utils::testBitInBitfield(*g_pageDirectory->getPageTableAddress(i), 0))
 					{
 						base = indexToAddress(i, 0);
 						break;
 					}
+						UINT32_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(i));
 					for(int j = 0; j < 1024; j++)
 					{
-						if (!utils::testBitInBitfield(kmap_pageTable(g_pageDirectory->getPageTable(i))[j], 0))
+						if (!utils::testBitInBitfield(pageTable[j], 0))
 						{
 							base = indexToAddress(i, j);
 							breakOut = true;
@@ -54,9 +84,12 @@ namespace obos
 				}
 			}
 			base = ROUND_ADDRESS_DOWN(base);
-			bool isFree = *g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) != 2;
+			bool isFree = utils::testBitInBitfield(*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)), 0);
 			if (!isFree)
+			{
 				*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) = (UINTPTR_T)kalloc_physicalPages(1) | 3;
+				utils::memzero(kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(base))), 4096);
+			}
 			isFree = !isFree;
 			if (!isFree)
 				base = HasVirtualAddress((PCVOID)base, nPages) ? 0 : base;
@@ -64,12 +97,16 @@ namespace obos
 				return nullptr;
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
 			{
-				UINTPTR_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address)));
-				pageTable[PageDirectory::addressToPageTableIndex(address)] = (UINTPTR_T)kalloc_physicalPages(1);
-				pageTable[PageDirectory::addressToPageTableIndex(address)] |= 1;
-				pageTable[PageDirectory::addressToPageTableIndex(address)] |= flags;
-				pageTable[PageDirectory::addressToPageTableIndex(address)] &= 0xFFFFFE07;
+				UINTPTR_T* pageTable = g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address));
+				pageTable = kmap_pageTable(pageTable);
+				UINTPTR_T entry = 0;
+				entry = (UINTPTR_T)kalloc_physicalPages(1);
+				entry |= 1;
+				entry |= flags;
+				entry &= 0xFFFFFE07;
+				*(pageTable + PageDirectory::addressToPageTableIndex(address)) = entry;
 			}
+			kfree_pageTable();
 			return (PVOID)base;
 		}
 		DWORD VirtualFree(PVOID _base, SIZE_T nPages)
@@ -104,7 +141,8 @@ namespace obos
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
 			{
 				UINTPTR_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address)));
-				if (!utils::testBitInBitfield(pageTable[PageDirectory::addressToPageTableIndex(address)], 0))
+				UINTPTR_T physAddress = pageTable[PageDirectory::addressToPageTableIndex(address)];
+				if (!utils::testBitInBitfield(physAddress, 0))
 					return false;
 			}
 			return true;

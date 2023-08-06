@@ -31,5 +31,7 @@ namespace obos
 
 		PVOID kalloc_physicalPages(SIZE_T nPages);
 		INT   kfree_physicalPages(PVOID base, SIZE_T nPages);
+
+		UINT32_T* kmap_physical(PVOID _base, SIZE_T nPages, utils::RawBitfield flags, PVOID physicalAddress, bool force = false);
 	}
 }
