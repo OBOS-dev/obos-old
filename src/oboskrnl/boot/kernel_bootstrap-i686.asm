@@ -117,8 +117,8 @@ wait1:
     mov  al, 0xFE
     out  0x64, al
 
-;    ; Hold the machine.
-;    db 0xEB, 0xFE
+    ; Hold the machine. Shouldn't get hit, but just in case.
+    db 0xEB, 0xFE
 
     ; Shouldn't get hit. Only here for completeness.
     ret

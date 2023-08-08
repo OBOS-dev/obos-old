@@ -108,12 +108,16 @@ namespace obos
 
 	void Pic::enableIrq(BYTE interrupt)
 	{
+		if (interrupt > 7)
+			interrupt -= 8;
 		utils::RawBitfield bitfield = recvDataByte();
 		utils::clearBitInBitfield(bitfield, interrupt);
 		sendDataByte(bitfield);
 	}
 	void Pic::disableIrq(BYTE interrupt)
 	{
+		if (interrupt > 7)
+			interrupt -= 8;
 		utils::RawBitfield bitfield = recvDataByte();
 		utils::setBitInBitfield(bitfield, interrupt);
 		sendDataByte(bitfield);

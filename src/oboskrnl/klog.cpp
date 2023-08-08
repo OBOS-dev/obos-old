@@ -343,4 +343,39 @@ namespace obos
 		for (int i = nStackFrames; i > -1; i--, current = current->down)
 			printf_noFlush("%s%d: %p\r\n", prefix, i, current->eip);
 	}
+
+	static unsigned long int next = 1;  // NB: "unsigned long int" is assumed to be 32 bits wide
+
+	int rand(void)  // RAND_MAX assumed to be 32767
+	{
+		next = next * 1103515245 + 12345;
+		return (unsigned int)(next / 65536) % 32768;
+	}
+
+	void srand(unsigned int seed)
+	{
+		next = seed;
+	}
+
+	static inline UINT64_T rdtsc()
+	{
+		UINT64_T ret;
+		asm volatile ("rdtsc" : "=A"(ret));
+		return ret;
+	}
+
+	void poop()
+	{
+		extern UINT32_T* s_framebuffer;
+		extern SIZE_T s_framebufferWidth;
+		extern SIZE_T s_framebufferHeight;
+		srand(rdtsc());
+		for (UINTPTR_T i = 0, random = rand(); i < s_framebufferWidth * s_framebufferHeight; i++, random = rand())
+		{
+			s_framebuffer[i] = (rdtsc() % (random + 1)) * i;
+			io_wait();
+			io_wait();
+			io_wait();
+		}
+	}
 }

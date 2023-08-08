@@ -43,10 +43,8 @@ target_link_options(oboskrnl
     PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crtn.S"
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/oboskrnl.map"
     PUBLIC "-ffreestanding"
-    PUBLIC "-nostdlib"
-    PUBLIC "-lgcc"
-    PUBLIC "-fno-rtti"
-    PUBLIC "-fno-exceptions")
+    PUBLIC "-nostdlib")
+target_link_libraries(oboskrnl PUBLIC ${LIBGCC})
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 

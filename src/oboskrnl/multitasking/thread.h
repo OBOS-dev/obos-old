@@ -96,6 +96,8 @@ namespace obos
 			interrupt_frame frame;
 			SIZE_T iterations = 0;
 			SIZE_T nHandles = 0;
+			PVOID stackBottom = nullptr;
+			SIZE_T stackSizePages = 0;
 		};
 	}
 }

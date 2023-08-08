@@ -3,6 +3,7 @@
 
 	Copyright (c) 2023 Omar Berrow
 */
+
 #include <multitasking/mutex/mutexHandle.h>
 #include <multitasking/mutex/mutex.h>
 
@@ -23,12 +24,13 @@ namespace obos
 		{
 			MutexHandle* newHandle = (MutexHandle*)kcalloc(1, sizeof(MutexHandle));
 			newHandle->m_origin = m_origin;
+			newHandle->m_value = m_value;
 			m_references++;
 			return newHandle;
 		}
 		int MutexHandle::closeHandle()
 		{
-			if(m_origin->getReferences()--)
+			if(!(--m_origin->getReferences()))
 				delete (MutexHandle*)m_value;
 			return m_origin->getReferences();
 		}

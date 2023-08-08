@@ -34,8 +34,8 @@ namespace obos
 		
 		virtual ~Handle() {}
 	protected:
-		void* m_value;
-		Handle* m_origin;
+		void* m_value = nullptr;
+		Handle* m_origin = nullptr;
 		// If m_origin != this this field is unused.
 		SIZE_T m_references = 0;
 	};

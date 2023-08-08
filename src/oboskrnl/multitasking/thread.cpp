@@ -50,6 +50,7 @@ namespace obos
 
 			status = threadStatus | (UINT32_T)status_t::RUNNING;
 			status &= ~((UINT32_T)status_t::DEAD);
+			status &= ~((UINT32_T)status_t::BLOCKED);
 
 			priority = threadPriority;
 			iterations = 0;
@@ -57,9 +58,14 @@ namespace obos
 			tid = g_nextThreadTid++;
 			exitCode = 0;
 
+			if (!stackSizePages)
+				stackSizePages = 2;
+
 			UINT32_T* stack = (UINT32_T*)memory::VirtualAlloc(nullptr, stackSizePages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
 			if (!stack)
 				return false;
+			stackBottom = stack;
+			this->stackSizePages = stackSizePages;
 			stack += stackSizePages * 1024;
 			stack -= 1;
 			*stack = (UINT32_T)userData;

@@ -3,15 +3,305 @@
 
 	Copyright (c) 2023 Omar Berrow
 */
-#include <multitasking/threadHandle.h>
 
+#include <multitasking/threadHandle.h>
+#include <multitasking/thread.h>
+#include <multitasking/multitasking.h>
+
+#include <memory_manager/paging/allocate.h>
+
+#include <handle.h>
+
+#include <inline-asm.h>
 
 namespace obos
 {
 	namespace multitasking
 	{
-		/*ThreadHandle::ThreadHandle(Thread::Tid tid)
+		ThreadHandle::ThreadHandle()
 		{
-		}*/
+			m_origin = this;
+			m_references = 1;
+			m_value = m_thread = nullptr;
+		}
+
+
+		bool ThreadHandle::CreateThread(Thread::priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages)
+		{
+			m_value = m_thread = new Thread();
+			m_thread->nHandles++;
+			return m_thread->CreateThread(threadPriority, entry, userData, threadStatus, stackSizePages);
+		}
+		bool ThreadHandle::OpenThread(Thread::Tid tid)
+		{
+			if (m_thread)
+				return false;
+			EnterKernelSection();
+			list_iterator_t* iter = list_iterator_new(g_threads, LIST_HEAD);
+			list_node_t* node = list_iterator_next(iter);
+			for (; node != nullptr; node = list_iterator_next(iter))
+				if (((Thread*)node->val)->tid == tid)
+					break;
+			if (!node)
+			{
+				LeaveKernelSection();
+				return false;
+			}
+			OpenThread((Thread*)node->val);
+			((Thread*)m_value)->nHandles++;
+			LeaveKernelSection();
+			return true;
+		}
+		bool ThreadHandle::OpenThread(Thread* thread)
+		{
+			if (m_thread)
+				return false;
+			if (thread->status == (UINT32_T)status_t::DEAD)
+				return false;
+			EnterKernelSection();
+			m_value = m_thread = thread;
+			m_references = 1;
+			m_origin = this;
+			thread->nHandles++;
+			LeaveKernelSection();
+			return true;
+		}
+		void ThreadHandle::PauseThread(bool force)
+		{
+			if (!m_thread)
+				return;
+			if (m_thread->tid == (DWORD)-1)
+				return;
+			if (m_thread->status == (UINT32_T)status_t::DEAD)
+				return;
+			// Pausing the current thread isn't a good idea...
+			if (m_thread == g_currentThread && !force)
+				return;
+			m_thread->status |= (UINT32_T)status_t::PAUSED;
+			if (m_thread == g_currentThread)
+				_int(0x30);
+		}
+		void ThreadHandle::ResumeThread()
+		{
+			if (!m_thread)
+				return;
+			if (m_thread->tid == (DWORD)-1)
+				return;
+			if (m_thread->status == (UINT32_T)status_t::DEAD)
+				return;
+			m_thread->status &= ~((UINT32_T)status_t::PAUSED);
+		}
+		void ThreadHandle::SetThreadPriority(Thread::priority_t newPriority)
+		{
+			if (!m_thread)
+				return;
+			if (m_thread->tid == (DWORD)-1)
+				return;
+			if (m_thread->status == (UINT32_T)status_t::DEAD)
+				return;
+			if (m_thread->priority == newPriority)
+				return;
+			EnterKernelSection();
+			list_t* priorityList = nullptr;
+			list_t* oldPriorityList = nullptr;
+
+			switch (newPriority)
+			{
+			case obos::multitasking::Thread::priority_t::IDLE:
+				priorityList = g_threadPriorityList[0];
+				break;
+			case obos::multitasking::Thread::priority_t::LOW:
+				priorityList = g_threadPriorityList[1];
+				break;
+			case obos::multitasking::Thread::priority_t::NORMAL:
+				priorityList = g_threadPriorityList[2];
+				break;
+			case obos::multitasking::Thread::priority_t::HIGH:
+				priorityList = g_threadPriorityList[3];
+				break;
+			default:
+				LeaveKernelSection();
+				return;
+			}
+			switch (m_thread->priority)
+			{
+			case obos::multitasking::Thread::priority_t::IDLE:
+				oldPriorityList = g_threadPriorityList[0];
+				break;
+			case obos::multitasking::Thread::priority_t::LOW:
+				oldPriorityList = g_threadPriorityList[1];
+				break;
+			case obos::multitasking::Thread::priority_t::NORMAL:
+				oldPriorityList = g_threadPriorityList[2];
+				break;
+			case obos::multitasking::Thread::priority_t::HIGH:
+				oldPriorityList = g_threadPriorityList[3];
+				break;
+			default:
+				LeaveKernelSection();
+				return;
+			}
+
+			m_thread->priority = newPriority;
+			m_thread->iterations = 0;
+			list_remove(oldPriorityList, list_find(oldPriorityList, m_value));
+			list_rpush(priorityList, list_node_new(m_value));
+			LeaveKernelSection();
+			if (m_thread == g_currentThread)
+				_int(0x30);
+		}
+		void ThreadHandle::SetThreadStatus(utils::RawBitfield newStatus)
+		{
+			if (!m_thread)
+				return;
+			if (m_thread->tid == (DWORD)-1)
+				return;
+			// Don't kill threads this way please.
+			if (m_thread->status == (UINT32_T)status_t::DEAD || newStatus == (UINT32_T)status_t::DEAD)
+				return;
+			if (newStatus == m_thread->status)
+				return;
+			newStatus &= ~((UINT32_T)status_t::DEAD);
+			m_thread->status = newStatus;
+			if (m_thread == g_currentThread)
+				_int(0x30);
+		}
+
+		void ThreadHandle::TerminateThread(DWORD exitCode)
+		{
+			if (!m_thread)
+				return;
+			if (m_thread->tid == (DWORD)-1)
+				return;
+			if (m_thread->status == (UINT32_T)status_t::DEAD)
+				return;
+			if (m_thread == g_currentThread)
+				return;
+			// Kill the thread.
+			m_thread->status = (UINT32_T)status_t::DEAD;
+			m_thread->exitCode = exitCode;
+			if (m_thread == g_currentThread)
+				_int(0x30);
+		}
+
+		Thread::Tid ThreadHandle::GetTid()
+		{
+			if (!m_thread)
+				return 0;
+			return m_thread->tid;
+		}
+
+		DWORD ThreadHandle::GetExitCode()
+		{
+			if (!m_thread)
+				return 0;
+			if (m_thread->tid == (DWORD)-1)
+				return 0;
+			if (m_thread->status != (UINT32_T)status_t::DEAD)
+				return 0;
+			return m_thread->exitCode;
+		}
+
+		Thread::priority_t ThreadHandle::GetThreadPriority()
+		{
+			if (!m_thread)
+				return (Thread::priority_t)0;
+			if (m_thread->tid == (DWORD)-1)
+				return (Thread::priority_t)0;
+			return m_thread->priority;
+		}
+
+		utils::RawBitfield ThreadHandle::GetThreadStatus()
+		{
+			if (!m_thread)
+				return 0;
+			if (m_thread->tid == (DWORD)-1)
+				return 0;
+			return m_thread->status;
+		}
+
+		Handle* ThreadHandle::duplicate()
+		{
+			EnterKernelSection();
+			ThreadHandle* newHandle = (ThreadHandle*)kcalloc(1, sizeof(ThreadHandle));
+			newHandle->m_origin = newHandle;
+			newHandle->m_references++;
+			newHandle->m_value = m_value;
+			newHandle->m_thread = m_thread;
+			m_thread->nHandles++;
+			m_references++;
+			LeaveKernelSection();
+			return newHandle;
+		}
+		int ThreadHandle::closeHandle()
+		{
+			if (!(--m_thread->nHandles) && m_thread->status == (UINT32_T)status_t::DEAD && !(--m_origin->getReferences()))
+			{
+				// We can free the thread's information.
+
+				EnterKernelSection();
+				list_t* priorityList = nullptr;
+
+				switch (m_thread->priority)
+				{
+				case obos::multitasking::Thread::priority_t::IDLE:
+					priorityList = g_threadPriorityList[0];
+					break;
+				case obos::multitasking::Thread::priority_t::LOW:
+					priorityList = g_threadPriorityList[1];
+					break;
+				case obos::multitasking::Thread::priority_t::NORMAL:
+					priorityList = g_threadPriorityList[2];
+					break;
+				case obos::multitasking::Thread::priority_t::HIGH:
+					priorityList = g_threadPriorityList[3];
+					break;
+				default:
+					LeaveKernelSection();
+					return 0;
+				}
+				list_remove(priorityList, list_find(priorityList, m_value));
+				list_remove(g_threads, list_find(g_threads, m_value));
+
+				if (m_thread != g_currentThread)
+					memory::VirtualFree(m_thread->stackBottom, m_thread->stackSizePages);
+
+				delete m_thread;
+				LeaveKernelSection();
+			}
+			m_thread = nullptr;
+			m_value = nullptr;
+			return m_origin->getReferences();
+		}
+
+		void ExitThread(DWORD exitCode)
+		{
+			EnterKernelSection();
+			ThreadHandle handle;
+			handle.OpenThread(g_currentThread);
+			handle.m_thread->lastError = exitCode;
+			handle.m_thread->status = (UINT32_T)ThreadHandle::status_t::DEAD;
+			handle.closeHandle();
+			LeaveKernelSection();
+			_int(0x30);
+		}
+		DWORD GetCurrentThreadTid()
+		{
+			return g_currentThread->tid;
+		}
+		Thread::priority_t GetCurrentThreadPriority()
+		{
+			return g_currentThread->priority;
+		}
+		utils::RawBitfield GetCurrentThreadStatus()
+		{
+			return g_currentThread->status;
+		}
+		ThreadHandle* GetCurrentThreadHandle()
+		{
+			ThreadHandle* handle = new ThreadHandle{}; 
+			handle->OpenThread(g_currentThread);
+			return handle;
+		}
 	}
 }
