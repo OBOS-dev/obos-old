@@ -157,7 +157,7 @@ namespace obos
 			if (m_thread->tid == (DWORD)-1)
 				return;
 			// Don't kill threads this way please.
-			if (m_thread->status == (UINT32_T)status_t::DEAD || newStatus == (UINT32_T)status_t::DEAD)
+			if (m_thread->status == (UINT32_T)status_t::DEAD || newStatus == (UINT32_T)status_t::DEAD || utils::testBitInBitfield(newStatus, 2))
 				return;
 			if (newStatus == m_thread->status)
 				return;
@@ -187,7 +187,7 @@ namespace obos
 		Thread::Tid ThreadHandle::GetTid()
 		{
 			if (!m_thread)
-				return 0;
+				return -1;
 			return m_thread->tid;
 		}
 
@@ -222,6 +222,8 @@ namespace obos
 
 		Handle* ThreadHandle::duplicate()
 		{
+			if (!m_value)
+				return nullptr;
 			EnterKernelSection();
 			ThreadHandle* newHandle = (ThreadHandle*)kcalloc(1, sizeof(ThreadHandle));
 			newHandle->m_origin = newHandle;
@@ -279,7 +281,7 @@ namespace obos
 			EnterKernelSection();
 			ThreadHandle handle;
 			handle.OpenThread(g_currentThread);
-			handle.m_thread->lastError = exitCode;
+			handle.m_thread->exitCode = exitCode;
 			handle.m_thread->status = (UINT32_T)ThreadHandle::status_t::DEAD;
 			handle.closeHandle();
 			LeaveKernelSection();
