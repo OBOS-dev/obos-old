@@ -43,24 +43,104 @@
 #endif
 
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
+#define NUM_MODULES 2
+
+extern "C" UINTPTR_T * boot_page_directory1;
 
 namespace obos
 {
 	multiboot_info_t* g_multibootInfo;
 	memory::PageDirectory g_pageDirectory;
 
+	void pageFault(const interrupt_frame* frame)
+	{
+		const char* action = utils::testBitInBitfield(frame->errorCode, 1) ? "write" : "read";
+		const char* privilegeLevel = utils::testBitInBitfield(frame->errorCode, 2) ? "user" : "kernel";
+		const char* isPresent = utils::testBitInBitfield(frame->errorCode, 0) ? "present" : "non-present";
+		UINTPTR_T location = (UINTPTR_T)memory::GetPageFaultAddress();
+		extern UINT32_T* s_backbuffer;
+		if (!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
+			kpanic((PVOID)frame->ebp, kpanic_format(
+				"Page fault in %s-mode at %p while trying to %s a %s page. The address of that page is %p (Page directory index %d, page table index %d).\r\n Dumping registers: \r\n"
+				"\tEDI: %p\r\n"
+				"\tESI: %p\r\n"
+				"\tEBP: %p\r\n"
+				"\tESP: %p\r\n"
+				"\tEBX: %p\r\n"
+				"\tEDX: %p\r\n"
+				"\tECX: %p\r\n"
+				"\tEAX: %p\r\n"
+				"\tEIP: %p\r\n"
+				"\tEFLAGS: %p\r\n"
+				"\tSS: %p\r\n"
+				"\tDS: %p\r\n"
+				"\tCS: %p\r\n"),
+				privilegeLevel, frame->eip, action, isPresent, location,
+				memory::PageDirectory::addressToIndex(location), memory::PageDirectory::addressToPageTableIndex(location),
+				frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
+				frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
+				frame->ss, frame->ds, frame->cs);
+		asm volatile("cli; hlt");
+	}
+	void defaultExceptionHandler(const interrupt_frame* frame)
+	{
+		kpanic((PVOID)frame->ebp, kpanic_format(
+			"Unhandled exception %d at %p. Error code: %d. Dumping registers: \r\n"
+			"\tEDI: %p\r\n"
+			"\tESI: %p\r\n"
+			"\tEBP: %p\r\n"
+			"\tESP: %p\r\n"
+			"\tEBX: %p\r\n"
+			"\tEDX: %p\r\n"
+			"\tECX: %p\r\n"
+			"\tEAX: %p\r\n"
+			"\tEIP: %p\r\n"
+			"\tEFLAGS: %p\r\n"
+			"\tSS: %p\r\n"
+			"\tDS: %p\r\n"
+			"\tCS: %p\r\n"),
+			frame->intNumber,
+			frame->eip,
+			frame->errorCode,
+			frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
+			frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
+			frame->ss, frame->ds, frame->cs);
+	}
+
 	// Initial boot sequence (Initializes the gdt, the idt, paging, the console, the physical memory manager, the pic, and software multitasking.
 	void kmain(multiboot_info_t* header, DWORD magic)
 	{
 		obos::g_multibootInfo = header;
 
-		if (magic != MULTIBOOT_BOOTLOADER_MAGIC)
+		if (magic != MULTIBOOT_BOOTLOADER_MAGIC || header->mods_count != NUM_MODULES)
 			return;
 		
 		EnterKernelSection();
 
+		memory::g_pageDirectory = &g_pageDirectory;
+
+		memory::InitializePaging();
+
+		RegisterInterruptHandler(14, pageFault);
+
 		obos::InitializeGdt();
 		obos::InitializeIdt();
+
+		memory::InitializePhysicalMemoryManager();
+
+		if ((g_multibootInfo->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) != MULTIBOOT_INFO_FRAMEBUFFER_INFO)
+			kpanic(nullptr, kpanic_format("No framebuffer info from the bootloader.\r\n"));
+		if (g_multibootInfo->framebuffer_height != 768 || g_multibootInfo->framebuffer_width != 1024)
+			kpanic(nullptr, kpanic_format("The framebuffer set up by the bootloader is not 1024x768. Instead, it is %dx%d\r\n"),
+				g_multibootInfo->framebuffer_width, g_multibootInfo->framebuffer_height);
+
+		for (UINTPTR_T physAddress = g_multibootInfo->framebuffer_addr, virtAddress = 0xFFCFF000;
+			virtAddress < 0xFFFFF000;
+			virtAddress += 4096, physAddress += 4096)
+			memory::kmap_physical((PVOID)virtAddress, 1, memory::VirtualAllocFlags::WRITE_ENABLED, (PVOID)physAddress);
+
+		// Initialize the console.
+		InitializeConsole(0xFFFFFFFF, 0x00000000);
 
 		obos::Pic currentPic{ obos::Pic::PIC1_CMD, obos::Pic::PIC1_DATA };
 		// Interrupt 32-40 (0x20-0x27)
@@ -69,13 +149,7 @@ namespace obos
 		// Interrupt 40-47 (0x28-0x2f)
 		currentPic.remap(0x28, 2);
 
-		memory::InitializePhysicalMemoryManager();
-		
-		memory::g_pageDirectory = new (&g_pageDirectory) memory::PageDirectory{ (UINTPTR_T*)&memory::g_kernelPageDirectory };
-
-		memory::InitializePaging();
-
-		for(int i = 0x20; i < 0x30; i++)
+		for(BYTE i = 0x20; i < 0x30; i++)
 			RegisterInterruptHandler(i, [](const obos::interrupt_frame* frame) {
 				if(frame->intNumber != 32)
 					printf("\r\nUnhandled external interrupt. IRQ Number: %d.\r\n", frame->intNumber - 32);
@@ -83,82 +157,9 @@ namespace obos
 					(void)inb(0x60);
 				SendEOI(frame->intNumber - 32);
 			});
-		for (int i = 0; i < 32; i++)
-		{
-			RegisterInterruptHandler(i, [](const interrupt_frame* frame) {
-					kpanic(kpanic_format(
-						"Unhandled exception %d at %p. Error code: %d. Dumping registers: \r\n"
-						"\tEDI: %p\r\n"
-						"\tESI: %p\r\n"
-						"\tEBP: %p\r\n"
-						"\tEBP: %p\r\n"
-						"\tEBX: %p\r\n"
-						"\tEDX: %p\r\n"
-						"\tECX: %p\r\n"
-						"\tEAX: %p\r\n"
-						"\tEIP: %p\r\n"
-						"\tEFLAGS: %p\r\n"
-						"\tSS: %p\r\n"
-						"\tDS: %p\r\n"
-						"\tCS: %p\r\n"),
-						frame->intNumber,
-						frame->eip,
-						frame->errorCode,
-						frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
-						frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
-						frame->eflags,
-						frame->ss, frame->ds, frame->cs);
-				});
-		}
-
-		RegisterInterruptHandler(14, [](const interrupt_frame* frame) {
-			const char* action = utils::testBitInBitfield(frame->errorCode, 1) ? "write" : "read";
-			const char* privilegeLevel = utils::testBitInBitfield(frame->errorCode, 2) ? "user" : "kernel";
-			const char* isPresent = utils::testBitInBitfield(frame->errorCode, 0) ? "present" : "non-present";
-			UINTPTR_T location = (UINTPTR_T)memory::GetPageFaultAddress();
-			extern UINT32_T* s_backbuffer;
-			if(!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
-				kpanic(kpanic_format(
-					"Page fault in %s-mode at %p while trying to %s a %s page. The address of that page is %p (Page directory index %d, page table index %d).\r\n Dumping registers: \r\n"
-					"\tEDI: %p\r\n"
-					"\tESI: %p\r\n"
-					"\tEBP: %p\r\n"
-					"\tESP: %p\r\n"
-					"\tEBX: %p\r\n"
-					"\tEDX: %p\r\n"
-					"\tECX: %p\r\n"
-					"\tEAX: %p\r\n"
-					"\tEIP: %p\r\n"
-					"\tEFLAGS: %p\r\n"
-					"\tSS: %p\r\n"
-					"\tDS: %p\r\n"
-					"\tCS: %p\r\n"),
-					privilegeLevel, frame->eip, action, isPresent, location,
-					memory::PageDirectory::addressToIndex(location), memory::PageDirectory::addressToPageTableIndex(location), 
-					frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
-					frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
-					frame->eflags,
-					frame->ss, frame->ds, frame->cs);
-			asm volatile("cli; hlt");
-			});
-
+		for (BYTE i = 0; i < 32; i++)
+			RegisterInterruptHandler(i == 14 ? 0 : i, defaultExceptionHandler);
 		
-		if ((g_multibootInfo->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) != MULTIBOOT_INFO_FRAMEBUFFER_INFO)
-			kpanic("No framebuffer info from the bootloader.\r\n");
-		if (g_multibootInfo->framebuffer_height != 768 || g_multibootInfo->framebuffer_width != 1024)
-			kpanic("The framebuffer set up by the bootloader is not 1024x768. Instead, it is %dx%d\r\n", g_multibootInfo->framebuffer_width, g_multibootInfo->framebuffer_height);
-
-		UINTPTR_T limit = 0xFFFFF000;
-
-		for (UINTPTR_T physAddress = g_multibootInfo->framebuffer_addr, virtAddress = 0xFFCFF000;
-			virtAddress < limit;
-			virtAddress += 4096, physAddress += 4096)
-			memory::kmap_physical((PVOID)virtAddress, 1, memory::VirtualAllocFlags::WRITE_ENABLED, (PVOID)physAddress);
-
-		// Initialize the console.
-		InitializeConsole(0xFFFFFFFF, 0x00000000);
-		
-		asm volatile("sti");
 		LeaveKernelSection();
 
 		multitasking::InitializeMultitasking();
@@ -174,21 +175,23 @@ namespace obos
 	}
 	void kmainThr()
 	{
-		memory::g_pageDirectory = new memory::PageDirectory{ memory::g_kernelPageDirectory };
-
+		multitasking::g_initialized = true;
 		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
 
-		ConsoleOutput(ascii_art, ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start, false);
-		ConsoleFillLine();
-		
+		SetConsoleColor(0x003399FF, 0x00000000);
+		ConsoleOutput(ascii_art, ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start);
+		SetConsoleColor(0xFFFFFFFF, 0x00000000);
+
 		multitasking::Thread* threads = (multitasking::Thread*)kcalloc(4, sizeof(multitasking::Thread));
 
 		multitasking::Thread* newThread1 = new (threads) multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #1!\r\n", 0, 2 };
-		multitasking::Thread* newThread2 = new (threads+1) multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #2!\r\n", 0, 2 };
-		multitasking::Thread* newThread3 = new (threads+2) multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #3!\r\n", 0, 2 };
-		multitasking::Thread* newThread4 = new (threads+3) multitasking::Thread{ multitasking::Thread::priority_t::NORMAL, testThread, (PVOID)"Hello from test thread #4!\r\n", 0, 2 };
+		multitasking::Thread* newThread2 = new (threads+1) multitasking::Thread{ multitasking::Thread::priority_t::IDLE, testThread, (PVOID)"Hello from test thread #2!\r\n", 0, 2 };
+		multitasking::Thread* newThread3 = new (threads+2) multitasking::Thread{ multitasking::Thread::priority_t::HIGH, testThread, (PVOID)"Hello from test thread #3!\r\n", 0, 2 };
+		multitasking::Thread* newThread4 = new (threads+3) multitasking::Thread{ multitasking::Thread::priority_t::LOW , testThread, (PVOID)"Hello from test thread #4!\r\n", 0, 2 };
 
-		asm volatile(".byte 0xEB; .byte 0xFE;");
+		//asm volatile(".byte 0xEB; .byte 0xFE;");
+		sti();
+		hlt();
 
 		delete newThread1;
 		delete newThread2;
@@ -202,7 +205,7 @@ extern "C"
 {
 	void __cxa_pure_virtual()
 	{
-		obos::kpanic(kpanic_format("Attempt to call a pure virtual function."));
+		obos::kpanic(nullptr, kpanic_format("Attempt to call a pure virtual function."));
 	}
 
 	typedef unsigned uarch_t;

@@ -7,16 +7,9 @@
 #pragma once
 
 #include <types.h>
+#include <stddef.h>
 
-[[nodiscard]] PVOID operator new(size_t, void* ptr) noexcept
-{
-	return ptr;
-}
-[[nodiscard]] PVOID operator new[](size_t, void* ptr) noexcept
-{
-	return ptr;
-}
-VOID operator delete(PVOID, PVOID) noexcept
-{}
-VOID operator delete[](PVOID, PVOID) noexcept
-{}
+[[nodiscard]] PVOID operator new(size_t, void* ptr) noexcept;
+[[nodiscard]] PVOID operator new[](size_t, void* ptr) noexcept;
+VOID operator delete(PVOID, PVOID) noexcept;
+VOID operator delete[](PVOID, PVOID) noexcept;

@@ -36,7 +36,6 @@ namespace obos
 			DWORD GetExitCode();
 			Thread::priority_t GetThreadPriority();
 			utils::RawBitfield GetThreadStatus();
-			DWORD GetExitCode();
 
 			constexpr static handleType getType()
 			{

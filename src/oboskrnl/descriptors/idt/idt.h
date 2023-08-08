@@ -27,14 +27,14 @@ namespace obos
 	{
 		// +0		
 		UINT32_T ds;
-		//		  +4,  +8, +12,	   +16, +20, +24, +28, +32
-		UINT32_T edi, esi, ebp, currentESP, ebx, edx, ecx, eax;
+		//		  +4,  +8,  +12, +16, +20, +24, +28, +32
+		UINT32_T edi, esi, ebp, esp, ebx, edx, ecx, eax;
 		// +36
 		UINT8_T intNumber;
 		// +40 (Padding)
 		UINT32_T errorCode;
-		//		 +44, +48,    +52, +56, +60
-		UINT32_T eip, cs , eflags, esp, ss;
+		//		 +44,+48,    +52,	   +56,+60
+		UINT32_T eip, cs , eflags, useresp, ss;
 		// +64 (End)
 	};
 

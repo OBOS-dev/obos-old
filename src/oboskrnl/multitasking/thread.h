@@ -79,7 +79,7 @@ namespace obos
 			virtual ~Thread()
 			{
 				if (status != (UINT32_T)status_t::DEAD && tid != ((DWORD)-1))
-					kpanic("A thread object was destroyed without the thread being dead.");
+					kpanic(nullptr, kpanic_format("A thread object was destroyed without the thread being dead."));
 			}
 
 			/*friend void InitializeMultitasking();
@@ -90,11 +90,12 @@ namespace obos
 			DWORD exitCode = 0;
 			DWORD lastError = 0;
 			priority_t priority = priority_t::IDLE;
-			utils::RawBitfield status;
+			utils::RawBitfield status = 0;
 			bool(*isBlockedCallback)(Thread* _this, PVOID userData) = nullptr;
 			PVOID isBlockedUserdata = nullptr;
 			interrupt_frame frame;
-			SIZE_T iterations;
+			SIZE_T iterations = 0;
+			SIZE_T nHandles = 0;
 		};
 	}
 }

@@ -20,17 +20,14 @@ namespace obos
 		UINTPTR_T s_lastPageTable[1024] attribute(aligned(4096));
 		UINTPTR_T* kmap_pageTable(PVOID physicalAddress)
 		{
-			UINT32_T* pageDirectory = *(UINT32_T**)g_pageDirectory;
-			pageDirectory[1023] = (UINTPTR_T)&s_lastPageTable | 3;
 			s_lastPageTable[1023] = (UINTPTR_T)physicalAddress;
 			s_lastPageTable[1023] |= 3;
 			return (UINTPTR_T*)0xFFFFF000;
 		}
 		void kfree_pageTable()
 		{
-			UINT32_T* pageDirectory = *(UINT32_T**)g_pageDirectory;
-			pageDirectory[1023] = (UINTPTR_T)&s_lastPageTable | 3;
 			s_lastPageTable[1023] = 0;
+			tlbFlush(0xFFFFF000);
 		}
 		UINT32_T* kmap_physical(PVOID _base, SIZE_T nPages, utils::RawBitfield flags, PVOID physicalAddress, bool force)
 		{
@@ -46,7 +43,7 @@ namespace obos
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
 			{
 				UINTPTR_T* pageTable = PageDirectory::addressToIndex(address) != 1023 ? kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address))) : 
-					(UINTPTR_T*)&s_lastPageTable;
+					(UINTPTR_T*)(((UINTPTR_T)&s_lastPageTable) - 0xC0000000);
 				pageTable[PageDirectory::addressToPageTableIndex(address)] = (UINTPTR_T)physicalAddress;
 				pageTable[PageDirectory::addressToPageTableIndex(address)] |= 1;
 				pageTable[PageDirectory::addressToPageTableIndex(address)] |= flags;
@@ -61,7 +58,7 @@ namespace obos
 			// Should we choose a base address?
 			if (inRange(base, nullptr, 0x3FFFFF))
 			{
-				for (int i = 1; i < 1024; i++)
+				for (int i = utils::testBitInBitfield(flags, 2) ? 1 : 0x301; i < 1024; i++)
 				{
 					bool breakOut = false;
 					if (!utils::testBitInBitfield(*g_pageDirectory->getPageTableAddress(i), 0))
@@ -133,10 +130,12 @@ namespace obos
 		bool HasVirtualAddress(PCVOID _base, SIZE_T nPages)
 		{
 			UINTPTR_T base = ROUND_ADDRESS_DOWN(GET_FUNC_ADDR(_base));
+			if (base == 0xFFFFF000)
+				return utils::testBitInBitfield(s_lastPageTable[1023], 0);
 			// TODO: Check if this is from a syscall or directly from the kernel.
 			/*if (base < 0x400000)
 				return false;*/
-			if (*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) == 2)
+			if (!utils::testBitInBitfield(*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)), 0))
 				return false;
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
 			{

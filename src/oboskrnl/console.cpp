@@ -39,10 +39,10 @@ namespace obos
 
 	// Internal functions.
 	
-	static void memset(void* block, char val, SIZE_T size)
+	/*static void memset(void* block, char val, SIZE_T size)
 	{
 		for (SIZE_T i = 0; i < size; ((PBYTE)block)[i++] = val);
-	}
+	}*/
 //#define vga_entry(uc, color) ((UINT16_T) uc | (UINT16_T) color << 8)
 //	static void putcharAt(DWORD x, DWORD y, BYTE character, BYTE color)
 //	{
@@ -60,7 +60,10 @@ namespace obos
 		int cx, cy;
 		int mask[8] = { 128,64,32,16,8,4,2,1 };
 		const unsigned char* glyph = font + (int)character * 16;
-
+		if (x > s_nCharsHorizontal)
+			x = 0;
+		if (y > s_framebufferHeight)
+			y = 0;
 		x <<= 3;
 		y += 16;
 
@@ -72,22 +75,17 @@ namespace obos
 	}
 	static void on_newline()
 	{
-		if (++s_terminalRow >= s_nCharsVertical)
+		if (++s_terminalRow >= s_nCharsVertical - 1)
 		{
 			s_reachedEndTerminal = true;
-			memset(s_framebuffer, 0, (s_framebufferWidth - 1) * sizeof(UINT16_T));
-			for (DWORD y = 0, y2 = 1; y < s_framebufferHeight; y++, y2++)
-				for (DWORD x = 0; x < s_framebufferWidth; x++)
-					s_framebuffer[y * s_framebufferWidth + x] = s_framebuffer[y2 * s_framebufferWidth + x];
-			s_terminalRow = s_terminalRow - 1;
+			// Erase the first line of characters.
+			utils::memzero(s_backbuffer, s_framebufferWidth * 16 * 4);
+			utils::memcpy(s_backbuffer, s_backbuffer + s_framebufferWidth * 16, (s_framebufferWidth * s_framebufferHeight * 4) - s_framebufferWidth * 16 * 4);
+			utils::dwMemset((DWORD*)(GET_FUNC_ADDR(s_backbuffer) + (s_framebufferWidth * s_framebufferHeight * 4) - s_framebufferWidth * 16 * 4),
+				s_backgroundColor, s_framebufferWidth * 16);
 		}
-		DWORD x = s_terminalColumn;
-		DWORD y = 0;
-		if (!s_reachedEndTerminal)
-			y = s_terminalRow;
-		else
-			s_terminalRow = y = s_framebufferHeight - 1;
-		SetTerminalCursorPosition(x,y);
+		if (s_reachedEndTerminal)
+			s_terminalRow = s_nCharsVertical - 2;
 	}
 
 	// API
@@ -105,11 +103,7 @@ namespace obos
 		if (!s_consoleMutex)
 			s_consoleMutex = new multitasking::MutexHandle{};
 		if(!s_backbuffer)
-		{
-			SIZE_T size = (s_framebufferWidth * s_framebufferHeight * sizeof(DWORD));
-			//0x900000;
-			s_backbuffer = (UINT32_T*)memory::VirtualAlloc(s_backbuffer, size >> 12, memory::VirtualAllocFlags::WRITE_ENABLED);
-		}
+			s_backbuffer = (UINT32_T*)memory::VirtualAlloc(nullptr, (s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12, memory::VirtualAllocFlags::WRITE_ENABLED);
 		s_consoleMutex->Lock();
 		utils::memzero(s_backbuffer, s_framebufferWidth * s_framebufferHeight * 4);
 		font = (PBYTE)(((multiboot_module_t*)g_multibootInfo->mods_addr)->mod_start);
@@ -165,12 +159,6 @@ namespace obos
 		case '\t':
 		{
 			DWORD x = ((s_terminalColumn >> 2) + 1) << 2;
-			DWORD y = 0;
-			if (!s_reachedEndTerminal)
-				y = s_terminalRow;
-			else
-				y = s_framebufferHeight - 1;
-			SetTerminalCursorPosition(x, y);
 			for (DWORD i = 0; i < x && s_terminalColumn < s_framebufferWidth; i++)
 				putcharAt(++s_terminalColumn, s_terminalRow * 16, ' ', s_foregroundColor, s_backgroundColor);
 			break;
@@ -186,13 +174,14 @@ namespace obos
 			if (!s_reachedEndTerminal)
 				y = s_terminalRow;
 			else
-				y = s_framebufferHeight - 1;
+				y = s_nCharsVertical - 2;
 			SetTerminalCursorPosition(x, y);
 			return;
 		}
 		case '\0':
 			break;
 		case ' ':
+		case 15:
 			s_terminalColumn++;
 			break;
 		default:
@@ -241,7 +230,7 @@ namespace obos
 		if (ch == '\n')
 			return;
 
-		for (SIZE_T i = 0; i < s_nCharsHorizontal; i++)
+		for (SIZE_T i = s_terminalColumn; i < s_nCharsHorizontal; i++)
 			__Impl_OutputCharacter(ch);
 
 		if (_swapBuffers)
@@ -277,7 +266,7 @@ namespace obos
 
 	static void __Impl_swapBuffers()
 	{
-		utils::memcpy(s_framebuffer, s_backbuffer, s_framebufferWidth * s_framebufferHeight);
+		utils::memcpy(s_framebuffer, s_backbuffer, s_framebufferWidth * s_framebufferHeight * 4);
 	}
 	// Swap the backbuffer and the viewport.
 	void swapBuffers()

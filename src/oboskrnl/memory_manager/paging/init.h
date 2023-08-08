@@ -41,10 +41,10 @@ namespace obos
 			static void switchToThisAsm(UINTPTR_T address);
 		};
 		extern PageDirectory* g_pageDirectory;
-		extern UINTPTR_T g_kernelPageDirectory[1024] attribute(aligned(4096));
 		// Makes a page directory and switches to it, thus enabling paging.
 		void InitializePaging();
 
+		void tlbFlush(UINT32_T addr);
 		PVOID GetPageFaultAddress();
 	}
 }

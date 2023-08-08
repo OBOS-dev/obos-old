@@ -9,10 +9,12 @@
 
 #include <utils/bitfields.h>
 
+#include <new>
+
 #define indexToAddress(index, pageTableIndex) ((UINTPTR_T)(((index) << 22) + ((pageTableIndex) << 12)))
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && val <= ((UINTPTR_T)(rEnd)))
 
-extern "C" char _ZN4obos6memory13PageDirectoryC1Ev;
+extern "C" UINTPTR_T boot_page_directory1;
 
 namespace obos
 {
@@ -42,7 +44,7 @@ namespace obos
 		{
 			if (!m_initialized)
 				return;
-			switchToThisAsm((UINTPTR_T)m_array);
+			switchToThisAsm((UINTPTR_T)m_array & 0xFFFFF000);
 		}
 		extern UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
 
@@ -86,10 +88,9 @@ namespace obos
 			return (base >> 12) % 1024;
 		}
 
-		extern void enablePaging();
-		
 		PageDirectory* g_pageDirectory;
-		UINTPTR_T attribute(aligned(4096)) g_kernelPageDirectory[1024];
+		
+		extern UINTPTR_T s_lastPageTable[1024] attribute(aligned(4096));
 
 		void InitializePaging()
 		{
@@ -97,26 +98,14 @@ namespace obos
 			constructor(g_pageDirectory);*/
 			if (g_enabledPaging)
 				return;
-			UINTPTR_T* firstPageTable = g_pageDirectory->getPageTableAddress(0);
-			*firstPageTable = (UINTPTR_T)kalloc_physicalPages(1);
-			*firstPageTable |= 3;
-			UINT32_T* pageTable = (UINT32_T*)(*firstPageTable & (~3));
-			for(UINTPTR_T i = 0, address = 0; i < 1024; i++, address += 4096)
-			{
-				if (i != 1023)
-					*g_pageDirectory->getPageTableAddress(i + 1) = 2;
-				utils::IntegerBitfield flags;
-				flags.setBitfield(indexToAddress(0, i));
-				flags.setBit(0);
-				if (!inRange(address, 0x100000, (UINTPTR_T)&__erodata))
-					flags.setBit(1);
-				pageTable[i] = flags.operator UINT32_T();
-			}
-			extern UINTPTR_T s_lastPageTable[1024] attribute(aligned(4096));
-			*g_pageDirectory->getPageTableAddress(1023) = (UINTPTR_T)&s_lastPageTable | 3;
-			g_pageDirectory->switchToThis();
-			enablePaging();
+			memory::g_pageDirectory = new (g_pageDirectory) memory::PageDirectory{ &boot_page_directory1 };
+			*memory::g_pageDirectory->getPageTableAddress(1023) = (((UINTPTR_T)&s_lastPageTable) - 0xC0000000) | 7;
 			g_enabledPaging = true;
+		}
+
+		void tlbFlush(UINT32_T addr)
+		{
+			asm volatile("invlpg (%0)" ::"r"(addr) : "memory");
 		}
 	}
 }

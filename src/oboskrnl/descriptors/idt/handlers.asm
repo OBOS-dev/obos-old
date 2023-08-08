@@ -67,11 +67,12 @@ ISR_NOERRCODE 46
 ISR_NOERRCODE 47
 ISR_NOERRCODE 48
 
-segment data
+segment .data
 global _ZN4obos19g_interruptHandlersE
 _ZN4obos19g_interruptHandlersE:
     times 256-($-$$) dd 0
-segment text
+
+segment .text
 
 extern defaultInterruptHandler
 
@@ -105,6 +106,7 @@ isr_common_stub:
     mov ds, ax
 
     popad
+
 ;   Pop the interrupt number and error code.
     lea esp, [esp+8]
 

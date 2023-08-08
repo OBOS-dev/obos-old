@@ -10,31 +10,39 @@ SECTIONS
 {
 	. = 1M;
  
-	.text BLOCK(4K) : ALIGN(4K)
+	_kernel_start = .;
+
+    .multiboot.data : {
+        *(.multiboot.data)
+    }
+
+    .multiboot.text : {
+        *(.multiboot.text)
+    }
+
+	. += 0xC0000000;
+
+	.text ALIGN (4K) : AT (ADDR (.text) - 0xC0000000)
 	{
-		*(.multiboot)
 		*(.text)
 	}
-
-	_ZN4obos6memory7__etextE = .;
-
-	.rodata BLOCK(4K) : ALIGN(4K)
+	.rodata ALIGN (4K) : AT (ADDR (.rodata) - 0xC0000000)
 	{
 		*(.rodata)
 	}
 	_ZN4obos6memory9__erodataE = .;
- 
-	.data BLOCK(4K) : ALIGN(4K)
+	.data ALIGN (4K) : AT (ADDR (.data) - 0xC0000000)
 	{
 		*(.data)
 	}
- 
-	.bss BLOCK(4K) : ALIGN(4K)
+	.bss ALIGN (4K) : AT (ADDR (.bss) - 0xC0000000)
 	{
 		*(COMMON)
 		*(.bss)
+		*(.bootstrap_stack)
 	}
+	_kernel_end = .;
 	
 }
-_ZN4obos6memory8endImageE = 0x800000;
-_ZN4obos6memory9endKernelE = 0x1100000;
+_ZN4obos6memory8endImageE = 0x400000;
+_ZN4obos6memory9endKernelE = 0xE0000000;

@@ -45,10 +45,20 @@ namespace obos
 
 		void findNewTask(const interrupt_frame* frame)
 		{
+			if (!g_initialized)
+			{
+				if (frame->intNumber != 0x30)
+					SendEOI(frame->intNumber - 32);
+				return;
+			}
 			if (g_currentThread)
 				g_currentThread->frame = *frame;
 			else
+			{
+				if (frame->intNumber != 0x30)
+					SendEOI(frame->intNumber - 32);
 				return;
+			}
 			
 			// Tf all threads were ran, then clear the amount of iterations.
 
@@ -60,6 +70,11 @@ namespace obos
 				for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
 				{
 					currentThread = (Thread*)node->val;
+					if (currentThread->status != (INT)Thread::status_t::RUNNING)
+					{
+						currentThread = nullptr;
+						continue;
+					}
 					break;
 				}
 				list_iterator_destroy(iter);
@@ -116,11 +131,12 @@ namespace obos
 			EnterKernelSection();
 			g_threads = list_new();
 			for(int i = 0; i < 4; g_threadPriorityList[i++] = list_new());
-			Thread* kmainThread = g_currentThread = new Thread{};
+			Thread* kmainThread = new Thread{};
 			kmainThread->tid = 0;
 			kmainThread->frame.eip = GET_FUNC_ADDR(kmainThr);
 			kmainThread->frame.esp = GET_FUNC_ADDR(&thrstack_top);
 			kmainThread->frame.ebp = 0;
+			kmainThread->frame.eflags = getEflags() | 0x200;
 			kmainThread->priority = Thread::priority_t::NORMAL;
 			kmainThread->status = (UINT32_T)Thread::status_t::RUNNING;
 			kmainThread->exitCode = 0;
@@ -129,7 +145,6 @@ namespace obos
 			list_lpush(g_threads			  , list_node_new(kmainThread));
 			list_lpush(g_threadPriorityList[2], list_node_new(kmainThread));
 
-			Pic masterPic{ Pic::PIC1_CMD, Pic::PIC1_DATA };
 			// 400 hz, 2.5 ms. (1/400 * 1000)
 			UINT32_T divisor = 1193180 / 400;
 			
@@ -142,15 +157,10 @@ namespace obos
 			outb(0x40, l);
 			outb(0x40, h);
 			
-			masterPic.enableIrq(0);
 			RegisterInterruptHandler(0x20, findNewTask);
 			RegisterInterruptHandler(0x30, findNewTask);
-			g_initialized = true;
 			LeaveKernelSection();
-			// Just in case.
-			asm volatile("mov %0, %%eax" :
-										: "memory"(&kmainThread->frame));
-			switchToTaskAsm();
+			switchToTask(kmainThread);
 		}
 	}
 }

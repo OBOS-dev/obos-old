@@ -16,6 +16,7 @@ void outw(UINT16_T port, UINT16_T val);
 UINT8_T inb(UINT16_T port);
 UINT16_T inw(UINT16_T port);
 void io_wait(void);
+UINT32_T getEflags();
 
 void cli();
 void sti();
@@ -25,6 +26,7 @@ void _int(BYTE interrupt);
 
 namespace obos
 {
+	void RestartComputer();
 	// Disables interrupts and makes sure they can't be enabled until LeaveKernelSection is called.
 	void EnterKernelSection();
 	// Enables interrupts if this call matches the first call to EnterKernelSection. (Like a stack)

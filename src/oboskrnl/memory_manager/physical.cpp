@@ -58,7 +58,7 @@ namespace obos
 		bool InitializePhysicalMemoryManager()
 		{
 			if ((g_multibootInfo->flags & MULTIBOOT_INFO_MEM_MAP) != MULTIBOOT_INFO_MEM_MAP)
-				obos::kpanic("No memory map from the bootloader.");
+				obos::kpanic(nullptr, kpanic_format("No memory map from the bootloader."));
 			if (g_physicalMemoryManagerInitialized)
 				return false;
 			for (SIZE_T i = 0; i < g_countPages / 32; i++)

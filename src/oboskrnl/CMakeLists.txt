@@ -22,7 +22,7 @@ set(oboskrnl_headers "types.h"                            "boot/multiboot.h"    
 )
 
 set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm"  "descriptors/idt/handlers.asm"
-                        "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"
+                        "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"         "inline-asm.asm"
 )
 
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cxxSources} ${oboskrnl_headers})

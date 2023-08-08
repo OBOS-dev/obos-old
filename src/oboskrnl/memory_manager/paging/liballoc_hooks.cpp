@@ -67,3 +67,16 @@ VOID operator delete[](PVOID block, size_t) noexcept
 {
 	kfree(block);
 }
+
+[[nodiscard]] PVOID operator new(size_t, void* ptr) noexcept
+{
+	return ptr;
+}
+[[nodiscard]] PVOID operator new[](size_t, void* ptr) noexcept
+{
+	return ptr;
+}
+VOID operator delete(PVOID, PVOID) noexcept
+{}
+VOID operator delete[](PVOID, PVOID) noexcept
+{}
