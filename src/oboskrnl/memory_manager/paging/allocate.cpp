@@ -146,5 +146,22 @@ namespace obos
 			}
 			return true;
 		}
+		DWORD MemoryProtect(PVOID _base, SIZE_T nPages, utils::RawBitfield flags)
+		{
+			UINTPTR_T base = GET_FUNC_ADDR(_base);
+			if (!HasVirtualAddress(_base, nPages) || base < 0x400000)
+				return 1;
+			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
+			{
+				UINTPTR_T* pageTable = g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address));
+				pageTable = kmap_pageTable(pageTable);
+				UINTPTR_T entry = pageTable[PageDirectory::addressToPageTableIndex(address)] & 0xFFFFF000;
+				entry |= 1;
+				entry |= flags;
+				entry &= 0xFFFFFE07;
+				*(pageTable + PageDirectory::addressToPageTableIndex(address)) = entry;
+			}
+			return 0;
+		}
 	}
 }

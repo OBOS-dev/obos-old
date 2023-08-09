@@ -59,5 +59,10 @@ namespace obos
 		/// <param name="nPages">The amount of pages to check.</param>
 		/// <returns>false if the pages were never allocated, otherwise true.</returns>
 		bool HasVirtualAddress(PCVOID base, SIZE_T nPages);
+		/// <summary>
+		/// Changes the flags of the specified area of memory.
+		/// </summary>
+		/// <returns>Zero on success, and if the base is less 0x400000, or if you haven't allocated the pages, one..</returns>
+		DWORD MemoryProtect(PVOID base, SIZE_T nPages, utils::RawBitfield flags);
 	}
 }

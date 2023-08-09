@@ -10,7 +10,7 @@ set(oboskrnl_cxxSources "boot/kmain.cpp"            "console.cpp"               
                         "utils/bitfields.cpp"       "descriptors/idt/pic.cpp"                  "memory_manager/paging/init.cpp"     "memory_manager/paging/allocate.cpp"
                         "utils/memory.cpp"          "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.c" "external/list/list_iterator.c"
                         "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "multitasking/threadHandle.cpp"
-                        "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp"
+                        "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "elf/elf.cpp"
 )
 
 set(oboskrnl_headers "types.h"                            "boot/multiboot.h"                   "console.h"                    "klog.h"
@@ -18,7 +18,7 @@ set(oboskrnl_headers "types.h"                            "boot/multiboot.h"    
                      "utils/bitfields.h"                  "descriptors/idt/pic.h"              "memory_manager/paging/init.h" "memory_manager/paging/allocate.h" 
                      "utils/memory.h"                     "memory_manager/liballoc/liballoc.h" "utils/list.h"                 "external/list/list.h"
                      "multitasking/threadHandle.h"        "multitasking/multitasking.h"        "multitasking/mutex/mutex.h"   "multitasking/mutex/mutexHandle.h"
-                     "new"
+                     "new"                                "elf/elf.h"                          "elf/elfStructures.h"
 )
 
 set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm"  "descriptors/idt/handlers.asm"
