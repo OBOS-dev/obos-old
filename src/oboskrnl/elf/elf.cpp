@@ -25,6 +25,7 @@ namespace obos
 				if (programHeader->p_type != PT_LOAD)
 				{
 					// We can't load something that well, can't be loaded.
+
 					continue;
 				}
 				UINT32_T virtualAllocFlags = 0;
@@ -37,11 +38,11 @@ namespace obos
 				const PBYTE src = startAddress + programHeader->p_offset;
 				if (programHeader->p_filesz)
 				{
-					utils::memcpy(dest, src, programHeader->p_memsz);
-					utils::memzero(dest + programHeader->p_memsz, (nPages << 12) - programHeader->p_memsz);
+					utils::memcpy(dest, src, programHeader->p_filesz);
+					utils::memzero(dest + programHeader->p_filesz, (nPages << 12) - programHeader->p_filesz);
 				}
 				else
-					utils::memzero(dest + programHeader->p_memsz, (nPages << 12) - programHeader->p_memsz);
+					utils::memzero(dest, nPages << 12);
 				memory::MemoryProtect(dest, nPages, virtualAllocFlags);
 				if (baseAddress > programHeader->p_vaddr)
 					baseAddress = programHeader->p_vaddr;

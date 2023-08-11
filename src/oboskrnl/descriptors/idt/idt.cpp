@@ -4,8 +4,9 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
-#include "idt.h"
+#include <descriptors/idt/idt.h>
 
+#include <driver_api/interrupts.h>
 
 extern "C" void isr0();
 extern "C" void isr1();
@@ -133,6 +134,7 @@ s_idtEntries[interrupt] = IdtEntry((UINTPTR_T)isr ##interrupt, 0x08, 0x8E);
 		REGISTER_INTERRUPT(46);
 		REGISTER_INTERRUPT(47);
 		REGISTER_INTERRUPT(48);
+		s_idtEntries[0x50] = IdtEntry((UINTPTR_T)isr80, 0x08, 0x8E);
 
 		s_idtPointer.limit = sizeof(s_idtEntries) - 1;
 		s_idtPointer.base  = (UINTPTR_T)&s_idtEntries;

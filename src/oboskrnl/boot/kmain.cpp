@@ -34,6 +34,9 @@
 
 #include <elf/elf.h>
 
+#include <driver_api/interrupts.h>
+#include <driver_api/syscalls.h>
+
 #ifdef __INTELLISENSE__
 #define __i686__ 1
 #undef _MSC_VER
@@ -172,32 +175,31 @@ namespace obos
 		// Oh no!
 		//kpanic(kpanic_format("obos::kmain tried to return!"));
 	}
-	void testThread(PVOID userData)
-	{
-		CSTRING str = (CSTRING)userData;
-		ConsoleOutputString(str);
-		multitasking::ExitThread(multitasking::GetCurrentThreadTid());
-	}
+	void(*readFromKeyboard)(STRING outputBuffer, SIZE_T sizeBuffer) = nullptr;
 	void kmainThr()
 	{ 
 		multitasking::g_initialized = true;
 
 		UINTPTR_T entry = 0, base = 0;
 
+		driverAPI::ResetSyscallHandlers();
+
+		driverAPI::RegisterSyscalls();
+		
 		DWORD err = elfLoader::LoadElfFile((PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start, 
 			((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
 			entry,base);
 		if (err)
-			kpanic(nullptr, kpanic_format("Elf loader failed with code %d."), err);
-		printf("Loaded elf file, running _start!\r\n");
-		DWORD ret = ((DWORD(*)(void(*)(const char* format, ...)))entry)(printf);
-		printf("_start returned with exit code: %p\r\n", ret);
+			kpanic(nullptr, kpanic_format("Elf loader failed with code %d."), err); // We can't go under it, we can't go above it, oh no! we've got to go through it.
+		((DWORD(*)())entry)();
 
-		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
+		// When the kernel is ready to have a half working terminal, uncomment these lines.
 
+		/*char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
+		
 		SetConsoleColor(0x003399FF, 0x00000000);
 		ConsoleOutput(ascii_art, ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start);
-		SetConsoleColor(0xFFFFFFFF, 0x00000000);
+		SetConsoleColor(0xFFFFFFFF, 0x00000000);*/
 
 		asm volatile (".byte 0xeb, 0xfe;");
 	}

@@ -1,4 +1,4 @@
-﻿# CMakeLists.txt
+﻿# src/oboskrnl/CMakeLists.txt
 #
 # Copyright (c) 2023 Omar Berrow
 
@@ -11,6 +11,7 @@ set(oboskrnl_cxxSources "boot/kmain.cpp"            "console.cpp"               
                         "utils/memory.cpp"          "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.c" "external/list/list_iterator.c"
                         "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "multitasking/threadHandle.cpp"
                         "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "elf/elf.cpp"
+                        "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"
 )
 
 set(oboskrnl_headers "types.h"                            "boot/multiboot.h"                   "console.h"                    "klog.h"
@@ -18,11 +19,13 @@ set(oboskrnl_headers "types.h"                            "boot/multiboot.h"    
                      "utils/bitfields.h"                  "descriptors/idt/pic.h"              "memory_manager/paging/init.h" "memory_manager/paging/allocate.h" 
                      "utils/memory.h"                     "memory_manager/liballoc/liballoc.h" "utils/list.h"                 "external/list/list.h"
                      "multitasking/threadHandle.h"        "multitasking/multitasking.h"        "multitasking/mutex/mutex.h"   "multitasking/mutex/mutexHandle.h"
-                     "new"                                "elf/elf.h"                          "elf/elfStructures.h"
+                     "new"                                "elf/elf.h"                          "elf/elfStructures.h"          "driver_api/interrupts.h"
+                     "utils/hashTable.h"
 )
 
 set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm"  "descriptors/idt/handlers.asm"
                         "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"         "inline-asm.asm"
+                        "driver_api/interrupts.asm"
 )
 
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cxxSources} ${oboskrnl_headers})
@@ -31,6 +34,7 @@ add_executable(oboskrnl ${oboskrnl_files})
 target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=misleading-indentation> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-builtin-declaration-mismatch> 
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=unknown-pragmas>
+                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
 )

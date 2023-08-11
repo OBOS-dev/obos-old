@@ -18,7 +18,13 @@
 #endif
 #define NUL		((CHAR)0)
 
+#ifdef __cplusplus
 typedef bool				BOOL;
+#else
+typedef _Bool				BOOL;
+#define FALSE 0
+#define TRUE 1
+#endif
 typedef unsigned char		UINT8_T;
 typedef unsigned short		UINT16_T;
 typedef unsigned int		UINT32_T;

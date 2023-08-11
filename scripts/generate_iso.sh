@@ -2,6 +2,8 @@ clear
 cd ..
 echo Generating the iso \"obos.iso\"
 # Copy the kernel to it's place.
-cp out/oboskrnl isodir/obos/oboskrnl
+cp -u out/oboskrnl isodir/obos/oboskrnl
+# Copy the ps2Keyboard driver to it's place.
+cp -u out/ps2Keyboard isodir/obos/drivers/input/ps2Keyboard
 grub-mkrescue -o out/obos.iso isodir
 cd scripts

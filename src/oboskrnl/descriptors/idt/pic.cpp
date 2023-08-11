@@ -137,7 +137,7 @@ namespace obos
 		return utils::testBitInBitfield(isr_register, interrupt);
 	}
 
-	void SendEOI(DWORD irqNumber)
+	void SendEOI(BYTE irqNumber)
 	{
 		if (irqNumber > 15)
 			return;

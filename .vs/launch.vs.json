@@ -15,6 +15,10 @@
           "description": "Adds the kernel's symbol file."
         },
         {
+          "text": "add-symbol-file C:/Code/obos/out/ps2Keyboard",
+          "description": "Adds the kernel's symbol file."
+        },
+        {
           "text": "target remote :1234",
           "description": "Connects to qemu's gdb stub."
         }
