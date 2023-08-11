@@ -48,7 +48,6 @@
 #endif
 
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
-#define NUM_MODULES 3
 
 extern "C" UINTPTR_T* boot_page_directory1;
 extern "C" void _init();
@@ -159,11 +158,6 @@ namespace obos
 
 		for(BYTE i = 0x20; i < 0x30; i++)
 			RegisterInterruptHandler(i, [](const obos::interrupt_frame* frame) {
-				Pic pic{ (frame->intNumber - 32 > 7) ? Pic::PIC2_CMD : Pic::PIC1_CMD, (frame->intNumber - 32 > 7) ? Pic::PIC2_DATA : Pic::PIC2_DATA };
-				pic.disableIrq(frame->intNumber - 32);
-				if (frame->intNumber == 33)
-					printf("Scan code: 0x%X\r\n", inb(0x60));
-				pic.enableIrq(frame->intNumber - 32);
 				SendEOI(frame->intNumber - 32);
 				});
 		for (BYTE i = 0; i < 32; i++)
@@ -190,10 +184,20 @@ namespace obos
 			((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
 			entry,base);
 		if (err)
-			kpanic(nullptr, kpanic_format("Elf loader failed with code %d."), err); // We can't go under it, we can't go above it, oh no! we've got to go through it.
+			kpanic(nullptr, kpanic_format("Elf loader failed with code %d."), err);
 		((DWORD(*)())entry)();
 
-		// When the kernel is ready to have a half working terminal, uncomment these lines.
+		char(*existsCallback)(CSTRING filename, SIZE_T* size) = (char(*)(CSTRING filename, SIZE_T* size))driverAPI::g_registeredDrivers[1]->existsCallback;
+		void(*readCallback)(CSTRING filename, STRING output, SIZE_T size) = (void(*)(CSTRING filename, STRING output, SIZE_T size))driverAPI::g_registeredDrivers[1]->readCallback;
+		
+		SIZE_T filesize = 0;
+		char existsData = existsCallback("test.txt", &filesize);
+		if (!existsData)
+			kpanic(nullptr, kpanic_format("/initrd.txt doesn't exist."));
+		char* filedata = new char[filesize + 1];
+		readCallback("test.txt", filedata, filesize);
+		printf("/test.txt: \r\n%s", filedata);
+		delete[] filedata;
 
 		/*char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
 		

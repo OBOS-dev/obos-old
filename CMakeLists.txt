@@ -12,3 +12,4 @@ project ("obos" C CXX ASM-ATT ASM_NASM)
 add_subdirectory ("src/oboskrnl")
 # Include the ps2 keyboard driver.
 add_subdirectory("src/drivers/input/ps2Keyboard")
+add_subdirectory("src/drivers/filesystems/ustar")

@@ -70,6 +70,20 @@ namespace obos
 			// +64 (End)
 		};
 
+		enum fileExistsReturn
+		{
+			// If this is set, the file cannot be written to.
+			FILE_EXISTS_READ_ONLY = 1,
+			// If this is set, the file links to another file.
+			FILE_EXISTS_SYMLINK = 2,
+			// If this is set, this is a directory.
+			FILE_EXISTS_DIRECTORY = 4,
+			// If this is set, the file links to another file.
+			FILE_EXISTS_HARDLINK = 8,
+			// If this is set, the file refers to a device.
+			FILE_EXISTS_DEVICE = 16
+		};
+
 #ifdef __cplusplus
 	}
 }

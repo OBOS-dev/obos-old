@@ -17,11 +17,13 @@
 
 #include <console.h>
 
+#include <boot/multiboot.h>
+
 #define DEFINE_RESERVED_PARAMETERS volatile UINT32_T, volatile UINT32_T, volatile UINT32_T, volatile UINT32_T
 
 namespace obos
 {
-	extern void(*readFromKeyboard)(STRING outputBuffer, SIZE_T sizeBuffer);
+	extern multiboot_info_t* g_multibootInfo;
 	namespace driverAPI
 	{
 		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS, DWORD driverID, serviceType type);
@@ -31,6 +33,9 @@ namespace obos
 		static exitStatus DisableIRQ(DEFINE_RESERVED_PARAMETERS, BYTE irq);
 		static exitStatus RegisterReadCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, void(*callback)(STRING outputBuffer, SIZE_T sizeBuffer));
 		static exitStatus PrintChar(DEFINE_RESERVED_PARAMETERS, CHAR ch, bool flush);
+		static exitStatus GetMultibootModule(DEFINE_RESERVED_PARAMETERS, DWORD moduleIndex, UINTPTR_T* moduleAddress, SIZE_T* size);
+		static exitStatus RegisterFileReadCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer));
+		static exitStatus RegisterFileExistsCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, char(*callback)(CSTRING filename, SIZE_T* size));
 
 		/*struct driverIdentification
 		{
@@ -42,11 +47,6 @@ namespace obos
 			}
 		};
 		utils::HashTable<DWORD, driverIdentification*, driverIdentification> g_registeredDrivers;*/
-		struct driverIdentification
-		{
-			DWORD driverId = 0;
-			serviceType service_type = serviceType::SERVICE_TYPE_INVALID;
-		};
 		driverIdentification** g_registeredDrivers = nullptr;
 		SIZE_T g_registeredDriversCapacity = 128;
 
@@ -61,6 +61,9 @@ namespace obos
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(DisableIRQ));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterReadCallback));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(PrintChar));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(GetMultibootModule));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterFileReadCallback));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterFileExistsCallback));
 		}
 
 		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS, DWORD driverID, serviceType type)
@@ -212,13 +215,45 @@ namespace obos
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
 			if (!g_registeredDrivers[driverId])
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			// TODO: Make this syscall do something.
-			readFromKeyboard = callback;
+			if (g_registeredDrivers[driverId]->service_type != serviceType::SERVICE_TYPE_USER_INPUT_DEVICE)
+				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
+			g_registeredDrivers[driverId]->readCallback = (PVOID)callback;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 		static exitStatus PrintChar(DEFINE_RESERVED_PARAMETERS, CHAR ch, bool flush) 
 		{
 			ConsoleOutputCharacter(ch, flush);
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+		static exitStatus GetMultibootModule(DEFINE_RESERVED_PARAMETERS, DWORD moduleIndex, UINTPTR_T* moduleStart, SIZE_T* size)
+		{
+			if (moduleIndex >= NUM_MODULES)
+				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
+			multiboot_module_t* mod = ((multiboot_module_t*)g_multibootInfo->mods_addr) + moduleIndex;
+			*moduleStart = mod->mod_start;
+			*size = mod->mod_end - mod->mod_start;
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+		static exitStatus RegisterFileReadCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer))
+		{
+			if (driverId > g_registeredDriversCapacity)
+				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
+			if (!g_registeredDrivers[driverId])
+				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
+			if (g_registeredDrivers[driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
+				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
+			g_registeredDrivers[driverId]->readCallback = (PVOID)callback;
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+		static exitStatus RegisterFileExistsCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, char(*callback)(CSTRING filename, SIZE_T* size))
+		{
+			if (driverId > g_registeredDriversCapacity)
+				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
+			if (!g_registeredDrivers[driverId])
+				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
+			if (g_registeredDrivers[driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
+				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
+			g_registeredDrivers[driverId]->existsCallback = (PVOID)callback;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 	}

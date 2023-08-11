@@ -1,23 +1,14 @@
-# src/drivers/input/ps2Keyboard/
+# src/drivers/input/ps2Keyboard/CMakeLists.txt
 #
 # Copyright (c) 2023 Omar Berrow
 
 # The ps/2 keyboard driver.
 
-add_executable (ps2Keyboard "dmain.c")
+add_executable (ps2Keyboard "dmain.c" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.h")
 
-target_compile_options(ps2Keyboard PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
-                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=misleading-indentation> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-builtin-declaration-mismatch> 
-                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=unknown-pragmas>
-                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>
-                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
-                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>)
+target_compile_options(ps2Keyboard PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror>)
 
-target_link_options(ps2Keyboard 
-    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crti.S" 
-    PUBLIC "${CRTBEGIN_DIRECTORY}"
-    PUBLIC "${CRTEND_DIRECTORY}"
-    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crtn.S"
+target_link_options(ps2Keyboard
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/ps2Keyboard.map"
     PUBLIC "-ffreestanding"
     PUBLIC "-nostdlib")

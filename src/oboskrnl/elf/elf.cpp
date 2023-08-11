@@ -38,8 +38,8 @@ namespace obos
 				const PBYTE src = startAddress + programHeader->p_offset;
 				if (programHeader->p_filesz)
 				{
-					utils::memcpy(dest, src, programHeader->p_filesz);
-					utils::memzero(dest + programHeader->p_filesz, (nPages << 12) - programHeader->p_filesz);
+					utils::memcpy(dest + programHeader->p_offset, src, programHeader->p_filesz);
+					utils::memzero(dest + programHeader->p_filesz + programHeader->p_offset, (nPages << 12) - programHeader->p_filesz - programHeader->p_offset);
 				}
 				else
 					utils::memzero(dest, nPages << 12);

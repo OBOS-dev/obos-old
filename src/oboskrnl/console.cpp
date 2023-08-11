@@ -9,11 +9,14 @@
 #include <inline-asm.h>
 
 #include <utils/memory.h>
+#include <utils/bitfields.h>
 
 #include <memory_manager/paging/allocate.h>
 #include <memory_manager/physical.h>
 
 #include <multitasking/mutex/mutexHandle.h>
+
+#include <new>
 
 #define UpdateCursorPosition() SetTerminalCursorPosition(s_terminalColumn, s_terminalRow)
 extern void strreverse(char* begin, int size);
@@ -36,6 +39,7 @@ namespace obos
 	extern multiboot_info_t* g_multibootInfo;
 	PBYTE font = nullptr;
 	static multitasking::MutexHandle* s_consoleMutex;
+	static utils::IntegerBitfield s_modifiedLines[2];
 
 	// Internal functions.
 	
@@ -83,6 +87,9 @@ namespace obos
 			utils::memcpy(s_backbuffer, s_backbuffer + s_framebufferWidth * 16, (s_framebufferWidth * s_framebufferHeight * 4) - s_framebufferWidth * 16 * 4);
 			utils::dwMemset((DWORD*)(GET_FUNC_ADDR(s_backbuffer) + (s_framebufferWidth * s_framebufferHeight * 4) - s_framebufferWidth * 16 * 4),
 				s_backgroundColor, s_framebufferWidth * 16);
+			for (int i = 0; i < 2; i++)
+				s_modifiedLines[i].setBitfield(0);
+			utils::memcpy(s_framebuffer, s_backbuffer, s_framebufferWidth * s_framebufferHeight * 4);
 		}
 		if (s_reachedEndTerminal)
 			s_terminalRow = s_nCharsVertical - 2;
@@ -112,6 +119,8 @@ namespace obos
 		s_consoleMutex->Unlock();
 		SetCursor(true);
 		UpdateCursorPosition();
+		new (s_modifiedLines) utils::IntegerBitfield{};
+		new (s_modifiedLines + 1) utils::IntegerBitfield{};
 		LeaveKernelSection();
 	}
 	void SetCursor(bool status)
@@ -161,6 +170,7 @@ namespace obos
 			DWORD x = ((s_terminalColumn >> 2) + 1) << 2;
 			for (DWORD i = 0; i < x && s_terminalColumn < s_framebufferWidth; i++)
 				putcharAt(++s_terminalColumn, s_terminalRow * 16, ' ', s_foregroundColor, s_backgroundColor);
+			s_modifiedLines[s_terminalRow >> 5].setBit(s_terminalRow % 32);
 			break;
 		}
 		case '\b':
@@ -169,13 +179,7 @@ namespace obos
 				// TODO: Make a beep here.
 				break;
 			putcharAt(--s_terminalColumn, s_terminalRow * 16, ' ', s_foregroundColor, s_backgroundColor);
-			DWORD x = s_terminalColumn;
-			DWORD y = 0;
-			if (!s_reachedEndTerminal)
-				y = s_terminalRow;
-			else
-				y = s_nCharsVertical - 2;
-			SetTerminalCursorPosition(x, y);
+			s_modifiedLines[s_terminalRow >> 5].setBit(s_terminalRow % 32);
 			return;
 		}
 		case '\0':
@@ -192,6 +196,7 @@ namespace obos
 				on_newline();
 			}
 			putcharAt(s_terminalColumn - 1, s_terminalRow * 16, ch, s_foregroundColor, s_backgroundColor);
+			s_modifiedLines[s_terminalRow >> 5].setBit(s_terminalRow % 32);
 			UpdateCursorPosition();
 		}
 		}
@@ -266,7 +271,24 @@ namespace obos
 
 	static void __Impl_swapBuffers()
 	{
-		utils::memcpy(s_framebuffer, s_backbuffer, s_framebufferWidth * s_framebufferHeight * 4);
+		for (int b = 0; b < 32; b++)
+		{
+			if (s_modifiedLines[0].getBit(b))
+			{
+				int scanline = b * 16 + 6;
+				s_modifiedLines[0].clearBit(b);
+				utils::memcpy(s_framebuffer + (scanline * s_framebufferWidth), s_backbuffer + (scanline * s_framebufferWidth), s_framebufferWidth * 16 * 4);
+			}
+		}
+		for (int b = 0; b < 16; b++)
+		{
+			if (s_modifiedLines[1].getBit(b))
+			{
+				int scanline = ((32 + b) * 16) + 6;
+				s_modifiedLines[1].clearBit(b);
+				utils::memcpy(s_framebuffer + (scanline * s_framebufferWidth), s_backbuffer + (scanline * s_framebufferWidth), (s_framebufferWidth * 16 * 4) - 6);
+			}
+		}
 	}
 	// Swap the backbuffer and the viewport.
 	void swapBuffers()

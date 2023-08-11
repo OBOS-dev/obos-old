@@ -1,5 +1,5 @@
 /*
-	dmain.cpp
+	drivers/input/ps2Keyboard/dmain.c
 	
 	Copyright (c) 2023 Omar Berrow
 */
@@ -7,20 +7,11 @@
 #include <types.h>
 
 #include <driver_api/enums.h>
+#include <driver_api/syscall_interface.h>
 
 #include <stdarg.h>
 
 typedef _Bool bool;
-
-extern enum exitStatus RegisterDriver(DWORD driverID, enum serviceType type);
-extern enum exitStatus RegisterInterruptHandler(DWORD driverId, BYTE interruptId, void(*handler)(const struct interrupt_frame* frame));
-extern enum exitStatus PicSendEoi(BYTE irq);
-extern enum exitStatus DisableIRQ(BYTE irq);
-extern enum exitStatus EnableIRQ(BYTE irq);
-extern enum exitStatus RegisterReadCallback(DWORD driverId, void(*callback)(STRING outputBuffer, SIZE_T sizeBuffer));
-extern enum exitStatus PrintChar(CHAR ch, bool flush);
-
-extern enum exitStatus CallSyscall(DWORD syscallId, ...);
 
 #define cli() asm volatile("cli")
 #define sti() asm volatile("sti")
@@ -45,23 +36,24 @@ typedef struct _key
 	SIZE_T nPressed;
 	bool isPressed;
 	char ch;
+	char shiftAlias;
 } key;
 
 key g_keys[] = {
 	{ 0x00, 0,0, '\x00' },
 	{ 0x01, 0,0, '\x1b' },
-	{ 0x02, 0,0, '1' },
-	{ 0x03, 0,0, '2' },
-	{ 0x04, 0,0, '3' },
-	{ 0x05, 0,0, '4' },
-	{ 0x06, 0,0, '5' },
-	{ 0x07, 0,0, '6' },
-	{ 0x08, 0,0, '7' },
-	{ 0x09, 0,0, '8' },
-	{ 0x0A, 0,0, '9' },
-	{ 0x0B, 0,0, '0' },
-	{ 0x0C, 0,0, '-' },
-	{ 0x0D, 0,0, '=' },
+	{ 0x02, 0,0, '1', '!' },
+	{ 0x03, 0,0, '2', '@' },
+	{ 0x04, 0,0, '3', '#' },
+	{ 0x05, 0,0, '4', '$' },
+	{ 0x06, 0,0, '5', '%' },
+	{ 0x07, 0,0, '6', '^' },
+	{ 0x08, 0,0, '7', '&' },
+	{ 0x09, 0,0, '8', '*' },
+	{ 0x0A, 0,0, '9', '(' },
+	{ 0x0B, 0,0, '0', ')' },
+	{ 0x0C, 0,0, '-', '_'},
+	{ 0x0D, 0,0, '=', '+' },
 	{ 0x0E, 0,0, '\b' },
 	{ 0x0F, 0,0, '\t' },
 	{ 0x10, 0,0, 'Q' },
@@ -74,8 +66,8 @@ key g_keys[] = {
 	{ 0x17, 0,0, 'I' },
 	{ 0x18, 0,0, 'O' },
 	{ 0x19, 0,0, 'P' },
-	{ 0x1A, 0,0, '[' },
-	{ 0x1B, 0,0, ']' },
+	{ 0x1A, 0,0, '[', '{' },
+	{ 0x1B, 0,0, ']', '}' },
 	{ 0x1C, 0,0, '\n' },
 	{ 0x1D, 0,0, '\0' },
 	{ 0x1E, 0,0, 'A' },
@@ -87,11 +79,11 @@ key g_keys[] = {
 	{ 0x24, 0,0, 'J' },
 	{ 0x25, 0,0, 'K' },
 	{ 0x26, 0,0, 'L' },
-	{ 0x27, 0,0, ';' },
-	{ 0x28, 0,0, '\'' },
-	{ 0x29, 0,0, '`' },
+	{ 0x27, 0,0, ';', ':' },
+	{ 0x28, 0,0, '\'', '\"' },
+	{ 0x29, 0,0, '`', '~' },
 	{ 0x2A, 0,0, '\0' },
-	{ 0x2B, 0,0, '\\' },
+	{ 0x2B, 0,0, '\\', '|'},
 	{ 0x2C, 0,0, 'Z' },
 	{ 0x2D, 0,0, 'X' },
 	{ 0x2E, 0,0, 'C' },
@@ -99,9 +91,9 @@ key g_keys[] = {
 	{ 0x30, 0,0, 'B' },
 	{ 0x31, 0,0, 'N' },
 	{ 0x32, 0,0, 'M' },
-	{ 0x33, 0,0, ',' },
-	{ 0x34, 0,0, '.' },
-	{ 0x35, 0,0, '/' },
+	{ 0x33, 0,0, ',', '<' },
+	{ 0x34, 0,0, '.', '>' },
+	{ 0x35, 0,0, '/', '?' },
 	{ 0x36, 0,0, '\0' },
 	{ 0x37, 0,0, '*' },
 	{ 0x38, 0,0, '\0' },
@@ -139,7 +131,7 @@ key g_keys[] = {
 	{ 0x58, 0,0, '\0' },
 };
 // Should take 2 pages.
-key g_keyBuffer[512] = {};
+BYTE g_keyBuffer[8192] = {};
 SIZE_T g_keyBufferPosition = 0;
 
 struct
@@ -148,37 +140,34 @@ struct
 	bool isNumberLock : 1;
 	bool isCapsLock : 1;
 	bool isShiftPressed : 1;
-} __attribute__((packed)) flags = {0,0,0};
+} __attribute__((packed)) flags = {0,0,0,0};
 
 
 static void readCallback(STRING outputBuffer, SIZE_T size)
 {
-	for (SIZE_T i = 0; i < size; i++)
-		outputBuffer[i] = g_keyBuffer[i].ch;
+	for (SIZE_T i = 0; i < size && i < 8192; i++)
+	{
+		if (!g_keyBuffer[i])
+			continue;
+		outputBuffer[i] = g_keyBuffer[i];
+	}
 }
-
-extern void _init();
 
 int _start()
 {
-	_init();
-
 	RegisterDriver(DRIVER_ID, SERVICE_TYPE_USER_INPUT_DEVICE);
 
 	cli();
 	DisableIRQ(1);
 
-	// Keys need to helf for 250 ms before repeating, and they repeat at a rate 30 hz (33.33333 ms).
+	// Keys need to held for 250 ms before repeating, and they repeat at a rate of 30 hz (33.33333 ms).
 	sendCommand(2, 0xF3, 0);
-	
-	// Turn off the leds.
-	sendCommand(2, 0xED, 0);
 
-	// Set scancode set 1.
+	// Set scancode set 1 (scancode set 2?).
 	sendCommand(2, 0xF0, 2);
 
 	// Enable scanning.
-	//sendCommand(1, 0xF4);
+	sendCommand(1, 0xF4);
 
 	RegisterInterruptHandler(DRIVER_ID, 0x21, keyboardInterrupt);
 
@@ -198,29 +187,33 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 
 	bool wasReleased = (scancode & 0x80) == 0x80;
 
-	const char ch = g_keys[scancode].ch;
-	
 	if (scancode > 0xD8)
 		goto done;
 
 	if (wasReleased)
 		scancode &= ~(0x80);
+
+	const char ch = g_keys[scancode].ch;
+
 	g_keys[scancode].isPressed = !wasReleased;
 	g_keys[scancode].nPressed++;
-	if(g_keys[scancode].ch)
+	if(g_keys[scancode].ch && g_keys[scancode].isPressed)
 	{
 		bool isUppercase = flags.isCapsLock || flags.isShiftPressed;
 		if (flags.isCapsLock && flags.isShiftPressed)
 			isUppercase = false;
 
-		key newKey = {};
+		char newKey = 0;
 		if(ch < 'A' || ch > 'Z')
-			newKey.ch = ch;
+			newKey = ch;
 		else
-			newKey.ch = isUppercase ? ch : (ch - 'A') + 'a';
-		g_keyBuffer[g_keyBufferPosition++] = newKey;
-		if(newKey.ch != '\n')
-			PrintChar(newKey.ch, false);
+			newKey = isUppercase ? ch : (ch - 'A') + 'a';
+		if (flags.isShiftPressed && (ch < 'A' || ch > 'Z') && g_keys[scancode].shiftAlias)
+			newKey = g_keys[scancode].shiftAlias;
+		if(newKey)
+			g_keyBuffer[g_keyBufferPosition++] = newKey;
+		if(newKey != '\n')
+			PrintChar(newKey, true);
 		else
 		{
 			PrintChar('\r', false);
@@ -232,7 +225,10 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 		flags.isShiftPressed = !wasReleased;
 
 	if (wasReleased)
+	{
+		g_keys[scancode].nPressed = 0;
 		goto done;
+	}
 
 
 	switch (scancode)
@@ -241,6 +237,7 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 	{
 		flags.isCapsLock = !flags.isCapsLock;
 		BYTE bitfield = flags.isScrollLock | (flags.isNumberLock << 1) | (flags.isCapsLock << 2);
+		bitfield <<= 1;
 		sendCommand(2, 0xED, bitfield);
 		break;
 	}
@@ -248,6 +245,7 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 	{
 		flags.isScrollLock = !flags.isScrollLock;
 		BYTE bitfield = flags.isScrollLock | (flags.isNumberLock << 1) | (flags.isCapsLock << 2);
+		bitfield <<= 1;
 		sendCommand(2, 0xED, bitfield);
 		break;
 	}
@@ -255,6 +253,7 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 	{
 		flags.isNumberLock = !flags.isNumberLock;
 		BYTE bitfield = flags.isScrollLock | (flags.isNumberLock << 1) | (flags.isCapsLock << 2);
+		bitfield <<= 1;
 		sendCommand(2, 0xED, bitfield);
 		break;
 	}
@@ -311,36 +310,3 @@ UINT16_T inw(UINT16_T port)
 		: "memory");
 	return ret;
 }
-
-__asm__("RegisterDriver: ;"
-			 "mov $0, %eax;"
-			 "int $0x50;"
-			 "ret;"
-		"RegisterInterruptHandler: ;"
-			 "mov $1, %eax;"
-			 "int $0x50;"
-			 "ret;"
-		"PicSendEoi:"
-			"mov $2, %eax;"
-			"int $0x50;"
-			"ret;"
-		"EnableIRQ:"
-			"mov $3, %eax;"
-			"int $0x50;"
-			"ret;"
-		"DisableIRQ:"
-			"mov $4, %eax;"
-			"int $0x50;"
-			"ret;"
-		"RegisterReadCallback:"
-			"mov $5, %eax;"
-			"int $0x50;"
-			"ret;"
-		"PrintChar:"
-			"mov $6, %eax;"
-			"int $0x50;"
-			"ret;"
-		"CallSyscall: ;"
-			 "mov 0x8(%esp),%eax;"
-			 "int $0x50;"
-			 "ret;");
