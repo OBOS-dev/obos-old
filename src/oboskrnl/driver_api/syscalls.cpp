@@ -8,9 +8,9 @@
 #include <driver_api/interrupts.h>
 #include <driver_api/enums.h>
 
-#include <utils/hashTable.h>
-
 #include <memory_manager/liballoc/liballoc.h>
+#include <memory_manager/physical.h>
+#include <memory_manager/paging/allocate.h>
 
 #include <descriptors/idt/idt.h>
 #include <descriptors/idt/pic.h>
@@ -19,7 +19,12 @@
 
 #include <boot/multiboot.h>
 
+#include <utils/memory.h>
+
+#include <klog.h>
+
 #define DEFINE_RESERVED_PARAMETERS volatile UINT32_T, volatile UINT32_T, volatile UINT32_T, volatile UINT32_T
+#define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
 
 namespace obos
 {
@@ -36,6 +41,9 @@ namespace obos
 		static exitStatus GetMultibootModule(DEFINE_RESERVED_PARAMETERS, DWORD moduleIndex, UINTPTR_T* moduleAddress, SIZE_T* size);
 		static exitStatus RegisterFileReadCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer));
 		static exitStatus RegisterFileExistsCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, char(*callback)(CSTRING filename, SIZE_T* size));
+		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS, UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags);
+		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS, PVOID virtualAddress);
+		static exitStatus Printf(DEFINE_RESERVED_PARAMETERS, CSTRING format, ...);
 
 		/*struct driverIdentification
 		{
@@ -64,6 +72,9 @@ namespace obos
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(GetMultibootModule));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterFileReadCallback));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterFileExistsCallback));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(MapPhysicalTo));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(UnmapPhysicalTo));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(Printf));
 		}
 
 		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS, DWORD driverID, serviceType type)
@@ -77,6 +88,8 @@ namespace obos
 					g_registeredDrivers = (driverIdentification**)krealloc(g_registeredDrivers, g_registeredDriversCapacity);
 				}
 				if (type == serviceType::SERVICE_TYPE_INVALID)
+					return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
+				if (type > serviceType::SERVICE_TYPE_MAX_VALUE)
 					return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
 				driverIdentification* identity = new driverIdentification {
 					driverID,
@@ -254,6 +267,32 @@ namespace obos
 			if (g_registeredDrivers[driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
 			g_registeredDrivers[driverId]->existsCallback = (PVOID)callback;
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS, UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags)
+		{
+			if (inRange(virtualAddress, 0xC0000000, 0xE0000000))
+				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
+			if(!memory::kmap_physical(virtualAddress, 1, flags, (PVOID)physicalAddress))
+				return exitStatus::EXIT_STATUS_ADDRESS_NOT_AVAILABLE;
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS, PVOID virtualAddress)
+		{
+			if (inRange(virtualAddress, 0xC0000000, 0xE0000000))
+				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
+			if (memory::VirtualFree(virtualAddress, 1) == 1)
+				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+		static exitStatus Printf(DEFINE_RESERVED_PARAMETERS, CSTRING format, ...)
+		{
+			va_list list;
+			va_start(list, format);
+
+			vprintf(format, list);
+
+			va_end(list);
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 	}

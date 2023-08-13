@@ -44,6 +44,8 @@ namespace obos
 			SERVICE_TYPE_COMMUNICATION,
 			// Ex: A virtual serial driver (see com0com on windows to understand this).
 			SERVICE_TYPE_VIRTUAL_COMMUNICATION,
+			// Not a service, instead it indicates the service type with the biggest value.
+			SERVICE_TYPE_MAX_VALUE = SERVICE_TYPE_VIRTUAL_COMMUNICATION
 		};
 		DEFINE_ENUM exitStatus
 		{
@@ -53,6 +55,7 @@ namespace obos
 			EXIT_STATUS_ACCESS_DENIED,
 			EXIT_STATUS_NO_SUCH_DRIVER,
 			EXIT_STATUS_INVALID_PARAMETER,
+			EXIT_STATUS_ADDRESS_NOT_AVAILABLE,
 		};
 
 		struct interrupt_frame
@@ -83,6 +86,14 @@ namespace obos
 			// If this is set, the file refers to a device.
 			FILE_EXISTS_DEVICE = 16
 		};
+
+		enum allocFlags
+		{
+			ALLOC_FLAGS_WRITE_ENABLED = 2,
+			ALLOC_FLAGS_GLOBAL = 4,
+			ALLOC_FLAGS_CACHE_DISABLE = 16
+		};
+
 
 #ifdef __cplusplus
 	}

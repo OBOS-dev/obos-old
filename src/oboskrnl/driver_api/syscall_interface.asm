@@ -34,6 +34,9 @@ SYSCALL_DEFINE PrintChar, current_syscall
 SYSCALL_DEFINE GetMultibootModule, current_syscall
 SYSCALL_DEFINE RegisterFileReadCallback, current_syscall
 SYSCALL_DEFINE RegisterFileExistsCallback, current_syscall
+SYSCALL_DEFINE MapPhysicalTo, current_syscall
+SYSCALL_DEFINE UnmapPhysicalTo, current_syscall
+SYSCALL_DEFINE Printf, current_syscall
 
 ; All syscalls must be before this.
 SYSCALL_DEFINE CallSyscall, [esp+8]

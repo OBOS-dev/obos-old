@@ -2,3 +2,5 @@
 .vs/*
 !.vs/launch.vs.json
 out/Ubuntu/*
+disk.img
+/disk.img

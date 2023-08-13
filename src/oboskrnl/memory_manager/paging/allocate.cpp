@@ -22,6 +22,7 @@ namespace obos
 		{
 			s_lastPageTable[1023] = (UINTPTR_T)physicalAddress;
 			s_lastPageTable[1023] |= 3;
+			tlbFlush(0xFFFFF000);
 			return (UINTPTR_T*)0xFFFFF000;
 		}
 		void kfree_pageTable()
@@ -47,7 +48,8 @@ namespace obos
 				pageTable[PageDirectory::addressToPageTableIndex(address)] = (UINTPTR_T)physicalAddress;
 				pageTable[PageDirectory::addressToPageTableIndex(address)] |= 1;
 				pageTable[PageDirectory::addressToPageTableIndex(address)] |= flags;
-				pageTable[PageDirectory::addressToPageTableIndex(address)] &= 0xFFFFFE07;
+				pageTable[PageDirectory::addressToPageTableIndex(address)] &= 0xFFFFF017;
+				tlbFlush(0xFFFFF000);
 			}
 			return (UINT32_T*)base;
 		}
@@ -56,7 +58,7 @@ namespace obos
 		{
 			UINTPTR_T base = GET_FUNC_ADDR(_base);
 			// Should we choose a base address?
-			if (inRange(base, nullptr, 0x3FFFFF))
+			if (!base)
 			{
 				for (int i = utils::testBitInBitfield(flags, 2) ? 1 : 0x301; i < 1024; i++)
 				{
@@ -100,8 +102,9 @@ namespace obos
 				entry = (UINTPTR_T)kalloc_physicalPages(1);
 				entry |= 1;
 				entry |= flags;
-				entry &= 0xFFFFFE07;
+				entry &= 0xFFFFF017;
 				*(pageTable + PageDirectory::addressToPageTableIndex(address)) = entry;
+				tlbFlush(0xFFFFF000);
 			}
 			kfree_pageTable();
 			return (PVOID)base;
@@ -109,7 +112,7 @@ namespace obos
 		DWORD VirtualFree(PVOID _base, SIZE_T nPages)
 		{
 			UINTPTR_T base = ROUND_ADDRESS_DOWN(GET_FUNC_ADDR(_base));
-			if (!HasVirtualAddress(_base, nPages) || base < 0x400000)
+			if (!HasVirtualAddress(_base, nPages))
 				return 1;
 			utils::memset(_base, 0, nPages << 12);
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
@@ -117,6 +120,7 @@ namespace obos
 				UINTPTR_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address)));
 				kfree_physicalPages((PVOID)(pageTable[PageDirectory::addressToPageTableIndex(address)] & 0xFFFFF000), 1);
 				pageTable[PageDirectory::addressToPageTableIndex(address)] = 0;
+				tlbFlush(0xFFFFF000);
 			}
 			UINTPTR_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(base)));
 			for (int i = 0; i < 1024; i++)
@@ -133,8 +137,6 @@ namespace obos
 			if (base == 0xFFFFF000)
 				return utils::testBitInBitfield(s_lastPageTable[1023], 0);
 			// TODO: Check if this is from a syscall or directly from the kernel.
-			/*if (base < 0x400000)
-				return false;*/
 			if (!utils::testBitInBitfield(*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)), 0))
 				return false;
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
@@ -158,8 +160,9 @@ namespace obos
 				UINTPTR_T entry = pageTable[PageDirectory::addressToPageTableIndex(address)] & 0xFFFFF000;
 				entry |= 1;
 				entry |= flags;
-				entry &= 0xFFFFFE07;
+				entry &= 0xFFFFF017;
 				*(pageTable + PageDirectory::addressToPageTableIndex(address)) = entry;
+				tlbFlush(0xFFFFF000);
 			}
 			return 0;
 		}

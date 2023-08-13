@@ -3,7 +3,7 @@
 
 	Copyright (c) 2023 gdt.cpp
 */
-#include "gdt.h"
+#include <descriptors/gdt/gdt.h>
 
 extern "C" void gdtFlush(UINTPTR_T base);
 
@@ -38,7 +38,7 @@ namespace obos
 		s_gdtEntries[1] = GdtEntry(0, 0xFFFFFFFF, 0x9A, 0xCF);
 		s_gdtEntries[2] = GdtEntry(0, 0xFFFFFFFF, 0x92, 0xCF);
 		s_gdtEntries[3] = GdtEntry(0, 0xFFFFFFFF, 0xFA, 0xCF);
-		s_gdtEntries[4] = GdtEntry(0,0xFFFFFFFF,0xF2,0xCF);
+		s_gdtEntries[4] = GdtEntry(0, 0xFFFFFFFF, 0xF2, 0xCF);
 	
 		s_gdtPointer.limit = sizeof(s_gdtEntries) - 1;
 		s_gdtPointer.base  = (UINTPTR_T)&s_gdtEntries;

@@ -1,3 +1,6 @@
+cd ..
+cp -u out/ahci isodir/obos/initrd/ahci
+cd scripts
 ./make_initrd.sh
 cd ..
 echo Generating the iso \"obos.iso\"

@@ -26,6 +26,7 @@ namespace obos
 			{
 				WRITE_ENABLED = 2,
 				GLOBAL = 4,
+				CACHE_DISABLE = 16
 			};
 			VirtualAllocFlags() = default;
 			VirtualAllocFlags(UINT32_T value) 
@@ -40,7 +41,7 @@ namespace obos
 		/// <summary>
 		/// Allocates virtual memory.
 		/// </summary>
-		/// <param name="base">The base address. If this is less than 0x400000, the function will choose a base address.</param>
+		/// <param name="base">The base address. If this is nullptr, the function will choose a base address.</param>
 		/// <param name="nPages">The amount of pages to allocate.</param>
 		/// <param name="flags">The allocation flags.</param>
 		/// <returns>The base address. If the base address was already allocated, nullptr.</returns>

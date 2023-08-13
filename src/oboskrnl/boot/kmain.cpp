@@ -26,11 +26,6 @@
 #include <memory_manager/paging/allocate.h>
 
 #include <multitasking/multitasking.h>
-#include <multitasking/threadHandle.h>
-
-#include <utils/memory.h>
-
-#include <new>
 
 #include <elf/elf.h>
 
@@ -122,8 +117,6 @@ namespace obos
 		
 		EnterKernelSection();
 
-		_init();
-
 		memory::g_pageDirectory = &g_pageDirectory;
 
 		memory::InitializePaging();
@@ -162,7 +155,7 @@ namespace obos
 				});
 		for (BYTE i = 0; i < 32; i++)
 			RegisterInterruptHandler(i == 14 ? 0 : i, defaultExceptionHandler);
-		
+
 		LeaveKernelSection();
 
 		multitasking::InitializeMultitasking();
@@ -173,6 +166,8 @@ namespace obos
 	void kmainThr()
 	{ 
 		multitasking::g_initialized = true;
+
+		_init();
 
 		UINTPTR_T entry = 0, base = 0;
 
@@ -191,13 +186,20 @@ namespace obos
 		void(*readCallback)(CSTRING filename, STRING output, SIZE_T size) = (void(*)(CSTRING filename, STRING output, SIZE_T size))driverAPI::g_registeredDrivers[1]->readCallback;
 		
 		SIZE_T filesize = 0;
-		char existsData = existsCallback("test.txt", &filesize);
+		char existsData = existsCallback("ahci", &filesize);
 		if (!existsData)
-			kpanic(nullptr, kpanic_format("/initrd.txt doesn't exist."));
-		char* filedata = new char[filesize + 1];
-		readCallback("test.txt", filedata, filesize);
-		printf("/test.txt: \r\n%s", filedata);
+			kpanic(nullptr, kpanic_format("/obos/initrd/ahci doesn't exist."));
+		char* filedata = new char[filesize];
+		readCallback("ahci", filedata, filesize);
+
+		err = elfLoader::LoadElfFile((PBYTE)filedata,
+			filesize,
+			entry, base);
+		if (err)
+			kpanic(nullptr, kpanic_format("Elf loader failed with code %d."), err);
 		delete[] filedata;
+
+		((DWORD(*)())entry)();
 
 		/*char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
 		

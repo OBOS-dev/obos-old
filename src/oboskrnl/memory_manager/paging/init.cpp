@@ -7,8 +7,6 @@
 #include <memory_manager/paging/init.h>
 #include <memory_manager/physical.h>
 
-#include <utils/bitfields.h>
-
 #include <new>
 
 #define indexToAddress(index, pageTableIndex) ((UINTPTR_T)(((index) << 22) + ((pageTableIndex) << 12)))
@@ -105,7 +103,7 @@ namespace obos
 
 		void tlbFlush(UINT32_T addr)
 		{
-			asm volatile("invlpg (%0)" ::"r"(addr) : "memory");
+			asm volatile("invlpg (%0)" ::"b"(addr) : "memory");
 		}
 	}
 }

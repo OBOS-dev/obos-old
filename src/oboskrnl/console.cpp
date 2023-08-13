@@ -4,15 +4,15 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
-#include <boot/multiboot.h>
 #include <console.h>
+
+#include <boot/multiboot.h>
 #include <inline-asm.h>
 
 #include <utils/memory.h>
 #include <utils/bitfields.h>
 
 #include <memory_manager/paging/allocate.h>
-#include <memory_manager/physical.h>
 
 #include <multitasking/mutex/mutexHandle.h>
 

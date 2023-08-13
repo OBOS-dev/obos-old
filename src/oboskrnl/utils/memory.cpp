@@ -5,7 +5,6 @@
 */
 
 #include <utils/memory.h>
-#include <utils/smart_ptr.h>
 
 #include <memory_manager/paging/allocate.h>
 
@@ -45,14 +44,5 @@ namespace obos
 		{
 			return (PCVOID)memchr((PVOID)block, ch, size);
 		}
-
-		/*SIZE_T strlen(CSTRING str)
-		{
-			if (!memory::HasVirtualAddress(str, 1))
-				return (SIZE_T)-1;
-			SIZE_T i = 0;
-			for (; str[i]; i++);
-			return i;
-		}*/
 	}
 }

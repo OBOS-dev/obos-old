@@ -34,12 +34,19 @@ namespace obos
 				DWORD nPages = programHeader->p_memsz >> 12;
 				if ((programHeader->p_memsz % 4096) != 0)
 					nPages++;
+				allocate:
 				PBYTE dest = (PBYTE)memory::VirtualAlloc((PVOID)programHeader->p_vaddr, nPages, memory::VirtualAllocFlags::WRITE_ENABLED);
+				if (!memory::HasVirtualAddress((PVOID)programHeader->p_vaddr, nPages))
+				{
+					// If the allocation mysteriously failed, try again.
+
+					goto allocate;
+				}
 				const PBYTE src = startAddress + programHeader->p_offset;
 				if (programHeader->p_filesz)
 				{
-					utils::memcpy(dest + programHeader->p_offset, src, programHeader->p_filesz);
-					utils::memzero(dest + programHeader->p_filesz + programHeader->p_offset, (nPages << 12) - programHeader->p_filesz - programHeader->p_offset);
+					utils::memcpy(dest/* + programHeader->p_offset*/, src, programHeader->p_filesz);
+					utils::memzero(dest + programHeader->p_filesz/* + programHeader->p_offset*/, (nPages << 12) - programHeader->p_filesz/* - programHeader->p_offset*/);
 				}
 				else
 					utils::memzero(dest, nPages << 12);

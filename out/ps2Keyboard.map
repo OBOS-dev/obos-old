@@ -78,7 +78,7 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
 .plt.sec
  *(.plt.sec)
 
-.text           0x08048080      0x697
+.text           0x08048080      0x6af
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -94,7 +94,7 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
                 0x08048678                inb
                 0x08048695                inw
  *fill*         0x080486b4        0xc 
- .text          0x080486c0       0x57 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+ .text          0x080486c0       0x6f src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
                 0x080486c0                RegisterDriver
                 0x080486c8                RegisterInterruptHandler
                 0x080486d0                PicSendEoi
@@ -105,7 +105,10 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
                 0x080486f8                GetMultibootModule
                 0x08048700                RegisterFileReadCallback
                 0x08048708                RegisterFileExistsCallback
-                0x08048710                CallSyscall
+                0x08048710                MapPhysicalTo
+                0x08048718                UnmapPhysicalTo
+                0x08048720                Printf
+                0x08048728                CallSyscall
  *(.gnu.warning)
 
 .fini
@@ -140,7 +143,7 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
 
 .exception_ranges
  *(.exception_ranges*)
-                0x08049717                        . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
+                0x0804972f                        . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
 
 .eh_frame
  *(.eh_frame)
@@ -159,7 +162,7 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
 .exception_ranges
  *(.exception_ranges*)
 
-.tdata          0x08049717        0x0
+.tdata          0x0804972f        0x0
                 [!provide]                        PROVIDE (__tdata_start = .)
  *(.tdata .tdata.* .gnu.linkonce.td.*)
 
@@ -167,18 +170,18 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0x08049717        0x0
+.preinit_array  0x0804972f        0x0
                 [!provide]                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end = .)
 
-.init_array     0x08049717        0x0
+.init_array     0x0804972f        0x0
                 [!provide]                        PROVIDE (__init_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
                 [!provide]                        PROVIDE (__init_array_end = .)
 
-.fini_array     0x08049717        0x0
+.fini_array     0x0804972f        0x0
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -208,46 +211,46 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
 .dynamic
  *(.dynamic)
 
-.got            0x08049718        0x0
+.got            0x08049730        0x0
  *(.got)
- .got           0x08049718        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+ .got           0x08049730        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
  *(.igot)
-                0x08049718                        . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
+                0x08049730                        . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
 
-.got.plt        0x08049718        0x0
+.got.plt        0x08049730        0x0
  *(.got.plt)
- .got.plt       0x08049718        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+ .got.plt       0x08049730        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
  *(.igot.plt)
- .igot.plt      0x08049718        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+ .igot.plt      0x08049730        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
 
-.data           0x08049720      0x42c
+.data           0x08049740      0x42c
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x08049720      0x42c src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
-                0x08049720                g_keys
+ .data          0x08049740      0x42c src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+                0x08049740                g_keys
 
 .data1
  *(.data1)
-                0x08049b4c                        _edata = .
+                0x08049b6c                        _edata = .
                 [!provide]                        PROVIDE (edata = .)
-                0x08049b4c                        . = .
-                0x08049b4c                        __bss_start = .
+                0x08049b6c                        . = .
+                0x08049b6c                        __bss_start = .
 
-.bss            0x08049b60     0x2008
+.bss            0x08049b80     0x2008
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x08049b60     0x2005 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
-                0x08049b60                g_keyBuffer
-                0x0804bb60                g_keyBufferPosition
-                0x0804bb64                flags
+ .bss           0x08049b80     0x2005 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+                0x08049b80                g_keyBuffer
+                0x0804bb80                g_keyBufferPosition
+                0x0804bb84                flags
  *(COMMON)
-                0x0804bb68                        . = ALIGN ((. != 0x0)?0x4:0x1)
- *fill*         0x0804bb65        0x3 
-                0x0804bb68                        . = ALIGN (0x4)
-                0x0804bb68                        . = SEGMENT_START ("ldata-segment", .)
-                0x0804bb68                        . = ALIGN (0x4)
-                0x0804bb68                        _end = .
+                0x0804bb88                        . = ALIGN ((. != 0x0)?0x4:0x1)
+ *fill*         0x0804bb85        0x3 
+                0x0804bb88                        . = ALIGN (0x4)
+                0x0804bb88                        . = SEGMENT_START ("ldata-segment", .)
+                0x0804bb88                        . = ALIGN (0x4)
+                0x0804bb88                        _end = .
                 [!provide]                        PROVIDE (end = .)
-                0x0804bb68                        . = DATA_SEGMENT_END (.)
+                0x0804bb88                        . = DATA_SEGMENT_END (.)
 
 .stab
  *(.stab)
@@ -300,20 +303,20 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
  .debug_pubnames
                 0x00000000        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
-.debug_info     0x00000000      0xb10
+.debug_info     0x00000000      0xb4d
  *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x00000000      0xa9d src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
- .debug_info    0x00000a9d       0x73 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+ .debug_info    0x00000000      0xada src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+ .debug_info    0x00000ada       0x73 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
 .debug_abbrev   0x00000000      0x25d
  *(.debug_abbrev)
  .debug_abbrev  0x00000000      0x242 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
  .debug_abbrev  0x00000242       0x1b src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
-.debug_line     0x00000000      0x931
+.debug_line     0x00000000      0x93a
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x8a0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
- .debug_line    0x000008a0       0x91 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+ .debug_line    0x000008a0       0x9a src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
 .debug_frame    0x00000000      0x178
  *(.debug_frame)

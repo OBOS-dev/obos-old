@@ -31,6 +31,9 @@ enum exitStatus RegisterFileReadCallback(DWORD driverId, void(*callback)(CSTRING
 /// <param name="size">An output parameter. If the file exists, this should be set to the file's size.</param>
 /// <returns>A bitfield. Look at driver_api/enums.h:enum fileExistsReturn for information on what this can be. If the file doesn't exist, return 0.</returns>
 enum exitStatus RegisterFileExistsCallback(DWORD driverId, char(*callback)(CSTRING filename, SIZE_T* size));
+enum exitStatus MapPhysicalTo(UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags);
+enum exitStatus UnmapPhysicalTo(PVOID virtualAddress);
+enum exitStatus Printf(CSTRING format, ...);
 
 enum exitStatus CallSyscall(DWORD syscallId, ...);
 
