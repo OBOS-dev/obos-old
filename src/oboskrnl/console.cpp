@@ -277,7 +277,7 @@ namespace obos
 			{
 				int scanline = b * 16 + 6;
 				s_modifiedLines[0].clearBit(b);
-				utils::memcpy(s_framebuffer + (scanline * s_framebufferWidth), s_backbuffer + (scanline * s_framebufferWidth), s_framebufferWidth * 16 * 4);
+				utils::dwMemcpy(s_framebuffer + (scanline * s_framebufferWidth), s_backbuffer + (scanline * s_framebufferWidth), s_framebufferWidth * 16);
 			}
 		}
 		for (int b = 0; b < 16; b++)
@@ -286,7 +286,7 @@ namespace obos
 			{
 				int scanline = ((32 + b) * 16) + 6;
 				s_modifiedLines[1].clearBit(b);
-				utils::memcpy(s_framebuffer + (scanline * s_framebufferWidth), s_backbuffer + (scanline * s_framebufferWidth), (s_framebufferWidth * 16 * 4) - 6);
+				utils::dwMemcpy(s_framebuffer + (scanline * s_framebufferWidth), s_backbuffer + (scanline * s_framebufferWidth), (s_framebufferWidth * 16) - 6);
 			}
 		}
 	}

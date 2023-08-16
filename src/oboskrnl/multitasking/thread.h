@@ -13,6 +13,8 @@
 
 #include <descriptors/idt/idt.h>
 
+#include <process/process.h>
+
 namespace obos
 {
 	namespace multitasking
@@ -98,6 +100,7 @@ namespace obos
 			SIZE_T nHandles = 0;
 			PVOID stackBottom = nullptr;
 			SIZE_T stackSizePages = 0;
+			process::Process* owner = nullptr;
 		};
 	}
 }

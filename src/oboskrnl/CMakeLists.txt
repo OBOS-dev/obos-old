@@ -20,12 +20,12 @@ set(oboskrnl_headers "types.h"                            "boot/multiboot.h"    
                      "utils/memory.h"                     "memory_manager/liballoc/liballoc.h" "utils/list.h"                 "external/list/list.h"
                      "multitasking/threadHandle.h"        "multitasking/multitasking.h"        "multitasking/mutex/mutex.h"   "multitasking/mutex/mutexHandle.h"
                      "new"                                "elf/elf.h"                          "elf/elfStructures.h"          "driver_api/interrupts.h"
-                     "utils/hashTable.h"
+                     "utils/hashTable.h"                  "process/process.h"
 )
 
 set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm"  "descriptors/idt/handlers.asm"
                         "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"         "inline-asm.asm"
-                        "driver_api/interrupts.asm"
+                        "driver_api/interrupts.asm"      "process/process.cpp"
 )
 
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cxxSources} ${oboskrnl_headers})

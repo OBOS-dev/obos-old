@@ -15,6 +15,9 @@
 ; void* obos::utils::dwMemset(DWORD* dest, DWORD val, SIZE_T countDwords);
 [global _ZN4obos5utils8dwMemsetEPjjj]
 
+; void* obos::utils::dwMemcpy(DWORD* dest, DWORD* src, SIZE_T countDwords);
+[global _ZN4obos5utils8dwMemcpyEPjPKjj]
+
 ; PVOID obos::utils::memset(PVOID block, UINT32_T ch, SIZE_T size)
 [global _ZN4obos5utils6memsetEPvjj]
 
@@ -85,6 +88,31 @@ _ZN4obos5utils8dwMemsetEPjjj:
 	mov dword [edi], eax
 
 	add edi, 4
+	loop .loop
+
+	mov eax, [ebp+8]
+
+.finish:
+	leave
+	ret
+_ZN4obos5utils8dwMemcpyEPjPKjj:
+	push ebp
+	mov ebp, esp
+
+	mov ecx, [ebp+16]
+
+	test ecx, ecx
+	jz .finish
+
+	mov edi, [ebp+8]
+	mov esi, [ebp+12]
+
+.loop:
+	mov eax, [esi]
+	mov dword [edi], eax
+	
+	add edi, 4
+	add esi, 4
 	loop .loop
 
 	mov eax, [ebp+8]

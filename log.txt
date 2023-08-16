@@ -1,0 +1,8 @@
+AHCI Log: Found ahci controller at pci bus 0, function 0, slot 4. Base address: 0xfebf1000.
+AHCI Log: The hba base takes up 4096 bytes.
+AHCI Log: Found sata drive at port 0.
+AHCI Warning: No drive found at port 1, even though it is implemented.
+AHCI Warning: No drive found at port 2, even though it is implemented.
+AHCI Warning: No drive found at port 3, even though it is implemented.
+AHCI Warning: No drive found at port 4, even though it is implemented.
+AHCI Warning: No drive found at port 5, even though it is implemented.

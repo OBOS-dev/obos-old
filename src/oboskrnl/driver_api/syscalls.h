@@ -9,6 +9,8 @@
 #include <types.h>
 #include <driver_api/enums.h>
 
+#include <process/process.h>
+
 namespace obos
 {
 	namespace driverAPI
@@ -16,6 +18,7 @@ namespace obos
 		struct driverIdentification
 		{
 			DWORD driverId = 0;
+			process::Process* process;
 			serviceType service_type = serviceType::SERVICE_TYPE_INVALID;
 			PVOID readCallback = nullptr;
 			PVOID existsCallback = nullptr;

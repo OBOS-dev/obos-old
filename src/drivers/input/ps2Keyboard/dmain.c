@@ -213,11 +213,21 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 		if(newKey)
 			g_keyBuffer[g_keyBufferPosition++] = newKey;
 		if(newKey != '\n')
+		{
+			outb(0x3f8, newKey);
 			PrintChar(newKey, true);
+		}
 		else
 		{
 			PrintChar('\r', false);
 			PrintChar('\n', true);
+			outb(0x3f8, '\r');
+			outb(0x3f8, '\n');
+		}
+		if (newKey == '\b')
+		{
+			outb(0x3f8, ' ');
+			outb(0x3f8, '\b');
 		}
 	}
 

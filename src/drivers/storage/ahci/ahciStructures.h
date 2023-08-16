@@ -314,3 +314,16 @@ typedef struct tagHBA_CMD_TBL
 	// 0x80
 	HBA_PRDT_ENTRY	prdt_entry[1];	// Physical region descriptor table entries, 0 ~ 65535
 } HBA_CMD_TBL;
+
+
+typedef struct tagAHCI_PORT
+{
+	HBA_PORT* hbaPort;
+	BOOL available;
+	enum tagDRIVE_TYPE
+	{
+		DRIVE_TYPE_INVALID = -1,
+		DRIVE_TYPE_SATA,
+		DRIVE_TYPE_SATAPI,
+	} driveType;
+} AHCI_PORT;

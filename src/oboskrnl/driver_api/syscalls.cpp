@@ -23,6 +23,8 @@
 
 #include <klog.h>
 
+#include <multitasking/multitasking.h>
+
 #define DEFINE_RESERVED_PARAMETERS volatile UINT32_T, volatile UINT32_T, volatile UINT32_T, volatile UINT32_T
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
 
@@ -44,6 +46,7 @@ namespace obos
 		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS, UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags);
 		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS, PVOID virtualAddress);
 		static exitStatus Printf(DEFINE_RESERVED_PARAMETERS, CSTRING format, ...);
+		static void interruptHandler(const obos::interrupt_frame* frame);
 
 		/*struct driverIdentification
 		{
@@ -57,6 +60,12 @@ namespace obos
 		utils::HashTable<DWORD, driverIdentification*, driverIdentification> g_registeredDrivers;*/
 		driverIdentification** g_registeredDrivers = nullptr;
 		SIZE_T g_registeredDriversCapacity = 128;
+
+		struct
+		{
+			VOID(*handler)(const obos::interrupt_frame* frame);
+			driverIdentification* driver;
+		} g_registeredInterruptHandlers[16];
 
 		void RegisterSyscalls()
 		{
@@ -93,7 +102,10 @@ namespace obos
 					return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
 				driverIdentification* identity = new driverIdentification {
 					driverID,
-					type
+					multitasking::g_currentThread->owner,
+					type,
+					nullptr,
+					nullptr
 				};
 				g_registeredDrivers[driverID] = identity;
 				return exitStatus::EXIT_STATUS_SUCCESS;
@@ -198,7 +210,9 @@ namespace obos
 			default:
 				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
 			}
-			obos::RegisterInterruptHandler(interruptId, handler);
+			obos::RegisterInterruptHandler(interruptId, interruptHandler);
+			g_registeredInterruptHandlers[interruptId - 0x20].handler = handler;
+			g_registeredInterruptHandlers[interruptId - 0x20].driver = g_registeredDrivers[driverId];
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 		static exitStatus PicSendEoi(DEFINE_RESERVED_PARAMETERS, BYTE irq)
@@ -294,6 +308,17 @@ namespace obos
 
 			va_end(list);
 			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+
+
+		static void interruptHandler(const obos::interrupt_frame* frame)
+		{
+			if (g_registeredInterruptHandlers[frame->intNumber - 32].driver)
+			{
+				g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->pageDirectory->switchToThis();
+				g_registeredInterruptHandlers[frame->intNumber - 32].handler(frame);
+				multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+			}
 		}
 	}
 }

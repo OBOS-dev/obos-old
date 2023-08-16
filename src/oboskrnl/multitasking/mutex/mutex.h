@@ -22,6 +22,8 @@ namespace obos
 
 			~Mutex();
 			friend bool MutexLockCallback(Thread* _this, PVOID _mutex);
+
+			friend class MutexHandle;
 		private:
 			bool m_locked = false;
 			bool m_resume = false;

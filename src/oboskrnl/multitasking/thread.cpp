@@ -75,6 +75,8 @@ namespace obos
 			frame.esp = (UINTPTR_T)stack;
 			frame.eip = (UINTPTR_T)entry;
 			frame.ebp = 0;
+			owner = g_currentThread->owner;
+			list_rpush(g_currentThread->owner->threads, list_node_new(this));
 
 			utils::setBitInBitfield(frame.eflags, 9);
 
@@ -82,7 +84,7 @@ namespace obos
 			list_rpush(priorityList, list_node_new(this));
 
 			LeaveKernelSection();
-			return false;
+			return true;
 		}
 	}
 }

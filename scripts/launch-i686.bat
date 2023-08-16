@@ -10,7 +10,8 @@ qemu-system-i386 -cdrom out/obos.iso ^
 -s ^
 -m 1G ^
 -serial tcp:0.0.0.0:1535,server,nowait ^
--serial tcp:0.0.0.0:1534,server,nowait ^ 
+-serial tcp:0.0.0.0:1534,server,nowait ^
 -monitor stdio ^
+-debugcon file:log.txt ^
 -d guest_errors
 cd scripts

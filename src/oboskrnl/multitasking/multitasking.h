@@ -9,6 +9,7 @@
 #include <utils/list.h>
 
 #include <multitasking/thread.h>
+#include <multitasking/mutex/mutexHandle.h>
 
 namespace obos
 {
@@ -22,6 +23,7 @@ namespace obos
 		extern list_t* g_threadPriorityList[4];
 		extern Thread* g_currentThread;
 		extern bool g_initialized;
+		extern MutexHandle* g_schedulerMutex;
 
 		void InitializeMultitasking();
 	}

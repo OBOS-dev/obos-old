@@ -24,6 +24,10 @@ BOOL testBit(UINT32_T bitfield, UINT8_T bit)
 	return (bitfield >> bit) & 1;
 }
 
+AHCI_PORT availablePorts[31];
+
+void ReadFromDrive(HBA_PORT* port, UINTPTR_T offsetSectors, SIZE_T bufSize, UINT8_T* buffer);
+
 int _start()
 {
 	RegisterDriver(DRIVER_ID, SERVICE_TYPE_STORAGE_DEVICE);
@@ -55,7 +59,9 @@ int _start()
 	HBA_MEM* hbaMem = (PVOID)0x410000;
 
 	for(UINTPTR_T base = 0x410000, virt = 0x410000, phys = baseAddr; virt < (base + hbaSize); virt += 4096, phys += 4096)
-		MapPhysicalTo(phys, (PVOID)virt, ALLOC_FLAGS_CACHE_DISABLE);
+		MapPhysicalTo(phys, (PVOID)virt, ALLOC_FLAGS_CACHE_DISABLE | ALLOC_FLAGS_WRITE_ENABLED);
+	hbaMem->bohc |= 0x00000002;
+	hbaMem->ghc |= 0x80000000;
 
 	UINT32_T implementedPorts = hbaMem->pi;
 
@@ -82,6 +88,9 @@ int _start()
 		case SATA_SIG_ATAPI:
 		{
 			Printf("AHCI Log: Found satapi drive at port %d.\r\n", i);
+			availablePorts[i].available = true;
+			availablePorts[i].driveType = DRIVE_TYPE_SATAPI;
+			availablePorts[i].hbaPort = port;
 			break;
 		}
 		case SATA_SIG_SEMB:
@@ -96,6 +105,9 @@ int _start()
 		}
 		default:
 		{
+			availablePorts[i].available = true;
+			availablePorts[i].driveType = DRIVE_TYPE_SATA;
+			availablePorts[i].hbaPort = port;
 			Printf("AHCI Log: Found sata drive at port %d.\r\n", i);
 			break;
 		}
@@ -105,4 +117,9 @@ int _start()
 	sti();
 
 	return 0;
+}
+
+void ReadFromDrive(HBA_PORT* port, UINTPTR_T offsetSectors, SIZE_T bufSize, UINT8_T* buffer)
+{
+
 }

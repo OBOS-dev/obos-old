@@ -100,13 +100,16 @@ namespace obos
 				pageTable = kmap_pageTable(pageTable);
 				UINTPTR_T entry = 0;
 				entry = (UINTPTR_T)kalloc_physicalPages(1);
-				entry |= 1;
-				entry |= flags;
-				entry &= 0xFFFFF017;
+				entry |= 3;
 				*(pageTable + PageDirectory::addressToPageTableIndex(address)) = entry;
 				tlbFlush(0xFFFFF000);
+				tlbFlush(address);
 			}
 			kfree_pageTable();
+			// Make sure the buffer is zero, in case the memory was freed carelessly when a process exited.
+			utils::memzero((PVOID)base, nPages * 4096);
+
+			MemoryProtect((PVOID)base, nPages, flags);
 			return (PVOID)base;
 		}
 		DWORD VirtualFree(PVOID _base, SIZE_T nPages)
@@ -114,6 +117,7 @@ namespace obos
 			UINTPTR_T base = ROUND_ADDRESS_DOWN(GET_FUNC_ADDR(_base));
 			if (!HasVirtualAddress(_base, nPages))
 				return 1;
+			MemoryProtect(_base, 1, VirtualAllocFlags::WRITE_ENABLED);
 			utils::memset(_base, 0, nPages << 12);
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
 			{

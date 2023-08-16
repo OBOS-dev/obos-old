@@ -20,6 +20,7 @@ namespace obos
 		PVOID memzero(PVOID block, SIZE_T size);
 		PVOID memcpy(PVOID dest, PCVOID src, SIZE_T size);
 		PVOID dwMemset(DWORD* dest, DWORD val, SIZE_T countDwords);
+		PVOID dwMemcpy(DWORD* dest, const DWORD* src, SIZE_T countDwords);
 		INT memcmp(PCVOID block1, PCVOID block2, SIZE_T size);
 		PVOID memchr(PVOID block, BYTE ch, SIZE_T size);
 		PCVOID memchr(PCVOID block, BYTE ch, SIZE_T size);

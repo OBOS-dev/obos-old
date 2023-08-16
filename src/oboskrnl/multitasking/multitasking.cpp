@@ -6,6 +6,7 @@
 
 #include <multitasking/multitasking.h>
 #include <multitasking/thread.h>
+#include <multitasking/mutex/mutexHandle.h>
 
 #include <utils/memory.h>
 
@@ -18,6 +19,7 @@ namespace obos
 {
 	extern void kmainThr();
 	extern char thrstack_top;
+	extern char stack_top;
 	namespace multitasking
 	{
 		list_t* g_threads = nullptr;
@@ -26,6 +28,7 @@ namespace obos
 		};
 		Thread* g_currentThread = nullptr;
 		bool g_initialized = false;
+		MutexHandle* g_schedulerMutex = nullptr;
 
 		bool canRanTask(Thread* thread)
 		{
@@ -37,9 +40,22 @@ namespace obos
 
 		void switchToTask(Thread* newThread)
 		{
-			g_currentThread = newThread;
+			static Thread* s_newThread;
+			s_newThread = newThread;
+			if(g_currentThread)
+				if (s_newThread->owner->pageDirectory != memory::g_pageDirectory)
+				{
+					asm volatile("mov %0, %%esp;"
+								 "mov %0, %%ebp" :
+												 : "r"(&stack_top)
+												 : "memory");
+					// No more parameters past this point.
+					s_newThread->owner->pageDirectory->switchToThis();
+				}
+			g_currentThread = s_newThread;
 			asm volatile("mov %0, %%eax" :
-										 : "memory"(&g_currentThread->frame));
+										 : "r"(&g_currentThread->frame)
+										 : "memory");
 			switchToTaskAsm();
 		}
 
@@ -51,6 +67,8 @@ namespace obos
 					SendEOI(frame->intNumber - 32);
 				return;
 			}
+			if (!g_schedulerMutex->Lock(false))
+				return;
 			if (g_currentThread)
 				g_currentThread->frame = *frame;
 			else
@@ -63,6 +81,8 @@ namespace obos
 			// Tf all threads were ran, then clear the amount of iterations.
 
 			EnterKernelSection();
+		findNew:
+
 			Thread* currentThread = nullptr;
 			for (int i = 0; i < 4 && !currentThread; i++)
 			{
@@ -87,8 +107,6 @@ namespace obos
 				list_iterator_destroy(iter);
 			}
 
-			findNew:
-
 			list_node_t* currentNode = nullptr;
 
 			// Find a new task.
@@ -98,11 +116,11 @@ namespace obos
 				for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
 				{
 					currentThread = (Thread*)node->val;
-					if (utils::testBitInBitfield(currentThread->status, 3))
+					if (utils::testBitInBitfield(currentThread->status, 2))
 					{
 						if (currentThread->isBlockedCallback)
 							if (currentThread->isBlockedCallback(currentThread, currentThread->isBlockedUserdata))
-								utils::clearBitInBitfield(currentThread->status, 3);
+								utils::clearBitInBitfield(currentThread->status, 2);
 							else {}
 						else
 							currentThread->status = (UINT32_T)Thread::status_t::DEAD;
@@ -118,6 +136,9 @@ namespace obos
 			}
 			if (!currentNode && (utils::testBitInBitfield(g_currentThread->status, 2) || utils::testBitInBitfield(g_currentThread->status, 3) || utils::testBitInBitfield(g_currentThread->status, 0)))
 				goto findNew;
+
+			g_schedulerMutex->Unlock();
+
 			LeaveKernelSection();
 			if (frame->intNumber != 0x30)
 				SendEOI(frame->intNumber - 32);
@@ -144,6 +165,8 @@ namespace obos
 			kmainThread->lastError = 0;
 			list_lpush(g_threads			  , list_node_new(kmainThread));
 			list_lpush(g_threadPriorityList[2], list_node_new(kmainThread));
+
+			g_schedulerMutex = new MutexHandle{};
 
 			// 400 hz, 2.5 ms. (1/400 * 1000)
 			UINT32_T divisor = 1193180 / 400;

@@ -34,22 +34,17 @@ namespace obos
 				DWORD nPages = programHeader->p_memsz >> 12;
 				if ((programHeader->p_memsz % 4096) != 0)
 					nPages++;
-				allocate:
 				PBYTE dest = (PBYTE)memory::VirtualAlloc((PVOID)programHeader->p_vaddr, nPages, memory::VirtualAllocFlags::WRITE_ENABLED);
-				if (!memory::HasVirtualAddress((PVOID)programHeader->p_vaddr, nPages))
-				{
-					// If the allocation mysteriously failed, try again.
-
-					goto allocate;
-				}
+				if (!dest)
+					return BASE_ADDRESS_USED;
 				const PBYTE src = startAddress + programHeader->p_offset;
+				utils::dwMemset((DWORD*)dest, 0, (nPages << 12) >> 2);
 				if (programHeader->p_filesz)
 				{
-					utils::memcpy(dest/* + programHeader->p_offset*/, src, programHeader->p_filesz);
-					utils::memzero(dest + programHeader->p_filesz/* + programHeader->p_offset*/, (nPages << 12) - programHeader->p_filesz/* - programHeader->p_offset*/);
+					UINTPTR_T offset = programHeader->p_vaddr - (UINTPTR_T)dest;
+					dest += offset;
+					utils::memcpy(dest, src, programHeader->p_filesz);
 				}
-				else
-					utils::memzero(dest, nPages << 12);
 				memory::MemoryProtect(dest, nPages, virtualAllocFlags);
 				if (baseAddress > programHeader->p_vaddr)
 					baseAddress = programHeader->p_vaddr;

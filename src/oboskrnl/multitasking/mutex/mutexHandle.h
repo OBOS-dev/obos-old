@@ -25,7 +25,7 @@ namespace obos
 			Handle* duplicate() override;
 			int closeHandle() override;
 
-			void Lock(bool waitIfLocked = true);
+			bool Lock(bool waitIfLocked = true);
 			void Unlock();
 
 			~MutexHandle();

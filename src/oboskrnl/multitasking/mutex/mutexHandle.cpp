@@ -35,12 +35,14 @@ namespace obos
 			return m_origin->getReferences();
 		}
 
-		void MutexHandle::Lock(bool waitIfLocked)
+		bool MutexHandle::Lock(bool waitIfLocked)
 		{
 			if (!m_value)
-				return;
+				return false;
 			Mutex* mutex = (Mutex*)m_value;
 			mutex->Lock(waitIfLocked);
+			return mutex->m_locked;
+			
 		}
 		void MutexHandle::Unlock()
 		{

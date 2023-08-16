@@ -9,10 +9,17 @@
 #include <multitasking/multitasking.h>
 
 #include <memory_manager/paging/allocate.h>
+#include <memory_manager/liballoc/liballoc.h>
 
 #include <handle.h>
 
 #include <inline-asm.h>
+#include <types.h>
+
+#include <process/process.h>
+
+#include <utils/bitfields.h>
+#include <external/list/list.h>
 
 namespace obos
 {
@@ -47,10 +54,9 @@ namespace obos
 				LeaveKernelSection();
 				return false;
 			}
-			OpenThread((Thread*)node->val);
-			((Thread*)m_value)->nHandles++;
+			bool ret = OpenThread((Thread*)node->val);
 			LeaveKernelSection();
-			return true;
+			return ret;
 		}
 		bool ThreadHandle::OpenThread(Thread* thread)
 		{
@@ -147,8 +153,6 @@ namespace obos
 			list_remove(oldPriorityList, list_find(oldPriorityList, m_value));
 			list_rpush(priorityList, list_node_new(m_value));
 			LeaveKernelSection();
-			if (m_thread == g_currentThread)
-				_int(0x30);
 		}
 		void ThreadHandle::SetThreadStatus(utils::RawBitfield newStatus)
 		{
@@ -178,10 +182,14 @@ namespace obos
 			if (m_thread == g_currentThread)
 				return;
 			// Kill the thread.
+			EnterKernelSection();
 			m_thread->status = (UINT32_T)status_t::DEAD;
 			m_thread->exitCode = exitCode;
-			if (m_thread == g_currentThread)
-				_int(0x30);
+			list_remove(m_thread->owner->threads, list_find(m_thread->owner->threads, g_currentThread));
+			if (m_thread->owner->threads->len == 0)
+				m_thread->owner->TerminateProcess();
+			memory::VirtualFree(m_thread->stackBottom, m_thread->stackSizePages);
+			LeaveKernelSection();
 		}
 
 		Thread::Tid ThreadHandle::GetTid()
@@ -218,6 +226,48 @@ namespace obos
 			if (m_thread->tid == (DWORD)-1)
 				return 0;
 			return m_thread->status;
+		}
+
+		bool ThreadHandle::WaitForThreadExit()
+		{
+			if (!m_thread)
+				return false;
+			if (m_thread->tid == (DWORD)-1)
+				return false;
+			if (m_thread->status == (UINT32_T)status_t::DEAD)
+				return true; // The thread already exited...
+			if (m_thread == g_currentThread)
+				return false;
+			multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread*, PVOID userdata)->bool {
+				return utils::testBitInBitfield(((multitasking::Thread*)userdata)->status, 0);
+				};
+			multitasking::g_currentThread->isBlockedUserdata = m_thread;
+			multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;
+			_int(0x30);
+			return true;
+		}
+
+		bool ThreadHandle::WaitForThreadStatusChange(utils::RawBitfield newStatus)
+		{
+			if (!m_thread)
+				return false;
+			if (m_thread->tid == (DWORD)-1)
+				return false;
+			if (m_thread->status == (UINT32_T)status_t::DEAD || m_thread->status == newStatus)
+				return true; // The thread already exited...
+			if (m_thread == g_currentThread)
+				return false;
+			EnterKernelSection();
+			multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread*, PVOID userdata)->bool {
+				UINTPTR_T* udata = (UINTPTR_T*)userdata;
+				return ((multitasking::Thread*)(udata[0]))->status == udata[1];
+				};
+			UINTPTR_T udata[2] = { (UINTPTR_T)m_thread, newStatus };
+			multitasking::g_currentThread->isBlockedUserdata = udata;
+			multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;
+			LeaveKernelSection();
+			_int(0x30);
+			return true;
 		}
 
 		Handle* ThreadHandle::duplicate()
@@ -265,9 +315,6 @@ namespace obos
 				list_remove(priorityList, list_find(priorityList, m_value));
 				list_remove(g_threads, list_find(g_threads, m_value));
 
-				if (m_thread != g_currentThread)
-					memory::VirtualFree(m_thread->stackBottom, m_thread->stackSizePages);
-
 				delete m_thread;
 				LeaveKernelSection();
 			}
@@ -283,6 +330,7 @@ namespace obos
 			handle.OpenThread(g_currentThread);
 			handle.m_thread->exitCode = exitCode;
 			handle.m_thread->status = (UINT32_T)ThreadHandle::status_t::DEAD;
+			list_remove(g_currentThread->owner->threads, list_find(g_currentThread->owner->threads, g_currentThread));
 			handle.closeHandle();
 			LeaveKernelSection();
 			_int(0x30);

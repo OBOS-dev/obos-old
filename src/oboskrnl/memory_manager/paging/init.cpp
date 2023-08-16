@@ -32,8 +32,6 @@ namespace obos
 
 		void PageDirectory::init()
 		{
-			if (m_initialized)
-				destroy();
 			m_array = (UINTPTR_T*)kalloc_physicalPages(1);
 			m_owns = m_initialized = true;
 		}
@@ -42,6 +40,7 @@ namespace obos
 		{
 			if (!m_initialized)
 				return;
+			g_pageDirectory = this;
 			switchToThisAsm((UINTPTR_T)m_array & 0xFFFFF000);
 		}
 		extern UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
@@ -50,31 +49,29 @@ namespace obos
 		{
 			if (pageTable > 1023 || !m_initialized)
 				return nullptr;
-			//return (g_enabledPaging ? kmap_pageTable(m_array) : m_array) + pageTable;
-			return m_array + pageTable;
+			UINTPTR_T* array = nullptr;
+			if (m_array == &boot_page_directory1)
+				array = m_array;
+			else
+				array = kmap_pageTable(m_array);
+			return array + pageTable;
 		}
 		UINTPTR_T* PageDirectory::getPageTable(UINT16_T pageTable)
 		{
 			if (pageTable > 1023 || !m_initialized)
 				return nullptr;
-			//return (UINTPTR_T*)((g_enabledPaging ? kmap_pageTable(m_array) : m_array)[pageTable] & 0xFFFFF000);
-			return (UINTPTR_T*)(m_array[pageTable] & 0xFFFFF000);
-		}
-
-		void PageDirectory::destroy()
-		{
-			if (m_initialized && m_owns)
-			{
-				// the next two lines are fine, look in kfree_physicalPages before changing them.
-				for (int i = 0; i < 1024; i++)
-					kfree_physicalPages((PVOID)m_array[i], 1);
-				kfree_physicalPages(m_array, 1);
-			}
+			UINTPTR_T* array = nullptr;
+			if (m_array == &boot_page_directory1)
+				array = m_array;
+			else
+				array = kmap_pageTable(m_array);
+			return (UINTPTR_T*)(array[pageTable] & 0xFFFFF000);
 		}
 
 		PageDirectory::~PageDirectory()
 		{
-			destroy();
+			if (m_owns)
+				kfree_physicalPages(m_array, 1);
 		}
 
 		UINT16_T PageDirectory::addressToIndex(UINTPTR_T base)

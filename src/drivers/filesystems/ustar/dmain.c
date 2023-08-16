@@ -73,9 +73,9 @@ static void ReadFile(CSTRING filename, STRING output, SIZE_T count)
 
 	while(!memcmp(iter + 257, "ustar", 6))
 	{
+		SIZE_T filesize = oct2bin(iter + 124, 11);
 		if (!strcmp((CSTRING)iter, filename))
 		{
-			SIZE_T filesize = oct2bin(iter + 124, 11);
 			UINT8_T* filedata = iter + 512;
 			for (SIZE_T i = 0; i < count; i++)
 			{
@@ -84,7 +84,7 @@ static void ReadFile(CSTRING filename, STRING output, SIZE_T count)
 				output[i] = filedata[i];
 			}
 		}
-		iter += 512;
+		iter += (((filesize + 511) / 512) + 1) * 512;
 	}
 }
 char FileExists(CSTRING filename, SIZE_T* size)
@@ -95,9 +95,9 @@ char FileExists(CSTRING filename, SIZE_T* size)
 
 	while (!memcmp(iter + 257, "ustar", 6))
 	{
+		SIZE_T filesize = oct2bin(iter + 124, 11);
 		if (!strcmp((CSTRING)iter, filename))
 		{
-			SIZE_T filesize = oct2bin(iter + 124, 11);
 			*size = filesize;
 			BYTE type = *(iter + 156);
 			ret = FILE_EXISTS_READ_ONLY;
@@ -118,7 +118,7 @@ char FileExists(CSTRING filename, SIZE_T* size)
 			}
 			break;
 		}
-		iter += 512;
+		iter += (((filesize + 511) / 512) + 1) * 512;
 	}
 	return ret;
 

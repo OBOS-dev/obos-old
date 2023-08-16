@@ -104,6 +104,17 @@ namespace obos
 			}
 
 			/// <summary>
+			/// Waits for the thread to exit.
+			/// </summary>
+			/// <returns>false is the handle wasn't opened, otherwise true.</returns>
+			bool WaitForThreadExit();
+			/// <summary>
+			/// Waits for the thread to change it's status to.
+			/// </summary>
+			/// <returns>false is the handle wasn't opened, otherwise true.</returns>
+			bool WaitForThreadStatusChange(utils::RawBitfield newStatus);
+
+			/// <summary>
 			/// Duplicates the thread handle.
 			/// </summary>
 			/// <returns>The new thread handle, or on failure, nullptr.</returns>

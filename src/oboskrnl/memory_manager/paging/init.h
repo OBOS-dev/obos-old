@@ -23,11 +23,13 @@ namespace obos
 			void switchToThis();
 
 			// Always check if the address of the return value of this function is not nullptr.
+			// If there was a page table allocated, it will reallocate it.
 			UINTPTR_T* getPageTableAddress(UINT16_T pageTable);
 			// Always check if the address of the return value of this function is not nullptr.
+			// If there was a page table allocated, it will reallocate it.
 			UINTPTR_T* getPageTable(UINT16_T pageTable);
 
-			void destroy();
+			UINTPTR_T* getPageDirectory() { return m_array; }
 
 			~PageDirectory();
 
