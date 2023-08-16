@@ -169,6 +169,8 @@ int _start()
 	// Enable scanning.
 	sendCommand(1, 0xF4);
 
+	sendCommand(1, 0xED | 0b111);
+	
 	RegisterInterruptHandler(DRIVER_ID, 0x21, keyboardInterrupt);
 
 	RegisterReadCallback(DRIVER_ID, readCallback);
@@ -247,7 +249,6 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 	{
 		flags.isCapsLock = !flags.isCapsLock;
 		BYTE bitfield = flags.isScrollLock | (flags.isNumberLock << 1) | (flags.isCapsLock << 2);
-		bitfield <<= 1;
 		sendCommand(2, 0xED, bitfield);
 		break;
 	}
@@ -255,7 +256,6 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 	{
 		flags.isScrollLock = !flags.isScrollLock;
 		BYTE bitfield = flags.isScrollLock | (flags.isNumberLock << 1) | (flags.isCapsLock << 2);
-		bitfield <<= 1;
 		sendCommand(2, 0xED, bitfield);
 		break;
 	}
@@ -263,7 +263,6 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 	{
 		flags.isNumberLock = !flags.isNumberLock;
 		BYTE bitfield = flags.isScrollLock | (flags.isNumberLock << 1) | (flags.isCapsLock << 2);
-		bitfield <<= 1;
 		sendCommand(2, 0xED, bitfield);
 		break;
 	}
@@ -289,6 +288,8 @@ BYTE sendCommand(DWORD nCommands, ...)
 		ret = inb(0x60);
 		if (ret == ACK)
 			break;
+		/*else
+			Printf("PS/2 Log: No ACK from the keyboard, trying again. Received %p.\r\n", ret);*/
 	}
 	va_end(list);
 	return ret;

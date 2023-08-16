@@ -8,6 +8,8 @@
 segment .text
 
 extern _ZN4obos9driverAPI14g_syscallTableE
+extern _ZN4obos18EnterKernelSectionEv
+extern _ZN4obos18LeaveKernelSectionEv
 
 ; Dispatch driver syscalls.
 ; The syscall id is in eax.
@@ -20,6 +22,15 @@ isr80:
 	; Get the syscall id.
 	lea eax, [eax*4]
 	lea eax, [_ZN4obos9driverAPI14g_syscallTableE+eax]
+
+	push eax
+	call _ZN4obos18EnterKernelSectionEv
+	pop eax
+
 	call [eax]
+
+	push eax
+	call _ZN4obos18LeaveKernelSectionEv
+	pop eax
 
 	iret

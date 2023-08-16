@@ -33,11 +33,11 @@ namespace obos
 		Process::Process()
 		{}
 
-		VOID ProcEntryPoint(PVOID entry)
+		VOID attribute(section(".glb.text")) ProcEntryPoint(PVOID entry)
 		{
 			DWORD(*main)() = (DWORD(*)())entry;
 			main();
-			multitasking::g_currentThread->owner->TerminateProcess();
+			asm volatile("mov $1, %eax; mov %esp, %ebx; int $0x40;");
 		}
 		VOID DriverEntryPoint(PVOID entry)
 		{
@@ -88,10 +88,14 @@ namespace obos
 				return loaderRet;
 			}
 
+			isUserMode = !isDriver;
+
 			multitasking::Thread* mainThread = new multitasking::Thread{};
+			
+			mainThread->owner = this;
 
 			bool ret = mainThread->CreateThread(multitasking::Thread::priority_t::NORMAL,
-				!isDriver ? ProcEntryPoint : DriverEntryPoint, 
+				!isDriver ? (VOID(*)(PVOID))0x400000 : DriverEntryPoint,
 				(PVOID)entry,
 				(DWORD)multitasking::Thread::status_t::PAUSED,
 				0);
@@ -113,7 +117,7 @@ namespace obos
 				multitasking::ThreadHandle* mainThreadHandle = (multitasking::ThreadHandle*)_mainThread;
 				mainThreadHandle->OpenThread(mainThread);
 			}
-
+			
 			// Switch back the parent's page directory.
 			multitasking::g_currentThread->owner->pageDirectory->switchToThis();
 

@@ -1,5 +1,7 @@
 cd ..
 cp -u out/ahci isodir/obos/initrd/ahci
+cp -u out/ps2Keyboard isodir/obos/initrd/ps2Keyboard
+cp -u out/testProgram isodir/obos/initrd/testProgram
 cd scripts
 ./make_initrd.sh
 cd ..

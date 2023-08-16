@@ -16,3 +16,4 @@ add_subdirectory("src/drivers/input/ps2Keyboard/")
 add_subdirectory("src/drivers/filesystems/ustar/")
 # Include the ahci driver.
 add_subdirectory("src/drivers/storage/ahci/")
+add_subdirectory("src/testProgram")

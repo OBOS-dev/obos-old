@@ -338,7 +338,7 @@ namespace obos
 		if (first && !memory::HasVirtualAddress(first, 1))
 			asm volatile ("mov %%ebp, %0" : : "memory"(current) : );
 		int nStackFrames = 0;
-		for (; current->down && memory::HasVirtualAddress(current->down, 1); nStackFrames++, current = current->down);
+		for (; current->down && memory::HasVirtualAddress(current->down, 1) && current->down != current; nStackFrames++, current = current->down);
 		asm volatile ("mov %%ebp, %0" : : "memory"(current) : );
 		for (int i = nStackFrames; i > -1; i--, current = current->down)
 			printf_noFlush("%s%d: %p\r\n", prefix, i, current->eip);

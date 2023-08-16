@@ -89,6 +89,8 @@ namespace obos
 				*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) = (UINTPTR_T)kalloc_physicalPages(1) | 3;
 				utils::memzero(kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(base))), 4096);
 			}
+			// Make sure the page directory is global if the page was allocated as global, so nothing goes wrong.
+			*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) |= (flags & VirtualAllocFlags::GLOBAL);
 			isFree = !isFree;
 			if (!isFree)
 				base = HasVirtualAddress((PCVOID)base, nPages) ? 0 : base;
@@ -100,16 +102,13 @@ namespace obos
 				pageTable = kmap_pageTable(pageTable);
 				UINTPTR_T entry = 0;
 				entry = (UINTPTR_T)kalloc_physicalPages(1);
-				entry |= 3;
+				entry |= flags | 1;
+				entry &= 0xFFFFF017;
 				*(pageTable + PageDirectory::addressToPageTableIndex(address)) = entry;
 				tlbFlush(0xFFFFF000);
 				tlbFlush(address);
 			}
 			kfree_pageTable();
-			// Make sure the buffer is zero, in case the memory was freed carelessly when a process exited.
-			utils::memzero((PVOID)base, nPages * 4096);
-
-			MemoryProtect((PVOID)base, nPages, flags);
 			return (PVOID)base;
 		}
 		DWORD VirtualFree(PVOID _base, SIZE_T nPages)
@@ -154,7 +153,7 @@ namespace obos
 		}
 		DWORD MemoryProtect(PVOID _base, SIZE_T nPages, utils::RawBitfield flags)
 		{
-			UINTPTR_T base = GET_FUNC_ADDR(_base);
+			UINTPTR_T base = ROUND_ADDRESS_DOWN(GET_FUNC_ADDR(_base));
 			if (!HasVirtualAddress(_base, nPages) || base < 0x400000)
 				return 1;
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
@@ -162,12 +161,12 @@ namespace obos
 				UINTPTR_T* pageTable = g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address));
 				pageTable = kmap_pageTable(pageTable);
 				UINTPTR_T entry = pageTable[PageDirectory::addressToPageTableIndex(address)] & 0xFFFFF000;
-				entry |= 1;
-				entry |= flags;
+				entry |= flags | 1;
 				entry &= 0xFFFFF017;
 				*(pageTable + PageDirectory::addressToPageTableIndex(address)) = entry;
 				tlbFlush(0xFFFFF000);
 			}
+			*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) |= (flags & VirtualAllocFlags::GLOBAL);
 			return 0;
 		}
 	}

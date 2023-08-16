@@ -28,9 +28,9 @@ namespace obos
 
 					continue;
 				}
-				UINT32_T virtualAllocFlags = 0;
+				UINT32_T virtualAllocFlags = memory::VirtualAllocFlags::GLOBAL;
 				if ((programHeader->p_flags & PF_W) == PF_W)
-					virtualAllocFlags = memory::VirtualAllocFlags::WRITE_ENABLED;
+					virtualAllocFlags |= memory::VirtualAllocFlags::WRITE_ENABLED;
 				DWORD nPages = programHeader->p_memsz >> 12;
 				if ((programHeader->p_memsz % 4096) != 0)
 					nPages++;

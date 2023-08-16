@@ -11,7 +11,7 @@ set(oboskrnl_cxxSources "boot/kmain.cpp"            "console.cpp"               
                         "utils/memory.cpp"          "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.c" "external/list/list_iterator.c"
                         "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "multitasking/threadHandle.cpp"
                         "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "elf/elf.cpp"
-                        "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"
+                        "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"                  "syscalls/syscalls.cpp"              "process/process.cpp"
 )
 
 set(oboskrnl_headers "types.h"                            "boot/multiboot.h"                   "console.h"                    "klog.h"
@@ -20,12 +20,12 @@ set(oboskrnl_headers "types.h"                            "boot/multiboot.h"    
                      "utils/memory.h"                     "memory_manager/liballoc/liballoc.h" "utils/list.h"                 "external/list/list.h"
                      "multitasking/threadHandle.h"        "multitasking/multitasking.h"        "multitasking/mutex/mutex.h"   "multitasking/mutex/mutexHandle.h"
                      "new"                                "elf/elf.h"                          "elf/elfStructures.h"          "driver_api/interrupts.h"
-                     "utils/hashTable.h"                  "process/process.h"
+                     "utils/hashTable.h"                  "process/process.h"                  "syscalls/syscalls.h"
 )
 
 set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm"  "descriptors/idt/handlers.asm"
                         "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"         "inline-asm.asm"
-                        "driver_api/interrupts.asm"      "process/process.cpp"
+                        "driver_api/interrupts.asm"      "syscalls/interrupts.asm"     
 )
 
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cxxSources} ${oboskrnl_headers})

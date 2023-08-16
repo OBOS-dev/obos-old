@@ -75,13 +75,19 @@ namespace obos
 			frame.esp = (UINTPTR_T)stack;
 			frame.eip = (UINTPTR_T)entry;
 			frame.ebp = 0;
-			owner = g_currentThread->owner;
+			// If our owner wasn't set before, then we'll use from the current thread's owner.
+			if(!owner)
+				owner = g_currentThread->owner;
 			list_rpush(g_currentThread->owner->threads, list_node_new(this));
 
 			utils::setBitInBitfield(frame.eflags, 9);
 
 			list_rpush(g_threads, list_node_new(this));
 			list_rpush(priorityList, list_node_new(this));
+
+			if(owner)
+				if(owner->isUserMode)
+					tssStackBottom = memory::VirtualAlloc(nullptr, 2, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
 
 			LeaveKernelSection();
 			return true;

@@ -101,6 +101,7 @@ namespace obos
 			PVOID stackBottom = nullptr;
 			SIZE_T stackSizePages = 0;
 			process::Process* owner = nullptr;
+			PVOID tssStackBottom = nullptr; // If allocated, it will be 2 pages.
 		};
 	}
 }

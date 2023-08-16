@@ -6,6 +6,8 @@
 
 ; extern "C" void gdtFlush(UINTPTR_T base);
 global gdtFlush
+; extern "C" void tssFlush();
+global tssFlush
 
 gdtFlush:
     mov eax, [esp+4]
@@ -19,3 +21,7 @@ gdtFlush:
     jmp 0x08:.flush
 .flush:
     ret
+tssFlush:
+    mov ax, (5 * 8) | 0
+	ltr ax
+	ret

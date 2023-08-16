@@ -33,6 +33,8 @@
 
 #include <process/process.h>
 
+#include <syscalls/syscalls.h>
+
 #ifdef __INTELLISENSE__
 #define __i686__ 1
 #undef _MSC_VER
@@ -47,6 +49,8 @@
 
 extern "C" UINTPTR_T* boot_page_directory1;
 extern "C" void _init();
+extern "C" char _glb_text_start;
+extern "C" char _glb_text_end;
 
 namespace obos
 {
@@ -185,7 +189,19 @@ namespace obos
 		driverAPI::ResetSyscallHandlers();
 
 		driverAPI::RegisterSyscalls();
+
+		process::RegisterSyscalls();
 		
+		{
+			PCHAR ptr = (PCHAR)memory::VirtualAlloc((PVOID)0x400000, 1, memory::VirtualAllocFlags::GLOBAL | memory::VirtualAllocFlags::WRITE_ENABLED);
+
+			memory::tlbFlush((UINT32_T)ptr);
+
+			for (PCHAR it = &_glb_text_start; it != &_glb_text_end; it++, ptr++)
+				*ptr = *it;
+			memory::MemoryProtect(ptr, 1, memory::VirtualAllocFlags::GLOBAL);
+		}
+
 		multitasking::ThreadHandle mainThread;
 
 		process::Process* initrdDriver = new process::Process{};
@@ -238,6 +254,26 @@ namespace obos
 		if (ret)
 			kpanic(NULLPTR, kpanic_format("CreateProcess failed with %d."), ret);
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
+		mainThread.closeHandle();
+
+		delete[] filedata;
+		
+		filesize = 0;
+		initrdDriver->pageDirectory->switchToThis();
+		existsData = existsCallback("testProgram", &filesize);
+		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+		if (!existsData)
+			kpanic(nullptr, kpanic_format("/obos/initrd/testProgram doesn't exist."));
+		filedata = new BYTE[filesize];
+		initrdDriver->pageDirectory->switchToThis();
+		readCallback("testProgram", (STRING)filedata, filesize);
+		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+
+		process::Process* testProgram = new process::Process{};
+		testProgram->CreateProcess(filedata, filesize, (PVOID)&mainThread);
+		if (ret)
+			kpanic(NULLPTR, kpanic_format("CreateProcess failed with %d."), ret);
+		mainThread.WaitForThreadExit();
 		mainThread.closeHandle();
 
 		delete[] filedata;

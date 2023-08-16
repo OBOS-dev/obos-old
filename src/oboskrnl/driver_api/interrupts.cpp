@@ -8,7 +8,7 @@
 
 #include <utils/memory.h>
 
-static DWORD do_nothing()
+DWORD do_nothing()
 { return -1; }
 
 namespace obos

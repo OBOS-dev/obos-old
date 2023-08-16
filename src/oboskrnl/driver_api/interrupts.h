@@ -13,6 +13,8 @@
 
 #include <descriptors/idt/idt.h>
 
+// syscalls/interrupts.asm
+extern "C" void isr64();
 // driver_api/interrupts.asm
 extern "C" void isr80();
 

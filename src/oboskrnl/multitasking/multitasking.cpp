@@ -20,6 +20,7 @@ namespace obos
 	extern void kmainThr();
 	extern char thrstack_top;
 	extern char stack_top;
+	extern void SetTSSStack(PVOID);
 	namespace multitasking
 	{
 		list_t* g_threads = nullptr;
@@ -37,6 +38,7 @@ namespace obos
 		}
 
 		extern void switchToTaskAsm();
+		extern void switchToUserModeTask();
 
 		void switchToTask(Thread* newThread)
 		{
@@ -53,10 +55,18 @@ namespace obos
 					s_newThread->owner->pageDirectory->switchToThis();
 				}
 			g_currentThread = s_newThread;
+			if(!g_currentThread->owner->isUserMode)
+			{
+				asm volatile("mov %0, %%eax" :
+											 : "r"(&g_currentThread->frame)
+											 : "memory");
+				switchToTaskAsm();
+			}
+			SetTSSStack(g_currentThread->tssStackBottom);
 			asm volatile("mov %0, %%eax" :
 										 : "r"(&g_currentThread->frame)
 										 : "memory");
-			switchToTaskAsm();
+			switchToUserModeTask();
 		}
 
 		void findNewTask(const interrupt_frame* frame)

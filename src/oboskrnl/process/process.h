@@ -16,6 +16,7 @@ namespace obos
 {
 	namespace process
 	{
+		VOID DriverEntryPoint(PVOID entry);
 		extern DWORD g_nextProcessId;
 		class Process
 		{
@@ -51,6 +52,7 @@ namespace obos
 			list_t* children = nullptr;
 			list_t* threads = nullptr;
 			list_t* mutexes = nullptr;
+			bool isUserMode = false;
 		};
 	}
 }
