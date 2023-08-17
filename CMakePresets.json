@@ -63,7 +63,6 @@
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
               "CMAKE_BUILD_TYPE": "Debug",
-              "LINKER_SCRIPT": "scripts/linker.ld",
               "OUTPUT_DIR": "/mnt/c/Code/obos/out/",
               "CRTBEGIN_DIRECTORY": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o",
               "CRTEND_DIRECTORY": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o",

@@ -44,7 +44,7 @@ git clone https://github.com/oberrow/obos.git
 * Second, enter the directory that the repository was cloned into.
 * Third, configure CMake with this command:
 
-cmake ./ -G Ninja -DLINKER_SCRIPT=kernel/linker.ld \
+cmake ./ -G Ninja \
 "-DOUTPUT_DIR=$PWD/out" \
 -DCMAKE_BUILD_TYPE=Debug \
 -DCRTBEGIN_DIRECTORY=$(i686-elf-g++ -print-file-name=crtbegin.o) \

@@ -40,7 +40,7 @@ target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE
 )
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}")
 target_link_options(oboskrnl 
-    PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}"
+    PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/linker.ld"
     PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crti.S" 
     PUBLIC "${CRTBEGIN_DIRECTORY}"
     PUBLIC "${CRTEND_DIRECTORY}"
@@ -53,7 +53,7 @@ set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 target_compile_definitions(oboskrnl PUBLIC CURSOR_SLEEP_TIME_2_5_MS=${CURSOR_SLEEP_TIME_2_5_MS})
 
-message("Using linker script at " ${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT})
+message("Using linker script at " "${CMAKE_SOURCE_DIR}/src/oboskrnl/linker.ld")
 message("crtbegin.o is at ${CRTBEGIN_DIRECTORY}")
 message("crtend.o is at ${CRTBEGIN_DIRECTORY}")
 
