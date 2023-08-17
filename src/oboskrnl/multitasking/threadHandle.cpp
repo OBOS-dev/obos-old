@@ -33,7 +33,7 @@ namespace obos
 		}
 
 
-		bool ThreadHandle::CreateThread(Thread::priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages)
+		DWORD ThreadHandle::CreateThread(Thread::priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages)
 		{
 			m_value = m_thread = new Thread();
 			m_thread->nHandles++;
@@ -185,7 +185,7 @@ namespace obos
 			EnterKernelSection();
 			m_thread->status = (UINT32_T)status_t::DEAD;
 			m_thread->exitCode = exitCode;
-			list_remove(m_thread->owner->threads, list_find(m_thread->owner->threads, g_currentThread));
+			list_remove(m_thread->owner->threads, list_find(m_thread->owner->threads, m_thread));
 			if (m_thread->owner->threads->len == 0)
 				m_thread->owner->TerminateProcess();
 			memory::VirtualFree(m_thread->stackBottom, m_thread->stackSizePages);
@@ -254,7 +254,7 @@ namespace obos
 			if (m_thread->tid == (DWORD)-1)
 				return false;
 			if (m_thread->status == (UINT32_T)status_t::DEAD || m_thread->status == newStatus)
-				return true; // The thread already exited...
+				return true;
 			if (m_thread == g_currentThread)
 				return false;
 			EnterKernelSection();

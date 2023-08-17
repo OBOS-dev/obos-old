@@ -15,7 +15,7 @@ namespace obos
 		class MutexHandle final : private Handle
 		{
 		public:
-			constexpr static handleType getType()
+			handleType getType() override
 			{
 				return handleType::mutex;
 			}

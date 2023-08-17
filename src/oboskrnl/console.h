@@ -31,14 +31,15 @@ namespace obos
 		WHITE,
 	};
 	void InitializeConsole(UINT32_T foreground, UINT32_T background);
-	void SetCursor(bool status);
 	void SetConsoleColor(UINT32_T foreground, UINT32_T background);
 	void GetConsoleColor(UINT32_T& foreground, UINT32_T& background);
 	void ConsoleOutputCharacter(CHAR ch, bool swapBuffers = true);
+	void ConsoleOutputCharacter(CHAR ch, DWORD x, DWORD y, bool swapBuffers = true);
 	void ConsoleOutput(CSTRING message, SIZE_T size, bool swapBuffers = true);
 	void ConsoleOutputString(CSTRING message, bool swapBuffers = true);
 	void ConsoleFillLine(char ch = '-', bool _swapBuffers = true);
 	void SetTerminalCursorPosition(DWORD x, DWORD y);
+	void GetTerminalCursorPosition(DWORD& x, DWORD& y);
 
 	void swapBuffers();
 }

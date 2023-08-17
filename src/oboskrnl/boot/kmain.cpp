@@ -179,7 +179,7 @@ namespace obos
 		g_kernelProcess->pageDirectory = memory::g_pageDirectory;
 		g_kernelProcess->pid = process::g_nextProcessId++;
 		g_kernelProcess->threads = list_new();
-		g_kernelProcess->mutexes = list_new();
+		g_kernelProcess->abstractHandles = list_new();
 		g_kernelProcess->children = list_new();
 
 		list_rpush(g_kernelProcess->threads, list_node_new(multitasking::g_currentThread));
@@ -231,12 +231,11 @@ namespace obos
 
 		process::Process* ahciDriver = new process::Process{};
 		ahciDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
+		delete[] filedata;
 		if (ret)
 			kpanic(NULLPTR, kpanic_format("CreateProcess failed with %d."), ret);
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
 		mainThread.closeHandle();
-
-		delete[] filedata;
 
 		filesize = 0;
 		initrdDriver->pageDirectory->switchToThis();
@@ -251,13 +250,12 @@ namespace obos
 
 		process::Process* keyboardDriver = new process::Process{};
 		keyboardDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
+		delete[] filedata;
 		if (ret)
 			kpanic(NULLPTR, kpanic_format("CreateProcess failed with %d."), ret);
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
 		mainThread.closeHandle();
 
-		delete[] filedata;
-		
 		filesize = 0;
 		initrdDriver->pageDirectory->switchToThis();
 		existsData = existsCallback("testProgram", &filesize);
@@ -273,10 +271,10 @@ namespace obos
 		testProgram->CreateProcess(filedata, filesize, (PVOID)&mainThread);
 		if (ret)
 			kpanic(NULLPTR, kpanic_format("CreateProcess failed with %d."), ret);
+		delete[] filedata;
 		mainThread.WaitForThreadExit();
 		mainThread.closeHandle();
 
-		delete[] filedata;
 
 		/*char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
 		

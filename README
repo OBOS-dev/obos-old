@@ -49,7 +49,8 @@ cmake ./ -G Ninja -DLINKER_SCRIPT=kernel/linker.ld \
 -DCMAKE_BUILD_TYPE=Debug \
 -DCRTBEGIN_DIRECTORY=$(i686-elf-g++ -print-file-name=crtbegin.o) \
 -DCRTEND_DIRECTORY=$(i686-elf-g++ -print-file-name=crtend.o) \
--DLIBGCC=$(i686-elf-g++ --print-libgcc-file-name)
+-DLIBGCC=$(i686-elf-g++ --print-libgcc-file-name) \
+-DCURSOR_SLEEP_TIME_2_5_MS=100
 
 * Fourth, build everything with this command:
 ninja -j 0 all

@@ -6,369 +6,107 @@ Name             Origin             Length             Attributes
 
 Linker script and memory map
 
-LOAD src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
-LOAD src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/driver_api/syscall_interface.asm.o
-                [!provide]                        PROVIDE (__executable_start = SEGMENT_START ("text-segment", 0x8048000))
-                0x08048074                        . = (SEGMENT_START ("text-segment", 0x8048000) + SIZEOF_HEADERS)
+LOAD src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+LOAD src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
+                0xe0000000                        . = 0xe0000000
 
-.interp
- *(.interp)
+.text           0xe0000000      0x34c
+ *(.multiboot)
+ *(.text)
+ .text          0xe0000000      0x21a src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+                0xe00000bb                Thread
+                0xe0000133                _start
+ *fill*         0xe000021a        0x6 
+ .text          0xe0000220      0x12c src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
+                0xe0000220                ConsoleOutputString
+                0xe000022c                ExitProcess
+                0xe0000238                CreateProcess
+                0xe0000244                TerminateProcess
+                0xe0000250                OpenCurrentProcessHandle
+                0xe000025c                OpenProcessHandle
+                0xe0000268                CreateThread
+                0xe0000274                OpenThread
+                0xe0000280                PauseThread
+                0xe000028c                ResumeThread
+                0xe0000298                SetThreadPriority
+                0xe00002a4                SetThreadStatus
+                0xe00002b0                TerminateThread
+                0xe00002bc                GetTid
+                0xe00002c8                GetExitCode
+                0xe00002d4                GetThreadPriority
+                0xe00002e0                GetThreadStatus
+                0xe00002ec                WaitForThreadExit
+                0xe00002f8                ExitThread
+                0xe0000304                GetCurrentThreadTid
+                0xe0000310                GetCurrentThreadHandle
+                0xe000031c                GetCurrentThreadPriority
+                0xe0000328                GetCurrentThreadStatus
+                0xe0000334                CloseHandle
+                0xe0000340                Printf
 
-.note.gnu.build-id
- *(.note.gnu.build-id)
+.iplt           0xe000034c        0x0
+ .iplt          0xe000034c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.hash
- *(.hash)
+.rodata         0xe0001000       0x89
+ *(.rodata)
+ .rodata        0xe0001000       0x89 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.gnu.hash
- *(.gnu.hash)
+.rel.dyn        0xe000108c        0x0
+ .rel.got       0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .rel.iplt      0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.dynsym
- *(.dynsym)
+.data           0xe0002000        0x0
+ *(.data)
+ .data          0xe0002000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.dynstr
- *(.dynstr)
+.got            0xe000108c        0x0
+ .got           0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.gnu.version
- *(.gnu.version)
+.got.plt        0xe000108c        0x0
+ .got.plt       0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.gnu.version_d
- *(.gnu.version_d)
+.igot.plt       0xe000108c        0x0
+ .igot.plt      0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.gnu.version_r
- *(.gnu.version_r)
-
-.rel.dyn        0x08048074        0x0
- *(.rel.init)
- *(.rel.text .rel.text.* .rel.gnu.linkonce.t.*)
- *(.rel.fini)
- *(.rel.rodata .rel.rodata.* .rel.gnu.linkonce.r.*)
- *(.rel.data.rel.ro .rel.data.rel.ro.* .rel.gnu.linkonce.d.rel.ro.*)
- *(.rel.data .rel.data.* .rel.gnu.linkonce.d.*)
- *(.rel.tdata .rel.tdata.* .rel.gnu.linkonce.td.*)
- *(.rel.tbss .rel.tbss.* .rel.gnu.linkonce.tb.*)
- *(.rel.ctors)
- *(.rel.dtors)
- *(.rel.got)
- .rel.got       0x08048074        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
- *(.rel.bss .rel.bss.* .rel.gnu.linkonce.b.*)
- *(.rel.ifunc)
-
-.rel.plt        0x08048074        0x0
- *(.rel.plt)
-                [!provide]                        PROVIDE (__rel_iplt_start = .)
- *(.rel.iplt)
- .rel.iplt      0x08048074        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
-                [!provide]                        PROVIDE (__rel_iplt_end = .)
-
-.relr.dyn
- *(.relr.dyn)
-
-.init
- *(SORT_NONE(.init))
-
-.plt            0x08048074        0x0
- *(.plt)
- *(.iplt)
- .iplt          0x08048074        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
-
-.plt.got
- *(.plt.got)
-
-.plt.sec
- *(.plt.sec)
-
-.text           0x08048080       0x8f
- *(.text.unlikely .text.*_unlikely .text.unlikely.*)
- *(.text.exit .text.exit.*)
- *(.text.startup .text.startup.*)
- *(.text.hot .text.hot.*)
- *(SORT_BY_NAME(.text.sorted.*))
- *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0x08048080       0x17 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
-                0x08048080                _start
- *fill*         0x08048097        0x9 
- .text          0x080480a0       0x6f src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/driver_api/syscall_interface.asm.o
-                0x080480a0                RegisterDriver
-                0x080480a8                RegisterInterruptHandler
-                0x080480b0                PicSendEoi
-                0x080480b8                EnableIRQ
-                0x080480c0                DisableIRQ
-                0x080480c8                RegisterReadCallback
-                0x080480d0                PrintChar
-                0x080480d8                GetMultibootModule
-                0x080480e0                RegisterFileReadCallback
-                0x080480e8                RegisterFileExistsCallback
-                0x080480f0                MapPhysicalTo
-                0x080480f8                UnmapPhysicalTo
-                0x08048100                Printf
-                0x08048108                CallSyscall
- *(.gnu.warning)
-
-.fini
- *(SORT_NONE(.fini))
-                [!provide]                        PROVIDE (__etext = .)
-                [!provide]                        PROVIDE (_etext = .)
-                [!provide]                        PROVIDE (etext = .)
-
-.rodata
- *(.rodata .rodata.* .gnu.linkonce.r.*)
-
-.rodata1
- *(.rodata1)
-
-.eh_frame_hdr
- *(.eh_frame_hdr)
- *(.eh_frame_entry .eh_frame_entry.*)
-
-.eh_frame
- *(.eh_frame)
- *(.eh_frame.*)
-
-.sframe
- *(.sframe)
- *(.sframe.*)
-
-.gcc_except_table
- *(.gcc_except_table .gcc_except_table.*)
-
-.gnu_extab
- *(.gnu_extab*)
-
-.exception_ranges
- *(.exception_ranges*)
-                0x0804910f                        . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
-
-.eh_frame
- *(.eh_frame)
- *(.eh_frame.*)
-
-.sframe
- *(.sframe)
- *(.sframe.*)
-
-.gnu_extab
- *(.gnu_extab)
-
-.gcc_except_table
- *(.gcc_except_table .gcc_except_table.*)
-
-.exception_ranges
- *(.exception_ranges*)
-
-.tdata          0x0804910f        0x0
-                [!provide]                        PROVIDE (__tdata_start = .)
- *(.tdata .tdata.* .gnu.linkonce.td.*)
-
-.tbss
- *(.tbss .tbss.* .gnu.linkonce.tb.*)
- *(.tcommon)
-
-.preinit_array  0x0804910f        0x0
-                [!provide]                        PROVIDE (__preinit_array_start = .)
- *(.preinit_array)
-                [!provide]                        PROVIDE (__preinit_array_end = .)
-
-.init_array     0x0804910f        0x0
-                [!provide]                        PROVIDE (__init_array_start = .)
- *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
- *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
-                [!provide]                        PROVIDE (__init_array_end = .)
-
-.fini_array     0x0804910f        0x0
-                [!provide]                        PROVIDE (__fini_array_start = .)
- *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
- *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
-                [!provide]                        PROVIDE (__fini_array_end = .)
-
-.ctors
- *crtbegin.o(.ctors)
- *crtbegin?.o(.ctors)
- *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
- *(SORT_BY_NAME(.ctors.*))
- *(.ctors)
-
-.dtors
- *crtbegin.o(.dtors)
- *crtbegin?.o(.dtors)
- *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
- *(SORT_BY_NAME(.dtors.*))
- *(.dtors)
-
-.jcr
- *(.jcr)
-
-.data.rel.ro
- *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
- *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*)
-
-.dynamic
- *(.dynamic)
-
-.got            0x08049110        0x0
- *(.got)
- .got           0x08049110        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
- *(.igot)
-                0x08049110                        . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
-
-.got.plt        0x08049110        0x0
- *(.got.plt)
- .got.plt       0x08049110        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
- *(.igot.plt)
- .igot.plt      0x08049110        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
-
-.data           0x08049110       0x14
- *(.data .data.* .gnu.linkonce.d.*)
- .data          0x08049110       0x14 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
-
-.data1
- *(.data1)
-                0x08049124                        _edata = .
-                [!provide]                        PROVIDE (edata = .)
-                0x08049124                        . = .
-                0x08049124                        __bss_start = .
-
-.bss            0x08049124        0x0
- *(.dynbss)
- *(.bss .bss.* .gnu.linkonce.b.*)
+.bss            0xe0002000        0x0
  *(COMMON)
-                0x08049124                        . = ALIGN ((. != 0x0)?0x4:0x1)
-                0x08049124                        . = ALIGN (0x4)
-                0x08049124                        . = SEGMENT_START ("ldata-segment", .)
-                0x08049124                        . = ALIGN (0x4)
-                0x08049124                        _end = .
-                [!provide]                        PROVIDE (end = .)
-                0x08049124                        . = DATA_SEGMENT_END (.)
+ *(.bss)
+ .bss           0xe0002000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+OUTPUT(/mnt/c/Code/obos/out/testProgram elf32-i386)
 
-.stab
- *(.stab)
+.debug_frame    0x00000000       0x98
+ .debug_frame   0x00000000       0x98 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .debug_frame   0x00000098        0x0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
 
-.stabstr
- *(.stabstr)
+.debug_info     0x00000000      0x444
+ .debug_info    0x00000000      0x3d3 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .debug_info    0x000003d3       0x71 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
 
-.stab.excl
- *(.stab.excl)
-
-.stab.exclstr
- *(.stab.exclstr)
-
-.stab.index
- *(.stab.index)
-
-.stab.indexstr
- *(.stab.indexstr)
-
-.comment
- *(.comment)
-
-.gnu.build.attributes
- *(.gnu.build.attributes .gnu.build.attributes.*)
-
-.debug
- *(.debug)
-
-.line
- *(.line)
-
-.debug_srcinfo
- *(.debug_srcinfo)
-
-.debug_sfnames
- *(.debug_sfnames)
+.debug_abbrev   0x00000000      0x13f
+ .debug_abbrev  0x00000000      0x124 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .debug_abbrev  0x00000124       0x1b src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
 
 .debug_aranges  0x00000000       0x40
- *(.debug_aranges)
  .debug_aranges
-                0x00000000       0x20 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
+                0x00000000       0x20 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
  .debug_aranges
-                0x00000020       0x20 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/driver_api/syscall_interface.asm.o
+                0x00000020       0x20 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
+
+.debug_line     0x00000000      0x439
+ .debug_line    0x00000000      0x369 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .debug_line    0x00000369       0xd0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
+
+.debug_str      0x00000000        0x0
+ .debug_str     0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+
+.comment        0x00000000       0x12
+ .comment       0x00000000       0x12 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+                                 0x13 (size before relaxing)
 
 .debug_pubnames
                 0x00000000        0x0
- *(.debug_pubnames)
  .debug_pubnames
-                0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/driver_api/syscall_interface.asm.o
-
-.debug_info     0x00000000       0xd1
- *(.debug_info .gnu.linkonce.wi.*)
- .debug_info    0x00000000       0x5e src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
- .debug_info    0x0000005e       0x73 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/driver_api/syscall_interface.asm.o
-
-.debug_abbrev   0x00000000       0x36
- *(.debug_abbrev)
- .debug_abbrev  0x00000000       0x1b src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
- .debug_abbrev  0x0000001b       0x1b src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/driver_api/syscall_interface.asm.o
-
-.debug_line     0x00000000       0xfe
- *(.debug_line .debug_line.* .debug_line_end)
- .debug_line    0x00000000       0x64 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
- .debug_line    0x00000064       0x9a src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/driver_api/syscall_interface.asm.o
-
-.debug_frame    0x00000000        0x0
- *(.debug_frame)
- .debug_frame   0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
- .debug_frame   0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/driver_api/syscall_interface.asm.o
-
-.debug_str
- *(.debug_str)
+                0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
 
 .debug_loc      0x00000000        0x0
- *(.debug_loc)
- .debug_loc     0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.asm.o
- .debug_loc     0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/driver_api/syscall_interface.asm.o
-
-.debug_macinfo
- *(.debug_macinfo)
-
-.debug_weaknames
- *(.debug_weaknames)
-
-.debug_funcnames
- *(.debug_funcnames)
-
-.debug_typenames
- *(.debug_typenames)
-
-.debug_varnames
- *(.debug_varnames)
-
-.debug_pubtypes
- *(.debug_pubtypes)
-
-.debug_ranges
- *(.debug_ranges)
-
-.debug_addr
- *(.debug_addr)
-
-.debug_line_str
- *(.debug_line_str)
-
-.debug_loclists
- *(.debug_loclists)
-
-.debug_macro
- *(.debug_macro)
-
-.debug_names
- *(.debug_names)
-
-.debug_rnglists
- *(.debug_rnglists)
-
-.debug_str_offsets
- *(.debug_str_offsets)
-
-.debug_sup
- *(.debug_sup)
-
-.gnu.attributes
- *(.gnu.attributes)
-
-/DISCARD/
- *(.note.GNU-stack)
- *(.gnu_debuglink)
- *(.gnu.lto_*)
-OUTPUT(/mnt/c/Code/obos/out//testProgram elf32-i386)
+ .debug_loc     0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o

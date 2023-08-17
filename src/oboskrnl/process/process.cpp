@@ -7,16 +7,21 @@
 #include <process/process.h>
 
 #include <memory_manager/paging/allocate.h>
+#include <memory_manager/paging/init.h>
 
 #include <multitasking/multitasking.h>
 #include <multitasking/threadHandle.h>
-#include <multitasking/mutex/mutexHandle.h>
+#include <multitasking/thread.h>
 
 #include <elf/elf.h>
 
 #include <inline-asm.h>
+#include <handle.h>
+#include <types.h>
 
 #include <utils/memory.h>
+#include <utils/list.h>
+
 
 extern "C" UINTPTR_T boot_page_directory1;
 
@@ -30,6 +35,8 @@ namespace obos
 	namespace process
 	{
 		DWORD g_nextProcessId = 0;
+		list_t* g_processList = nullptr;
+
 		Process::Process()
 		{}
 
@@ -58,6 +65,8 @@ namespace obos
 		{
 			if (pageDirectory)
 				return (DWORD)-1;
+			if (!g_processList)
+				g_processList = list_new();
 			EnterKernelSection();
 			pid = g_nextProcessId++;
 			pageDirectory = new memory::PageDirectory{};
@@ -75,7 +84,7 @@ namespace obos
 			
 			children = list_new();
 			threads = list_new();
-			mutexes = list_new();
+			abstractHandles = list_new();
 
 			UINTPTR_T entry = 0;
 			UINTPTR_T base = 0;
@@ -94,16 +103,16 @@ namespace obos
 			
 			mainThread->owner = this;
 
-			bool ret = mainThread->CreateThread(multitasking::Thread::priority_t::NORMAL,
+			DWORD ret = mainThread->CreateThread(multitasking::Thread::priority_t::NORMAL,
 				!isDriver ? (VOID(*)(PVOID))0x400000 : DriverEntryPoint,
 				(PVOID)entry,
 				(DWORD)multitasking::Thread::status_t::PAUSED,
 				0);
-			if (!ret)
+			if (ret)
 			{
 				multitasking::g_currentThread->owner->pageDirectory->switchToThis();
 				LeaveKernelSection();
-				return 4;
+				return 3 + ret;
 			}
 
 			mainThread->owner = this;
@@ -120,6 +129,8 @@ namespace obos
 			
 			// Switch back the parent's page directory.
 			multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+
+			list_rpush(g_processList, list_node_new(this));
 
 			LeaveKernelSection();
 
@@ -155,17 +166,18 @@ namespace obos
 				delete threadHandle;
 			}
 			list_iterator_destroy(iter);
-			iter = list_iterator_new(mutexes, LIST_HEAD);
-			// Same for the mutexes.
-			for (list_node_t* _mutex = list_iterator_next(iter); _mutex != nullptr; _mutex = list_iterator_next(iter))
+			iter = list_iterator_new(abstractHandles, LIST_HEAD);
+			// Same for the rest of the handles.
+			for (list_node_t* _handle = list_iterator_next(iter); _handle != nullptr; _handle = list_iterator_next(iter))
 			{
-				multitasking::MutexHandle* mutexHandle = (multitasking::MutexHandle*)_mutex->val;
-				mutexHandle->closeHandle();
+				Handle* handle = (Handle*)_handle->val;
+				handle->closeHandle();
 			}
 			list_iterator_destroy(iter);
 			list_destroy(children);
 			list_destroy(threads);
-			list_destroy(mutexes);
+			list_destroy(abstractHandles);
+			list_remove(g_processList, list_find(g_processList, this));
 			if (this == multitasking::g_currentThread->owner)
 			{
 				UINTPTR_T* stack = (UINTPTR_T*)s_temporaryStack;

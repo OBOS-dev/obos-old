@@ -18,6 +18,7 @@ namespace obos
 	{
 		VOID DriverEntryPoint(PVOID entry);
 		extern DWORD g_nextProcessId;
+		extern list_t* g_processList;
 		class Process
 		{
 		public:
@@ -29,8 +30,9 @@ namespace obos
 			/// <param name="file">A pointer to the complete elf file's data.</param>
 			/// <param name="size">The size of the buffer.</param>
 			/// <param name="mainThread">A pointer to an obos::multitasking::ThreadHandle to be opened with the process's main thread.</param>
-			/// <returns>Success is zero. The elf file's exit status is it's from 1-3. Four if the function could not create the main thread. 0xFFFFFFFF if a process exists in
-			/// the current object.</returns>
+			/// <returns>Success is zero. The elf file's exit status if it's from 1-3, and the elf loader failed.
+			/// If the return value is 4 and up, it is CreateThread's exit status, if it failed.
+			/// 0xFFFFFFFF if a process exists in the current object.</returns>
 			DWORD CreateProcess(PBYTE file, SIZE_T size, PVOID mainThread, bool isDriver = false);
 			/// <summary>
 			/// Terminates the process.
@@ -51,8 +53,9 @@ namespace obos
 			Process* parent = nullptr;
 			list_t* children = nullptr;
 			list_t* threads = nullptr;
-			list_t* mutexes = nullptr;
+			list_t* abstractHandles = nullptr;
 			bool isUserMode = false;
+			UINTPTR_T magicNumber = 0xCA44C071;
 		};
 	}
 }

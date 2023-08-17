@@ -31,6 +31,10 @@ namespace obos
 	void EnterKernelSection();
 	// Enables interrupts if this call matches the first call to EnterKernelSection. (Like a stack)
 	void LeaveKernelSection();
+	// Sets g_currentThread->isServicingSyscall to true
+	void EnterSyscall();
+	// Sets g_currentThread->isServicingSyscall to false
+	void ExitSyscall();
 }
 
 #endif

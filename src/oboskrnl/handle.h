@@ -23,7 +23,7 @@ namespace obos
 	public:
 		Handle() = default;
 
-		constexpr static handleType getType()
+		virtual handleType getType()
 		{
 			return handleType::abstract;
 		}

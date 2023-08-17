@@ -51,7 +51,7 @@ namespace obos
 			Thread() = default;
 			Thread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages);
 
-			bool CreateThread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages);
+			DWORD CreateThread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages);
 
 			//void SetThreadPriority(priority_t newPriority)
 			//{
@@ -102,6 +102,7 @@ namespace obos
 			SIZE_T stackSizePages = 0;
 			process::Process* owner = nullptr;
 			PVOID tssStackBottom = nullptr; // If allocated, it will be 2 pages.
+			bool isServicingSyscall = false;
 		};
 	}
 }

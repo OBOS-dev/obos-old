@@ -117,27 +117,10 @@ namespace obos
 		SetConsoleColor(foregroundColor, backgroundColor);
 		utils::dwMemset(s_framebuffer, s_backgroundColor, s_framebufferWidth * s_framebufferHeight);
 		s_consoleMutex->Unlock();
-		SetCursor(true);
 		UpdateCursorPosition();
 		new (s_modifiedLines) utils::IntegerBitfield{};
 		new (s_modifiedLines + 1) utils::IntegerBitfield{};
 		LeaveKernelSection();
-	}
-	void SetCursor(bool status)
-	{
-		/*if(status)
-		{ 
-			outb(0x3D4, 0x0A);
-			outb(0x3D5, (inb(0x3D5) & 0xC0) | 7);
-
-			outb(0x3D4, 0x0B);
-			outb(0x3D5, (inb(0x3D5) & 0xE0) | 9);
-		}
-		else
-		{
-			outb(0x3D4, 0x0A);
-			outb(0x3D5, 0x20);
-		}*/
 	}
 	void SetConsoleColor(UINT32_T foregroundColor, UINT32_T backgroundColor)
 	{
@@ -184,7 +167,6 @@ namespace obos
 		}
 		case '\0':
 			break;
-		case ' ':
 		case 15:
 			s_terminalColumn++;
 			break;
@@ -256,17 +238,34 @@ namespace obos
 		s_consoleMutex->Unlock();
 		LeaveKernelSection();
 	}
-	void SetTerminalCursorPosition(DWORD x, DWORD y)
+	void ConsoleOutputCharacter(CHAR ch, DWORD x, DWORD y, bool _swapBuffers)
 	{
-		//UINT16_T pos = y * s_framebufferWidth + x;
-
-		/*outb(0x3D4, 0x0F);
-		outb(0x3D5, (UINT8_T)(pos & 0xFF));
-		outb(0x3D4, 0x0E);
-		outb(0x3D5, (UINT8_T)((pos >> 8) & 0xFF));*/
-
+		if (!s_consoleMutex)
+			return;
+		EnterKernelSection();
+		s_consoleMutex->Lock();
+		DWORD oldX = s_terminalColumn;
+		DWORD oldY = s_terminalRow;
 		s_terminalColumn = x;
 		s_terminalRow = y;
+		__Impl_OutputCharacter(ch);
+		if (_swapBuffers)
+			__Impl_swapBuffers();
+		s_terminalColumn = oldX;
+		s_terminalRow = oldY;
+		s_consoleMutex->Unlock();
+		LeaveKernelSection();
+	}
+	void SetTerminalCursorPosition(DWORD x, DWORD y)
+	{
+		s_terminalColumn = x;
+		s_terminalRow = y;
+	}
+
+	void GetTerminalCursorPosition(DWORD& x, DWORD& y)
+	{
+		x = s_terminalColumn;
+		y = s_terminalRow;
 	}
 
 	static void __Impl_swapBuffers()

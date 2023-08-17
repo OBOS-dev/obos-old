@@ -7,7 +7,9 @@
 #include <multitasking/mutex/mutexHandle.h>
 #include <multitasking/mutex/mutex.h>
 
-#include <memory_manager/liballoc/liballoc.h>
+#include <multitasking/multitasking.h>
+
+#include <process/process.h>
 
 namespace obos
 {
@@ -18,13 +20,17 @@ namespace obos
 			m_value = new Mutex();
 			m_origin = this;
 			m_references = 1;
+			if (process::g_nextProcessId)
+				list_rpush(g_currentThread->owner->abstractHandles, list_node_new(this));
 		}
 
 		Handle* MutexHandle::duplicate()
 		{
-			MutexHandle* newHandle = (MutexHandle*)kcalloc(1, sizeof(MutexHandle));
+			MutexHandle* newHandle = new MutexHandle{};
 			newHandle->m_origin = m_origin;
+			delete reinterpret_cast<MutexHandle*>(newHandle->m_value);
 			newHandle->m_value = m_value;
+			newHandle->m_references = 0;
 			m_references++;
 			return newHandle;
 		}
@@ -32,6 +38,8 @@ namespace obos
 		{
 			if(!(--m_origin->getReferences()))
 				delete (MutexHandle*)m_value;
+			if (process::g_nextProcessId)
+				list_remove(g_currentThread->owner->abstractHandles, list_find(g_currentThread->owner->abstractHandles, this));
 			return m_origin->getReferences();
 		}
 

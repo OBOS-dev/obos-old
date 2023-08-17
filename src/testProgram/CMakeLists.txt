@@ -4,19 +4,20 @@
 
 # The ps/2 keyboard driver.
 
-add_executable (testProgram "main.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.h")
+add_executable (testProgram "main.c" "${CMAKE_SOURCE_DIR}/src/oboskrnl/syscalls/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/syscalls/syscall_interface.h")
 
 target_compile_options(testProgram PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror>)
 
 target_link_options(testProgram
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/testProgram.map"
     PUBLIC "-ffreestanding"
+    PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/src/testProgram/linker.ld"
     PUBLIC "-nostdlib")
 
 set_target_properties(testProgram PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 target_compile_definitions(testProgram PUBLIC OBOS=1)
 
-set(CMAKE_ASM_NASM_LINK_EXECUTABLE "i686-elf-gcc -g -Xlinker -Map ${OUTPUT_DIR}/testProgram.map -ffreestanding -nostdlib <OBJECTS> -o ${OUTPUT_DIR}/testProgram")
+# set(CMAKE_ASM_NASM_LINK_EXECUTABLE "i686-elf-gcc -g -Xlinker -Map ${OUTPUT_DIR}/testProgram.map -ffreestanding -nostdlib <OBJECTS> -o ${OUTPUT_DIR}/testProgram")
 
 target_include_directories(testProgram PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 

@@ -51,6 +51,7 @@ target_link_options(oboskrnl
 target_link_libraries(oboskrnl PUBLIC ${LIBGCC})
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
+target_compile_definitions(oboskrnl PUBLIC CURSOR_SLEEP_TIME_2_5_MS=${CURSOR_SLEEP_TIME_2_5_MS})
 
 message("Using linker script at " ${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT})
 message("crtbegin.o is at ${CRTBEGIN_DIRECTORY}")

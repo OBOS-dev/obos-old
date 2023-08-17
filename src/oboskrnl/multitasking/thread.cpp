@@ -23,7 +23,7 @@ namespace obos
 			CreateThread(threadPriority, entry, userData, threadStatus, stackSizePages);
 		}
 
-		bool Thread::CreateThread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages)
+		DWORD Thread::CreateThread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages)
 		{
 			list_t* priorityList = nullptr;
 
@@ -42,7 +42,7 @@ namespace obos
 				priorityList = g_threadPriorityList[3];
 				break;
 			default:
-				return false;
+				return 1;
 				break;
 			}
 
@@ -63,7 +63,7 @@ namespace obos
 
 			UINT32_T* stack = (UINT32_T*)memory::VirtualAlloc(nullptr, stackSizePages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
 			if (!stack)
-				return false;
+				return 2;
 			stackBottom = stack;
 			this->stackSizePages = stackSizePages;
 			stack += stackSizePages * 1024;
@@ -90,7 +90,7 @@ namespace obos
 					tssStackBottom = memory::VirtualAlloc(nullptr, 2, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
 
 			LeaveKernelSection();
-			return true;
+			return 0;
 		}
 	}
 }

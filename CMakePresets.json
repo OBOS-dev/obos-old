@@ -67,7 +67,8 @@
               "OUTPUT_DIR": "/mnt/c/Code/obos/out/",
               "CRTBEGIN_DIRECTORY": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o",
               "CRTEND_DIRECTORY": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o",
-              "LIBGCC": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a"
+              "LIBGCC": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a",
+              "CURSOR_SLEEP_TIME_2_5_MS": "75"
             },
             "condition": {
                 "type": "equals",

@@ -8,6 +8,8 @@
 #include <types.h>
 #include <descriptors/idt/pic.h>
 
+#include <multitasking/multitasking.h>
+
 void outb(UINT16_T port, UINT8_T val)
 {
     asm volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) :"memory");
@@ -343,5 +345,13 @@ namespace obos
         inKernelSection = false;
         asm volatile("sti");
         Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(0);
+    }
+    void EnterSyscall()
+    {
+        multitasking::g_currentThread->isServicingSyscall = true;
+    }
+    void ExitSyscall()
+    {
+        multitasking::g_currentThread->isServicingSyscall = false;
     }
 }

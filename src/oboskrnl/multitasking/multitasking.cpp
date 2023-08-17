@@ -15,12 +15,16 @@
 #include <descriptors/idt/idt.h>
 #include <descriptors/idt/pic.h>
 
+#include <console.h>
+
 namespace obos
 {
 	extern void kmainThr();
 	extern char thrstack_top;
 	extern char stack_top;
 	extern void SetTSSStack(PVOID);
+	extern DWORD s_terminalColumn;
+	extern DWORD s_terminalRow;
 	namespace multitasking
 	{
 		list_t* g_threads = nullptr;
@@ -55,14 +59,17 @@ namespace obos
 					s_newThread->owner->pageDirectory->switchToThis();
 				}
 			g_currentThread = s_newThread;
-			if(!g_currentThread->owner->isUserMode)
+			if(!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall)
 			{
+				// If we're servicing an interrupt, we need to set esp0 in the tss.
+				if(g_currentThread->isServicingSyscall)
+					SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
 				asm volatile("mov %0, %%eax" :
 											 : "r"(&g_currentThread->frame)
 											 : "memory");
 				switchToTaskAsm();
 			}
-			SetTSSStack(g_currentThread->tssStackBottom);
+			SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
 			asm volatile("mov %0, %%eax" :
 										 : "r"(&g_currentThread->frame)
 										 : "memory");
@@ -71,6 +78,36 @@ namespace obos
 
 		void findNewTask(const interrupt_frame* frame)
 		{
+			static BYTE s_cursorCounter = 0;
+			static bool s_isCursorOn = false;
+			static SIZE_T s_cursorRow = 0;
+			static SIZE_T s_cursorColumn = 0;
+			static bool s_cursorInitialized;
+			if (s_cursorCounter++ == CURSOR_SLEEP_TIME_2_5_MS)
+			{
+				if (s_cursorRow != s_terminalRow)
+				{
+					if(s_cursorInitialized)
+						ConsoleOutputCharacter(' ', s_cursorColumn, s_cursorRow);
+					s_cursorRow = s_terminalRow;
+				}
+				s_cursorInitialized = true;
+				if (s_cursorColumn != s_terminalColumn)
+				{
+					if (s_cursorColumn > s_terminalColumn)
+						ConsoleOutputCharacter(' ', s_cursorColumn + 1, s_cursorRow);
+					s_cursorColumn = s_terminalColumn;
+				}
+				if (s_isCursorOn && s_cursorRow == s_terminalRow)
+				{
+					ConsoleOutputCharacter('_', s_cursorColumn++, s_cursorRow);
+					s_cursorColumn--;
+				}
+				else
+					ConsoleOutputCharacter(' ', s_cursorColumn, s_cursorRow);
+				s_isCursorOn = !s_isCursorOn;
+				s_cursorCounter = 0;
+			}
 			if (!g_initialized)
 			{
 				if (frame->intNumber != 0x30)

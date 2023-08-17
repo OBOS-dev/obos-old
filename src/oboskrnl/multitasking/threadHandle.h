@@ -35,7 +35,7 @@ namespace obos
 			/// <param name="threadStatus">- The status of the thread. THREAD_DEAD and THREAD_BLOCKED are ignored.</param>
 			/// <param name="stackSizePages">The size of the thread's stack. If this is zero, it will set to two.</param>
 			/// <returns>false on failure, otherwise true.</returns>
-			bool CreateThread(Thread::priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages);
+			DWORD CreateThread(Thread::priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages);
 			/// <summary>
 			/// Opens a thread handle based on it's tid.
 			/// </summary>
@@ -86,19 +86,19 @@ namespace obos
 			/// <summary>
 			/// Gets the thread's priority.
 			/// </summary>
-			/// <returns>The thread's priority, or, failure, zero.</returns>
+			/// <returns>The thread's priority, or, on failure, zero.</returns>
 			Thread::priority_t GetThreadPriority();
 			/// <summary>
 			/// Gets the thread's status.
 			/// </summary>
-			/// <returns>The thread's status, or, failure, zero.</returns>
+			/// <returns>The thread's status, or, on failure, zero.</returns>
 			utils::RawBitfield GetThreadStatus();
 
 			/// <summary>
 			/// Gets the type of the handle.
 			/// </summary>
 			/// <returns>handleType::thread.</returns>
-			constexpr static handleType getType()
+			handleType getType() override
 			{
 				return handleType::thread;
 			}
