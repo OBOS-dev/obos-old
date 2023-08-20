@@ -4,6 +4,9 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
+#include <boot/multiboot.h>
+
+#include <types.h>
 #include <klog.h>
 #include <console.h>
 #include <inline-asm.h>
@@ -14,6 +17,10 @@
 
 #include <descriptors/idt/idt.h>
 #include <descriptors/idt/pic.h>
+
+#include <external/amalgamated-dist/Zydis.h>
+
+#include <boot/boot.h>
 
 // Credit: http://www.strudel.org.uk/itoa/
 static char* itoa(int value, char* result, int base) {
@@ -149,21 +156,23 @@ static char toupper(char ch)
 //
 //;
 
+extern "C" PVOID getEBP();
+
 namespace obos
 {
-	static void(*s_consoleOutputCharacter)(BYTE ch, PVOID userdata) = [](BYTE ch, PVOID) 
+	volatile void consoleOutputCharacter(BYTE ch, PVOID)
 	{
 		obos::ConsoleOutputCharacter(ch, false);
 		outb(0x3f8, ch);
-		outb(0xe9 , ch);
-	};
-	void _vprintf(void(*printChar)(BYTE ch, PVOID userdata), PVOID printCharUserdata, CSTRING format, va_list list)
+		outb(0xe9, ch);
+	}
+	void _vprintf(volatile void(*printChar)(BYTE ch, PVOID userdata), volatile PVOID printCharUserdata, CSTRING format, va_list list)
 	{
 		CSTRING _format = format;
 		for (; *_format; _format++)
 		{
 			char ch = *_format;
-			if(ch == '%')
+			if (ch == '%')
 			{
 				ch = *++_format;
 				switch (ch)
@@ -172,7 +181,7 @@ namespace obos
 				case 'i':
 				{
 					char str[12];
-					utils::ZeroMemory(str);
+					utils::memzero(str, 12);
 					itoa(va_arg(list, int), str, 10);
 					for (int i = 0; str[i]; i++)
 						printChar(str[i], printCharUserdata);
@@ -181,7 +190,7 @@ namespace obos
 				case 'u':
 				{
 					char str[12];
-					utils::ZeroMemory(str);
+					utils::memzero(str, 12);
 					itoa_unsigned(va_arg(list, int), str, 10);
 					for (int i = 0; str[i]; i++)
 						printChar(str[i], printCharUserdata);
@@ -190,7 +199,7 @@ namespace obos
 				case 'o':
 				{
 					char str[13];
-					utils::ZeroMemory(str);
+					utils::memzero(str, 13);
 					itoa_unsigned(va_arg(list, int), str, 8);
 					for (int i = 0; str[i]; i++)
 						printChar(str[i], printCharUserdata);
@@ -199,7 +208,7 @@ namespace obos
 				case 'x':
 				{
 					char str[9];
-					utils::ZeroMemory(str);
+					utils::memzero(str, 9);
 					itoa_unsigned(va_arg(list, unsigned int), str, 16);
 					for (int i = 0; str[i]; i++)
 						printChar(str[i], printCharUserdata);
@@ -208,9 +217,9 @@ namespace obos
 				case 'X':
 				{
 					char str[9];
-					utils::ZeroMemory(str);
+					utils::memzero(str, 9);
 					itoa_unsigned(va_arg(list, unsigned int), str, 16);
-					
+
 					for (int i = 0; str[i]; i++)
 						printChar(toupper(str[i]), printCharUserdata);
 					break;
@@ -229,7 +238,7 @@ namespace obos
 				case 'p':
 				{
 					char str[9];
-					utils::ZeroMemory(str);
+					utils::memzero(str, 9);
 					itoa_unsigned(va_arg(list, unsigned int), str, 16);
 					printChar('0', printCharUserdata);
 					printChar('x', printCharUserdata);
@@ -257,13 +266,31 @@ namespace obos
 	void printf(CSTRING format, ...)
 	{
 		va_list list; va_start(list, format);
-		_vprintf(s_consoleOutputCharacter, nullptr, format, list);
+		_vprintf(consoleOutputCharacter, nullptr, format, list);
 		va_end(list);
 		swapBuffers();
 	}
+	static volatile void sprintf_callback(BYTE ch, PVOID userData)
+	{
+		STRING output = *reinterpret_cast<STRING*>(userData);
+		SIZE_T& _index = **(reinterpret_cast<SIZE_T**>(userData) + 1);
+		if (output)
+			output[_index++] = ch;
+		else
+			_index++;
+	}
+	SIZE_T sprintf(STRING output, CSTRING format, ...)
+	{
+		va_list list; va_start(list, format);
+		SIZE_T index = 0;
+		UINTPTR_T udata[2] = { GET_FUNC_ADDR(output), GET_FUNC_ADDR(&index) };
+		_vprintf(sprintf_callback, udata, format, list);
+		va_end(list);
+		return index;
+	}
 	void vprintf(CSTRING format, va_list list)
 	{
-		_vprintf(s_consoleOutputCharacter, nullptr, format, list);
+		_vprintf(consoleOutputCharacter, nullptr, format, list);
 		swapBuffers();
 	}
 
@@ -272,7 +299,7 @@ namespace obos
 		extern void RestartComputer();
 		RestartComputer();
 	}
-	void kpanic(PVOID printStackTracePar, CSTRING format, ...)
+	void kpanic(PVOID printStackTracePar, PVOID eip, CSTRING format, ...)
 	{
 		asm volatile("cli");
 		EnterKernelSection();
@@ -296,11 +323,14 @@ namespace obos
 			s_reachedEndTerminal = false;
 
 			va_list list; va_start(list, format);
-			_vprintf(s_consoleOutputCharacter, nullptr, format, list);
+			_vprintf(consoleOutputCharacter, nullptr, format, list);
 			va_end(list);
 
 			printf_noFlush("Stack trace:\r\n");
 			printStackTrace(printStackTracePar, "\t");
+
+			if(eip)
+				disassemble(eip, "\t");
 
 			DWORD x = s_terminalColumn;
 			DWORD y = s_terminalRow;
@@ -309,40 +339,222 @@ namespace obos
 			/*s_terminalColumn = 0;
 			s_terminalRow = 8;
 			ConsoleOutput(skull_ascii_art, sizeof(skull_ascii_art), false);*/
-			
+
 			s_terminalColumn = x;
 			s_terminalRow = y;
 			printf_noFlush("Press any key to restart...\r\n");
-			Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(1);
-			RegisterInterruptHandler(33, irq1);
 
 			swapBuffers();
 		}
+		
+		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(1);
+		RegisterInterruptHandler(33, irq1);
 
 		asm volatile("sti;"
-					 ".byte 0xEB, 0xFD");
+			".byte 0xEB, 0xFD");
 	}
 
 	void printf_noFlush(CSTRING format, ...)
 	{
 		va_list list; va_start(list, format);
-		_vprintf(s_consoleOutputCharacter, nullptr, format, list);
+		_vprintf(consoleOutputCharacter, nullptr, format, list);
 		va_end(list);
 	}
 
 	void printStackTrace(PVOID first, CSTRING prefix)
 	{
 		stack_frame* current = (stack_frame*)first;
+		bool getFromEbp = false;
 		if (!first)
-			asm volatile ("mov %%ebp, %0" : : "memory"(current) : );
+		{
+			current = reinterpret_cast<stack_frame*>(getEBP());
+			getFromEbp = true;
+		}
 		if (first && !memory::HasVirtualAddress(first, 1))
-			asm volatile ("mov %%ebp, %0" : : "memory"(current) : );
+		{
+			current = reinterpret_cast<stack_frame*>(getEBP());
+			getFromEbp = true;
+		}
 		int nStackFrames = 0;
 		for (; current->down && memory::HasVirtualAddress(current->down, 1) && current->down != current; nStackFrames++, current = current->down);
-		asm volatile ("mov %%ebp, %0" : : "memory"(current) : );
+		if (getFromEbp)
+			current = reinterpret_cast<stack_frame*>(getEBP());
+		else
+			current = (stack_frame*)first;
 		for (int i = nStackFrames; i > -1; i--, current = current->down)
-			printf_noFlush("%s%d: %p\r\n", prefix, i, current->eip);
+		{
+			STRING func = nullptr;
+			SIZE_T functionAddress = 0;
+			addr2func((PVOID)current->eip, func, functionAddress);
+			printf_noFlush("%s%d: %p (%s+%d)\r\n", prefix, i, current->eip, func ? func : "[external code]", functionAddress ? (current->eip - functionAddress) : 0);
+			if(func)
+				delete func;
+		}
 	}
+	void disassemble(PVOID _eip, CSTRING prefix)
+	{
+		if (!memory::HasVirtualAddress(_eip, 1))
+		{
+			printf_noFlush("%p: Invalid eip. Aborting...\r\n", _eip);
+			return;
+		}
+		STRING filename = nullptr;
+
+		addr2file(_eip, filename);
+		printf_noFlush("Disassembly of address %p (%s):\r\n", _eip, filename ? filename : "Unknown file.");
+		if(filename)
+			delete filename;
+
+		ZyanU32 eip = reinterpret_cast<ZyanU32>(_eip);
+
+		PBYTE data = (PBYTE)_eip;
+
+		ZyanUSize offset = 0;
+		ZydisDisassembledInstruction instruction;
+
+		int i = 0;
+
+		while (ZYAN_SUCCESS(ZydisDisassembleIntel(
+			ZYDIS_MACHINE_MODE_LEGACY_32,
+			eip,
+			data + offset,
+			32,
+			&instruction
+		)))
+		{
+			if (i >= 10)
+				break;
+			STRING function = nullptr;
+			SIZE_T functionAddress = 0;
+			addr2func(reinterpret_cast<PVOID>(eip), function, functionAddress);
+			printf_noFlush("%s%p (%s+%d): %s\r\n", prefix, eip, function, eip - functionAddress, instruction.text);
+			if (filename)
+				delete function;
+			offset += instruction.info.length;
+			eip += instruction.info.length;
+			i++;
+		}
+	}
+
+	constexpr SIZE_T npos = 0xFFFFFFFF;
+
+	/*SIZE_T findNext(CSTRING string, SIZE_T szStr, char ch, SIZE_T offset = 0)
+	{
+		SIZE_T i = offset;
+		for (; i < szStr && string[i] != ch; i++);
+		if (i == szStr)
+			return npos;
+		return i;
+	}*/
+	SIZE_T countTo(CSTRING string, CHAR ch)
+	{
+		SIZE_T i = 0;
+		for (; string[i] != ch; i++);
+		return i;
+	}
+	
+	UINT32_T hex2bin(const char* str, unsigned size)
+	{
+		UINT32_T ret = 0;
+		if (size > 8)
+			return 0;
+		str += *str == '\n';
+		//unsigned size = utils::strlen(str);
+		for (int i = size - 1, j = 0; i > -1; i--, j++)
+		{
+			char c = str[i];
+			UINT32_T digit = 0;
+			switch (c)
+			{
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				digit = c - '0';
+				break;
+			case 'A':
+			case 'B':
+			case 'C':
+			case 'D':
+			case 'E':
+			case 'F':
+				digit = (c - 'A') + 10;
+				break;
+			case 'a':
+			case 'b':
+			case 'c':
+			case 'd':
+			case 'e':
+			case 'f':
+				digit = (c - 'a') + 10;
+				break;
+			default:
+				break;
+			}
+			/*if (!j)
+			{
+				ret = digit;
+				continue;
+			}*/
+			ret |= digit << (j * 4);
+		}
+		return ret;
+	}
+
+	void addr2func(PVOID addr, STRING& str, SIZE_T& functionAddress)
+	{
+		UINTPTR_T address = GET_FUNC_ADDR(addr);
+		CSTRING startAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[4].mod_start);
+		CSTRING endAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[4].mod_end);
+		for (CSTRING iter = startAddress;
+			iter < endAddress;
+			iter += countTo(iter, '\n') + 1)
+		{
+			CSTRING nextLine = iter + countTo(iter, '\n') + 1;
+			UINTPTR_T symbolAddress = hex2bin(iter, countTo(iter, ' '));
+			UINTPTR_T nextSymbolAddress = hex2bin(nextLine, countTo(nextLine, ' '));
+			if (address >= symbolAddress && address < nextSymbolAddress)
+			{
+				iter += countTo(iter, ' ') + 3;
+				SIZE_T size = countTo(iter, '\t');
+				str = new CHAR[size + 1];
+				utils::memcpy(str, iter, size);
+				functionAddress = symbolAddress;
+				break;
+			}
+		}
+	}
+
+	void addr2file(PVOID addr, STRING& str)
+	{
+		UINTPTR_T address = GET_FUNC_ADDR(addr);
+		CSTRING startAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[4].mod_start);
+		CSTRING endAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[4].mod_end);
+		for (CSTRING iter = startAddress;
+			iter < endAddress;
+			iter += countTo(iter, '\n') + 1)
+		{
+			CSTRING nextLine = iter + countTo(iter, '\n') + 1;
+			UINTPTR_T symbolAddress = hex2bin(iter, countTo(iter, ' '));
+			UINTPTR_T nextSymbolAddress = hex2bin(nextLine, countTo(nextLine, ' '));
+			if (address >= symbolAddress && address < nextSymbolAddress)
+			{
+				iter += countTo(iter, ' ') + 3;
+				iter += countTo(iter, '\t') + 1;
+				SIZE_T size = countTo(iter, ':');
+				str = new CHAR[size + 1];
+				utils::memcpy(str, iter, size);
+				break;
+			}
+		}
+	}
+
 
 	static unsigned long int next = 1;  // NB: "unsigned long int" is assumed to be 32 bits wide
 
@@ -379,3 +591,10 @@ namespace obos
 		}
 	}
 }
+/*UINT32_T ipow(int n, int ex)
+{
+	UINT32_T res = n;
+	for (UINT32_T i = 0; i < ex; i++) res *= n;
+	res /= n;
+	return res;
+}*/

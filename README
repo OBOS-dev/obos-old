@@ -50,7 +50,7 @@ cmake ./ -G Ninja \
 -DCRTBEGIN_DIRECTORY=$(i686-elf-g++ -print-file-name=crtbegin.o) \
 -DCRTEND_DIRECTORY=$(i686-elf-g++ -print-file-name=crtend.o) \
 -DLIBGCC=$(i686-elf-g++ --print-libgcc-file-name) \
--DCURSOR_SLEEP_TIME_2_5_MS=100
+-DCURSOR_SLEEP_TIME_2_5_MS=75
 
 * Fourth, build everything with this command:
 ninja -j 0 all
@@ -67,7 +67,9 @@ The generated iso will be stored in ./out
  |_| \_|\____/  |_|  |_____\_____|______|
 
 This project is licensed under the MIT License.
-Also I use a linked list from github and it has this license (MIT):
-https://github.com/clibs/list/blob/master/LICENSE
-You can find the project here:
+I also use a linked list from github and it has this license (MIT):
 https://github.com/clibs/list
+https://github.com/clibs/list/blob/master/LICENSE
+I also use Zydis and it has the MIT license.
+https://github.com/zyantific/zydis
+https://github.com/zyantific/zydis/blob/master/LICENSE

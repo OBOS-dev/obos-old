@@ -154,7 +154,7 @@ namespace obos
 		DWORD MemoryProtect(PVOID _base, SIZE_T nPages, utils::RawBitfield flags)
 		{
 			UINTPTR_T base = ROUND_ADDRESS_DOWN(GET_FUNC_ADDR(_base));
-			if (!HasVirtualAddress(_base, nPages) || base < 0x400000)
+			if (!HasVirtualAddress(_base, nPages))
 				return 1;
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
 			{

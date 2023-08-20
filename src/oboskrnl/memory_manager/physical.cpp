@@ -7,6 +7,7 @@
 #include <memory_manager/physical.h>
 
 #include <klog.h>
+#include <inline-asm.h>
 
 #include <boot/multiboot.h>
 
@@ -58,7 +59,7 @@ namespace obos
 		bool InitializePhysicalMemoryManager()
 		{
 			if ((g_multibootInfo->flags & MULTIBOOT_INFO_MEM_MAP) != MULTIBOOT_INFO_MEM_MAP)
-				obos::kpanic(nullptr, kpanic_format("No memory map from the bootloader."));
+				obos::kpanic(nullptr, getEIP(), kpanic_format("No memory map from the bootloader."));
 			if (g_physicalMemoryManagerInitialized)
 				return false;
 			for (SIZE_T i = 0; i < g_countPages / 32; i++)

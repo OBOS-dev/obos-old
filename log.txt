@@ -6,30 +6,3 @@ AHCI Warning: No drive found at port 2, even though it is implemented.
 AHCI Warning: No drive found at port 3, even though it is implemented.
 AHCI Warning: No drive found at port 4, even though it is implemented.
 AHCI Warning: No drive found at port 5, even though it is implemented.
-Kernel panic at line 68, file /home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp, message:
-Page fault in kernel-mode at 0x8048747 (tid 0, pid 0) while trying to read a non-present page.
-The address of that page is 0x8048747 (Page directory index 32, page table index 72).
- Dumping registers: 
-	EDI: 0x0
-	ESI: 0x0
-	EBP: 0xc0140e14
-	ESP: 0xc0140dd4
-	EBX: 0x84
-	EDX: 0x80
-	ECX: 0x0
-	EAX: 0x0
-	EIP: 0x8048747
-	EFLAGS: 0x200086
-	SS: 0x1
-	DS: 0x23
-	CS: 0x8
-
-Stack trace:
-	6: 0xc0106461
-	5: 0xc0104718
-	4: 0xc01043be
-	3: 0xc010ce75
-	2: 0xc01043be
-	1: 0xc010870b
-	0: 0xc01088e7
-Press any key to restart...

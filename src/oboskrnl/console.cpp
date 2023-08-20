@@ -172,12 +172,12 @@ namespace obos
 			break;
 		default:
 		{
+			putcharAt(s_terminalColumn, s_terminalRow * 16, ch, s_foregroundColor, s_backgroundColor);
 			if (++s_terminalColumn >= s_nCharsHorizontal)
 			{
 				s_terminalColumn = 0;
 				on_newline();
 			}
-			putcharAt(s_terminalColumn - 1, s_terminalRow * 16, ch, s_foregroundColor, s_backgroundColor);
 			s_modifiedLines[s_terminalRow >> 5].setBit(s_terminalRow % 32);
 			UpdateCursorPosition();
 		}
@@ -190,10 +190,10 @@ namespace obos
 		EnterKernelSection();
 		s_consoleMutex->Lock();
 		for (SIZE_T i = 0; i < size; __Impl_OutputCharacter(message[i++]));
+		LeaveKernelSection();
 		if (_swapBuffers)
 			__Impl_swapBuffers();
 		s_consoleMutex->Unlock();
-		LeaveKernelSection();
 	}
 	void ConsoleOutputString(CSTRING message, bool _swapBuffers)
 	{
@@ -202,10 +202,10 @@ namespace obos
 		EnterKernelSection();
 		s_consoleMutex->Lock();
 		for (SIZE_T i = 0; message[i]; __Impl_OutputCharacter(message[i++]));
+		LeaveKernelSection();
 		if(_swapBuffers)
 			__Impl_swapBuffers();
 		s_consoleMutex->Unlock();
-		LeaveKernelSection();
 	}
 	void ConsoleFillLine(char ch, bool _swapBuffers)
 	{
@@ -289,7 +289,16 @@ namespace obos
 			}
 		}
 	}
-	// Swap the backbuffer and the viewport.
+	void ClearConsole()
+	{
+		EnterKernelSection();
+		s_consoleMutex->Lock();
+		utils::dwMemset(s_backbuffer, 0, s_framebufferWidth * s_framebufferHeight);
+		utils::dwMemset(s_framebuffer, 0, s_framebufferWidth * s_framebufferHeight);
+		s_consoleMutex->Unlock();
+		LeaveKernelSection();
+	}
+	// Swap the backbuffer with the viewport.
 	void swapBuffers()
 	{
 		EnterKernelSection();

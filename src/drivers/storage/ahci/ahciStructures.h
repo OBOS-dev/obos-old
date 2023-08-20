@@ -319,6 +319,7 @@ typedef struct tagHBA_CMD_TBL
 typedef struct tagAHCI_PORT
 {
 	HBA_PORT* hbaPort;
+	UINT32_T* clbVirtualAddress;
 	BOOL available;
 	enum tagDRIVE_TYPE
 	{

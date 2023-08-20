@@ -43,16 +43,15 @@ void Thread(PVOID userdata)
 
 void _start()
 {
+	SetConsoleColor(0xFFFFF700, 0x00000000);
 	ConsoleOutputString("testProgram started!\r\n");
 	HANDLE thr1 = 0;
-	DWORD status = CreateThread(&thr1, 4, Thread, 0, 0, 0);
+	DWORD status = CreateThread(&thr1, 1, Thread, 0, 0, 0);
 	if (status)
 	{
 		CloseHandle(thr1);
 		return;
 	}
-	WaitForThreadExit(thr1);
-	CloseHandle(thr1);
 	DWORD tid = GetCurrentThreadTid();
 
 	char str[12] = {};
@@ -61,5 +60,9 @@ void _start()
 	ConsoleOutputString(str);
 	ConsoleOutputString("\r\n");
 
+	WaitForThreadExit(thr1);
+	CloseHandle(thr1);
 	ConsoleOutputString("Exiting testProgram.\r\n");
+	SetConsoleColor(0xFFFFFFFF, 0x00000000);
+	ExitProcess(0);
 }

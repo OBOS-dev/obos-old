@@ -10,6 +10,12 @@
 
 #define TO_PBYTE(addr) ((PBYTE)addr)
 
+// To make the compiler happy.
+extern "C" int memcmp(PCVOID b1, PCVOID b2, SIZE_T sz)
+{
+	return obos::utils::memcmp(b1,b2, sz);
+}
+
 namespace obos
 {
 	namespace utils
@@ -43,6 +49,12 @@ namespace obos
 		PCVOID memchr(PCVOID block, BYTE ch, SIZE_T size)
 		{
 			return (PCVOID)memchr((PVOID)block, ch, size);
+		}
+		INT strcmp(CSTRING block1, CSTRING block2)
+		{
+			if(strlen(block1) != strlen(block2))
+				return -2;
+			return memcmp(block1, block2, strlen(block1));
 		}
 	}
 }

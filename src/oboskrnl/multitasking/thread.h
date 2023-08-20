@@ -8,6 +8,7 @@
 
 #include <types.h>
 #include <klog.h>
+#include <inline-asm.h>
 
 #include <utils/bitfields.h>
 
@@ -81,7 +82,7 @@ namespace obos
 			virtual ~Thread()
 			{
 				if (status != (UINT32_T)status_t::DEAD && tid != ((DWORD)-1))
-					kpanic(nullptr, kpanic_format("A thread object was destroyed without the thread being dead."));
+					kpanic(nullptr, getEIP(), kpanic_format("A thread object was destroyed without the thread being dead."));
 			}
 
 			/*friend void InitializeMultitasking();

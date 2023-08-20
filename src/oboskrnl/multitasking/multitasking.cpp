@@ -17,6 +17,8 @@
 
 #include <console.h>
 
+
+
 namespace obos
 {
 	extern void kmainThr();
@@ -59,10 +61,10 @@ namespace obos
 					s_newThread->owner->pageDirectory->switchToThis();
 				}
 			g_currentThread = s_newThread;
-			if(!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall)
+			if (!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall || (g_currentThread->frame.eip >= 0xC0000000 && g_currentThread->frame.eip < 0xE0000000))
 			{
-				// If we're servicing an interrupt, we need to set esp0 in the tss.
-				if(g_currentThread->isServicingSyscall)
+				// If we're servicing a syscall, we need to set esp0 in the tss.
+				if(g_currentThread->isServicingSyscall || (g_currentThread->frame.eip >= 0xC0000000 && g_currentThread->frame.eip < 0xE0000000))
 					SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
 				asm volatile("mov %0, %%eax" :
 											 : "r"(&g_currentThread->frame)
@@ -83,7 +85,7 @@ namespace obos
 			static SIZE_T s_cursorRow = 0;
 			static SIZE_T s_cursorColumn = 0;
 			static bool s_cursorInitialized;
-			if (s_cursorCounter++ == CURSOR_SLEEP_TIME_2_5_MS)
+			if (s_cursorCounter++ == CURSOR_SLEEP_TIME_2_5_MS && CURSOR_SLEEP_TIME_2_5_MS != 0)
 			{
 				if (s_cursorRow != s_terminalRow)
 				{
@@ -130,7 +132,7 @@ namespace obos
 			EnterKernelSection();
 		findNew:
 
-			Thread* currentThread = nullptr;
+			volatile Thread* currentThread = nullptr;
 			for (int i = 0; i < 4 && !currentThread; i++)
 			{
 				list_iterator_t* iter = list_iterator_new(g_threadPriorityList[i], LIST_HEAD);
@@ -149,12 +151,15 @@ namespace obos
 			if (currentThread->iterations >= (UINT32_T)currentThread->priority)
 			{
 				list_iterator_t* iter = list_iterator_new(g_threads, LIST_HEAD);
-				for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter), currentThread = (Thread*)node->val)
+				for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
+				{
+					currentThread = (Thread*)node->val;
 					currentThread->iterations = 0;
+				}
 				list_iterator_destroy(iter);
 			}
 
-			list_node_t* currentNode = nullptr;
+			volatile list_node_t* currentNode = nullptr;
 
 			// Find a new task.
 			for (int i = 3; i > -1 && !currentNode; i--)
@@ -166,13 +171,13 @@ namespace obos
 					if (utils::testBitInBitfield(currentThread->status, 2))
 					{
 						if (currentThread->isBlockedCallback)
-							if (currentThread->isBlockedCallback(currentThread, currentThread->isBlockedUserdata))
-								utils::clearBitInBitfield(currentThread->status, 2);
+							if (currentThread->isBlockedCallback(const_cast<Thread*>(currentThread), currentThread->isBlockedUserdata))
+								utils::clearBitInBitfield(const_cast<Thread*>(currentThread)->status, 2);
 							else {}
 						else
 							currentThread->status = (UINT32_T)Thread::status_t::DEAD;
 					}
-					if (canRanTask(currentThread))
+					if (canRanTask(const_cast<Thread*>(currentThread)))
 					{
 						currentNode = node;
 						currentThread->iterations++;
@@ -191,7 +196,7 @@ namespace obos
 				SendEOI(frame->intNumber - 32);
 			if (currentThread == g_currentThread)
 				return;
-			switchToTask(currentThread);
+			switchToTask(const_cast<Thread*>(currentThread));
 		}
 
 		void InitializeMultitasking()

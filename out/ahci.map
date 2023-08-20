@@ -11,10 +11,10 @@ LOAD src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
 LOAD src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
                 0x00800000                        . = 0x800000
 
-.text           0x00800000      0x8a9
+.text           0x00800000      0xdde
  *(.multiboot)
  *(.text)
- .text          0x00800000       0x6f src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+ .text          0x00800000       0x77 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
                 0x00800000                RegisterDriver
                 0x00800008                RegisterInterruptHandler
                 0x00800010                PicSendEoi
@@ -28,56 +28,60 @@ LOAD src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
                 0x00800050                MapPhysicalTo
                 0x00800058                UnmapPhysicalTo
                 0x00800060                Printf
-                0x00800068                CallSyscall
- .text          0x0080006f      0x389 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
-                0x0080006f                testBit
-                0x00800092                _start
-                0x008003f2                ReadFromDrive
- .text          0x008003f8      0x4b1 src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
-                0x008003f8                outb
-                0x00800419                outw
-                0x0080043a                outl
-                0x00800452                inb
-                0x0080046f                inw
-                0x0080048e                inl
-                0x008004aa                pciReadByteRegister
-                0x00800540                pciReadWordRegister
-                0x008005d7                pciReadDwordRegister
-                0x00800666                pciWriteDwordRegister
-                0x008006eb                enumerateBus
-                0x00800830                enumeratePci
+                0x00800068                GetPhysicalAddress
+                0x00800070                CallSyscall
+ .text          0x00800077      0x8b6 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
+                0x00800077                testBit
+                0x0080009a                memzero
+                0x008000c9                _start
+                0x008005ce                ReadFromDrive
+                0x0080089d                StopCommandEngine
+                0x008008e9                StartCommandEngine
+ .text          0x0080092d      0x4b1 src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
+                0x0080092d                outb
+                0x0080094e                outw
+                0x0080096f                outl
+                0x00800987                inb
+                0x008009a4                inw
+                0x008009c3                inl
+                0x008009df                pciReadByteRegister
+                0x00800a75                pciReadWordRegister
+                0x00800b0c                pciReadDwordRegister
+                0x00800b9b                pciWriteDwordRegister
+                0x00800c20                enumerateBus
+                0x00800d65                enumeratePci
 
-.iplt           0x008008a9        0x0
- .iplt          0x008008a9        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+.iplt           0x00800dde        0x0
+ .iplt          0x00800dde        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
-.rodata         0x00801000      0x1a5
+.rodata         0x00801000      0x1c7
  *(.rodata)
- .rodata        0x00801000      0x1a5 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
+ .rodata        0x00801000      0x1c7 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
 
-.rel.dyn        0x008011a8        0x0
- .rel.got       0x008011a8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
- .rel.iplt      0x008011a8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+.rel.dyn        0x008011c8        0x0
+ .rel.got       0x008011c8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+ .rel.iplt      0x008011c8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
 .data           0x00802000        0x0
  *(.data)
  .data          0x00802000        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
  .data          0x00802000        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
 
-.got            0x008011a8        0x0
- .got           0x008011a8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+.got            0x008011c8        0x0
+ .got           0x008011c8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
-.got.plt        0x008011a8        0x0
- .got.plt       0x008011a8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+.got.plt        0x008011c8        0x0
+ .got.plt       0x008011c8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
-.igot.plt       0x008011a8        0x0
- .igot.plt      0x008011a8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+.igot.plt       0x008011c8        0x0
+ .igot.plt      0x008011c8        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
-.bss            0x00802000      0x174
+.bss            0x00802000      0x1f0
  *(COMMON)
  *(.bss)
- .bss           0x00802000      0x174 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
+ .bss           0x00802000      0x1f0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
                 0x00802000                availablePorts
- .bss           0x00802174        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
+ .bss           0x008021f0        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
 OUTPUT(/mnt/c/Code/obos/out/ahci elf32-i386)
 
 .debug_aranges  0x00000000       0x60
@@ -93,32 +97,32 @@ OUTPUT(/mnt/c/Code/obos/out/ahci elf32-i386)
  .debug_pubnames
                 0x00000000        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
-.debug_info     0x00000000     0x120a
+.debug_info     0x00000000     0x18a3
  .debug_info    0x00000000       0x73 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
- .debug_info    0x00000073      0xaba src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
- .debug_info    0x00000b2d      0x6dd src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
+ .debug_info    0x00000073     0x1153 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
+ .debug_info    0x000011c6      0x6dd src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
 
-.debug_abbrev   0x00000000      0x323
+.debug_abbrev   0x00000000      0x3c3
  .debug_abbrev  0x00000000       0x1b src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
- .debug_abbrev  0x0000001b      0x1ea src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
- .debug_abbrev  0x00000205      0x11e src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
+ .debug_abbrev  0x0000001b      0x28a src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
+ .debug_abbrev  0x000002a5      0x11e src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
 
-.debug_line     0x00000000      0xbcf
- .debug_line    0x00000000       0x9a src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
- .debug_line    0x0000009a      0x499 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
- .debug_line    0x00000533      0x69c src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
+.debug_line     0x00000000     0x1330
+ .debug_line    0x00000000       0x9d src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+ .debug_line    0x0000009d      0xbf7 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
+ .debug_line    0x00000c94      0x69c src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
 
-.debug_frame    0x00000000      0x2ec
+.debug_frame    0x00000000      0x380
  .debug_frame   0x00000000        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
- .debug_frame   0x00000000       0x98 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
- .debug_frame   0x00000098      0x254 src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
+ .debug_frame   0x00000000      0x12c src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
+ .debug_frame   0x0000012c      0x254 src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
 
 .debug_loc      0x00000000        0x0
  .debug_loc     0x00000000        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
-.debug_str      0x00000000       0x60
- .debug_str     0x00000000        0x0 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
- .debug_str     0x00000000       0x60 src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
+.debug_str      0x00000000       0x6a
+ .debug_str     0x00000000        0xa src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o
+ .debug_str     0x0000000a       0x60 src/drivers/storage/ahci/CMakeFiles/ahci.dir/enumerate_pci.c.o
 
 .comment        0x00000000       0x12
  .comment       0x00000000       0x12 src/drivers/storage/ahci/CMakeFiles/ahci.dir/dmain.c.o

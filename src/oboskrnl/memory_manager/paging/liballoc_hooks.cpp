@@ -12,32 +12,39 @@
 
 #include <utils/memory.h>
 
-extern "C" {
+#include <stddef.h>
+
+namespace obos
+{
+	SIZE_T g_nLiballocPagesAllocated = 0;
+}
+
+extern "C"
+{
+	void* liballoc_alloc(size_t nPages)
+	{
+		PVOID block = obos::memory::VirtualAlloc(reinterpret_cast<PVOID>(0xD0000000 + (obos::g_nLiballocPagesAllocated << 12)), nPages, obos::memory::VirtualAllocFlags::WRITE_ENABLED);
+		obos::g_nLiballocPagesAllocated += nPages;
+		if (block)
+			obos::utils::memzero(block, nPages << 12);
+		return block;
+	}
+	int liballoc_free(void* block, size_t nPages)
+	{
+		obos::g_nLiballocPagesAllocated -= nPages;
+		return obos::memory::VirtualFree(block, nPages);
+	}
+	
 	int liballoc_lock()
 	{
 		obos::EnterKernelSection();
 		return 0;
 	}
+	
 	int liballoc_unlock()
 	{
 		obos::LeaveKernelSection();
 		return 0;
-	}
-
-	static size_t s_nPagesAllocated = 0;
-
-	void* liballoc_alloc(size_t nPages)
-	{
-		s_nPagesAllocated += nPages;
-		PVOID block = obos::memory::VirtualAlloc(nullptr, nPages, obos::memory::VirtualAllocFlags::WRITE_ENABLED);
-		if (block)
-			obos::utils::memset(block, 0, nPages * 4096);
-		return block;
-	}
-	int liballoc_free(void* block, size_t nPages)
-	{
-		s_nPagesAllocated -= nPages;
-		return obos::memory::VirtualFree(block, nPages);
 	}
 }
 
@@ -59,11 +66,11 @@ VOID operator delete[](PVOID block) noexcept
 {
 	kfree(block);
 }
-VOID operator delete(PVOID block, size_t) noexcept
+VOID operator delete(PVOID block, size_t)
 {
 	kfree(block);
 }
-VOID operator delete[](PVOID block, size_t) noexcept
+VOID operator delete[](PVOID block, size_t)
 {
 	kfree(block);
 }

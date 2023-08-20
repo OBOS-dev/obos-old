@@ -23,6 +23,8 @@ namespace obos
 		{
 			if ((m_locked && !waitIfLocked) || !g_initialized)
 				return;
+			if (m_locked && m_locked == g_currentThread->tid)
+				return;
 			if (m_locked)
 			{
 				EnterKernelSection();

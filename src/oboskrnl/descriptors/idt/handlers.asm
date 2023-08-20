@@ -80,6 +80,7 @@ global isr_common_stub
 
 isr_common_stub:
     pushad
+    mov eax, 0
     mov ax, ds
     push eax
 

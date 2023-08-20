@@ -17,6 +17,7 @@ UINT8_T inb(UINT16_T port);
 UINT16_T inw(UINT16_T port);
 void io_wait(void);
 UINT32_T getEflags();
+PVOID getEIP();
 
 void cli();
 void sti();

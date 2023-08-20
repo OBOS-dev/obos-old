@@ -8,7 +8,8 @@ ENTRY(_start)
 
 SECTIONS
 {
-	. = 3584M;
+	/*. = 3584M;*/
+	. = 0xB035431F;
 
 	.text BLOCK(4K) : ALIGN(4K)
 	{

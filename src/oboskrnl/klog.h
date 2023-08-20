@@ -17,16 +17,20 @@
 namespace obos
 {
 	void printf(CSTRING format, ...);
+	SIZE_T sprintf(STRING output, CSTRING format, ...);
 	void printf_noFlush(CSTRING format, ...);
 	void vprintf(CSTRING format, va_list list);
 
-	void kpanic(PVOID printStackTracePar, CSTRING format, ...);
+	void kpanic(PVOID printStackTracePar, PVOID eip, CSTRING format, ...);
 
 	struct stack_frame
 	{
 		stack_frame* down;
-		PVOID eip;
+		UINTPTR_T eip;
 	};
 
 	void printStackTrace(PVOID first, CSTRING prefix = "");
+	void disassemble(PVOID eip, CSTRING prefix = "");
+	void addr2func(PVOID addr, STRING& str, SIZE_T& functionAddress);
+	void addr2file(PVOID addr, STRING& str);
 }

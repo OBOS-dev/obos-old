@@ -35,6 +35,10 @@
 
 #include <syscalls/syscalls.h>
 
+#include <elf/elf.h>
+#include <elf/elfStructures.h>
+#include <utils/memory.h>
+
 #ifdef __INTELLISENSE__
 #define __i686__ 1
 #undef _MSC_VER
@@ -64,9 +68,12 @@ namespace obos
 		const char* isPresent = utils::testBitInBitfield(frame->errorCode, 0) ? "present" : "non-present";
 		UINTPTR_T location = (UINTPTR_T)memory::GetPageFaultAddress();
 		extern UINT32_T* s_backbuffer;
+		if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
+			multitasking::g_currentThread->owner->TerminateProcess(0xFFFFFFF1);
 		if (!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
-			kpanic((PVOID)frame->ebp, kpanic_format(
-				"Page fault in %s-mode at %p (tid %d, pid %d) while trying to %s a %s page.\r\nThe address of that page is %p (Page directory index %d, page table index %d).\r\n Dumping registers: \r\n"
+			kpanic((PVOID)frame->ebp, (PVOID)frame->eip,
+			kpanic_format(
+				"Page fault in %s-mode at %p (tid %d, pid %d) while trying to %s a %s page.\r\nThe address of that page is %p (Page directory index %d, page table index %d).\r\nDumping registers: \r\n"
 				"\tEDI: %p\r\n"
 				"\tESI: %p\r\n"
 				"\tEBP: %p\r\n"
@@ -89,27 +96,36 @@ namespace obos
 	}
 	void defaultExceptionHandler(const interrupt_frame* frame)
 	{
-		kpanic((PVOID)frame->ebp, kpanic_format(
-			"Unhandled exception %d at %p. Error code: %d. Dumping registers: \r\n"
-			"\tEDI: %p\r\n"
-			"\tESI: %p\r\n"
-			"\tEBP: %p\r\n"
-			"\tESP: %p\r\n"
-			"\tEBX: %p\r\n"
-			"\tEDX: %p\r\n"
-			"\tECX: %p\r\n"
-			"\tEAX: %p\r\n"
-			"\tEIP: %p\r\n"
-			"\tEFLAGS: %p\r\n"
-			"\tSS: %p\r\n"
-			"\tDS: %p\r\n"
-			"\tCS: %p\r\n"),
-			frame->intNumber,
-			frame->eip,
-			frame->errorCode,
-			frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
-			frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
-			frame->ss, frame->ds, frame->cs);
+		if (frame->errorCode == 1 && utils::testBitInBitfield(frame->eflags, 8))
+		{
+			utils::clearBitInBitfield(const_cast<interrupt_frame*>(frame)->eflags, 8);
+			return;
+		}
+		if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
+			multitasking::g_currentThread->owner->TerminateProcess(~frame->intNumber);
+		kpanic((PVOID)frame->ebp, (PVOID)frame->eip,
+			kpanic_format(
+				"Unhandled exception %d at %p (tid %d, pid %d). Error code: %d. Dumping registers: \r\n"
+				"\tEDI: %p\r\n"
+				"\tESI: %p\r\n"
+				"\tEBP: %p\r\n"
+				"\tESP: %p\r\n"
+				"\tEBX: %p\r\n"
+				"\tEDX: %p\r\n"
+				"\tECX: %p\r\n"
+				"\tEAX: %p\r\n"
+				"\tEIP: %p\r\n"
+				"\tEFLAGS: %p\r\n"
+				"\tSS: %p\r\n"
+				"\tDS: %p\r\n"
+				"\tCS: %p\r\n"),
+				frame->intNumber,
+				frame->eip,
+				multitasking::GetCurrentThreadTid(), multitasking::g_currentThread->owner->pid,
+				frame->errorCode,
+				frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
+				frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
+				frame->ss, frame->ds, frame->cs);
 	}
 
 	// Initial boot sequence (Initializes the gdt, the idt, paging, the console, the physical memory manager, the pic, and software multitasking.
@@ -134,9 +150,9 @@ namespace obos
 		memory::InitializePhysicalMemoryManager();
 
 		if ((g_multibootInfo->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) != MULTIBOOT_INFO_FRAMEBUFFER_INFO)
-			kpanic(nullptr, kpanic_format("No framebuffer info from the bootloader.\r\n"));
+			kpanic(nullptr, getEIP(), kpanic_format("No framebuffer info from the bootloader.\r\n"));
 		if (g_multibootInfo->framebuffer_height != 768 || g_multibootInfo->framebuffer_width != 1024)
-			kpanic(nullptr, kpanic_format("The framebuffer set up by the bootloader is not 1024x768. Instead, it is %dx%d\r\n"),
+			kpanic(nullptr, getEIP(), kpanic_format("The framebuffer set up by the bootloader is not 1024x768. Instead, it is %dx%d\r\n"),
 				g_multibootInfo->framebuffer_width, g_multibootInfo->framebuffer_height);
 
 		for (UINTPTR_T physAddress = g_multibootInfo->framebuffer_addr, virtAddress = 0xFFCFF000;
@@ -165,7 +181,7 @@ namespace obos
 
 		multitasking::InitializeMultitasking();
 		// Oh no!
-		//kpanic(kpanic_format("obos::kmain tried to return!"));
+		kpanic(nullptr, getEIP(), kpanic_format("obos::kmain tried to return!"));
 	}
 	process::Process* g_kernelProcess = nullptr;
 	void kmainThr()
@@ -173,7 +189,6 @@ namespace obos
 		multitasking::g_initialized = true;
 
 		_init();
-
 		g_kernelProcess = new process::Process{};
 
 		g_kernelProcess->pageDirectory = memory::g_pageDirectory;
@@ -211,7 +226,7 @@ namespace obos
 				((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
 				(PVOID)&mainThread, true);
 		if (ret)
-			kpanic(NULLPTR, kpanic_format("CreateProcess failed with %d."), ret);
+			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
 		mainThread.closeHandle();
 
@@ -223,7 +238,7 @@ namespace obos
 		char existsData = existsCallback("ahci", &filesize);
 		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
 		if (!existsData)
-			kpanic(nullptr, kpanic_format("/obos/initrd/ahci doesn't exist."));
+			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/ahci doesn't exist."));
 		PBYTE filedata = new BYTE[filesize];
 		initrdDriver->pageDirectory->switchToThis();
 		readCallback("ahci", (STRING)filedata, filesize);
@@ -233,7 +248,7 @@ namespace obos
 		ahciDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
 		delete[] filedata;
 		if (ret)
-			kpanic(NULLPTR, kpanic_format("CreateProcess failed with %d."), ret);
+			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
 		mainThread.closeHandle();
 
@@ -242,7 +257,7 @@ namespace obos
 		existsData = existsCallback("ps2Keyboard", &filesize);
 		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
 		if (!existsData)
-			kpanic(nullptr, kpanic_format("/obos/initrd/ps2Keyboard doesn't exist."));
+			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/ps2Keyboard doesn't exist."));
 		filedata = new BYTE[filesize];
 		initrdDriver->pageDirectory->switchToThis();
 		readCallback("ps2Keyboard", (STRING)filedata, filesize);
@@ -252,35 +267,18 @@ namespace obos
 		keyboardDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
 		delete[] filedata;
 		if (ret)
-			kpanic(NULLPTR, kpanic_format("CreateProcess failed with %d."), ret);
+			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
 		mainThread.closeHandle();
 
-		filesize = 0;
-		initrdDriver->pageDirectory->switchToThis();
-		existsData = existsCallback("testProgram", &filesize);
-		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
-		if (!existsData)
-			kpanic(nullptr, kpanic_format("/obos/initrd/testProgram doesn't exist."));
-		filedata = new BYTE[filesize];
-		initrdDriver->pageDirectory->switchToThis();
-		readCallback("testProgram", (STRING)filedata, filesize);
-		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
-
-		process::Process* testProgram = new process::Process{};
-		testProgram->CreateProcess(filedata, filesize, (PVOID)&mainThread);
-		if (ret)
-			kpanic(NULLPTR, kpanic_format("CreateProcess failed with %d."), ret);
-		delete[] filedata;
-		mainThread.WaitForThreadExit();
-		mainThread.closeHandle();
-
-
-		/*char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
+		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
 		
 		SetConsoleColor(0x003399FF, 0x00000000);
 		ConsoleOutput(ascii_art, ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start);
-		SetConsoleColor(0xFFFFFFFF, 0x00000000);*/
+		SetConsoleColor(0xFFFFFFFF, 0x00000000);
+
+		// Uncomment this line to kpanic.
+		//*((PBYTE)0x486594834) = 'L';
 
 		asm volatile (".byte 0xeb, 0xfe;");
 	}
@@ -291,7 +289,7 @@ extern "C"
 {
 	void __cxa_pure_virtual()
 	{
-		obos::kpanic(nullptr, kpanic_format("Attempt to call a pure virtual function."));
+		obos::kpanic(nullptr, getEIP(), kpanic_format("Attempt to call a pure virtual function."));
 	}
 
 	typedef unsigned uarch_t;

@@ -37,8 +37,9 @@ namespace obos
 			/// <summary>
 			/// Terminates the process.
 			/// </summary>
+			/// <param name="exitCode">The process's exit code.</param>
 			/// <returns>Success is zero, or 0xFFFFFFFF if there is no process.</returns>
-			DWORD TerminateProcess(void);
+			DWORD TerminateProcess(DWORD exitCode);
 
 			Process(Process&&) = delete;
 			Process(const Process&) = delete;
@@ -55,6 +56,7 @@ namespace obos
 			list_t* threads = nullptr;
 			list_t* abstractHandles = nullptr;
 			bool isUserMode = false;
+			DWORD exitCode = 0;
 			UINTPTR_T magicNumber = 0xCA44C071;
 		};
 	}

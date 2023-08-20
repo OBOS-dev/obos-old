@@ -18,7 +18,7 @@
 #endif
 #define NUL		((CHAR)0)
 
-#define NUM_MODULES 4
+#define NUM_MODULES 5
 
 #ifdef __cplusplus
 typedef bool				BOOL;

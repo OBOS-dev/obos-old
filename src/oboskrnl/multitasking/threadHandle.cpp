@@ -187,7 +187,7 @@ namespace obos
 			m_thread->exitCode = exitCode;
 			list_remove(m_thread->owner->threads, list_find(m_thread->owner->threads, m_thread));
 			if (m_thread->owner->threads->len == 0)
-				m_thread->owner->TerminateProcess();
+				m_thread->owner->TerminateProcess(exitCode);
 			memory::VirtualFree(m_thread->stackBottom, m_thread->stackSizePages);
 			LeaveKernelSection();
 		}

@@ -2,6 +2,8 @@
 
 ; UINT32_T getEflags(void);
 global _Z9getEflagsv
+global _Z6getEIPv
+global getEBP
 
 _Z9getEflagsv:
 	push ebp
@@ -11,4 +13,10 @@ _Z9getEflagsv:
 	pop eax
 
 	leave
+	ret
+_Z6getEIPv:
+	pop eax
+	jmp eax
+getEBP:
+	mov eax, ebp
 	ret

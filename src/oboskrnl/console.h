@@ -41,5 +41,6 @@ namespace obos
 	void SetTerminalCursorPosition(DWORD x, DWORD y);
 	void GetTerminalCursorPosition(DWORD& x, DWORD& y);
 
+	void ClearConsole();
 	void swapBuffers();
 }

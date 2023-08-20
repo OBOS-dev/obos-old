@@ -44,7 +44,7 @@ namespace obos
 		{
 			DWORD(*main)() = (DWORD(*)())entry;
 			main();
-			asm volatile("mov $1, %eax; mov %esp, %ebx; int $0x40;");
+			asm volatile("push %eax; mov $1, %eax; mov %esp, %ebx; int $0x40;");
 		}
 		VOID DriverEntryPoint(PVOID entry)
 		{
@@ -139,8 +139,9 @@ namespace obos
 			return 0;
 		}
 		static BYTE s_temporaryStack[8192] attribute(aligned(4096));
-		static PBYTE s_localVariable;
-		DWORD Process::TerminateProcess(void)
+		static PBYTE s_localVariable = nullptr;
+		static DWORD s_exitCode = 0;
+		DWORD Process::TerminateProcess(DWORD exitCode)
 		{
 			if (!pageDirectory)
 				return (DWORD)-1;
@@ -178,6 +179,7 @@ namespace obos
 			list_destroy(threads);
 			list_destroy(abstractHandles);
 			list_remove(g_processList, list_find(g_processList, this));
+			s_exitCode = exitCode;
 			if (this == multitasking::g_currentThread->owner)
 			{
 				UINTPTR_T* stack = (UINTPTR_T*)s_temporaryStack;
@@ -197,6 +199,7 @@ namespace obos
 			for (s_localVariable = (PBYTE)0xE0000000; s_localVariable != (PBYTE)0xFFC00000; s_localVariable += 4096)
 				memory::VirtualFree(s_localVariable, 1);
 			delete pageDirectory;
+			this->exitCode = s_exitCode;
 			if (this == multitasking::g_currentThread->owner)
 			{
 				LeaveKernelSection();

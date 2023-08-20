@@ -24,6 +24,11 @@
 ; SIZE_T obos::utils::strlen(CSTRING str);
 [global _ZN4obos5utils6strlenEPKc]
 
+; To make the compiler happy.
+global memset
+global memcpy
+
+memcpy:
 _ZN4obos5utils6memcpyEPvPKvj:
 	push ebp
 	mov ebp, esp
@@ -120,6 +125,7 @@ _ZN4obos5utils8dwMemcpyEPjPKjj:
 .finish:
 	leave
 	ret
+memset:
 _ZN4obos5utils6memsetEPvjj:
 	push ebp
 	mov ebp, esp

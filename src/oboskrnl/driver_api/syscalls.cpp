@@ -31,6 +31,10 @@
 namespace obos
 {
 	extern multiboot_info_t* g_multibootInfo;
+	namespace memory
+	{
+		UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
+	}
 	namespace driverAPI
 	{
 		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS, DWORD driverID, serviceType type);
@@ -46,6 +50,7 @@ namespace obos
 		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS, UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags);
 		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS, PVOID virtualAddress);
 		static exitStatus Printf(DEFINE_RESERVED_PARAMETERS, CSTRING format, ...);
+		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS, PVOID linearAddress, PVOID* physicalAddress);
 		static void interruptHandler(const obos::interrupt_frame* frame);
 
 		/*struct driverIdentification
@@ -84,6 +89,7 @@ namespace obos
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(MapPhysicalTo));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(UnmapPhysicalTo));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(Printf));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(GetPhysicalAddress));
 		}
 
 		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS, DWORD driverID, serviceType type)
@@ -137,7 +143,7 @@ namespace obos
 				};
 				SIZE_T i = 0;
 				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i]; i++);
-				if(i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i])
+				if(i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i - 1])
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
@@ -152,7 +158,7 @@ namespace obos
 				};
 				SIZE_T i = 0;
 				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i]; i++);
-				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i])
+				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i - 1])
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
@@ -165,7 +171,7 @@ namespace obos
 				};
 				SIZE_T i = 0;
 				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i]; i++);
-				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i])
+				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i - 1])
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
@@ -197,7 +203,7 @@ namespace obos
 				};
 				SIZE_T i = 0;
 				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i]; i++);
-				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i])
+				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i - 1])
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
@@ -310,14 +316,24 @@ namespace obos
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 
+		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS, PVOID linearAddress, PVOID* physicalAddress)
+		{
+			if (!memory::g_pageDirectory->getPageTableAddress(memory::PageDirectory::addressToIndex((UINTPTR_T)linearAddress)))
+				return exitStatus::EXIT_STATUS_ADDRESS_NOT_AVAILABLE;
+			*physicalAddress = reinterpret_cast<PVOID>(memory::kmap_pageTable(memory::g_pageDirectory->getPageTable(memory::PageDirectory::addressToIndex((UINTPTR_T)linearAddress)))
+				[memory::PageDirectory::addressToPageTableIndex((UINTPTR_T)linearAddress)] & 0xFFFFF000);
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+
 
 		static void interruptHandler(const obos::interrupt_frame* frame)
 		{
 			if (g_registeredInterruptHandlers[frame->intNumber - 32].driver)
 			{
+				memory::PageDirectory* oldPagedir = memory::g_pageDirectory;
 				g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->pageDirectory->switchToThis();
 				g_registeredInterruptHandlers[frame->intNumber - 32].handler(frame);
-				multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+				oldPagedir->switchToThis();
 			}
 		}
 	}

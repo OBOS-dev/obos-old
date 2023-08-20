@@ -8,79 +8,93 @@ Linker script and memory map
 
 LOAD src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 LOAD src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
-                0xe0000000                        . = 0xe0000000
+                0xb035431f                        . = 0xb035431f
 
-.text           0xe0000000      0x34c
+.text           0xb0355000      0x424
  *(.multiboot)
  *(.text)
- .text          0xe0000000      0x21a src/testProgram/CMakeFiles/testProgram.dir/main.c.o
-                0xe00000bb                Thread
-                0xe0000133                _start
- *fill*         0xe000021a        0x6 
- .text          0xe0000220      0x12c src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
-                0xe0000220                ConsoleOutputString
-                0xe000022c                ExitProcess
-                0xe0000238                CreateProcess
-                0xe0000244                TerminateProcess
-                0xe0000250                OpenCurrentProcessHandle
-                0xe000025c                OpenProcessHandle
-                0xe0000268                CreateThread
-                0xe0000274                OpenThread
-                0xe0000280                PauseThread
-                0xe000028c                ResumeThread
-                0xe0000298                SetThreadPriority
-                0xe00002a4                SetThreadStatus
-                0xe00002b0                TerminateThread
-                0xe00002bc                GetTid
-                0xe00002c8                GetExitCode
-                0xe00002d4                GetThreadPriority
-                0xe00002e0                GetThreadStatus
-                0xe00002ec                WaitForThreadExit
-                0xe00002f8                ExitThread
-                0xe0000304                GetCurrentThreadTid
-                0xe0000310                GetCurrentThreadHandle
-                0xe000031c                GetCurrentThreadPriority
-                0xe0000328                GetCurrentThreadStatus
-                0xe0000334                CloseHandle
-                0xe0000340                Printf
+ .text          0xb0355000      0x248 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+                0xb03550bb                Thread
+                0xb0355133                _start
+ *fill*         0xb0355248        0x8 
+ .text          0xb0355250      0x1d4 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
+                0xb0355250                ConsoleOutputString
+                0xb035525c                ExitProcess
+                0xb0355268                CreateProcess
+                0xb0355274                TerminateProcess
+                0xb0355280                OpenCurrentProcessHandle
+                0xb035528c                OpenProcessHandle
+                0xb0355298                CreateThread
+                0xb03552a4                OpenThread
+                0xb03552b0                PauseThread
+                0xb03552bc                ResumeThread
+                0xb03552c8                SetThreadPriority
+                0xb03552d4                SetThreadStatus
+                0xb03552e0                TerminateThread
+                0xb03552ec                GetTid
+                0xb03552f8                GetExitCode
+                0xb0355304                GetThreadPriority
+                0xb0355310                GetThreadStatus
+                0xb035531c                WaitForThreadExit
+                0xb0355328                ExitThread
+                0xb0355334                GetCurrentThreadTid
+                0xb0355340                GetCurrentThreadHandle
+                0xb035534c                GetCurrentThreadPriority
+                0xb0355358                GetCurrentThreadStatus
+                0xb0355364                CloseHandle
+                0xb0355370                OpenProcessParentHandle
+                0xb035537c                SetConsoleColor
+                0xb0355388                GetConsoleColor
+                0xb0355394                ConsoleOutputCharacter
+                0xb03553a0                ConsoleOutputCharacterAt
+                0xb03553ac                ConsoleOutput
+                0xb03553b8                ConsoleFillLine
+                0xb03553c4                SetConsoleCursorPosition
+                0xb03553d0                GetConsoleCursorPosition
+                0xb03553dc                ConsoleSwapBuffers
+                0xb03553e8                ClearConsole
+                0xb03553f4                VirtualAlloc
+                0xb0355400                VirtualFree
+                0xb035540c                HasVirtualAddress
+                0xb0355418                MemoryProtect
 
-.iplt           0xe000034c        0x0
- .iplt          0xe000034c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+.iplt           0xb0355424        0x0
+ .iplt          0xb0355424        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.rodata         0xe0001000       0x89
+.rodata         0xb0356000       0x89
  *(.rodata)
- .rodata        0xe0001000       0x89 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .rodata        0xb0356000       0x89 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.rel.dyn        0xe000108c        0x0
- .rel.got       0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
- .rel.iplt      0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+.rel.dyn        0xb035608c        0x0
+ .rel.got       0xb035608c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .rel.iplt      0xb035608c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.data           0xe0002000        0x0
+.data           0xb0357000        0x0
  *(.data)
- .data          0xe0002000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .data          0xb0357000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.got            0xe000108c        0x0
- .got           0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+.got            0xb035608c        0x0
+ .got           0xb035608c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.got.plt        0xe000108c        0x0
- .got.plt       0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+.got.plt        0xb035608c        0x0
+ .got.plt       0xb035608c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.igot.plt       0xe000108c        0x0
- .igot.plt      0xe000108c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+.igot.plt       0xb035608c        0x0
+ .igot.plt      0xb035608c        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 
-.bss            0xe0002000        0x0
+.bss            0xb0357000        0x0
  *(COMMON)
  *(.bss)
- .bss           0xe0002000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .bss           0xb0357000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
 OUTPUT(/mnt/c/Code/obos/out/testProgram elf32-i386)
 
 .debug_frame    0x00000000       0x98
  .debug_frame   0x00000000       0x98 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
  .debug_frame   0x00000098        0x0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
 
-.debug_info     0x00000000      0x444
- .debug_info    0x00000000      0x3d3 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
- .debug_info    0x000003d3       0x71 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
+.debug_info     0x00000000      0x481
+ .debug_info    0x00000000      0x410 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .debug_info    0x00000410       0x71 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
 
 .debug_abbrev   0x00000000      0x13f
  .debug_abbrev  0x00000000      0x124 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
@@ -92,9 +106,9 @@ OUTPUT(/mnt/c/Code/obos/out/testProgram elf32-i386)
  .debug_aranges
                 0x00000020       0x20 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
 
-.debug_line     0x00000000      0x439
- .debug_line    0x00000000      0x369 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
- .debug_line    0x00000369       0xd0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
+.debug_line     0x00000000      0x48f
+ .debug_line    0x00000000      0x387 src/testProgram/CMakeFiles/testProgram.dir/main.c.o
+ .debug_line    0x00000387      0x108 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.o
 
 .debug_str      0x00000000        0x0
  .debug_str     0x00000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.o

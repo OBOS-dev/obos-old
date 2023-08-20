@@ -8,8 +8,7 @@
 
 #include <types.h>
 
-#define GET_FUNC_ADDR(f) ((UINTPTR_T)(f))
-#define ZeroMemory(block) memset(block, 0, sizeof(block))
+#define GET_FUNC_ADDR(f) reinterpret_cast<UINTPTR_T>(f)
 
 namespace obos
 {
@@ -25,6 +24,7 @@ namespace obos
 		PVOID memchr(PVOID block, BYTE ch, SIZE_T size);
 		PCVOID memchr(PCVOID block, BYTE ch, SIZE_T size);
 
+		INT strcmp(CSTRING block1, CSTRING block2);
 		SIZE_T strlen(CSTRING str);
 	}
 }

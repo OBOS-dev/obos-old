@@ -23,7 +23,7 @@ extern int do_nothing();
 
 #define DEFINE_RESERVED_PARAMETERS PVOID parameters
 
-static bool checkUserPtr(PVOID ptr, bool isAllocCall = false)
+static bool checkUserPtr(PCVOID ptr, bool isAllocCall = false)
 {
 	UINTPTR_T iPtr = reinterpret_cast<UINTPTR_T>(ptr);
 	if (iPtr < 0x401000)
@@ -74,6 +74,20 @@ namespace obos
 		static DWORD GetCurrentThreadStatus(DEFINE_RESERVED_PARAMETERS);
 		static DWORD CloseHandle(DEFINE_RESERVED_PARAMETERS);
 		static DWORD OpenProcessParentHandle(DEFINE_RESERVED_PARAMETERS);
+		static DWORD SetConsoleColor(DEFINE_RESERVED_PARAMETERS);
+		static DWORD GetConsoleColor(DEFINE_RESERVED_PARAMETERS);
+		static DWORD ConsoleOutputCharacter(DEFINE_RESERVED_PARAMETERS);
+		static DWORD ConsoleOutputCharacterAt(DEFINE_RESERVED_PARAMETERS);
+		static DWORD ConsoleOutput(DEFINE_RESERVED_PARAMETERS);
+		static DWORD ConsoleFillLine(DEFINE_RESERVED_PARAMETERS);
+		static DWORD SetConsoleCursorPosition(DEFINE_RESERVED_PARAMETERS);
+		static DWORD GetConsoleCursorPosition(DEFINE_RESERVED_PARAMETERS);
+		static DWORD ConsoleSwapBuffers(DEFINE_RESERVED_PARAMETERS);
+		static DWORD ClearConsole(DEFINE_RESERVED_PARAMETERS);
+		static DWORD VirtualAlloc(DEFINE_RESERVED_PARAMETERS);
+		static DWORD VirtualFree(DEFINE_RESERVED_PARAMETERS);
+		static BOOL HasVirtualAddress(DEFINE_RESERVED_PARAMETERS);
+		static DWORD MemoryProtect(DEFINE_RESERVED_PARAMETERS);
 
 		UINTPTR_T g_syscallTable[512];
 		void RegisterSyscalls()
@@ -105,6 +119,21 @@ namespace obos
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(GetCurrentThreadStatus);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(CloseHandle);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(OpenProcessParentHandle);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(SetConsoleColor);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::GetConsoleColor);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::GetConsoleColor);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::ConsoleOutputCharacter);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::ConsoleOutputCharacterAt);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::ConsoleOutput);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::ConsoleFillLine);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::SetConsoleCursorPosition);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::GetConsoleCursorPosition);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::ConsoleSwapBuffers);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::ClearConsole);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::VirtualAlloc);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::VirtualFree);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::HasVirtualAddress);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::MemoryProtect);
 		}
 
 		static void ConsoleOutputString(DEFINE_RESERVED_PARAMETERS)
@@ -121,7 +150,13 @@ namespace obos
 		}
 		static void ExitProcess(DEFINE_RESERVED_PARAMETERS)
 		{
-			multitasking::g_currentThread->owner->TerminateProcess();
+			if(!checkUserPtr(parameters))
+				multitasking::g_currentThread->owner->TerminateProcess(0);
+			struct _par
+			{
+				DWORD exitCode;
+			} *par = reinterpret_cast<_par*>(parameters);
+			multitasking::g_currentThread->owner->TerminateProcess(par->exitCode);
 		}
 		static DWORD CreateProcess(DEFINE_RESERVED_PARAMETERS)
 		{
@@ -147,6 +182,7 @@ namespace obos
 			struct _par
 			{
 				HANDLE procHandle;
+				DWORD exitCode;
 			} *par = reinterpret_cast<_par*>(parameters);
 			if (!checkUserHandle(par->procHandle))
 				return 0xFFFFF000;
@@ -157,7 +193,7 @@ namespace obos
 				return 0xFFFFF000; // This isn't a process.
 			if (!ret->parent)
 				return 0xFFFFF000; // It is extremely unlikely the kernel calls this.
-			return ret->TerminateProcess();
+			return ret->TerminateProcess(par->exitCode);
 		}
 		DWORD OpenCurrentProcessHandle(DEFINE_RESERVED_PARAMETERS)
 		{
@@ -522,6 +558,172 @@ namespace obos
 				return 0xFFFFF000; // It is extremely unlikely the kernel calls this.
 			*par->parentHandle = reinterpret_cast<HANDLE>(proc->parent);
 			return 0;
+		}
+		static DWORD SetConsoleColor(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				DWORD fgColour;
+				DWORD bgColour;
+			} *par = reinterpret_cast<_par*>(parameters);
+			obos::SetConsoleColor(par->fgColour, par->bgColour);
+			return 0;
+		}
+		static DWORD GetConsoleColor(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				DWORD* fgColour;
+				DWORD* bgColour;
+			} *par = reinterpret_cast<_par*>(parameters);
+			if (!checkUserPtr(par->fgColour))
+				return 0xFFFFF000;
+			if (!checkUserPtr(par->bgColour))
+				return 0xFFFFF000;
+			obos::GetConsoleColor(*par->fgColour, *par->bgColour);
+			return 0;
+		}
+		static DWORD ConsoleOutputCharacter(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				CHAR ch;
+				bool swapBuffers;
+			} *par = reinterpret_cast<_par*>(parameters);
+			obos::ConsoleOutputCharacter(par->ch, par->swapBuffers);
+			return 0;
+		}
+		static DWORD ConsoleOutputCharacterAt(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				CHAR ch;
+				DWORD x, y;
+				bool swapBuffers;
+			} *par = reinterpret_cast<_par*>(parameters);
+			obos::ConsoleOutputCharacter(par->ch, par->x, par->y, par->swapBuffers);
+			return 0;
+		}
+		static DWORD ConsoleOutput(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				CSTRING out;
+				SIZE_T size;
+				bool swapBuffers;
+			} *par = reinterpret_cast<_par*>(parameters);
+			if (!checkUserPtr(par->out))
+				return 0xFFFFF000;
+			obos::ConsoleOutput(par->out, par->size, par->swapBuffers);
+			return 0;
+		}
+		static DWORD ConsoleFillLine(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				CHAR ch;
+				bool swapBuffers;
+			} *par = reinterpret_cast<_par*>(parameters);
+			obos::ConsoleFillLine(par->ch, par->swapBuffers);
+			return 0;
+		}
+		static DWORD SetConsoleCursorPosition(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				DWORD x, y;
+			} *par = reinterpret_cast<_par*>(parameters);
+			obos::SetTerminalCursorPosition(par->x, par->y);
+			return 0;
+		}
+		static DWORD GetConsoleCursorPosition(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				DWORD *x, *y;
+			} *par = reinterpret_cast<_par*>(parameters);
+			obos::GetTerminalCursorPosition(*par->x, *par->y);
+			return 0;
+		}
+		static DWORD ConsoleSwapBuffers(DEFINE_RESERVED_PARAMETERS)
+		{
+			obos::swapBuffers();
+			return 0;
+		}
+		static DWORD ClearConsole(DEFINE_RESERVED_PARAMETERS)
+		{
+			obos::ClearConsole();
+			return 0;
+		}
+		static DWORD VirtualAlloc(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				PVOID _base;
+				SIZE_T nPages; 
+				utils::RawBitfield flags;
+			} *par = reinterpret_cast<_par*>(parameters);
+			if (!checkUserPtr(par->_base, true))
+				return 0xFFFFF000;
+			return (DWORD)memory::VirtualAlloc(par->_base, par->nPages, par->flags | memory::VirtualAllocFlags::GLOBAL);
+		}
+		static DWORD VirtualFree(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				PVOID _base;
+				SIZE_T nPages;
+			} *par = reinterpret_cast<_par*>(parameters);
+			if (!checkUserPtr(par->_base))
+				return 0xFFFFF000;
+			return memory::VirtualFree(par->_base, par->nPages);
+		}
+		static BOOL HasVirtualAddress(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				PCVOID _base;
+				SIZE_T nPages;
+			} *par = reinterpret_cast<_par*>(parameters);
+			if (par->nPages == 1)
+				return checkUserPtr(par->_base);
+			return memory::HasVirtualAddress(par->_base, par->nPages) && checkUserPtr(par->_base, false);
+		}
+		static DWORD MemoryProtect(DEFINE_RESERVED_PARAMETERS)
+		{
+			if (!checkUserPtr(parameters))
+				return 0xFFFFF000;
+			struct _par
+			{
+				PVOID _base;
+				SIZE_T nPages; 
+				utils::RawBitfield flags;
+			} *par = reinterpret_cast<_par*>(parameters);
+			if (!checkUserPtr(par->_base))
+				return 0xFFFFF000;
+			return memory::MemoryProtect(par->_base, par->nPages, par->flags | memory::VirtualAllocFlags::GLOBAL);
 		}
 	}
 }

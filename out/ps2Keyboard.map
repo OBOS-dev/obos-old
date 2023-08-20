@@ -78,7 +78,7 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
 .plt.sec
  *(.plt.sec)
 
-.text           0x08048080      0x71f
+.text           0x08048080      0x727
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
  *(.text.startup .text.startup.*)
@@ -94,7 +94,7 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
                 0x080486e7                inb
                 0x08048704                inw
  *fill*         0x08048723        0xd 
- .text          0x08048730       0x6f src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+ .text          0x08048730       0x77 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
                 0x08048730                RegisterDriver
                 0x08048738                RegisterInterruptHandler
                 0x08048740                PicSendEoi
@@ -108,7 +108,8 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
                 0x08048780                MapPhysicalTo
                 0x08048788                UnmapPhysicalTo
                 0x08048790                Printf
-                0x08048798                CallSyscall
+                0x08048798                GetPhysicalAddress
+                0x080487a0                CallSyscall
  *(.gnu.warning)
 
 .fini
@@ -143,7 +144,7 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
 
 .exception_ranges
  *(.exception_ranges*)
-                0x0804979f                        . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
+                0x080497a7                        . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
 
 .eh_frame
  *(.eh_frame)
@@ -162,7 +163,7 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
 .exception_ranges
  *(.exception_ranges*)
 
-.tdata          0x0804979f        0x0
+.tdata          0x080497a7        0x0
                 [!provide]                        PROVIDE (__tdata_start = .)
  *(.tdata .tdata.* .gnu.linkonce.td.*)
 
@@ -170,18 +171,18 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0x0804979f        0x0
+.preinit_array  0x080497a7        0x0
                 [!provide]                        PROVIDE (__preinit_array_start = .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end = .)
 
-.init_array     0x0804979f        0x0
+.init_array     0x080497a7        0x0
                 [!provide]                        PROVIDE (__init_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
                 [!provide]                        PROVIDE (__init_array_end = .)
 
-.fini_array     0x0804979f        0x0
+.fini_array     0x080497a7        0x0
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -211,46 +212,46 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
 .dynamic
  *(.dynamic)
 
-.got            0x080497a0        0x0
+.got            0x080497a8        0x0
  *(.got)
- .got           0x080497a0        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+ .got           0x080497a8        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
  *(.igot)
-                0x080497a0                        . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
+                0x080497a8                        . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0xc)?0xc:0x0)
 
-.got.plt        0x080497a0        0x0
+.got.plt        0x080497a8        0x0
  *(.got.plt)
- .got.plt       0x080497a0        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+ .got.plt       0x080497a8        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
  *(.igot.plt)
- .igot.plt      0x080497a0        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+ .igot.plt      0x080497a8        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
 
-.data           0x080497a0      0x42c
+.data           0x080497c0      0x42c
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x080497a0      0x42c src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
-                0x080497a0                g_keys
+ .data          0x080497c0      0x42c src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+                0x080497c0                g_keys
 
 .data1
  *(.data1)
-                0x08049bcc                        _edata = .
+                0x08049bec                        _edata = .
                 [!provide]                        PROVIDE (edata = .)
-                0x08049bcc                        . = .
-                0x08049bcc                        __bss_start = .
+                0x08049bec                        . = .
+                0x08049bec                        __bss_start = .
 
-.bss            0x08049be0     0x2008
+.bss            0x08049c00     0x2008
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x08049be0     0x2005 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
-                0x08049be0                g_keyBuffer
-                0x0804bbe0                g_keyBufferPosition
-                0x0804bbe4                flags
+ .bss           0x08049c00     0x2005 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
+                0x08049c00                g_keyBuffer
+                0x0804bc00                g_keyBufferPosition
+                0x0804bc04                flags
  *(COMMON)
-                0x0804bbe8                        . = ALIGN ((. != 0x0)?0x4:0x1)
- *fill*         0x0804bbe5        0x3 
-                0x0804bbe8                        . = ALIGN (0x4)
-                0x0804bbe8                        . = SEGMENT_START ("ldata-segment", .)
-                0x0804bbe8                        . = ALIGN (0x4)
-                0x0804bbe8                        _end = .
+                0x0804bc08                        . = ALIGN ((. != 0x0)?0x4:0x1)
+ *fill*         0x0804bc05        0x3 
+                0x0804bc08                        . = ALIGN (0x4)
+                0x0804bc08                        . = SEGMENT_START ("ldata-segment", .)
+                0x0804bc08                        . = ALIGN (0x4)
+                0x0804bc08                        _end = .
                 [!provide]                        PROVIDE (end = .)
-                0x0804bbe8                        . = DATA_SEGMENT_END (.)
+                0x0804bc08                        . = DATA_SEGMENT_END (.)
 
 .stab
  *(.stab)
@@ -313,10 +314,10 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/
  .debug_abbrev  0x00000000      0x253 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
  .debug_abbrev  0x00000253       0x1b src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
-.debug_line     0x00000000      0x962
+.debug_line     0x00000000      0x965
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x8c8 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.o
- .debug_line    0x000008c8       0x9a src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
+ .debug_line    0x000008c8       0x9d src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.o
 
 .debug_frame    0x00000000      0x178
  *(.debug_frame)

@@ -24,8 +24,8 @@ enum exitStatus PrintChar(CHAR ch, BOOL flush);
 enum exitStatus GetMultibootModule(DWORD moduleIndex, UINTPTR_T* moduleStart, SIZE_T* size);
 enum exitStatus RegisterFileReadCallback(DWORD driverId, void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer));
 /// <summary>
-/// Gets info about a file.
 /// This documentation is for the callback.
+/// Gets info about a file.
 /// </summary>
 /// <param name="filename">The file's name</param>
 /// <param name="size">An output parameter. If the file exists, this should be set to the file's size.</param>
@@ -34,6 +34,7 @@ enum exitStatus RegisterFileExistsCallback(DWORD driverId, char(*callback)(CSTRI
 enum exitStatus MapPhysicalTo(UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags);
 enum exitStatus UnmapPhysicalTo(PVOID virtualAddress);
 enum exitStatus Printf(CSTRING format, ...);
+enum exitStatus GetPhysicalAddress(PVOID linearAddress, PVOID* physicalAddress);
 
 enum exitStatus CallSyscall(DWORD syscallId, ...);
 
