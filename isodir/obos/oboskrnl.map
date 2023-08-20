@@ -482,173 +482,173 @@ c012208e T obos::memory::VirtualAlloc(void*, unsigned int, unsigned int)	/home/o
 c01223b2 T obos::memory::VirtualFree(void*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/allocate.cpp:114
 c01225c0 T obos::memory::HasVirtualAddress(void const*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/allocate.cpp:137
 c01226d6 T obos::memory::MemoryProtect(void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/allocate.cpp:154
-c0122826 T obos::memory::PageDirectory::PageDirectory()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:23
-c0122826 T obos::memory::PageDirectory::PageDirectory()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:23
-c0122854 T obos::memory::PageDirectory::PageDirectory(unsigned int*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:27
-c0122854 T obos::memory::PageDirectory::PageDirectory(unsigned int*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:27
-c0122880 T obos::memory::PageDirectory::init()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:33
-c01228b0 T obos::memory::PageDirectory::switchToThis()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:39
-c01228e8 T obos::memory::PageDirectory::getPageTableAddress(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:48
-c0122956 T obos::memory::PageDirectory::getPageTable(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:59
-c01229ca T obos::memory::PageDirectory::~PageDirectory()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:71
-c01229ca T obos::memory::PageDirectory::~PageDirectory()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:71
-c01229f2 T obos::memory::PageDirectory::addressToIndex(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:77
-c01229fe T obos::memory::PageDirectory::addressToPageTableIndex(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:81
-c0122a0d T obos::memory::InitializePaging()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:90
-c0122a82 T obos::memory::tlbFlush(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:101
-c0122a94 T liballoc_alloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:24
-c0122aeb T liballoc_free	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:32
-c0122b11 T liballoc_lock	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:38
-c0122b23 T liballoc_unlock	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:44
-c0122b35 T operator new(unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:53
-c0122b4d T operator new[](unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:57
-c0122b65 T operator delete(void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:61
-c0122b7c T operator delete[](void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:65
-c0122b93 T operator delete(void*, unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:69
-c0122baa T operator delete[](void*, unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:73
-c0122bc1 T operator new(unsigned long, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:78
-c0122bc9 T operator new[](unsigned long, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:82
-c0122bd1 T operator delete(void*, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:86
-c0122bd7 T operator delete[](void*, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:88
-c0122bdd t obos::memory::addressToIndex(unsigned int, unsigned int*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:34
-c0122bfe t obos::memory::indexToAddress(unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:40
-c0122c13 t obos::memory::isAddressUsed(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:44
-c0122cc3 T obos::memory::InitializePhysicalMemoryManager()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:59
-c0122f00 T obos::memory::kalloc_physicalPages(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:104
-c012314d T obos::memory::kfree_physicalPages(void*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:162
-c0123280 T obos::multitasking::canRanTask(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:40
-c01232ac T obos::multitasking::switchToTask(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:49
-c01233bb T obos::multitasking::findNewTask(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:81
-c01238d8 T obos::multitasking::InitializeMultitasking()	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:202
-c0123a9e T obos::multitasking::MutexLockCallback(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:16
-c0123ad0 T obos::multitasking::Mutex::Lock(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:22
-c0123b8e T obos::multitasking::Mutex::Unlock()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:40
-c0123bc6 T obos::multitasking::Mutex::~Mutex()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:47
-c0123bc6 T obos::multitasking::Mutex::~Mutex()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:47
-c0123be8 T obos::multitasking::MutexHandle::MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:18
-c0123be8 T obos::multitasking::MutexHandle::MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:18
-c0123c80 T obos::multitasking::MutexHandle::duplicate()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:27
-c0123cf4 T obos::multitasking::MutexHandle::closeHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:37
-c0123d86 T obos::multitasking::MutexHandle::Lock(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:46
-c0123dc8 T obos::multitasking::MutexHandle::Unlock()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:55
-c0123df4 T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
-c0123df4 T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
-c0123e24 T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
-c0123e4a T obos::multitasking::Thread::Thread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:21
-c0123e4a T obos::multitasking::Thread::Thread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:21
-c0123f04 T obos::multitasking::Thread::CreateThread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:26
-c012411c T obos::multitasking::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:28
-c012411c T obos::multitasking::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:28
-c0124170 T obos::multitasking::ThreadHandle::CreateThread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:36
-c01241f0 T obos::multitasking::ThreadHandle::OpenThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:42
-c0124296 T obos::multitasking::ThreadHandle::OpenThread(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:61
-c0124308 T obos::multitasking::ThreadHandle::PauseThread(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:75
-c0124394 T obos::multitasking::ThreadHandle::ResumeThread()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:90
-c01243de T obos::multitasking::ThreadHandle::SetThreadPriority(obos::multitasking::Thread::priority_t)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:100
-c012455c T obos::multitasking::ThreadHandle::SetThreadStatus(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:157
-c01245fe T obos::multitasking::ThreadHandle::TerminateThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:174
-c01246fc T obos::multitasking::ThreadHandle::GetTid()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:195
-c012471c T obos::multitasking::ThreadHandle::GetExitCode()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:202
-c0124766 T obos::multitasking::ThreadHandle::GetThreadPriority()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:213
-c012479a T obos::multitasking::ThreadHandle::GetThreadStatus()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:222
-c01247ce t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
-c01247ea t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
-c0124806 t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
-c0124810 T obos::multitasking::ThreadHandle::WaitForThreadExit()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:231
-c01248b8 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:261
-c01248db t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:261
-c01248f0 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:261
-c01248fa T obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:250
-c01249cc T obos::multitasking::ThreadHandle::duplicate()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:273
-c0124a52 T obos::multitasking::ThreadHandle::closeHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:288
-c0124baf T obos::multitasking::ExitThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:326
-c0124c5a T obos::multitasking::GetCurrentThreadTid()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:338
-c0124c67 T obos::multitasking::GetCurrentThreadPriority()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:342
-c0124c74 T obos::multitasking::GetCurrentThreadStatus()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:346
-c0124c81 T obos::multitasking::GetCurrentThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:350
-c0124cc2 T obos::process::Process::Process()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:40
-c0124cc2 T obos::process::Process::Process()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:40
-c0124d1e t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:58
-c0124d28 t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:58
-c0124d3e t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:58
-c0124d48 T obos::process::DriverEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:49
-c0124ddc T obos::process::Process::CreateProcess(unsigned char*, unsigned int, void*, bool)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:64
-c01250ce T obos::process::Process::TerminateProcess(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:144
-c01253fd t checkUserPtr(void const*, bool)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:27
-c012546c t checkUserHandle(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:40
-c01254a7 T obos::process::RegisterSyscalls()	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:93
-c012581a t obos::process::ConsoleOutputString(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:140
-c0125872 t obos::process::ExitProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:152
-c01258c8 t obos::process::CreateProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:162
-c0125968 t obos::process::TerminateProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:179
-c0125a0c t obos::process::OpenCurrentProcessHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:199
-c0125a6d t obos::process::OpenProcessHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:212
-c0125b59 t obos::process::CreateThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:233
-c0125c2c t obos::process::OpenThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:254
-c0125d3d t obos::process::PauseThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:279
-c0125dd7 t obos::process::ResumeThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:297
-c0125e66 t obos::process::SetThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:314
-c0125efc t obos::process::SetThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:332
-c0125f92 t obos::process::TerminateThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:350
-c0126043 t obos::process::GetTid(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:370
-c0126143 t obos::process::GetExitCode(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:395
-c012625b t obos::process::GetThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:425
-c0126357 t obos::process::GetThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:452
-c0126453 t obos::process::WaitForThreadExit(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:479
-c012650b t obos::process::ExitThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:499
-c0126552 t obos::process::GetCurrentThreadTid(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:509
-c012655f t obos::process::GetCurrentThreadHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:513
-c012656c t obos::process::GetCurrentThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:517
-c0126579 t obos::process::GetCurrentThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:521
-c0126586 t obos::process::CloseHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:525
-c012660a t obos::process::OpenProcessParentHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:540
-c01266d0 t obos::process::SetConsoleColor(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:563
-c0126719 t obos::process::GetConsoleColor(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:575
-c01267a5 t obos::process::ConsoleOutputCharacter(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:591
-c01267f6 t obos::process::ConsoleOutputCharacterAt(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:603
-c0126856 t obos::process::ConsoleOutput(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:616
-c01268cb t obos::process::ConsoleFillLine(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:631
-c012691c t obos::process::SetConsoleCursorPosition(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:643
-c0126965 t obos::process::GetConsoleCursorPosition(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:654
-c01269ae t obos::process::ConsoleSwapBuffers(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:665
-c01269c0 t obos::process::ClearConsole(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:670
-c01269d2 t obos::process::VirtualAlloc(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:675
-c0126a1d t obos::process::VirtualFree(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:687
-c0126a62 t obos::process::HasVirtualAddress(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:698
-c0126aa7 t obos::process::MemoryProtect(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:709
-c0126af4 t makeBitmask(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:10
-c0126b12 T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
-c0126b12 T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
-c0126b2c T obos::utils::BitfieldBase::setBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:25
-c0126b44 T obos::utils::BitfieldBase::clearBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:29
-c0126b5e T obos::utils::BitfieldBase::getBit(unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:33
-c0126b72 T obos::utils::BitfieldBase::operator[](unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:38
-c0126b92 T obos::utils::BitfieldBase::operator unsigned int()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:43
-c0126b9e T obos::utils::BitfieldBase::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:47
-c0126bb0 T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
-c0126bb0 T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
-c0126bcc T obos::utils::Bitfield::setBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:59
-c0126c02 T obos::utils::Bitfield::clearBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:65
-c0126c38 T obos::utils::Bitfield::getBit(unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:71
-c0126c84 T obos::utils::Bitfield::operator[](unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:78
-c0126cac T obos::utils::Bitfield::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:83
-c0126cbe T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
-c0126cbe T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
-c0126cda T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
-c0126cda T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
-c0126d00 T obos::utils::IntegerBitfield::setBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:100
-c0126d0f T obos::utils::setBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:107
-c0126d3d T obos::utils::clearBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:111
-c0126d6d T obos::utils::testBitInBitfield(unsigned int, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:115
-c0126db6 T memcmp	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:14
-c0126dd2 T obos::utils::memcmp(void const*, void const*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:23
-c0126e97 T obos::utils::memchr(void*, unsigned char, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:40
-c0126efd T obos::utils::memchr(void const*, unsigned char, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:49
-c0126f21 T obos::utils::strcmp(char const*, char const*)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:53
-c0126f80 T __udivdi3	/mnt/c/Users/omark/Documents/cross_compiler/build-libgcc/i686-elf/libgcc/../../../gcc-11.4.0/libgcc/libgcc2.c:1298
-c01270b0 T __umoddi3	/mnt/c/Users/omark/Documents/cross_compiler/build-libgcc/i686-elf/libgcc/../../../gcc-11.4.0/libgcc/libgcc2.c:1286
-c0127200 T obos::process::ProcEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:43
-c0127200 T _glb_text_start	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:44
-c012721e T _glb_text_end
-c012721e T _init
-c012722d T _fini
+c012280c T obos::memory::PageDirectory::PageDirectory()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:23
+c012280c T obos::memory::PageDirectory::PageDirectory()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:23
+c012283a T obos::memory::PageDirectory::PageDirectory(unsigned int*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:27
+c012283a T obos::memory::PageDirectory::PageDirectory(unsigned int*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:27
+c0122866 T obos::memory::PageDirectory::init()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:33
+c0122896 T obos::memory::PageDirectory::switchToThis()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:39
+c01228ce T obos::memory::PageDirectory::getPageTableAddress(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:48
+c012293c T obos::memory::PageDirectory::getPageTable(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:59
+c01229b0 T obos::memory::PageDirectory::~PageDirectory()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:71
+c01229b0 T obos::memory::PageDirectory::~PageDirectory()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:71
+c01229d8 T obos::memory::PageDirectory::addressToIndex(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:77
+c01229e4 T obos::memory::PageDirectory::addressToPageTableIndex(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:81
+c01229f3 T obos::memory::InitializePaging()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:90
+c0122a68 T obos::memory::tlbFlush(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.cpp:101
+c0122a7a T liballoc_alloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:24
+c0122ad1 T liballoc_free	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:32
+c0122af7 T liballoc_lock	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:38
+c0122b09 T liballoc_unlock	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:44
+c0122b1b T operator new(unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:53
+c0122b33 T operator new[](unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:57
+c0122b4b T operator delete(void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:61
+c0122b62 T operator delete[](void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:65
+c0122b79 T operator delete(void*, unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:69
+c0122b90 T operator delete[](void*, unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:73
+c0122ba7 T operator new(unsigned long, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:78
+c0122baf T operator new[](unsigned long, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:82
+c0122bb7 T operator delete(void*, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:86
+c0122bbd T operator delete[](void*, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:88
+c0122bc3 t obos::memory::addressToIndex(unsigned int, unsigned int*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:34
+c0122be4 t obos::memory::indexToAddress(unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:40
+c0122bf9 t obos::memory::isAddressUsed(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:44
+c0122ca9 T obos::memory::InitializePhysicalMemoryManager()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:59
+c0122ee6 T obos::memory::kalloc_physicalPages(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:104
+c0123133 T obos::memory::kfree_physicalPages(void*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/physical.cpp:162
+c0123266 T obos::multitasking::canRanTask(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:40
+c0123292 T obos::multitasking::switchToTask(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:49
+c01233a1 T obos::multitasking::findNewTask(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:81
+c01238be T obos::multitasking::InitializeMultitasking()	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:202
+c0123a84 T obos::multitasking::MutexLockCallback(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:16
+c0123ab6 T obos::multitasking::Mutex::Lock(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:22
+c0123b74 T obos::multitasking::Mutex::Unlock()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:40
+c0123bac T obos::multitasking::Mutex::~Mutex()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:47
+c0123bac T obos::multitasking::Mutex::~Mutex()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:47
+c0123bce T obos::multitasking::MutexHandle::MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:18
+c0123bce T obos::multitasking::MutexHandle::MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:18
+c0123c66 T obos::multitasking::MutexHandle::duplicate()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:27
+c0123cda T obos::multitasking::MutexHandle::closeHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:37
+c0123d6c T obos::multitasking::MutexHandle::Lock(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:46
+c0123dae T obos::multitasking::MutexHandle::Unlock()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:55
+c0123dda T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
+c0123dda T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
+c0123e0a T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
+c0123e30 T obos::multitasking::Thread::Thread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:21
+c0123e30 T obos::multitasking::Thread::Thread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:21
+c0123eea T obos::multitasking::Thread::CreateThread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:26
+c0124102 T obos::multitasking::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:28
+c0124102 T obos::multitasking::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:28
+c0124156 T obos::multitasking::ThreadHandle::CreateThread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:36
+c01241d6 T obos::multitasking::ThreadHandle::OpenThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:42
+c012427c T obos::multitasking::ThreadHandle::OpenThread(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:61
+c01242ee T obos::multitasking::ThreadHandle::PauseThread(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:75
+c012437a T obos::multitasking::ThreadHandle::ResumeThread()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:90
+c01243c4 T obos::multitasking::ThreadHandle::SetThreadPriority(obos::multitasking::Thread::priority_t)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:100
+c0124542 T obos::multitasking::ThreadHandle::SetThreadStatus(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:157
+c01245e4 T obos::multitasking::ThreadHandle::TerminateThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:174
+c01246e2 T obos::multitasking::ThreadHandle::GetTid()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:195
+c0124702 T obos::multitasking::ThreadHandle::GetExitCode()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:202
+c012474c T obos::multitasking::ThreadHandle::GetThreadPriority()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:213
+c0124780 T obos::multitasking::ThreadHandle::GetThreadStatus()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:222
+c01247b4 t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
+c01247d0 t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
+c01247ec t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
+c01247f6 T obos::multitasking::ThreadHandle::WaitForThreadExit()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:231
+c012489e t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:261
+c01248c1 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:261
+c01248d6 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:261
+c01248e0 T obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:250
+c01249b2 T obos::multitasking::ThreadHandle::duplicate()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:273
+c0124a38 T obos::multitasking::ThreadHandle::closeHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:288
+c0124b95 T obos::multitasking::ExitThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:326
+c0124c40 T obos::multitasking::GetCurrentThreadTid()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:338
+c0124c4d T obos::multitasking::GetCurrentThreadPriority()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:342
+c0124c5a T obos::multitasking::GetCurrentThreadStatus()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:346
+c0124c67 T obos::multitasking::GetCurrentThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:350
+c0124ca8 T obos::process::Process::Process()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:40
+c0124ca8 T obos::process::Process::Process()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:40
+c0124d04 t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:58
+c0124d0e t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:58
+c0124d24 t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:58
+c0124d2e T obos::process::DriverEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:49
+c0124dc2 T obos::process::Process::CreateProcess(unsigned char*, unsigned int, void*, bool)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:64
+c01250b4 T obos::process::Process::TerminateProcess(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:144
+c01253e3 t checkUserPtr(void const*, bool)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:27
+c0125452 t checkUserHandle(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:40
+c012548d T obos::process::RegisterSyscalls()	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:93
+c0125800 t obos::process::ConsoleOutputString(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:140
+c0125858 t obos::process::ExitProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:152
+c01258ae t obos::process::CreateProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:162
+c012594e t obos::process::TerminateProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:179
+c01259f2 t obos::process::OpenCurrentProcessHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:199
+c0125a53 t obos::process::OpenProcessHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:212
+c0125b3f t obos::process::CreateThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:233
+c0125c12 t obos::process::OpenThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:254
+c0125d23 t obos::process::PauseThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:279
+c0125dbd t obos::process::ResumeThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:297
+c0125e4c t obos::process::SetThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:314
+c0125ee2 t obos::process::SetThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:332
+c0125f78 t obos::process::TerminateThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:350
+c0126029 t obos::process::GetTid(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:370
+c0126129 t obos::process::GetExitCode(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:395
+c0126241 t obos::process::GetThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:425
+c012633d t obos::process::GetThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:452
+c0126439 t obos::process::WaitForThreadExit(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:479
+c01264f1 t obos::process::ExitThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:499
+c0126538 t obos::process::GetCurrentThreadTid(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:509
+c0126545 t obos::process::GetCurrentThreadHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:513
+c0126552 t obos::process::GetCurrentThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:517
+c012655f t obos::process::GetCurrentThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:521
+c012656c t obos::process::CloseHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:525
+c01265f0 t obos::process::OpenProcessParentHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:540
+c01266b6 t obos::process::SetConsoleColor(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:563
+c01266ff t obos::process::GetConsoleColor(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:575
+c012678b t obos::process::ConsoleOutputCharacter(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:591
+c01267dc t obos::process::ConsoleOutputCharacterAt(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:603
+c012683c t obos::process::ConsoleOutput(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:616
+c01268b1 t obos::process::ConsoleFillLine(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:631
+c0126902 t obos::process::SetConsoleCursorPosition(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:643
+c012694b t obos::process::GetConsoleCursorPosition(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:654
+c0126994 t obos::process::ConsoleSwapBuffers(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:665
+c01269a6 t obos::process::ClearConsole(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:670
+c01269b8 t obos::process::VirtualAlloc(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:675
+c0126a29 t obos::process::VirtualFree(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:689
+c0126a8f t obos::process::HasVirtualAddress(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:702
+c0126b1b t obos::process::MemoryProtect(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:715
+c0126b8e t makeBitmask(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:10
+c0126bac T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
+c0126bac T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
+c0126bc6 T obos::utils::BitfieldBase::setBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:25
+c0126bde T obos::utils::BitfieldBase::clearBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:29
+c0126bf8 T obos::utils::BitfieldBase::getBit(unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:33
+c0126c0c T obos::utils::BitfieldBase::operator[](unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:38
+c0126c2c T obos::utils::BitfieldBase::operator unsigned int()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:43
+c0126c38 T obos::utils::BitfieldBase::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:47
+c0126c4a T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
+c0126c4a T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
+c0126c66 T obos::utils::Bitfield::setBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:59
+c0126c9c T obos::utils::Bitfield::clearBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:65
+c0126cd2 T obos::utils::Bitfield::getBit(unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:71
+c0126d1e T obos::utils::Bitfield::operator[](unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:78
+c0126d46 T obos::utils::Bitfield::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:83
+c0126d58 T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
+c0126d58 T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
+c0126d74 T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
+c0126d74 T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
+c0126d9a T obos::utils::IntegerBitfield::setBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:100
+c0126da9 T obos::utils::setBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:107
+c0126dd7 T obos::utils::clearBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:111
+c0126e07 T obos::utils::testBitInBitfield(unsigned int, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:115
+c0126e50 T memcmp	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:14
+c0126e6c T obos::utils::memcmp(void const*, void const*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:23
+c0126f31 T obos::utils::memchr(void*, unsigned char, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:40
+c0126f97 T obos::utils::memchr(void const*, unsigned char, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:49
+c0126fbb T obos::utils::strcmp(char const*, char const*)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:53
+c0127020 T __udivdi3	/mnt/c/Users/omark/Documents/cross_compiler/build-libgcc/i686-elf/libgcc/../../../gcc-11.4.0/libgcc/libgcc2.c:1298
+c0127150 T __umoddi3	/mnt/c/Users/omark/Documents/cross_compiler/build-libgcc/i686-elf/libgcc/../../../gcc-11.4.0/libgcc/libgcc2.c:1286
+c01272a0 T obos::process::ProcEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:43
+c01272a0 T _glb_text_start	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:44
+c01272be T _glb_text_end
+c01272be T _init
+c01272cd T _fini

@@ -681,7 +681,7 @@ namespace obos
 				SIZE_T nPages; 
 				utils::RawBitfield flags;
 			} *par = reinterpret_cast<_par*>(parameters);
-			if (!checkUserPtr(par->_base, true))
+			if (!checkUserPtr(par->_base, true) && par->_base != nullptr)
 				return 0xFFFFF000;
 			return (DWORD)memory::VirtualAlloc(par->_base, par->nPages, par->flags | memory::VirtualAllocFlags::GLOBAL);
 		}
