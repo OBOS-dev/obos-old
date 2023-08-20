@@ -12,5 +12,7 @@ qemu-system-i386 -cdrom out/obos.iso ^
 -serial tcp:0.0.0.0:1535,server,nowait ^
 -serial tcp:0.0.0.0:1534,server,nowait ^
 -monitor stdio ^
+-d trace:"*ahci*" ^
+-D log.txt 
 -debugcon file:log.txt
 cd scripts

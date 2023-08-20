@@ -71,8 +71,11 @@ int _start()
 
 	for(UINTPTR_T base = 0x410000, virt = 0x410000, phys = baseAddr; virt < (base + hbaSize); virt += 4096, phys += 4096)
 		MapPhysicalTo(phys, (PVOID)virt, ALLOC_FLAGS_CACHE_DISABLE | ALLOC_FLAGS_WRITE_ENABLED);
-	hbaMem->ghc |= (1 << 1);
 	hbaMem->ghc |= (1 << 31);
+	hbaMem->ghc |= (1 << 0);
+	hbaMem->ghc |= (1 << 31);
+	hbaMem->ghc |= (1 << 1);
+
 	hbaMem->bohc |= (1 << 1);
 	
 	BOOL supportsStaggeredSpinup = hbaMem->cap & (1 << 27);
@@ -148,12 +151,23 @@ int _start()
 		StopCommandEngine(port);
 
 		PVOID clbBase = availablePorts[i].clbVirtualAddress = VirtualAlloc(0, 1, ALLOC_FLAGS_WRITE_ENABLED | ALLOC_FLAGS_CACHE_DISABLE);
+		if (!clbBase)
+		{
+			Printf("AHCI Fatal Error: VirtualAlloc returned nullptr\r\n.");
+			return 1;
+		}
+		UINTPTR_T clbBasePhys = 0;
 		
 		port->fbs &= ~(1 << 0);
-		GetPhysicalAddress(clbBase, (PVOID*)&port->clb);
+		GetPhysicalAddress(clbBase, (PVOID*)&clbBasePhys);
+		port->clb = clbBasePhys & ~(0b1111111111);
 		port->clbu = 0;
-		port->fb = port->clb + 1024;
+		port->fb = clbBasePhys + 1024;
 		port->fbu = 0;
+
+		port->serr = 1;
+		port->is = 0;
+		port->ie = 0;
 
 		HBA_CMD_HEADER* cmdHeader = (HBA_CMD_HEADER*)clbBase;
 		PVOID ctbaBase = VirtualAlloc((PVOID)((UINTPTR_T)clbBase + 4096), 2, ALLOC_FLAGS_WRITE_ENABLED | ALLOC_FLAGS_CACHE_DISABLE);
@@ -172,6 +186,9 @@ int _start()
 		}
 
 		StartCommandEngine(port);
+
+		port->is = 0;
+		port->ie = 0xFFFFFFFF;
 	}
 
 	PBYTE buffer = VirtualAlloc(0, 2, ALLOC_FLAGS_WRITE_ENABLED | ALLOC_FLAGS_CACHE_DISABLE);
@@ -233,7 +250,9 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, UINTPTR_T endSecto
 	HBA_CMD_HEADER* cmdHeader = (HBA_CMD_HEADER*)_port->clbVirtualAddress;
 	cmdHeader += slot;
 	cmdHeader->cfl = sizeof(FIS_REG_H2D) / sizeof(UINT32_T);
-	cmdHeader->r = 0;
+	cmdHeader->w = 0;
+	cmdHeader->c = 1;
+	cmdHeader->p = 1;
 	cmdHeader->prdtl = (UINT16_T)((countSectors >> 4) + 1);
 
 	HBA_CMD_TBL* cmdtbl = (HBA_CMD_TBL*)cmdHeader->ctba;
@@ -252,7 +271,7 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, UINTPTR_T endSecto
 		cmdtbl->prdt_entry[i].dba = (UINT32_T)buffer;
 		cmdtbl->prdt_entry[i].dbau = 0;
 		cmdtbl->prdt_entry[i].dbc = 8 * 1024 - 1;	// 8K bytes (this value should always be set to 1 less than the actual value)
-		cmdtbl->prdt_entry[i].i = 1;
+		cmdtbl->prdt_entry[i].i = 0;
 		buffer += 4 * 1024;	// 4K words
 		countSectors -= 16;	// 16 sectors
 	}
@@ -261,7 +280,7 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, UINTPTR_T endSecto
 	cmdtbl->prdt_entry[i].dbau = 0;
 	//cmdtbl->prdt_entry[i].dbc = 512;	// 512 bytes per sector
 	cmdtbl->prdt_entry[i].dbc = (countSectors << 9) - 1;	// 512 bytes per sector
-	cmdtbl->prdt_entry[i].i = 1;
+	cmdtbl->prdt_entry[i].i = 0;
 
 	// Setup command
 	FIS_REG_H2D* cmdfis = (FIS_REG_H2D*)(&cmdtbl->cfis);
