@@ -613,42 +613,42 @@ c012694b t obos::process::GetConsoleCursorPosition(void*)	/home/omar/.vs/obos/sr
 c0126994 t obos::process::ConsoleSwapBuffers(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:665
 c01269a6 t obos::process::ClearConsole(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:670
 c01269b8 t obos::process::VirtualAlloc(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:675
-c0126a29 t obos::process::VirtualFree(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:689
-c0126a8f t obos::process::HasVirtualAddress(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:702
-c0126b1b t obos::process::MemoryProtect(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:715
-c0126b8e t makeBitmask(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:10
-c0126bac T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
-c0126bac T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
-c0126bc6 T obos::utils::BitfieldBase::setBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:25
-c0126bde T obos::utils::BitfieldBase::clearBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:29
-c0126bf8 T obos::utils::BitfieldBase::getBit(unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:33
-c0126c0c T obos::utils::BitfieldBase::operator[](unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:38
-c0126c2c T obos::utils::BitfieldBase::operator unsigned int()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:43
-c0126c38 T obos::utils::BitfieldBase::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:47
-c0126c4a T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
-c0126c4a T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
-c0126c66 T obos::utils::Bitfield::setBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:59
-c0126c9c T obos::utils::Bitfield::clearBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:65
-c0126cd2 T obos::utils::Bitfield::getBit(unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:71
-c0126d1e T obos::utils::Bitfield::operator[](unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:78
-c0126d46 T obos::utils::Bitfield::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:83
-c0126d58 T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
-c0126d58 T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
-c0126d74 T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
-c0126d74 T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
-c0126d9a T obos::utils::IntegerBitfield::setBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:100
-c0126da9 T obos::utils::setBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:107
-c0126dd7 T obos::utils::clearBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:111
-c0126e07 T obos::utils::testBitInBitfield(unsigned int, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:115
-c0126e50 T memcmp	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:14
-c0126e6c T obos::utils::memcmp(void const*, void const*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:23
-c0126f31 T obos::utils::memchr(void*, unsigned char, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:40
-c0126f97 T obos::utils::memchr(void const*, unsigned char, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:49
-c0126fbb T obos::utils::strcmp(char const*, char const*)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:53
-c0127020 T __udivdi3	/mnt/c/Users/omark/Documents/cross_compiler/build-libgcc/i686-elf/libgcc/../../../gcc-11.4.0/libgcc/libgcc2.c:1298
-c0127150 T __umoddi3	/mnt/c/Users/omark/Documents/cross_compiler/build-libgcc/i686-elf/libgcc/../../../gcc-11.4.0/libgcc/libgcc2.c:1286
-c01272a0 T obos::process::ProcEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:43
-c01272a0 T _glb_text_start	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:44
-c01272be T _glb_text_end
-c01272be T _init
-c01272cd T _fini
+c0126a42 t obos::process::VirtualFree(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:689
+c0126aa8 t obos::process::HasVirtualAddress(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:702
+c0126b34 t obos::process::MemoryProtect(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:715
+c0126ba6 t makeBitmask(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:10
+c0126bc4 T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
+c0126bc4 T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
+c0126bde T obos::utils::BitfieldBase::setBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:25
+c0126bf6 T obos::utils::BitfieldBase::clearBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:29
+c0126c10 T obos::utils::BitfieldBase::getBit(unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:33
+c0126c24 T obos::utils::BitfieldBase::operator[](unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:38
+c0126c44 T obos::utils::BitfieldBase::operator unsigned int()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:43
+c0126c50 T obos::utils::BitfieldBase::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:47
+c0126c62 T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
+c0126c62 T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
+c0126c7e T obos::utils::Bitfield::setBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:59
+c0126cb4 T obos::utils::Bitfield::clearBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:65
+c0126cea T obos::utils::Bitfield::getBit(unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:71
+c0126d36 T obos::utils::Bitfield::operator[](unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:78
+c0126d5e T obos::utils::Bitfield::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:83
+c0126d70 T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
+c0126d70 T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
+c0126d8c T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
+c0126d8c T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
+c0126db2 T obos::utils::IntegerBitfield::setBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:100
+c0126dc1 T obos::utils::setBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:107
+c0126def T obos::utils::clearBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:111
+c0126e1f T obos::utils::testBitInBitfield(unsigned int, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:115
+c0126e68 T memcmp	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:14
+c0126e84 T obos::utils::memcmp(void const*, void const*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:23
+c0126f49 T obos::utils::memchr(void*, unsigned char, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:40
+c0126faf T obos::utils::memchr(void const*, unsigned char, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:49
+c0126fd3 T obos::utils::strcmp(char const*, char const*)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:53
+c0127030 T __udivdi3	/mnt/c/Users/omark/Documents/cross_compiler/build-libgcc/i686-elf/libgcc/../../../gcc-11.4.0/libgcc/libgcc2.c:1298
+c0127160 T __umoddi3	/mnt/c/Users/omark/Documents/cross_compiler/build-libgcc/i686-elf/libgcc/../../../gcc-11.4.0/libgcc/libgcc2.c:1286
+c01272b0 T obos::process::ProcEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:43
+c01272b0 T _glb_text_start	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:44
+c01272ce T _glb_text_end
+c01272ce T _init
+c01272dd T _fini

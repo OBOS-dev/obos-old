@@ -28,7 +28,7 @@ AHCI_PORT availablePorts[31];
 
 extern PVOID VirtualAlloc(PVOID base, SIZE_T nPages, DWORD flags);
 
-void ReadFromDrive(AHCI_PORT* port, UINTPTR_T offsetSectors, SIZE_T countSectors, UINT16_T* buffer);
+void ReadFromDrive(AHCI_PORT* port, UINTPTR_T offsetSectors, UINTPTR_T endSectors, SIZE_T countSectors, UINT16_T* buffer);
 
 void StopCommandEngine(HBA_PORT* port);
 void StartCommandEngine(HBA_PORT* port);
@@ -71,11 +71,11 @@ int _start()
 
 	for(UINTPTR_T base = 0x410000, virt = 0x410000, phys = baseAddr; virt < (base + hbaSize); virt += 4096, phys += 4096)
 		MapPhysicalTo(phys, (PVOID)virt, ALLOC_FLAGS_CACHE_DISABLE | ALLOC_FLAGS_WRITE_ENABLED);
-	if (!(hbaMem->cap & (1 << 18)))
-		hbaMem->ghc |= (1 << 31);
-	while ((hbaMem->bohc & 1) && !(hbaMem->bohc & (1 << 1)))
-		hbaMem->bohc |= (1 << 1);
+	hbaMem->ghc |= (1 << 1);
+	hbaMem->ghc |= (1 << 31);
 	hbaMem->bohc |= (1 << 1);
+	
+	BOOL supportsStaggeredSpinup = hbaMem->cap & (1 << 27);
 
 	UINT32_T implementedPorts = hbaMem->pi;
 
@@ -85,6 +85,15 @@ int _start()
 		if (!testBit(implementedPorts, i))
 			continue;
 		HBA_PORT* port = &hbaMem->ports[i];
+
+		StopCommandEngine(port);
+
+		volatile DWORD sig = port->sig;
+
+		if(!supportsStaggeredSpinup)
+			port->cmd |= (1 << 1);
+
+		StartCommandEngine(port);
 
 		UINT32_T ssts = port->ssts;
 
@@ -97,7 +106,8 @@ int _start()
 			continue;
 		}
 
-		switch (port->sig)
+
+		switch (sig)
 		{
 		case SATA_SIG_ATAPI:
 		{
@@ -139,6 +149,7 @@ int _start()
 
 		PVOID clbBase = availablePorts[i].clbVirtualAddress = VirtualAlloc(0, 1, ALLOC_FLAGS_WRITE_ENABLED | ALLOC_FLAGS_CACHE_DISABLE);
 		
+		port->fbs &= ~(1 << 0);
 		GetPhysicalAddress(clbBase, (PVOID*)&port->clb);
 		port->clbu = 0;
 		port->fb = port->clb + 1024;
@@ -165,7 +176,33 @@ int _start()
 
 	PBYTE buffer = VirtualAlloc(0, 2, ALLOC_FLAGS_WRITE_ENABLED | ALLOC_FLAGS_CACHE_DISABLE);
 
-	ReadFromDrive(availablePorts + 0, 0, 1, (UINT16_T*)buffer);
+	{
+		UINT32_T* buf = (UINT32_T*)buffer;
+		for (int i = 0; i < 1024; buf[i++] = 0);
+	}
+
+	UINTPTR_T bufferPhys = 0;
+	GetPhysicalAddress(buffer, (PVOID*)&bufferPhys);
+
+	AHCI_PORT* port = &availablePorts[0];
+
+	for(int i = 0; i < 32; i++)
+	{
+		if (availablePorts[i].available && availablePorts[i].driveType == DRIVE_TYPE_SATA)
+		{
+			port = availablePorts + i;
+			break;
+		}
+	}
+
+	ReadFromDrive(port, 0, 16, 16, (UINT16_T*)bufferPhys);
+
+	Printf("Hexdump of disk sector offset 0:15.\r\n");
+
+	for (int i = 0; i < 512; i++)
+		Printf("%x%s", buffer[i] & 0xFF, (!(i % 32) && i) ? "\r\n" : " ");
+
+	Printf("\r\n");
 
 	sti();
 
@@ -174,11 +211,12 @@ int _start()
 
 #define ATA_CMD_READ_DMA_EX 0x25
 
-void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, SIZE_T countSectors, UINT16_T* buffer)
+void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, UINTPTR_T endSectors, SIZE_T countSectors, UINT16_T* buffer)
 {
+	//const SIZE_T savedCountSectors = countSectors;
 	HBA_PORT* port = _port->hbaPort;
 	
-	port->cmd |= 1;
+	StopCommandEngine(port);
 
 	port->is = (UINT32_T)-1;
 	UINT32_T slots = (port->sact | port->ci);
@@ -198,7 +236,12 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, SIZE_T countSector
 	cmdHeader->r = 0;
 	cmdHeader->prdtl = (UINT16_T)((countSectors >> 4) + 1);
 
-	HBA_CMD_TBL* cmdtbl = (HBA_CMD_TBL*)((UINTPTR_T)_port->clbVirtualAddress + 4096 + (slot << 8));
+	HBA_CMD_TBL* cmdtbl = (HBA_CMD_TBL*)cmdHeader->ctba;
+	{
+		UINTPTR_T phys = 0;
+		GetPhysicalAddress(_port->clbVirtualAddress, (PVOID*)&phys);
+		cmdtbl = (HBA_CMD_TBL*)((PBYTE)_port->clbVirtualAddress + (cmdHeader->ctba - phys));
+	}
 	memzero(cmdtbl, sizeof(HBA_CMD_TBL) +
 		(cmdHeader->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
 
@@ -207,6 +250,7 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, SIZE_T countSector
 	for (; i < cmdHeader->prdtl - 1; i++)
 	{
 		cmdtbl->prdt_entry[i].dba = (UINT32_T)buffer;
+		cmdtbl->prdt_entry[i].dbau = 0;
 		cmdtbl->prdt_entry[i].dbc = 8 * 1024 - 1;	// 8K bytes (this value should always be set to 1 less than the actual value)
 		cmdtbl->prdt_entry[i].i = 1;
 		buffer += 4 * 1024;	// 4K words
@@ -214,6 +258,8 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, SIZE_T countSector
 	}
 	// Last entry
 	cmdtbl->prdt_entry[i].dba = (UINT32_T)buffer;
+	cmdtbl->prdt_entry[i].dbau = 0;
+	//cmdtbl->prdt_entry[i].dbc = 512;	// 512 bytes per sector
 	cmdtbl->prdt_entry[i].dbc = (countSectors << 9) - 1;	// 512 bytes per sector
 	cmdtbl->prdt_entry[i].i = 1;
 
@@ -230,11 +276,13 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, SIZE_T countSector
 	cmdfis->device = 1 << 6;	// LBA mode
 
 	cmdfis->lba3 = (UINT8_T)(offsetSectors >> 24);
-	cmdfis->lba4 = (UINT8_T)(offsetSectors + countSectors);
-	cmdfis->lba5 = (UINT8_T)((offsetSectors + countSectors) >> 8);
+	cmdfis->lba4 = (UINT8_T)endSectors;
+	cmdfis->lba5 = (UINT8_T)(endSectors >> 8);
 
-	cmdfis->countl = countSectors & 0xFF;
-	cmdfis->counth = (countSectors >> 8) & 0xFF;
+	/*cmdfis->countl = savedCountSectors & 0xFF;
+	cmdfis->counth = (savedCountSectors >> 8) & 0xFF;*/
+	cmdfis->countl = 0;
+	cmdfis->counth = 0;
 
 #define ATA_DEV_BUSY 0x80
 #define ATA_DEV_DRQ 0x08
@@ -243,6 +291,8 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T offsetSectors, SIZE_T countSector
 	while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)));
 
 	port->ci = 1 << slot;	// Issue command
+
+	StartCommandEngine(port);
 
 	// Wait for completion
 	while (1)
