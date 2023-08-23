@@ -76,7 +76,7 @@ char* itoa_unsigned(unsigned int value, char* result, int base)
 	do
 	{
 
-		unsigned int abs = (quotient % base) < 0 ? (-(quotient % base)) : (quotient % base);
+		unsigned int abs = /*(quotient % base) < 0 ? (-(quotient % base)) : */(quotient % base);
 
 		*out = "0123456789abcdef"[abs];
 
@@ -160,13 +160,13 @@ extern "C" PVOID getEBP();
 
 namespace obos
 {
-	volatile void consoleOutputCharacter(BYTE ch, PVOID)
+	void consoleOutputCharacter(BYTE ch, PVOID)
 	{
 		obos::ConsoleOutputCharacter(ch, false);
 		outb(0x3f8, ch);
 		outb(0xe9, ch);
 	}
-	void _vprintf(volatile void(*printChar)(BYTE ch, PVOID userdata), volatile PVOID printCharUserdata, CSTRING format, va_list list)
+	void _vprintf(void(*printChar)(BYTE ch, PVOID userdata), volatile PVOID printCharUserdata, CSTRING format, va_list list)
 	{
 		CSTRING _format = format;
 		for (; *_format; _format++)
@@ -270,7 +270,7 @@ namespace obos
 		va_end(list);
 		swapBuffers();
 	}
-	static volatile void sprintf_callback(BYTE ch, PVOID userData)
+	static void sprintf_callback(BYTE ch, PVOID userData)
 	{
 		STRING output = *reinterpret_cast<STRING*>(userData);
 		SIZE_T& _index = **(reinterpret_cast<SIZE_T**>(userData) + 1);
@@ -404,8 +404,11 @@ namespace obos
 		printf_noFlush("Disassembly of address %p (%s):\r\n", _eip, filename ? filename : "Unknown file.");
 		if(filename)
 			delete filename;
-
+#ifdef __i686__
 		ZyanU32 eip = reinterpret_cast<ZyanU32>(_eip);
+#else
+		ZyanU64 eip = reinterpret_cast<ZyanU64>(_eip);
+#endif
 
 		PBYTE data = (PBYTE)_eip;
 
@@ -415,7 +418,11 @@ namespace obos
 		int i = 0;
 
 		while (ZYAN_SUCCESS(ZydisDisassembleIntel(
+#ifdef __i686__
 			ZYDIS_MACHINE_MODE_LEGACY_32,
+#else
+			ZYDIS_MACHINE_MODE_LONG_64,
+#endif
 			eip,
 			data + offset,
 			32,
@@ -427,7 +434,7 @@ namespace obos
 			STRING function = nullptr;
 			SIZE_T functionAddress = 0;
 			addr2func(reinterpret_cast<PVOID>(eip), function, functionAddress);
-			printf_noFlush("%s%p (%s+%d): %s\r\n", prefix, eip, function, eip - functionAddress, instruction.text);
+			printf_noFlush("%s%p (%s+%d): %s\r\n", prefix, eip, function ? function : "[external code]", functionAddress ? eip - functionAddress : 0, instruction.text);
 			if (filename)
 				delete function;
 			offset += instruction.info.length;
@@ -449,8 +456,8 @@ namespace obos
 	SIZE_T countTo(CSTRING string, CHAR ch)
 	{
 		SIZE_T i = 0;
-		for (; string[i] != ch; i++);
-		return i;
+		for (; string[i] != ch && string[i]; i++);
+		return string[i] ? i : npos;
 	}
 	
 	UINT32_T hex2bin(const char* str, unsigned size)
@@ -516,9 +523,15 @@ namespace obos
 			iter < endAddress;
 			iter += countTo(iter, '\n') + 1)
 		{
-			CSTRING nextLine = iter + countTo(iter, '\n') + 1;
+			CSTRING nextLine = nullptr;
+			if(countTo(iter, '\n') != npos)
+				nextLine = iter + countTo(iter, '\n') + 1;
 			UINTPTR_T symbolAddress = hex2bin(iter, countTo(iter, ' '));
-			UINTPTR_T nextSymbolAddress = hex2bin(nextLine, countTo(nextLine, ' '));
+			UINTPTR_T nextSymbolAddress = 0;
+			if (nextLine)
+				nextSymbolAddress = hex2bin(nextLine, countTo(nextLine, ' '));
+			else
+				nextSymbolAddress = 0xFFFFFFFF;
 			if (address >= symbolAddress && address < nextSymbolAddress)
 			{
 				iter += countTo(iter, ' ') + 3;

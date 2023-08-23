@@ -205,8 +205,43 @@ typedef volatile struct tagHBA_PORT
 typedef volatile struct tagHBA_MEM
 {
 	// 0x00 - 0x2B, Generic Host Control
-	UINT32_T cap;		// 0x00, Host capability
-	UINT32_T ghc;		// 0x04, Global host control
+	volatile struct
+	{
+		const UINT8_T np : 5;
+		const BOOL sxs : 1;
+		const BOOL ems : 1;
+		const BOOL ccsc : 1;
+		const UINT8_T nsc : 5;
+		const BOOL psc : 1;
+		const BOOL ssc : 1;
+		const BOOL pmd : 1;
+		const BOOL fbss : 1;
+		const BOOL spm : 1;
+		const BOOL sam : 1;
+		const BOOL resv1 : 1;
+		const UINT8_T iss : 4;
+		const BOOL sclo : 1;
+		const BOOL sal : 1;
+		const BOOL salp : 1;
+		const BOOL sss : 1;
+		const BOOL smps : 1;
+		const BOOL ssntf : 1;
+		const BOOL sncq : 1;
+		const BOOL s64a : 1;
+	} cap;		// 0x00, Host capability
+	volatile struct 
+	{
+		// HBA Reset.
+		BOOL hr : 1;
+		// Interrupt Enable.
+		BOOL ie : 1;
+		// MSI Revert to Single Message
+		BOOL mrsm : 1;
+		// Reserved.
+		UINT32_T revs : 28;
+		// AHCI Enable.
+		BOOL ae : 1;
+	} __attribute__((packed)) ghc;		// 0x04, Global host control
 	UINT32_T is;		// 0x08, Interrupt status
 	UINT32_T pi;		// 0x0C, Port implemented
 	UINT32_T vs;		// 0x10, Version

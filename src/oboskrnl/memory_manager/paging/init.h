@@ -46,7 +46,7 @@ namespace obos
 		// Makes a page directory and switches to it, thus enabling paging.
 		void InitializePaging();
 
-		void tlbFlush(UINT32_T addr);
+		void tlbFlush(UINTPTR_T addr);
 		PVOID GetPageFaultAddress();
 	}
 }

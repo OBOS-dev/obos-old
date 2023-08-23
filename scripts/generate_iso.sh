@@ -1,6 +1,8 @@
 cd ..
-cp -u out/ahci isodir/obos/initrd/ahci
+cp -u out/nvme isodir/obos/initrd/nvme
+objcopy -S isodir/obos/initrd/nvme
 cp -u out/ps2Keyboard isodir/obos/initrd/ps2Keyboard
+objcopy -S isodir/obos/initrd/ps2Keyboard
 nm out/oboskrnl --demangle=gnu-v3 -ln | grep -w --ignore-case T > isodir/obos/oboskrnl.map
 cd scripts
 ./make_initrd.sh

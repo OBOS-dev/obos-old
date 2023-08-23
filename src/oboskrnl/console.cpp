@@ -40,6 +40,7 @@ namespace obos
 	PBYTE font = nullptr;
 	static multitasking::MutexHandle* s_consoleMutex;
 	static utils::IntegerBitfield s_modifiedLines[2];
+	static bool lineSequence = false;
 
 	// Internal functions.
 	
@@ -93,6 +94,8 @@ namespace obos
 		}
 		if (s_reachedEndTerminal)
 			s_terminalRow = s_nCharsVertical - 2;
+		if (lineSequence)
+			s_terminalColumn = 0;
 	}
 
 	// API
@@ -100,6 +103,9 @@ namespace obos
 	void InitializeConsole(UINT32_T foregroundColor, UINT32_T backgroundColor)
 	{
 		EnterKernelSection();
+		lineSequence = !utils::strcmp(CONSOLE_NEWLINE_SEQUENCE, "LF");
+		new (s_modifiedLines) utils::IntegerBitfield{};
+		new (s_modifiedLines + 1) utils::IntegerBitfield{};
 		s_framebuffer = (UINT32_T*)0xFFCFF000;
 		s_terminalColumn = 0;
 		s_terminalRow = 0;
@@ -118,8 +124,6 @@ namespace obos
 		utils::dwMemset(s_framebuffer, s_backgroundColor, s_framebufferWidth * s_framebufferHeight);
 		s_consoleMutex->Unlock();
 		UpdateCursorPosition();
-		new (s_modifiedLines) utils::IntegerBitfield{};
-		new (s_modifiedLines + 1) utils::IntegerBitfield{};
 		LeaveKernelSection();
 	}
 	void SetConsoleColor(UINT32_T foregroundColor, UINT32_T backgroundColor)

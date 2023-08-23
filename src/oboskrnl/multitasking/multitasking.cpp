@@ -61,6 +61,13 @@ namespace obos
 					s_newThread->owner->pageDirectory->switchToThis();
 				}
 			g_currentThread = s_newThread;
+			if (g_currentThread->tid == 0)
+			{
+				asm volatile("mov %0, %%eax" :
+											 : "r"(&g_currentThread->frame)
+											 : "memory");
+				switchToTaskAsm();
+			}
 			if (!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall || (g_currentThread->frame.eip >= 0xC0000000 && g_currentThread->frame.eip < 0xE0000000))
 			{
 				// If we're servicing a syscall, we need to set esp0 in the tss.
@@ -148,15 +155,18 @@ namespace obos
 				}
 				list_iterator_destroy(iter);
 			}
-			if (currentThread->iterations >= (UINT32_T)currentThread->priority)
+			if(currentThread)
 			{
-				list_iterator_t* iter = list_iterator_new(g_threads, LIST_HEAD);
-				for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
+				if (currentThread->iterations >= (UINT32_T)currentThread->priority)
 				{
-					currentThread = (Thread*)node->val;
-					currentThread->iterations = 0;
+					list_iterator_t* iter = list_iterator_new(g_threads, LIST_HEAD);
+					for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
+					{
+						currentThread = (Thread*)node->val;
+						currentThread->iterations = 0;
+					}
+					list_iterator_destroy(iter);
 				}
-				list_iterator_destroy(iter);
 			}
 
 			volatile list_node_t* currentNode = nullptr;

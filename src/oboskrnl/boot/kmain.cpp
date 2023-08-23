@@ -40,16 +40,14 @@
 #include <utils/memory.h>
 
 #ifdef __INTELLISENSE__
-#define __i686__ 1
 #undef _MSC_VER
-#undef __x86_64__
 #endif
 
-#if !defined(__cplusplus) || !defined(__i686__) || !defined(__ELF__) || defined(_MSC_VER)
-#error You must be using a C++ i686 compiler with elf (i686-elf-g++, for example). This compiler cannot be msvc.
+#if !defined(__cplusplus) || !defined(__ELF__)
+#error You must be using a C++ compiler with elf.
 #endif
 
-#define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
+#define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) < ((UINTPTR_T)(rEnd)))
 
 extern "C" UINTPTR_T* boot_page_directory1;
 extern "C" void _init();
@@ -68,8 +66,13 @@ namespace obos
 		const char* isPresent = utils::testBitInBitfield(frame->errorCode, 0) ? "present" : "non-present";
 		UINTPTR_T location = (UINTPTR_T)memory::GetPageFaultAddress();
 		extern UINT32_T* s_backbuffer;
-		if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
-			multitasking::g_currentThread->owner->TerminateProcess(0xFFFFFFF1);
+		DWORD pid = 0xFFFFFFFF;
+		if(multitasking::g_initialized)
+		{
+			if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
+				multitasking::g_currentThread->owner->TerminateProcess(0xFFFFFFF1);
+			pid = multitasking::g_currentThread->owner->pid;
+		}
 		if (!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
 			kpanic((PVOID)frame->ebp, (PVOID)frame->eip,
 			kpanic_format(
@@ -87,7 +90,7 @@ namespace obos
 				"\tSS: %p\r\n"
 				"\tDS: %p\r\n"
 				"\tCS: %p\r\n"),
-				privilegeLevel, frame->eip, multitasking::GetCurrentThreadTid(), multitasking::g_currentThread->owner->pid, action, isPresent, location,
+				privilegeLevel, frame->eip, multitasking::GetCurrentThreadTid(), pid, action, isPresent, location,
 				memory::PageDirectory::addressToIndex(location), memory::PageDirectory::addressToPageTableIndex(location),
 				frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
 				frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
@@ -98,11 +101,16 @@ namespace obos
 	{
 		if (frame->errorCode == 1 && utils::testBitInBitfield(frame->eflags, 8))
 		{
-			utils::clearBitInBitfield(const_cast<interrupt_frame*>(frame)->eflags, 8);
+			//utils::clearBitInBitfield(reinterpret_cast<UINT32_T>(const_cast<interrupt_frame*>(frame)->eflags), 8);
 			return;
 		}
-		if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
-			multitasking::g_currentThread->owner->TerminateProcess(~frame->intNumber);
+		DWORD pid = 0xFFFFFFFF;
+		if (multitasking::g_initialized)
+		{
+			if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
+				multitasking::g_currentThread->owner->TerminateProcess(~frame->intNumber);
+			pid = multitasking::g_currentThread->owner->pid;
+		}
 		kpanic((PVOID)frame->ebp, (PVOID)frame->eip,
 			kpanic_format(
 				"Unhandled exception %d at %p (tid %d, pid %d). Error code: %d. Dumping registers: \r\n"
@@ -121,7 +129,7 @@ namespace obos
 				"\tCS: %p\r\n"),
 				frame->intNumber,
 				frame->eip,
-				multitasking::GetCurrentThreadTid(), multitasking::g_currentThread->owner->pid,
+				multitasking::GetCurrentThreadTid(), pid,
 				frame->errorCode,
 				frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
 				frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
@@ -131,10 +139,27 @@ namespace obos
 	// Initial boot sequence (Initializes the gdt, the idt, paging, the console, the physical memory manager, the pic, and software multitasking.
 	void kmain(multiboot_info_t* header, DWORD magic)
 	{
-		obos::g_multibootInfo = header;
+		obos::g_multibootInfo = reinterpret_cast<multiboot_info_t*>(reinterpret_cast<UINTPTR_T>(header) + 0xC0000000);
 
-		if (magic != MULTIBOOT_BOOTLOADER_MAGIC || header->mods_count != NUM_MODULES)
+		if (magic != MULTIBOOT_BOOTLOADER_MAGIC || g_multibootInfo->mods_count != NUM_MODULES)
 			return;
+
+		g_multibootInfo->apm_table += 0xC0000000;
+		g_multibootInfo->boot_loader_name += 0xC0000000;
+		g_multibootInfo->cmdline += 0xC0000000;
+		g_multibootInfo->config_table += 0xC0000000;
+		g_multibootInfo->drives_addr += 0xC0000000;
+		g_multibootInfo->mmap_addr += 0xC0000000;
+		g_multibootInfo->mods_addr += 0xC0000000;
+		{
+			multiboot_module_t* modules = (multiboot_module_t*)g_multibootInfo->mods_addr;
+			for(SIZE_T i = 0; i < g_multibootInfo->mods_count; i++)
+			{
+				modules[i].cmdline += 0xC0000000;
+				modules[i].mod_start += 0xC0000000;
+				modules[i].mod_end += 0xC0000000;
+			}
+		}
 		
 		EnterKernelSection();
 
@@ -210,7 +235,7 @@ namespace obos
 		{
 			PCHAR ptr = (PCHAR)memory::VirtualAlloc((PVOID)0x400000, 1, memory::VirtualAllocFlags::GLOBAL | memory::VirtualAllocFlags::WRITE_ENABLED);
 
-			memory::tlbFlush((UINT32_T)ptr);
+			memory::tlbFlush((UINTPTR_T)ptr);
 
 			for (PCHAR it = &_glb_text_start; it != &_glb_text_end; it++, ptr++)
 				*ptr = *it;
@@ -235,21 +260,22 @@ namespace obos
 
 		SIZE_T filesize = 0;
 		initrdDriver->pageDirectory->switchToThis();
-		char existsData = existsCallback("ahci", &filesize);
+		char existsData = existsCallback("nvme", &filesize);
 		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
 		if (!existsData)
-			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/ahci doesn't exist."));
+			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/nvme doesn't exist."));
 		PBYTE filedata = new BYTE[filesize];
 		initrdDriver->pageDirectory->switchToThis();
-		readCallback("ahci", (STRING)filedata, filesize);
+		readCallback("nvme", (STRING)filedata, filesize);
 		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
 
-		process::Process* ahciDriver = new process::Process{};
-		ahciDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
+		process::Process* nvmeDriver = new process::Process{};
+		nvmeDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
 		delete[] filedata;
 		if (ret)
 			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
-		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
+		//mainThread.WaitForThreadStatusChange(0);
+		// We don't need the handle anymore.
 		mainThread.closeHandle();
 
 		filesize = 0;
@@ -268,12 +294,14 @@ namespace obos
 		delete[] filedata;
 		if (ret)
 			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
-		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
+		//mainThread.WaitForThreadStatusChange(0);
+		// We don't need the handle anymore.
 		mainThread.closeHandle();
 
 		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
 		
 		SetConsoleColor(0x003399FF, 0x00000000);
+		ConsoleOutputString("\n");
 		ConsoleOutput(ascii_art, ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start);
 		SetConsoleColor(0xFFFFFFFF, 0x00000000);
 

@@ -13,6 +13,7 @@
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && val <= ((UINTPTR_T)(rEnd)))
 
 extern "C" UINTPTR_T boot_page_directory1;
+extern "C" char _stext;
 
 namespace obos
 {
@@ -51,7 +52,7 @@ namespace obos
 				return nullptr;
 			UINTPTR_T* array = nullptr;
 			if (m_array == &boot_page_directory1)
-				array = m_array;
+				array = reinterpret_cast<UINTPTR_T*>(reinterpret_cast<UINTPTR_T>(m_array) + 0xC0000000);
 			else
 				array = kmap_pageTable(m_array);
 			return array + pageTable;
@@ -62,7 +63,7 @@ namespace obos
 				return nullptr;
 			UINTPTR_T* array = nullptr;
 			if (m_array == &boot_page_directory1)
-				array = m_array;
+				array = reinterpret_cast<UINTPTR_T*>(reinterpret_cast<UINTPTR_T>(m_array) + 0xC0000000);
 			else
 				array = kmap_pageTable(m_array);
 			return (UINTPTR_T*)(array[pageTable] & 0xFFFFF000);
@@ -94,11 +95,20 @@ namespace obos
 			if (g_enabledPaging)
 				return;
 			memory::g_pageDirectory = new (g_pageDirectory) memory::PageDirectory{ &boot_page_directory1 };
+			//*memory::g_pageDirectory->getPageTableAddress(0) = 0;
 			*memory::g_pageDirectory->getPageTableAddress(1023) = (((UINTPTR_T)&s_lastPageTable) - 0xC0000000) | 7;
 			g_enabledPaging = true;
+			UINT32_T* pageTable = kmap_pageTable(memory::g_pageDirectory->getPageTable(768));
+			for (int i = PageDirectory::addressToPageTableIndex((reinterpret_cast<UINTPTR_T>(&_stext) >> 12) << 12);
+				i < PageDirectory::addressToPageTableIndex(((reinterpret_cast<UINTPTR_T>(&__erodata) >> 12) + 1) << 12); i++)
+			{
+				UINTPTR_T addr = indexToAddress(768, i);
+				(addr = addr);
+				pageTable[i] &= ~2;
+			}
 		}
 
-		void tlbFlush(UINT32_T addr)
+		void tlbFlush(UINTPTR_T addr)
 		{
 			asm volatile("invlpg (%0)" ::"b"(addr) : "memory");
 		}

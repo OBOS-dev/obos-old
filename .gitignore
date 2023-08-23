@@ -4,3 +4,4 @@
 out/Ubuntu/*
 disk.img
 /disk.img
+CMakePresets.json

@@ -4,6 +4,7 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
+#ifdef __i686__
 #include <elf/elf.h>
 #include <elf/elfStructures.h>
 
@@ -13,15 +14,12 @@
 
 #include <boot/multiboot.h>
 
-#include <klog.h>
-#include <inline-asm.h>
-
 namespace obos
 {
 	extern multiboot_info_t* g_multibootInfo;
 	namespace elfLoader
 	{
-		static DWORD load(PBYTE startAddress, SIZE_T size, UINTPTR_T& baseAddress)
+		static DWORD load(PBYTE startAddress, SIZE_T, UINTPTR_T& baseAddress)
 		{
 			Elf32_Ehdr* elfHeader = (Elf32_Ehdr*)startAddress;
 			Elf32_Phdr* programHeader = (Elf32_Phdr*)(GET_FUNC_ADDR(startAddress) + elfHeader->e_phoff);
@@ -148,3 +146,4 @@ namespace obos
 		}*/
 	}
 }
+#endif

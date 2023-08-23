@@ -144,21 +144,21 @@ typedef struct multiboot_elf_section_header_table multiboot_elf_section_header_t
 struct multiboot_info
 {
     /* Multiboot info version number */
-    multiboot_uint32_t flags;
+    multiboot_uint64_t flags;
 
     /* Available memory from BIOS */
-    multiboot_uint32_t mem_lower;
-    multiboot_uint32_t mem_upper;
+    multiboot_uint64_t mem_lower;
+    multiboot_uint64_t mem_upper;
 
     /* "root" partition */
-    multiboot_uint32_t boot_device;
+    multiboot_uint64_t boot_device;
 
     /* Kernel command line */
-    multiboot_uint32_t cmdline;
+    multiboot_uint64_t cmdline;
 
     /* Boot-Module list */
-    multiboot_uint32_t mods_count;
-    multiboot_uint32_t mods_addr;
+    multiboot_uint64_t mods_count;
+    multiboot_uint64_t mods_addr;
 
     union
     {
@@ -244,11 +244,11 @@ typedef struct multiboot_mmap_entry multiboot_memory_map_t;
 struct multiboot_mod_list
 {
     /* the memory used goes from bytes ’mod_start’ to ’mod_end-1’ inclusive */
-    multiboot_uint32_t mod_start;
-    multiboot_uint32_t mod_end;
+    multiboot_uint64_t mod_start;
+    multiboot_uint64_t mod_end;
 
     /* Module command line */
-    multiboot_uint32_t cmdline;
+    multiboot_uint64_t cmdline;
 
     /* padding to take it to 16 bytes (must be zero) */
     multiboot_uint32_t pad;

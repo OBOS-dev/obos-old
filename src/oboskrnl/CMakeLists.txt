@@ -30,14 +30,14 @@ set_source_files_properties(SOURCE "crti/src/crte.S" ASM-ATT)
 #                         "driver_api/interrupts.asm"      "syscalls/interrupts.asm"     
 # )
 
-file(GLOB_RECURSE oboskrnl_cxxSources *.cpp *.c)
-file(GLOB_RECURSE oboskrnl_headers *.h)
-file(GLOB_RECURSE oboskrnl_asmSources *.asm)
+# file(GLOB_RECURSE oboskrnl_cxxSources *.cpp *.c)
+# file(GLOB_RECURSE oboskrnl_headers *.h)
+# file(GLOB_RECURSE oboskrnl_asmSources *.asm)
 
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cxxSources} ${oboskrnl_headers})
 
 add_executable(oboskrnl ${oboskrnl_files})
-target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wextra> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=misleading-indentation> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-builtin-declaration-mismatch> 
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=unknown-pragmas>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=array-bounds>
@@ -50,18 +50,22 @@ target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE
 )
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}")
 target_link_options(oboskrnl 
-    PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/scripts/linker.ld"
-    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crti.S" 
+    PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}"
+#    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crti.S" 
     PUBLIC "${CRTBEGIN_DIRECTORY}"
     PUBLIC "${CRTEND_DIRECTORY}"
-    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crtn.S"
+#    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crtn.S"
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/oboskrnl.map"
     PUBLIC "-ffreestanding"
     PUBLIC "-nostdlib")
 target_link_libraries(oboskrnl PUBLIC ${LIBGCC})
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
-target_compile_definitions(oboskrnl PUBLIC CURSOR_SLEEP_TIME_2_5_MS=${CURSOR_SLEEP_TIME_2_5_MS} PUBLIC ZYAN_NO_LIBC=1)
+
+target_compile_definitions(oboskrnl PUBLIC CURSOR_SLEEP_TIME_2_5_MS=${CURSOR_SLEEP_TIME_2_5_MS}
+                                    PUBLIC CONSOLE_NEWLINE_SEQUENCE=\"${CONSOLE_NEWLINE_SEQUENCE}\" 
+                                    PUBLIC OBOS_ARCHITECTURE=${OBOS_ARCHITECTURE} 
+                                    PUBLIC ZYAN_NO_LIBC=1)
 
 message("Using linker script at " "${CMAKE_SOURCE_DIR}/scripts/linker.ld")
 message("crtbegin.o is at ${CRTBEGIN_DIRECTORY}")
@@ -74,20 +78,3 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 else()
     message(FATAL_ERROR "CMAKE_BUILD_TYPE must be \"Debug\".")
 endif()
-
-set(CMAKE_SYSTEM_NAME "Generic")
-set(CMAKE_SYSTEM_PROCESSOR "i686")
-
-set(CMAKE_C_COMPILER "i686-elf-gcc")
-set(CMAKE_CXX_COMPILER "i686-elf-g++")
-set(CMAKE_ASM-ATT_COMPILER "i686-elf-gcc")
-set(CMAKE_ASM_NASM_COMPILER "nasm")
-set(CMAKE_C_COMPILER_WORKS true)
-set(CMAKE_CXX_COMPILER_WORKS true)
-set(CMAKE_ASM-ATT_COMPILER_WORKS true)
-set(CMAKE_ASM_NAME_COMPILER_WORKS true)
-
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

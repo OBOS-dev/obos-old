@@ -15,7 +15,8 @@
           "description": "Adds the kernel's symbol file."
         },
         {
-          "text": "add-symbol-file C:/Code/obos/out/ahci"
+          "text": "add-symbol-file C:/Code/obos/out/nvme",
+          "ignoreFailures": true
         },
         {
           "text": "target remote :1234",
@@ -35,7 +36,7 @@
       ],
       "pipeTransport": { "disable": true },
       "showDisplayString": true,
-      "targetArchitecture": "x86",
+      "targetArchitecture": "x86_64",
       "miDebuggerServerAddress": ":1234"
     }
   ]

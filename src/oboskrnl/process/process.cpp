@@ -6,22 +6,25 @@
 
 #include <process/process.h>
 
-#include <memory_manager/paging/allocate.h>
 #include <memory_manager/paging/init.h>
+#include <memory_manager/physical.h>
 
 #include <multitasking/multitasking.h>
 #include <multitasking/threadHandle.h>
 #include <multitasking/thread.h>
+
+#include <multitasking/mutex/mutexHandle.h>
 
 #include <elf/elf.h>
 
 #include <inline-asm.h>
 #include <handle.h>
 #include <types.h>
+#include <klog.h>
 
 #include <utils/memory.h>
+#include <utils/bitfields.h>
 #include <utils/list.h>
-
 
 extern "C" UINTPTR_T boot_page_directory1;
 
@@ -44,12 +47,20 @@ namespace obos
 		{
 			DWORD(*main)() = (DWORD(*)())entry;
 			main();
+			// Call syscall 1 (ExitProcess) as we cannot call functions located in the kernel in user mode, which we are in.
 			asm volatile("push %eax; mov $1, %eax; mov %esp, %ebx; int $0x40;");
 		}
 		VOID DriverEntryPoint(PVOID entry)
 		{
 			DWORD(*main)() = (DWORD(*)())entry;
-			main();
+			DWORD ret = main();
+			if (ret != 0)
+			{
+				printf("\r\nDriver with pid %d failed to initialize with exit code %d.\r\n", multitasking::g_currentThread->owner->pid, ret);
+				// In case the driver disabled interrupts and they didn't get disabled;
+				asm volatile("sti" : : : "memory");
+				multitasking::g_currentThread->owner->TerminateProcess(ret);
+			}
 			EnterKernelSection();
 			auto currentThread = multitasking::GetCurrentThreadHandle();
 			currentThread->SetThreadPriority(multitasking::Thread::priority_t::IDLE);
@@ -58,6 +69,8 @@ namespace obos
 			multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread*, PVOID)->bool { return false; };
 			multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;
 			LeaveKernelSection();
+			// In case the driver disabled interrupts and they didn't get disabled;
+			asm volatile("sti" : : : "memory");
 			_int(0x30);
 		}
 
@@ -75,6 +88,7 @@ namespace obos
 			// Otherwise, you'll have a bad time.
 			utils::memzero(newPageDirectory, 4096);
 			UINTPTR_T* pBoot_page_directory1 = &boot_page_directory1;
+			pBoot_page_directory1 += 0x30000000/*0xC0000000*/;
 			// Clone the kernel page directory.
 			for (int i = 0; i < 1024; i++)
 				if(pBoot_page_directory1[i])
@@ -138,8 +152,9 @@ namespace obos
 
 			return 0;
 		}
-		static BYTE s_temporaryStack[8192] attribute(aligned(4096));
-		static PBYTE s_localVariable = nullptr;
+		/*static BYTE s_temporaryStack[8192] attribute(aligned(4096));
+		static multitasking::MutexHandle* s_temporaryStackMutex = nullptr;*/
+		static SIZE_T s_localVariable = 0;
 		static DWORD s_exitCode = 0;
 		DWORD Process::TerminateProcess(DWORD exitCode)
 		{
@@ -180,32 +195,54 @@ namespace obos
 			list_destroy(abstractHandles);
 			list_remove(g_processList, list_find(g_processList, this));
 			s_exitCode = exitCode;
-			if (this == multitasking::g_currentThread->owner)
-			{
-				UINTPTR_T* stack = (UINTPTR_T*)s_temporaryStack;
-				utils::memzero(s_temporaryStack, 8192);
-				stack[2047] = (UINTPTR_T)this;
-				// If we free all the memory for the process, that would include the current thread's stack, thus causing a triple fault.
-				// The only thing that could go wrong is if there is a cpu exception that enables interrupts when it returns, then the scheduler gets called, switching to another
-				// thread that also exits the process, then it will be overrwritten, and when this thread resumes execution, it would've been accessing garbage values, and would probably
-				// page fault.
-				stack += 2045;
-				asm volatile("mov %0, %%ebp;"
-							 "mov %0, %%esp;" : : "r"(stack) : "memory");
-			}
+			//if (this == multitasking::g_currentThread->owner)
+			//{
+			//	if (!s_temporaryStackMutex)
+			//		s_temporaryStackMutex = new multitasking::MutexHandle{};
+			//	else
+			//		s_temporaryStackMutex->Lock(); // Take ownership of the temporary stack.
+			//	UINTPTR_T* stack = (UINTPTR_T*)s_temporaryStack;
+			//	utils::memzero(s_temporaryStack, 8192);
+			//	stack[2047] = (UINTPTR_T)this;
+			//	stack += 2045;
+			//	asm volatile("mov %0, %%ebp;"
+			//				 "mov %0, %%esp;" : : "r"(stack) : "memory");
+			//}
 			// Free everything.
-			for (s_localVariable = (PBYTE)0x400000; s_localVariable != (PBYTE)0xC0000000; s_localVariable += 4096)
-				memory::VirtualFree(s_localVariable, 1);
-			for (s_localVariable = (PBYTE)0xE0000000; s_localVariable != (PBYTE)0xFFC00000; s_localVariable += 4096)
-				memory::VirtualFree(s_localVariable, 1);
+			for (s_localVariable = 0; s_localVariable != 768; s_localVariable++)
+			{
+				if (!pageDirectory->getPageTable(s_localVariable))
+					continue;
+				for (int i = 0; i < 1024; i++)
+				{
+					UINTPTR_T address = memory::kmap_pageTable(pageDirectory->getPageTable(s_localVariable))[i] & 0xFFFFF000;
+					if (address == 0x400000)
+						continue;
+					if (address)
+						utils::clearBitInBitfield(memory::g_availablePages[address >> 17], (address >> 12) % 32);
+				}
+			}
+			for (s_localVariable = 896; s_localVariable < 1023; s_localVariable++)
+			{
+				if (!pageDirectory->getPageTable(s_localVariable))
+					continue;
+				for (int i = 0; i < 1024; i++)
+				{
+					UINTPTR_T address = memory::kmap_pageTable(pageDirectory->getPageTable(s_localVariable))[i] & 0xFFFFF000;
+					if (address)
+						utils::clearBitInBitfield(memory::g_availablePages[address >> 17], (address >> 12) % 32);
+				}
+			}
+
 			delete pageDirectory;
+			
+			LeaveKernelSection();
 			this->exitCode = s_exitCode;
 			if (this == multitasking::g_currentThread->owner)
 			{
-				LeaveKernelSection();
-				multitasking::ExitThread(0);
+				//s_temporaryStackMutex->Unlock();
+				multitasking::ExitThread(s_exitCode);
 			}
-			LeaveKernelSection();
 			return 0;
 		}
 	}

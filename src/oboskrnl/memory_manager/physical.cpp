@@ -10,6 +10,7 @@
 #include <inline-asm.h>
 
 #include <boot/multiboot.h>
+#include <boot/boot.h>
 
 //// Trigger warning.
 //extern "C" char _ZN4obos5utils8Bitfield6setBitEh;
@@ -20,7 +21,6 @@
 
 namespace obos
 {
-	extern multiboot_info_t* g_multibootInfo;
 	namespace memory
 	{
 		utils::RawBitfield g_availablePages[g_countPages / 32];
@@ -42,7 +42,7 @@ namespace obos
 		}
 		static bool isAddressUsed(UINTPTR_T address)
 		{
-			if (inRange(address, 0, &endImage - 1))
+			if (address < 0x400000)
 				return false;
 			for (multiboot_memory_map_t* current = (multiboot_memory_map_t*)g_multibootInfo->mmap_addr;
 				current != (multiboot_memory_map_t*)(g_multibootInfo->mmap_addr + g_multibootInfo->mmap_length);

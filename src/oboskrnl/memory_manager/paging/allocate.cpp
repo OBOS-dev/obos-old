@@ -44,7 +44,7 @@ namespace obos
 			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
 			{
 				UINTPTR_T* pageTable = PageDirectory::addressToIndex(address) != 1023 ? kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address))) : 
-					(UINTPTR_T*)(((UINTPTR_T)&s_lastPageTable) - 0xC0000000);
+					(UINTPTR_T*)((UINTPTR_T)&s_lastPageTable);
 				pageTable[PageDirectory::addressToPageTableIndex(address)] = (UINTPTR_T)physicalAddress;
 				pageTable[PageDirectory::addressToPageTableIndex(address)] |= 1;
 				pageTable[PageDirectory::addressToPageTableIndex(address)] |= flags;
@@ -68,7 +68,7 @@ namespace obos
 						base = indexToAddress(i, 0);
 						break;
 					}
-						UINT32_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(i));
+						UINTPTR_T* pageTable = kmap_pageTable(g_pageDirectory->getPageTable(i));
 					for(int j = 0; j < 1024; j++)
 					{
 						if (!utils::testBitInBitfield(pageTable[j], 0))
