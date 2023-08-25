@@ -144,21 +144,21 @@ typedef struct multiboot_elf_section_header_table multiboot_elf_section_header_t
 struct multiboot_info
 {
     /* Multiboot info version number */
-    multiboot_uint64_t flags;
+    multiboot_uint32_t flags;
 
     /* Available memory from BIOS */
-    multiboot_uint64_t mem_lower;
-    multiboot_uint64_t mem_upper;
+    multiboot_uint32_t mem_lower;
+    multiboot_uint32_t mem_upper;
 
     /* "root" partition */
-    multiboot_uint64_t boot_device;
+    multiboot_uint32_t boot_device;
 
     /* Kernel command line */
-    multiboot_uint64_t cmdline;
+    multiboot_uint32_t cmdline;
 
     /* Boot-Module list */
-    multiboot_uint64_t mods_count;
-    multiboot_uint64_t mods_addr;
+    multiboot_uint32_t mods_count;
+    multiboot_uint32_t mods_addr;
 
     union
     {
@@ -191,7 +191,7 @@ struct multiboot_info
     multiboot_uint16_t vbe_interface_off;
     multiboot_uint16_t vbe_interface_len;
 
-    multiboot_uint64_t framebuffer_addr;
+    multiboot_uint32_t framebuffer_addr;
     multiboot_uint32_t framebuffer_pitch;
     multiboot_uint32_t framebuffer_width;
     multiboot_uint32_t framebuffer_height;
@@ -230,8 +230,14 @@ struct multiboot_color
 struct multiboot_mmap_entry
 {
     multiboot_uint32_t size;
+#if defined(__i686__)
+    multiboot_uint32_t addr;
+    multiboot_uint32_t len;
+#else
     multiboot_uint64_t addr;
     multiboot_uint64_t len;
+#endif
+
 #define MULTIBOOT_MEMORY_AVAILABLE              1
 #define MULTIBOOT_MEMORY_RESERVED               2
 #define MULTIBOOT_MEMORY_ACPI_RECLAIMABLE       3
@@ -244,11 +250,11 @@ typedef struct multiboot_mmap_entry multiboot_memory_map_t;
 struct multiboot_mod_list
 {
     /* the memory used goes from bytes ’mod_start’ to ’mod_end-1’ inclusive */
-    multiboot_uint64_t mod_start;
-    multiboot_uint64_t mod_end;
+    multiboot_uint32_t mod_start;
+    multiboot_uint32_t mod_end;
 
     /* Module command line */
-    multiboot_uint64_t cmdline;
+    multiboot_uint32_t cmdline;
 
     /* padding to take it to 16 bytes (must be zero) */
     multiboot_uint32_t pad;

@@ -17,7 +17,7 @@
 
 #include <console.h>
 
-#include <boot/multiboot.h>
+#include <boot/boot.h>
 
 #include <utils/memory.h>
 
@@ -25,12 +25,13 @@
 
 #include <multitasking/multitasking.h>
 
+#include <process/process.h>
+
 #define DEFINE_RESERVED_PARAMETERS volatile UINT32_T, volatile UINT32_T, volatile UINT32_T, volatile UINT32_T
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
 
 namespace obos
 {
-	extern multiboot_info_t* g_multibootInfo;
 	namespace memory
 	{
 		UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
@@ -316,6 +317,7 @@ namespace obos
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 
+#if defined(__i686__)
 		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS, PVOID linearAddress, PVOID* physicalAddress)
 		{
 			if (!memory::g_pageDirectory->getPageTableAddress(memory::PageDirectory::addressToIndex((UINTPTR_T)linearAddress)))
@@ -324,16 +326,20 @@ namespace obos
 				[memory::PageDirectory::addressToPageTableIndex((UINTPTR_T)linearAddress)] & 0xFFFFF000);
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-
+#elif defined(__x86_64__)
+		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS, PVOID, PVOID*)
+		{
+			return exitStatus::EXIT_STATUS_NOT_IMPLEMENTED;
+		}
+#endif
 
 		static void interruptHandler(const obos::interrupt_frame* frame)
 		{
 			if (g_registeredInterruptHandlers[frame->intNumber - 32].driver)
 			{
-				memory::PageDirectory* oldPagedir = memory::g_pageDirectory;
-				g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->pageDirectory->switchToThis();
+				g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->doContextSwitch();
 				g_registeredInterruptHandlers[frame->intNumber - 32].handler(frame);
-				oldPagedir->switchToThis();
+				multitasking::g_currentThread->owner->doContextSwitch();
 			}
 		}
 	}

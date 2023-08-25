@@ -57,4 +57,5 @@ SECTIONS
     
 }
 _ZN4obos6memory8endImageE = 0x400000;
+_ZN4obos11kernelStartE = 0xC0000000;
 _ZN4obos6memory9endKernelE = 0xE0000000;

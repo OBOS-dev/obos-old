@@ -48,7 +48,11 @@ namespace obos
 			DWORD(*main)() = (DWORD(*)())entry;
 			main();
 			// Call syscall 1 (ExitProcess) as we cannot call functions located in the kernel in user mode, which we are in.
+#if defined (__i686__)
 			asm volatile("push %eax; mov $1, %eax; mov %esp, %ebx; int $0x40;");
+#elif defined (__x86_64__)
+			asm volatile("push %rax; mov $1, %rax; mov %rsp, %rbx; int $0x40;");
+#endif
 		}
 		VOID DriverEntryPoint(PVOID entry)
 		{
@@ -76,12 +80,18 @@ namespace obos
 
 		DWORD Process::CreateProcess(PBYTE file, SIZE_T size, PVOID _mainThread, bool isDriver)
 		{
+#if defined(__i686__)
 			if (pageDirectory)
 				return (DWORD)-1;
+#elif defined(__x86_64__)
+			if (level4PageMap)
+				return (DWORD)-1;
+#endif
 			if (!g_processList)
 				g_processList = list_new();
 			EnterKernelSection();
 			pid = g_nextProcessId++;
+#if defined(__i686__)
 			pageDirectory = new memory::PageDirectory{};
 			UINTPTR_T* newPageDirectory = memory::kmap_pageTable(pageDirectory->getPageDirectory());
 			// We need to make sure the page directory is empty.
@@ -93,9 +103,12 @@ namespace obos
 			for (int i = 0; i < 1024; i++)
 				if(pBoot_page_directory1[i])
 					newPageDirectory[i] = pBoot_page_directory1[i];
-			// Leap of faith!
-			pageDirectory->switchToThis();
 			
+			pageDirectory->switchToThis();
+#elif defined(__x86_64__)
+
+#endif
+
 			children = list_new();
 			threads = list_new();
 			abstractHandles = list_new();
@@ -106,7 +119,7 @@ namespace obos
 			DWORD loaderRet = elfLoader::LoadElfFile(file, size, entry, base);
 			if (loaderRet)
 			{
-				multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+				multitasking::g_currentThread->owner->doContextSwitch();
 				LeaveKernelSection();
 				return loaderRet;
 			}
@@ -124,7 +137,7 @@ namespace obos
 				0);
 			if (ret)
 			{
-				multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+				multitasking::g_currentThread->owner->doContextSwitch();
 				LeaveKernelSection();
 				return 3 + ret;
 			}
@@ -142,7 +155,7 @@ namespace obos
 			}
 			
 			// Switch back the parent's page directory.
-			multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+			multitasking::g_currentThread->owner->doContextSwitch();
 
 			list_rpush(g_processList, list_node_new(this));
 
@@ -154,14 +167,21 @@ namespace obos
 		}
 		/*static BYTE s_temporaryStack[8192] attribute(aligned(4096));
 		static multitasking::MutexHandle* s_temporaryStackMutex = nullptr;*/
+#if defined(__i686__)
 		static SIZE_T s_localVariable = 0;
+#endif
 		static DWORD s_exitCode = 0;
 		DWORD Process::TerminateProcess(DWORD exitCode)
 		{
-			if (!pageDirectory)
+#if defined(__i686__)
+			if (pageDirectory)
 				return (DWORD)-1;
+#elif defined(__x86_64__)
+			if (level4PageMap)
+				return (DWORD)-1;
+#endif
 			EnterKernelSection();
-			pageDirectory->switchToThis();
+			doContextSwitch();
 			// Iterate over the children.
 			list_iterator_t* iter = list_iterator_new(children, LIST_HEAD);
 			for (list_node_t* _child = list_iterator_next(iter); _child != nullptr; _child = list_iterator_next(iter))
@@ -209,6 +229,7 @@ namespace obos
 			//				 "mov %0, %%esp;" : : "r"(stack) : "memory");
 			//}
 			// Free everything.
+#if defined(__i686__)
 			for (s_localVariable = 0; s_localVariable != 768; s_localVariable++)
 			{
 				if (!pageDirectory->getPageTable(s_localVariable))
@@ -233,9 +254,14 @@ namespace obos
 						utils::clearBitInBitfield(memory::g_availablePages[address >> 17], (address >> 12) % 32);
 				}
 			}
+#endif
 
+#if defined(__i686__)
 			delete pageDirectory;
-			
+#elif defined(__x86_64__)
+			delete level4PageMap;
+#endif
+
 			LeaveKernelSection();
 			this->exitCode = s_exitCode;
 			if (this == multitasking::g_currentThread->owner)
@@ -244,6 +270,15 @@ namespace obos
 				multitasking::ExitThread(s_exitCode);
 			}
 			return 0;
+		}
+
+		void Process::doContextSwitch()
+		{
+#if defined(__i686__)
+			pageDirectory->switchToThis();
+#elif defined(__x86_64__)
+			level4PageMap->switchToThis();
+#endif
 		}
 	}
 }

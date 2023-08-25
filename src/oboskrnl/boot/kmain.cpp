@@ -39,6 +39,8 @@
 #include <elf/elfStructures.h>
 #include <utils/memory.h>
 
+#include <boot/boot.h>
+
 #ifdef __INTELLISENSE__
 #undef _MSC_VER
 #endif
@@ -56,108 +58,81 @@ extern "C" char _glb_text_end;
 
 namespace obos
 {
+#if defined(__x86_64__)
+	obos::multiboot_info* g_multibootInfo;
+#elif defined(__i686__)
 	multiboot_info_t* g_multibootInfo;
+#endif
 	memory::PageDirectory g_pageDirectory;
+	extern char kernelStart;
+	
+	extern void pageFault(const interrupt_frame* frame);
+	extern void defaultExceptionHandler(const interrupt_frame* frame);
 
-	void pageFault(const interrupt_frame* frame)
+	// Initial boot sequence. Initializes all platform-specific things, and sets up multitasking, and jumps to kmainThr.
+	void kmain(::multiboot_info_t* header, DWORD magic)
 	{
-		const char* action = utils::testBitInBitfield(frame->errorCode, 1) ? "write" : "read";
-		const char* privilegeLevel = utils::testBitInBitfield(frame->errorCode, 2) ? "user" : "kernel";
-		const char* isPresent = utils::testBitInBitfield(frame->errorCode, 0) ? "present" : "non-present";
-		UINTPTR_T location = (UINTPTR_T)memory::GetPageFaultAddress();
-		extern UINT32_T* s_backbuffer;
-		DWORD pid = 0xFFFFFFFF;
-		if(multitasking::g_initialized)
-		{
-			if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
-				multitasking::g_currentThread->owner->TerminateProcess(0xFFFFFFF1);
-			pid = multitasking::g_currentThread->owner->pid;
-		}
-		if (!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
-			kpanic((PVOID)frame->ebp, (PVOID)frame->eip,
-			kpanic_format(
-				"Page fault in %s-mode at %p (tid %d, pid %d) while trying to %s a %s page.\r\nThe address of that page is %p (Page directory index %d, page table index %d).\r\nDumping registers: \r\n"
-				"\tEDI: %p\r\n"
-				"\tESI: %p\r\n"
-				"\tEBP: %p\r\n"
-				"\tESP: %p\r\n"
-				"\tEBX: %p\r\n"
-				"\tEDX: %p\r\n"
-				"\tECX: %p\r\n"
-				"\tEAX: %p\r\n"
-				"\tEIP: %p\r\n"
-				"\tEFLAGS: %p\r\n"
-				"\tSS: %p\r\n"
-				"\tDS: %p\r\n"
-				"\tCS: %p\r\n"),
-				privilegeLevel, frame->eip, multitasking::GetCurrentThreadTid(), pid, action, isPresent, location,
-				memory::PageDirectory::addressToIndex(location), memory::PageDirectory::addressToPageTableIndex(location),
-				frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
-				frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
-				frame->ss, frame->ds, frame->cs);
-		asm volatile("cli; hlt");
-	}
-	void defaultExceptionHandler(const interrupt_frame* frame)
-	{
-		if (frame->errorCode == 1 && utils::testBitInBitfield(frame->eflags, 8))
-		{
-			//utils::clearBitInBitfield(reinterpret_cast<UINT32_T>(const_cast<interrupt_frame*>(frame)->eflags), 8);
-			return;
-		}
-		DWORD pid = 0xFFFFFFFF;
-		if (multitasking::g_initialized)
-		{
-			if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
-				multitasking::g_currentThread->owner->TerminateProcess(~frame->intNumber);
-			pid = multitasking::g_currentThread->owner->pid;
-		}
-		kpanic((PVOID)frame->ebp, (PVOID)frame->eip,
-			kpanic_format(
-				"Unhandled exception %d at %p (tid %d, pid %d). Error code: %d. Dumping registers: \r\n"
-				"\tEDI: %p\r\n"
-				"\tESI: %p\r\n"
-				"\tEBP: %p\r\n"
-				"\tESP: %p\r\n"
-				"\tEBX: %p\r\n"
-				"\tEDX: %p\r\n"
-				"\tECX: %p\r\n"
-				"\tEAX: %p\r\n"
-				"\tEIP: %p\r\n"
-				"\tEFLAGS: %p\r\n"
-				"\tSS: %p\r\n"
-				"\tDS: %p\r\n"
-				"\tCS: %p\r\n"),
-				frame->intNumber,
-				frame->eip,
-				multitasking::GetCurrentThreadTid(), pid,
-				frame->errorCode,
-				frame->edi, frame->esi, frame->ebp, frame->esp, frame->ebx,
-				frame->edx, frame->ecx, frame->eax, frame->eip, frame->eflags,
-				frame->ss, frame->ds, frame->cs);
-	}
-
-	// Initial boot sequence (Initializes the gdt, the idt, paging, the console, the physical memory manager, the pic, and software multitasking.
-	void kmain(multiboot_info_t* header, DWORD magic)
-	{
-		obos::g_multibootInfo = reinterpret_cast<multiboot_info_t*>(reinterpret_cast<UINTPTR_T>(header) + 0xC0000000);
+		obos::g_multibootInfo = reinterpret_cast<obos::multiboot_info_t*>(reinterpret_cast<UINTPTR_T>(header) + reinterpret_cast<UINTPTR_T>(&kernelStart));
 
 		if (magic != MULTIBOOT_BOOTLOADER_MAGIC || g_multibootInfo->mods_count != NUM_MODULES)
 			return;
 
-		g_multibootInfo->apm_table += 0xC0000000;
-		g_multibootInfo->boot_loader_name += 0xC0000000;
-		g_multibootInfo->cmdline += 0xC0000000;
-		g_multibootInfo->config_table += 0xC0000000;
-		g_multibootInfo->drives_addr += 0xC0000000;
-		g_multibootInfo->mmap_addr += 0xC0000000;
-		g_multibootInfo->mods_addr += 0xC0000000;
+#if defined(__x86_64__)
+		g_multibootInfo->flags = header->flags;
+		g_multibootInfo->mem_upper = header->mem_upper;
+		g_multibootInfo->mem_lower = header->mem_lower;
+		g_multibootInfo->boot_device = header->boot_device;
+		g_multibootInfo->cmdline = header->cmdline;
+		g_multibootInfo->mods_addr = header->mods_addr;
+		g_multibootInfo->mods_count = header->mods_count;
+		utils::memcpy(&g_multibootInfo->u, &header->u, sizeof(header->u));
+		g_multibootInfo->mmap_addr = header->mmap_addr;
+		g_multibootInfo->mmap_length = header->mmap_length;
+		g_multibootInfo->drives_length = header->drives_length;
+		g_multibootInfo->drives_addr = header->drives_addr;
+		g_multibootInfo->config_table = header->config_table;
+		g_multibootInfo->boot_loader_name = header->boot_loader_name;
+		g_multibootInfo->apm_table = header->apm_table;
+		g_multibootInfo->vbe_control_info = header->vbe_control_info;
+		g_multibootInfo->vbe_mode_info = header->vbe_mode_info;
+		g_multibootInfo->vbe_mode = header->vbe_mode;
+		g_multibootInfo->vbe_interface_seg = header->vbe_interface_seg;
+		g_multibootInfo->vbe_interface_off = header->vbe_interface_off;
+		g_multibootInfo->vbe_interface_len = header->vbe_interface_len;
+		g_multibootInfo->framebuffer_addr = header->framebuffer_addr;
+		g_multibootInfo->framebuffer_pitch = header->framebuffer_pitch;
+		g_multibootInfo->framebuffer_width = header->framebuffer_width;
+		g_multibootInfo->framebuffer_height = header->framebuffer_height;
+		g_multibootInfo->framebuffer_bpp = header->framebuffer_bpp;
+		g_multibootInfo->framebuffer_type = header->framebuffer_type;
+		utils::memcpy(&g_multibootInfo->framebuffer_palette_addr, &header->framebuffer_palette_addr, 6);
+
 		{
-			multiboot_module_t* modules = (multiboot_module_t*)g_multibootInfo->mods_addr;
+			obos::multiboot_module_t* modules = (obos::multiboot_module_t*)g_multibootInfo->mods_addr;
+			::multiboot_module_t* modules32 = (::multiboot_module_t*)g_multibootInfo->mods_addr;
+			for (SIZE_T i = 0; i < g_multibootInfo->mods_count; i++)
+			{
+				modules[i].cmdline = modules32[i].cmdline + reinterpret_cast<UINTPTR_T>(&kernelStart);
+				modules[i].mod_start += modules32[i].mod_start + reinterpret_cast<UINTPTR_T>(&kernelStart);
+				modules[i].mod_end += modules32[i].mod_end + reinterpret_cast<UINTPTR_T>(&kernelStart);
+			}
+		}
+#endif
+
+		g_multibootInfo->apm_table += reinterpret_cast<UINTPTR_T>(&kernelStart);
+		g_multibootInfo->boot_loader_name += reinterpret_cast<UINTPTR_T>(&kernelStart);
+		g_multibootInfo->cmdline += reinterpret_cast<UINTPTR_T>(&kernelStart);
+		g_multibootInfo->config_table += reinterpret_cast<UINTPTR_T>(&kernelStart);
+		g_multibootInfo->drives_addr += reinterpret_cast<UINTPTR_T>(&kernelStart);
+		g_multibootInfo->mmap_addr += reinterpret_cast<UINTPTR_T>(&kernelStart);
+		g_multibootInfo->mods_addr += reinterpret_cast<UINTPTR_T>(&kernelStart);
+		{
+			obos::multiboot_module_t* modules = (obos::multiboot_module_t*)g_multibootInfo->mods_addr;
 			for(SIZE_T i = 0; i < g_multibootInfo->mods_count; i++)
 			{
-				modules[i].cmdline += 0xC0000000;
-				modules[i].mod_start += 0xC0000000;
-				modules[i].mod_end += 0xC0000000;
+				modules[i].cmdline += reinterpret_cast<UINTPTR_T>(&kernelStart);
+				modules[i].mod_start += reinterpret_cast<UINTPTR_T>(&kernelStart);
+				modules[i].mod_end += reinterpret_cast<UINTPTR_T>(&kernelStart);
 			}
 		}
 		
@@ -213,10 +188,14 @@ namespace obos
 	{ 
 		multitasking::g_initialized = true;
 
-		_init();
+		//_init();
 		g_kernelProcess = new process::Process{};
 
+#if defined(__i686__)
 		g_kernelProcess->pageDirectory = memory::g_pageDirectory;
+#elif defined(__x86_64__)
+		g_kernelProcess->level4PageMap = memory::g_level4PageMap;
+#endif
 		g_kernelProcess->pid = process::g_nextProcessId++;
 		g_kernelProcess->threads = list_new();
 		g_kernelProcess->abstractHandles = list_new();
@@ -259,15 +238,15 @@ namespace obos
 		void(*readCallback)(CSTRING filename, STRING output, SIZE_T size) = (void(*)(CSTRING filename, STRING output, SIZE_T size))driverAPI::g_registeredDrivers[1]->readCallback;
 
 		SIZE_T filesize = 0;
-		initrdDriver->pageDirectory->switchToThis();
+		initrdDriver->doContextSwitch();
 		char existsData = existsCallback("nvme", &filesize);
-		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+		multitasking::g_currentThread->owner->doContextSwitch();
 		if (!existsData)
 			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/nvme doesn't exist."));
 		PBYTE filedata = new BYTE[filesize];
-		initrdDriver->pageDirectory->switchToThis();
+		initrdDriver->doContextSwitch();
 		readCallback("nvme", (STRING)filedata, filesize);
-		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+		multitasking::g_currentThread->owner->doContextSwitch();
 
 		process::Process* nvmeDriver = new process::Process{};
 		nvmeDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
@@ -279,15 +258,15 @@ namespace obos
 		mainThread.closeHandle();
 
 		filesize = 0;
-		initrdDriver->pageDirectory->switchToThis();
+		initrdDriver->doContextSwitch();
 		existsData = existsCallback("ps2Keyboard", &filesize);
-		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+		multitasking::g_currentThread->owner->doContextSwitch();
 		if (!existsData)
 			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/ps2Keyboard doesn't exist."));
 		filedata = new BYTE[filesize];
-		initrdDriver->pageDirectory->switchToThis();
+		initrdDriver->doContextSwitch();
 		readCallback("ps2Keyboard", (STRING)filedata, filesize);
-		multitasking::g_currentThread->owner->pageDirectory->switchToThis();
+		multitasking::g_currentThread->owner->doContextSwitch();
 
 		process::Process* keyboardDriver = new process::Process{};
 		keyboardDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
@@ -298,7 +277,7 @@ namespace obos
 		// We don't need the handle anymore.
 		mainThread.closeHandle();
 
-		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
+		char* ascii_art = (STRING)((multiboot_mod_list64*)g_multibootInfo->mods_addr)[1].mod_start;
 		
 		SetConsoleColor(0x003399FF, 0x00000000);
 		ConsoleOutputString("\n");
@@ -334,7 +313,7 @@ extern "C"
 	atexitFuncEntry_t __atexitFuncs[ATEXIT_FUNC_MAX];
 	uarch_t __atexitFuncCount = 0;
 	
-	extern void* __dso_handle;
+	void* __dso_handle = (void*)0x27F187081FADCF;
 	
 	int __cxa_atexit(void (*f)(void*), void* objptr, void* dso) {
 		if (__atexitFuncCount >= ATEXIT_FUNC_MAX) {

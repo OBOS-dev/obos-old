@@ -84,7 +84,7 @@ namespace obos
 		static DWORD GetConsoleCursorPosition(DEFINE_RESERVED_PARAMETERS);
 		static DWORD ConsoleSwapBuffers(DEFINE_RESERVED_PARAMETERS);
 		static DWORD ClearConsole(DEFINE_RESERVED_PARAMETERS);
-		static DWORD VirtualAlloc(DEFINE_RESERVED_PARAMETERS);
+		static PVOID VirtualAlloc(DEFINE_RESERVED_PARAMETERS);
 		static DWORD VirtualFree(DEFINE_RESERVED_PARAMETERS);
 		static BOOL HasVirtualAddress(DEFINE_RESERVED_PARAMETERS);
 		static DWORD MemoryProtect(DEFINE_RESERVED_PARAMETERS);
@@ -92,7 +92,6 @@ namespace obos
 		UINTPTR_T g_syscallTable[512];
 		void RegisterSyscalls()
 		{
-			utils::dwMemset(g_syscallTable, (DWORD)do_nothing, sizeof(g_syscallTable) / sizeof(g_syscallTable[0]));
 			DWORD nextSyscall = 0;
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(ConsoleOutputString);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(ExitProcess);
@@ -134,6 +133,12 @@ namespace obos
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::VirtualFree);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::HasVirtualAddress);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::MemoryProtect);
+#if defined(__i686__)
+			utils::dwMemset(g_syscallTable + nextSyscall, (DWORD)do_nothing, sizeof(g_syscallTable) / sizeof(g_syscallTable[0]));
+#elif defined(__x86_64__)
+			for (SIZE_T i = nextSyscall; i < sizeof(g_syscallTable) / sizeof(g_syscallTable[0]); i++)
+				g_syscallTable[i] = reinterpret_cast<UINTPTR_T>(do_nothing);
+#endif
 		}
 
 		static void ConsoleOutputString(DEFINE_RESERVED_PARAMETERS)
@@ -677,10 +682,10 @@ namespace obos
 			obos::ClearConsole();
 			return 0;
 		}
-		static DWORD VirtualAlloc(DEFINE_RESERVED_PARAMETERS)
+		static PVOID VirtualAlloc(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+				return nullptr;
 			struct _par
 			{
 				PVOID _base;
@@ -688,12 +693,12 @@ namespace obos
 				utils::RawBitfield flags;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->_base, true) && par->_base != nullptr)
-				return 0xFFFFF000;
-			return (DWORD)memory::VirtualAlloc(par->_base, par->nPages, par->flags | memory::VirtualAllocFlags::GLOBAL);
+				return nullptr;
+			return memory::VirtualAlloc(par->_base, par->nPages, par->flags | memory::VirtualAllocFlags::GLOBAL);
 		}
 		static DWORD VirtualFree(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
+			if (!checkUserPtr(parameters))
 				return 0xFFFFF000;
 			struct _par
 			{
@@ -706,7 +711,7 @@ namespace obos
 		}
 		static BOOL HasVirtualAddress(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
+			if (!checkUserPtr(parameters))
 				return 0xFFFFF000;
 			struct _par
 			{

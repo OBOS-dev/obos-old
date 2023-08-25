@@ -17,10 +17,11 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 
 set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
 
-set(oboskrnl_asmSources "boot/x86-64/kernel_bootstrap.asm" # "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm"  "descriptors/idt/handlers.asm"
-                        # "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"         "inline-asm.asm"
-                        # "driver_api/interrupts.asm"      "syscalls/interrupts.asm"     
-)
+set(oboskrnl_asmSources "boot/x86-64/kernel_bootstrap.asm"		"x86-64/inline-asm.asm" "descriptors/idt/x86-64/handlers.asm" "descriptors/idt/x86-64/idt.asm" "utils/memcpy_x86-64.asm"
+						"memory_manager/paging/x86-64/init.asm")
+
+set(oboskrnl_platformSpecific "descriptors/idt/x86-64/idt.cpp" "x86-64/exception_handlers.cpp" "memory_manager/paging/x86-64/init.cpp" "memory_manager/paging/x86-64/allocate.cpp"
+							  "memory_manager/x86-64/physical.cpp")
 
 set (LINKER_SCRIPT "/src/oboskrnl/boot/x86-64/linker.ld")
 
@@ -32,4 +33,4 @@ string(STRIP "${LIBGCC}" LIBGCC)
 string(STRIP "${CRTBEGIN_DIRECTORY}" CRTBEGIN_DIRECTORY)
 string(STRIP "${CRTEND_DIRECTORY}" CRTEND_DIRECTORY)
 
-set(CMAKE_ASM_NASM_LINK_EXECUTABLE "x86_64-elf-gcc -T ${CMAKE_SOURCE_DIR}${LINKER_SCRIPT} -g -Xlinker -Map ${OUTPUT_DIR}/testProgram.map -ffreestanding -nostdlib <OBJECTS> -o ${OUTPUT_DIR}/oboskrnl -mcmodel=kernel")
+# set(CMAKE_ASM_NASM_LINK_EXECUTABLE "x86_64-elf-gcc -T ${CMAKE_SOURCE_DIR}${LINKER_SCRIPT} -g -Xlinker -Map ${OUTPUT_DIR}/testProgram.map -ffreestanding -nostdlib <OBJECTS> -o ${OUTPUT_DIR}/oboskrnl -mcmodel=kernel")

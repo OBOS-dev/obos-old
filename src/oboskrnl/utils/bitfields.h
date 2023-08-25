@@ -12,11 +12,17 @@ namespace obos
 {
 	namespace utils
 	{
-		// Bare functions. Use if polymorphism isn't working correctly.
+		// Bare functions.
 
 		void setBitInBitfield(UINT32_T& bitfield, UINT8_T bit);
 		void clearBitInBitfield(UINT32_T& bitfield, UINT8_T bit);
 		bool testBitInBitfield(const UINT32_T bitfield, UINT8_T bit);
+
+#ifdef __x86_64__
+		void setBitInBitfield(UINT64_T& bitfield, UINT8_T bit);
+		void clearBitInBitfield(UINT64_T& bitfield, UINT8_T bit);
+		bool testBitInBitfield(const UINT64_T bitfield, UINT8_T bit);
+#endif
 
 		class BitfieldBase
 		{
@@ -58,5 +64,6 @@ namespace obos
 	
 		using BitfieldBitmask = BitfieldBase;
 		using RawBitfield = UINT32_T;
+		using RawBitfield64 = UINT64_T;
 	}
 }

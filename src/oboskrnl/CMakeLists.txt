@@ -5,16 +5,15 @@
 set_source_files_properties(SOURCE "crti/src/crti.S" ASM-ATT)
 set_source_files_properties(SOURCE "crti/src/crte.S" ASM-ATT)
 
-# set(oboskrnl_cxxSources "boot/kmain.cpp"                    "console.cpp"                              "klog.cpp"                           "inline-asm.cpp"
-#                         "klog.cpp"                          "descriptors/gdt/gdt.cpp"                  "descriptors/idt/idt.cpp"            "memory_manager/physical.cpp"
-#                         "utils/bitfields.cpp"               "descriptors/idt/pic.cpp"                  "memory_manager/paging/init.cpp"     "memory_manager/paging/allocate.cpp"
-#                         "utils/memory.cpp"                  "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.c" "external/list/list_iterator.c"
-#                         "external/list/list_node.c"         "external/list/list.c"                     "multitasking/multitasking.cpp"      "multitasking/threadHandle.cpp"
-#                         "multitasking/thread.cpp"           "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "elf/elf.cpp"
-#                         "driver_api/interrupts.cpp"         "driver_api/syscalls.cpp"                  "syscalls/syscalls.cpp"              "process/process.cpp"
-#                         "external/amalgamated-dist/Zydis.c"
-# )
-# 
+set(oboskrnl_cxxSources "boot/kmain.cpp"            "console.cpp"                              "klog.cpp"                           "inline-asm.cpp"
+                        "klog.cpp"                  "utils/bitfields.cpp"                      "descriptors/idt/pic.cpp"            "external/list/list_iterator.c"
+                        "utils/memory.cpp"          "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.c" "multitasking/threadHandle.cpp"
+                        "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "elf/elf.cpp"
+                        "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "process/process.cpp"
+                        "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"                  "syscalls/syscalls.cpp"              "external/amalgamated-dist/Zydis.c"
+                        "descriptors/gdt/gdt.cpp"
+)
+
 # set(oboskrnl_headers "types.h"                            "boot/multiboot.h"                   "console.h"                    "klog.h"
 #                      "inline-asm.h"                       "descriptors/gdt/gdt.h"              "descriptors/idt/idt.h"        "memory_manager/physical.h"
 #                      "utils/bitfields.h"                  "descriptors/idt/pic.h"              "memory_manager/paging/init.h" "memory_manager/paging/allocate.h" 
@@ -24,17 +23,12 @@ set_source_files_properties(SOURCE "crti/src/crte.S" ASM-ATT)
 #                      "utils/hashTable.h"                  "process/process.h"                  "syscalls/syscalls.h"          "external/amalgamated-dist/Zydis.h"
 #                      "boot/boot.h"
 # )
-# 
-# set(oboskrnl_asmSources "boot/kernel_bootstrap-i686.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm"  "descriptors/idt/handlers.asm"
-#                         "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"         "inline-asm.asm"
-#                         "driver_api/interrupts.asm"      "syscalls/interrupts.asm"     
-# )
 
 # file(GLOB_RECURSE oboskrnl_cxxSources *.cpp *.c)
 # file(GLOB_RECURSE oboskrnl_headers *.h)
 # file(GLOB_RECURSE oboskrnl_asmSources *.asm)
 
-set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_cxxSources} ${oboskrnl_headers})
+set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_platformSpecific} ${oboskrnl_cxxSources})
 
 add_executable(oboskrnl ${oboskrnl_files})
 target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wextra> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
@@ -47,16 +41,21 @@ target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-g>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-delete-null-pointer-checks>
                                 PRIVATE $<$<COMPILE_LANGUAGE:C>:-fno-delete-null-pointer-checks>
+                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mno-red-zone>
+                                PRIVATE $<$<COMPILE_LANGUAGE:C>:-mno-red-zone>
+                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mcmodel=kernel>
+                                PRIVATE $<$<COMPILE_LANGUAGE:C>:-mcmodel=kernel>
 )
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}")
 target_link_options(oboskrnl 
     PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}"
 #    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crti.S" 
-    PUBLIC "${CRTBEGIN_DIRECTORY}"
-    PUBLIC "${CRTEND_DIRECTORY}"
+#    PUBLIC "${CRTBEGIN_DIRECTORY}"
+#    PUBLIC "${CRTEND_DIRECTORY}"
 #    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crtn.S"
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/oboskrnl.map"
     PUBLIC "-ffreestanding"
+    PUBLIC "-mcmodel=kernel"
     PUBLIC "-nostdlib")
 target_link_libraries(oboskrnl PUBLIC ${LIBGCC})
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")

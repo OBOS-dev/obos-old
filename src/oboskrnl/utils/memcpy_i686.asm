@@ -1,4 +1,4 @@
-; utils/memcpy.asm
+; utils/memcpy_i686.asm
 ; 
 ; 2023 Omar Berrow 
 ;

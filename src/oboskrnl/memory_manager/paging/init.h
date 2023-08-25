@@ -12,6 +12,7 @@ namespace obos
 {
 	namespace memory
 	{
+		// Only implemented on i686
 		class PageDirectory final
 		{
 		public:
@@ -23,10 +24,8 @@ namespace obos
 			void switchToThis();
 
 			// Always check if the address of the return value of this function is not nullptr.
-			// If there was a page table allocated, it will reallocate it.
 			UINTPTR_T* getPageTableAddress(UINT16_T pageTable);
 			// Always check if the address of the return value of this function is not nullptr.
-			// If there was a page table allocated, it will reallocate it.
 			UINTPTR_T* getPageTable(UINT16_T pageTable);
 
 			UINTPTR_T* getPageDirectory() { return m_array; }
@@ -42,8 +41,31 @@ namespace obos
 			bool m_initialized = false;
 			static void switchToThisAsm(UINTPTR_T address);
 		};
+		// Only valid in x86_64.
+		class PageMap
+		{
+		public:
+			PageMap();
+			// 'address' must be a physical address.
+			PageMap(UINTPTR_T* address);
+
+			// Use if you want to modify the entry in the level 4 page map.
+			UINTPTR_T* getLevel3PageMapAddress(UINT16_T level3PageMap);
+			// Use if you want to modify the entry in the level 3 page map.
+			UINTPTR_T* getLevel3PageMap(UINT16_T level3PageMap);
+			
+			void switchToThis();
+
+			~PageMap();
+
+			static UINT16_T computeIndexAtAddress(UINTPTR_T address, UINT8_T level) { return (address >> (9 * level + 12)) & 0x1FF; }
+		private:
+			UINTPTR_T* m_array = nullptr;
+			bool m_owns = false;
+			bool m_initialized = false;
+		};
 		extern PageDirectory* g_pageDirectory;
-		// Makes a page directory and switches to it, thus enabling paging.
+		extern PageMap* g_level4PageMap;
 		void InitializePaging();
 
 		void tlbFlush(UINTPTR_T addr);

@@ -1,5 +1,5 @@
 /* 
-	gdt.h
+	oboskrnl/descriptors/gdt/gdt.h
 
 	Copyright (c) 2023 Omar Berrow
 */

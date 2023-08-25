@@ -18,7 +18,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf32")
 
 set(oboskrnl_asmSources "boot/i686/kernel_bootstrap.asm" "descriptors/gdt/gdt.asm"       "descriptors/idt/idt.asm"  "descriptors/idt/handlers.asm"
-                        "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"         "inline-asm.asm"
+                        "memory_manager/paging/init.asm" "multitasking/multitasking.asm" "utils/memcpy.asm"         "i686/inline-asm.asm"
                         "driver_api/interrupts.asm"      "syscalls/interrupts.asm"     
 )
 

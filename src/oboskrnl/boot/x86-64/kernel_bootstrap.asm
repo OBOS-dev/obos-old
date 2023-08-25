@@ -33,8 +33,10 @@ boot_page_level3_map:
 boot_page_level4_map:
     times 4096 db 0
 align 4
-magic_number:
-    dd 0xFEFEFEFE
+; magic_number:
+;     dd 0xFEFEFEFE
+; multiboot_struct:
+;     dd 0xFEFEFEFE
 boot_stack_bottom:
     times 1024 db 0
 boot_stack:
@@ -54,8 +56,7 @@ GDT:
     dw $ - GDT - 1
     dd GDT
 
-global boot_page_directory1
-global boot_page_map_1
+global boot_page_level4_map
 
 section .bootstrap_stack nobits
 _ZN4obos12stack_bottomE:
@@ -92,7 +93,10 @@ _start:
 
     mov esp, boot_stack
 
-    mov [magic_number], eax
+    push eax
+    push 0
+    push ebx
+    push 0
 
     ; Check if we have cpuid.
     pushfd
@@ -135,8 +139,6 @@ _start:
 
 .finish:
 
-    db 0xeb, 0xfe
-
     lidt [IDT]
 
 ;   Enable PAE.
@@ -147,7 +149,7 @@ _start:
     mov eax, boot_page_level4_map
     mov cr3, eax
 
-;   Enable long mode.
+;   Enter long mode.
     mov ecx, 0xC0000080
     rdmsr
     ; Shouldn't be needed, but just in case
@@ -174,8 +176,6 @@ segment .text
 [bits 64]
 .paging_enabled:
 
-    mov rax, qword [magic_number]
-
 ;   One more thing to do...
     mov ax, 0x10
     mov ds, ax
@@ -185,6 +185,10 @@ segment .text
     mov gs, ax
 ; We're done setting up long mode!
 
+;   Restore rax and rbx
+    pop rbx
+    pop rax
+
 ; Setup the stack
     mov rsp, _ZN4obos9stack_topE
     xor rbp, rbp
@@ -192,7 +196,7 @@ segment .text
     ; Call the kernel.
     push rax
     push rbx
-    ;call _ZN4obos5kmainEP14multiboot_infoj
+    call _ZN4obos5kmainEP14multiboot_infoj
     
 ;   Reset the computer.
 

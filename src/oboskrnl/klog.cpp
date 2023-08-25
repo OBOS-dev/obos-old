@@ -238,8 +238,8 @@ namespace obos
 				case 'p':
 				{
 					char str[9];
-					utils::memzero(str, 9);
-					itoa_unsigned(va_arg(list, unsigned int), str, 16);
+					utils::memzero(str, 17);
+					itoa_unsigned(va_arg(list, UINTPTR_T), str, 16);
 					printChar('0', printCharUserdata);
 					printChar('x', printCharUserdata);
 					for (int i = 0; str[i]; i++)

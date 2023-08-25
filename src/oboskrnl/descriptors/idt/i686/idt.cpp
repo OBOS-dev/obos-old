@@ -4,7 +4,7 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
-#include <descriptors/idt/idt.h>
+#include <descriptors/idt/i686/idt.h>
 
 #include <driver_api/interrupts.h>
 

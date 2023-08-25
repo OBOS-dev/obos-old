@@ -17,7 +17,19 @@
 
 #include <console.h>
 
-
+#if defined(__i686__)
+#define isInKernelCode(frame) frame.eip >= 0xC0000000 && frame.eip < 0xE0000000
+#define setFrameAddress(frame_addr) \
+asm volatile("mov %0, %%eax" :\
+	: "r"(frame_addr)\
+	: "memory");
+#elif defined (__x86_64__)
+#define isInKernelCode(frame) frame.rip >= 0xFFFFFFFF80000000
+#define setFrameAddress(frame_addr) \
+asm volatile("mov %0, %%rax" :\
+	: "r"(frame_addr)\
+	: "memory");
+#endif
 
 namespace obos
 {
@@ -51,6 +63,7 @@ namespace obos
 			static Thread* s_newThread;
 			s_newThread = newThread;
 			if(g_currentThread)
+#if defined(__i686__)
 				if (s_newThread->owner->pageDirectory != memory::g_pageDirectory)
 				{
 					asm volatile("mov %0, %%esp;"
@@ -60,28 +73,32 @@ namespace obos
 					// No more parameters past this point.
 					s_newThread->owner->pageDirectory->switchToThis();
 				}
-			g_currentThread = s_newThread;
+#elif defined(__x86_64__)
+				if (s_newThread->owner->level4PageMap != memory::g_level4PageMap)
+				{
+					asm volatile("mov %0, %%rsp;"
+								 "mov %0, %%rbp" :
+												 : "r"(&stack_top)
+												 : "memory");
+					s_newThread->owner->doContextSwitch();
+				}
+#endif
+				g_currentThread = s_newThread;
 			if (g_currentThread->tid == 0)
 			{
-				asm volatile("mov %0, %%eax" :
-											 : "r"(&g_currentThread->frame)
-											 : "memory");
+				setFrameAddress(&g_currentThread->frame);
 				switchToTaskAsm();
 			}
-			if (!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall || (g_currentThread->frame.eip >= 0xC0000000 && g_currentThread->frame.eip < 0xE0000000))
+			if (!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall || isInKernelCode(g_currentThread->frame))
 			{
 				// If we're servicing a syscall, we need to set esp0 in the tss.
-				if(g_currentThread->isServicingSyscall || (g_currentThread->frame.eip >= 0xC0000000 && g_currentThread->frame.eip < 0xE0000000))
+				if(g_currentThread->isServicingSyscall || isInKernelCode(g_currentThread->frame))
 					SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
-				asm volatile("mov %0, %%eax" :
-											 : "r"(&g_currentThread->frame)
-											 : "memory");
+				
 				switchToTaskAsm();
 			}
 			SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
-			asm volatile("mov %0, %%eax" :
-										 : "r"(&g_currentThread->frame)
-										 : "memory");
+			setFrameAddress(&g_currentThread->frame);
 			switchToUserModeTask();
 		}
 
@@ -216,10 +233,17 @@ namespace obos
 			for(int i = 0; i < 4; g_threadPriorityList[i++] = list_new());
 			Thread* kmainThread = new Thread{};
 			kmainThread->tid = 0;
+#if defined(__i686__)
 			kmainThread->frame.eip = GET_FUNC_ADDR(kmainThr);
 			kmainThread->frame.esp = GET_FUNC_ADDR(&thrstack_top);
 			kmainThread->frame.ebp = 0;
-			kmainThread->frame.eflags = getEflags() | 0x200;
+			kmainThread->frame.eflags = getEflags();
+#else
+			kmainThread->frame.rip = GET_FUNC_ADDR(kmainThr);
+			kmainThread->frame.rsp = GET_FUNC_ADDR(&thrstack_top);
+			kmainThread->frame.rbp = 0;
+			kmainThread->frame.rflags = getEflags();
+#endif
 			kmainThread->priority = Thread::priority_t::NORMAL;
 			kmainThread->status = (UINT32_T)Thread::status_t::RUNNING;
 			kmainThread->exitCode = 0;

@@ -1,5 +1,5 @@
 /*
-	allocate.h
+	memory_manager/paging/allocate.h
 
 	Copyright (c) 2023 Omar Berrow
 */
@@ -26,17 +26,20 @@ namespace obos
 			{
 				WRITE_ENABLED = 2,
 				GLOBAL = 4,
-				CACHE_DISABLE = 16
+				CACHE_DISABLE = 16,
+#ifdef __x86_64__
+				EXECUTE_ENABLE = (1 << 63)
+#endif
 			};
 			VirtualAllocFlags() = default;
 			VirtualAllocFlags(UINT32_T value) 
 				:m_val{value}
 			{}
 
-			UINT32_T& getVal() { return m_val; }
+			UINTPTR_T& getVal() { return m_val; }
 			operator UINT32_T() { return m_val; }
 		private:
-			UINT32_T m_val;
+			UINTPTR_T m_val;
 		};
 		/// <summary>
 		/// Allocates virtual memory.
@@ -45,7 +48,7 @@ namespace obos
 		/// <param name="nPages">The amount of pages to allocate.</param>
 		/// <param name="flags">The allocation flags.</param>
 		/// <returns>The base address. If the base address was already allocated, nullptr.</returns>
-		PVOID VirtualAlloc(PVOID base, SIZE_T nPages, utils::RawBitfield flags);
+		PVOID VirtualAlloc(PVOID base, SIZE_T nPages, UINTPTR_T flags);
 		/// <summary>
 		/// Frees virtual memory. This will clear the pages if it doesn't fail.
 		/// </summary>
@@ -64,6 +67,6 @@ namespace obos
 		/// Changes the flags of the specified area of memory.
 		/// </summary>
 		/// <returns>Zero on success, and if the base is less 0x400000, or if you haven't allocated the pages, one..</returns>
-		DWORD MemoryProtect(PVOID base, SIZE_T nPages, utils::RawBitfield flags);
+		DWORD MemoryProtect(PVOID base, SIZE_T nPages, UINTPTR_T flags);
 	}
 }

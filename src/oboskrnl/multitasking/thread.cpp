@@ -61,6 +61,9 @@ namespace obos
 			if (!stackSizePages)
 				stackSizePages = 2;
 
+			// Setting up the registers is platform specific.
+
+#if defined(__i686__)
 			UINT32_T* stack = (UINT32_T*)memory::VirtualAlloc(nullptr, stackSizePages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
 			if (!stack)
 				return 2;
@@ -75,12 +78,29 @@ namespace obos
 			frame.esp = (UINTPTR_T)stack;
 			frame.eip = (UINTPTR_T)entry;
 			frame.ebp = 0;
+			utils::setBitInBitfield(frame.eflags, 9);
+#elif defined(__x86_64__)
+			UINTPTR_T* stack = (UINTPTR_T*)memory::VirtualAlloc(nullptr, stackSizePages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
+			if (!stack)
+				return 2;
+			stackBottom = stack;
+			this->stackSizePages = stackSizePages;
+			stack += stackSizePages * 512;
+			stack -= 1;
+			*stack = (UINTPTR_T)userData;
+			stack -= 1;
+			*stack = (UINTPTR_T)entry;
+
+			frame.rsp = (UINTPTR_T)stack;
+			frame.rip = (UINTPTR_T)entry;
+			frame.rbp = 0;
+			frame.rflags |= (1 << 9);
+#endif
 			// If our owner wasn't set before, then we'll use from the current thread's owner.
 			if(!owner)
 				owner = g_currentThread->owner;
 			list_rpush(g_currentThread->owner->threads, list_node_new(this));
 
-			utils::setBitInBitfield(frame.eflags, 9);
 
 			list_rpush(g_threads, list_node_new(this));
 			list_rpush(priorityList, list_node_new(this));

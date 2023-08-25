@@ -1,5 +1,5 @@
 /*
-	allocate.cpp
+	oboskrnl/memory_manager/i686/allocate.cpp
 
 	Copyright (c) 2023 Omar Berrow
 */
@@ -35,7 +35,7 @@ namespace obos
 			UINTPTR_T base = ROUND_ADDRESS_DOWN(GET_FUNC_ADDR(_base));
 			bool isFree = utils::testBitInBitfield(*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)), 0);
 			if (!isFree)
-				*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) = (UINTPTR_T)kalloc_physicalPages(1) | 3;
+				*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) = (UINTPTR_T)kalloc_physicalPages() | 3;
 			isFree = !isFree;
 			if (!isFree && !force)
 				base = HasVirtualAddress((PCVOID)base, nPages) ? 0 : base;
@@ -86,7 +86,7 @@ namespace obos
 			bool isFree = utils::testBitInBitfield(*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)), 0);
 			if (!isFree)
 			{
-				*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) = (UINTPTR_T)kalloc_physicalPages(1) | 3;
+				*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) = (UINTPTR_T)kalloc_physicalPages() | 3;
 				utils::memzero(kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(base))), 4096);
 			}
 			// Make sure the page directory is global if the page was allocated as global, so nothing goes wrong.
@@ -101,7 +101,7 @@ namespace obos
 				UINTPTR_T* pageTable = g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address));
 				pageTable = kmap_pageTable(pageTable);
 				UINTPTR_T entry = 0;
-				entry = (UINTPTR_T)kalloc_physicalPages(1);
+				entry = (UINTPTR_T)kalloc_physicalPages();
 				entry |= flags | 1;
 				entry &= 0xFFFFF017;
 				*(pageTable + PageDirectory::addressToPageTableIndex(address)) = entry;

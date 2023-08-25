@@ -18,6 +18,8 @@
 
 #include <new>
 
+#include <boot/boot.h>
+
 #define UpdateCursorPosition() SetTerminalCursorPosition(s_terminalColumn, s_terminalRow)
 extern void strreverse(char* begin, int size);
 
@@ -36,7 +38,6 @@ namespace obos
 	SIZE_T s_framebufferHeight = 0;
 	SIZE_T s_nCharsVertical = 0;
 	SIZE_T s_nCharsHorizontal = 0;
-	extern multiboot_info_t* g_multibootInfo;
 	PBYTE font = nullptr;
 	static multitasking::MutexHandle* s_consoleMutex;
 	static utils::IntegerBitfield s_modifiedLines[2];

@@ -121,5 +121,23 @@ namespace obos
 			UINT32_T val = bitfield >> bit;
 			return val & 0b1;
 		}
+
+#ifdef __x86_64__
+		void setBitInBitfield(UINT64_T& bitfield, UINT8_T bit)
+		{
+			bitfield |= (static_cast<UINT64_T>(1) << bit);
+		}
+		void clearBitInBitfield(UINT64_T& bitfield, UINT8_T bit)
+		{
+			bitfield &= ~(static_cast<UINT64_T>(1) << bit);
+		}
+		bool testBitInBitfield(const UINT64_T bitfield, UINT8_T bit)
+		{
+			if (!bitfield)
+				return false;
+			const UINT64_T val = bitfield >> bit;
+			return val & 0b1;
+		}
+#endif
 	}
 }

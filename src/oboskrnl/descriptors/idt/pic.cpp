@@ -134,7 +134,7 @@ namespace obos
 			interrupt -= 8;
 		sendCommandByte(0x0b);
 		UINT8_T isr_register = recvCommandByte();
-		return utils::testBitInBitfield(isr_register, interrupt);
+		return utils::testBitInBitfield((UINT32_T)isr_register, interrupt);
 	}
 
 	void SendEOI(BYTE irqNumber)

@@ -33,7 +33,7 @@ namespace obos
 
 		void PageDirectory::init()
 		{
-			m_array = (UINTPTR_T*)kalloc_physicalPages(1);
+			m_array = (UINTPTR_T*)kalloc_physicalPages();
 			m_owns = m_initialized = true;
 		}
 

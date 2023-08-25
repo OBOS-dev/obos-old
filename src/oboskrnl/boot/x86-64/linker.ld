@@ -29,6 +29,7 @@ SECTIONS
     . += 0xBFD03000;*/
     . += 0xFFFFFFFF80000000;
 
+
     .text ALIGN (4K) : AT (ADDR (.text) - 0xFFFFFFFF80000000)
     {
         _stext = .;
@@ -57,4 +58,5 @@ SECTIONS
     
 }
 _ZN4obos6memory8endImageE = 0x400000;
+_ZN4obos11kernelStartE = 0xFFFFFFFF80000000;
 _ZN4obos6memory9endKernelE = 0xFFFFFFFFFFFFFFFF;

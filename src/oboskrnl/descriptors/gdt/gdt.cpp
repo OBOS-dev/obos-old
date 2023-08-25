@@ -1,9 +1,10 @@
 /*
-	gdt.cpp
+	oboskrnl/descriptors/gdt/gdt.cpp
 
-	Copyright (c) 2023 gdt.cpp
+	Copyright (c) 2023 Omar Berrow
 */
 
+#ifdef __i686__
 #include <descriptors/gdt/gdt.h>
 
 #include <new>
@@ -95,3 +96,13 @@ namespace obos
 		g_tssEntry.esp0 = (UINTPTR_T)esp0;
 	}
 }
+#else
+namespace obos
+{
+	void InitializeGdt()
+	{
+		// If we're not on i686, then do nothing.
+	}
+	void SetTssStack(PVOID) {}
+}
+#endif
