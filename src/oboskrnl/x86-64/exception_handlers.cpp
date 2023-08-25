@@ -10,6 +10,8 @@
 
 #include <memory_manager/paging/init.h>
 
+#include <memory_manager/physical.h>
+
 #include <utils/bitfields.h>
 
 #include <types.h>
@@ -21,6 +23,10 @@
 
 namespace obos
 {
+	namespace memory
+	{
+		UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
+	}
 	void pageFault(const interrupt_frame* frame)
 	{
 		const char* action = utils::testBitInBitfield(frame->errorCode, 1) ? "write" : "read";
@@ -29,12 +35,40 @@ namespace obos
 		UINTPTR_T location = (UINTPTR_T)memory::GetPageFaultAddress();
 		extern UINT32_T* s_backbuffer;
 		DWORD pid = 0xFFFFFFFF;
-		/*if (multitasking::g_initialized)
+		if (utils::testBitInBitfield(frame->errorCode, 0))
+		{
+			// The page was present...
+			if (utils::testBitInBitfield(memory::g_level4PageMap->getPageTableEntry(
+					memory::PageMap::computeIndexAtAddress(location & 0xfff, 3),
+					memory::PageMap::computeIndexAtAddress(location & 0xfff, 2),
+					memory::PageMap::computeIndexAtAddress(location & 0xfff, 2),
+					memory::PageMap::computeIndexAtAddress(location & 0xfff, 1)), 9))
+			{
+				// Allocate the page, and apply the flags.
+				UINTPTR_T* pageTable = memory::kmap_pageTable(
+					memory::g_level4PageMap->getPageTable(
+							memory::PageMap::computeIndexAtAddress(location & 0xfff, 2), 
+							memory::PageMap::computeIndexAtAddress(location & 0xfff, 1),
+							memory::PageMap::computeIndexAtAddress(location & 0xfff, 0)));
+				UINTPTR_T& entry = pageTable[memory::PageMap::computeIndexAtAddress(location, 0)];
+				UINTPTR_T flags = entry >> 52;
+				utils::clearBitInBitfield(flags, 6);
+				bool canExecute = !utils::testBitInBitfield(flags, 8);
+				UINTPTR_T newEntry = reinterpret_cast<UINTPTR_T>(memory::kalloc_physicalPage());
+				newEntry |= 1 | flags;
+				if(!canExecute)
+					utils::setBitInBitfield(newEntry, 63);
+				entry = newEntry;
+				return; // Make it out like nothing happened...
+			}
+		}
+		if (multitasking::g_initialized)
 		{
 			if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
 				multitasking::g_currentThread->owner->TerminateProcess(0xFFFFFFF1);
-			pid = multitasking::g_currentThread->owner->pid;
-		}*/
+			if(multitasking::g_currentThread->owner)
+				pid = multitasking::g_currentThread->owner->pid;
+		}
 		if (!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
 			kpanic((PVOID)frame->rbp, (PVOID)frame->rip,
 				kpanic_format(
@@ -81,7 +115,8 @@ namespace obos
 		{
 			if (multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->isUserMode)
 				multitasking::g_currentThread->owner->TerminateProcess(~frame->intNumber);
-			pid = multitasking::g_currentThread->owner->pid;
+			if(multitasking::g_currentThread->owner)
+				pid = multitasking::g_currentThread->owner->pid;
 		}
 		kpanic((PVOID)frame->rbp, (PVOID)frame->rip,
 			kpanic_format(

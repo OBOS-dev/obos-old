@@ -388,7 +388,7 @@ namespace obos
 			addr2func((PVOID)current->eip, func, functionAddress);
 			printf_noFlush("%s%d: %p (%s+%d)\r\n", prefix, i, current->eip, func ? func : "[external code]", functionAddress ? (current->eip - functionAddress) : 0);
 			if(func)
-				delete func;
+				delete[] func;
 		}
 	}
 	void disassemble(PVOID _eip, CSTRING prefix)
@@ -403,7 +403,7 @@ namespace obos
 		addr2file(_eip, filename);
 		printf_noFlush("Disassembly of address %p (%s):\r\n", _eip, filename ? filename : "Unknown file.");
 		if(filename)
-			delete filename;
+			delete[] filename;
 #ifdef __i686__
 		ZyanU32 eip = reinterpret_cast<ZyanU32>(_eip);
 #else

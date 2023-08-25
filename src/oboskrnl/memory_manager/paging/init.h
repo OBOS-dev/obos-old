@@ -35,7 +35,7 @@ namespace obos
 			static UINT16_T addressToIndex(UINTPTR_T base);
 			static UINT16_T addressToPageTableIndex(UINTPTR_T base);
 		private:
-			// NOTE: Do not change the position of this variable. Don't to do it if you don't want to have a bad time.
+			// NOTE: Do not change the position of this variable. Don't do it if you don't want to have a bad time.
 			UINTPTR_T* m_array = nullptr;
 			bool m_owns = false;
 			bool m_initialized = false;
@@ -51,9 +51,22 @@ namespace obos
 
 			// Use if you want to modify the entry in the level 4 page map.
 			UINTPTR_T* getLevel3PageMapAddress(UINT16_T level3PageMap);
-			// Use if you want to modify the entry in the level 3 page map.
+			// Use if you want to modify the entry in the level 3 page map. Returns an array.
+			// Can also be called getLevel4PageMapEntry().	
 			UINTPTR_T* getLevel3PageMap(UINT16_T level3PageMap);
+			// Use if you want to modify the entry in the page directory. Returns an array.
+			// Can also be called getLevel3PageMapEntry()
+			UINTPTR_T* getPageDirectory(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex);
+			UINTPTR_T* getPageDirectoryRealtive(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex);
+			// Use if you want to modify the entry in the page table. Returns an array.
+			// Can also be called getPageDirectoryEntry()
+			UINTPTR_T* getPageTable(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex);
+			UINTPTR_T* getPageTableRealtive(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex);
+			// Returns a physical address.
+			UINTPTR_T getPageTableEntry(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex, UINT16_T index);
 			
+			UINTPTR_T* getPageMap() const { return m_array; }
+
 			void switchToThis();
 
 			~PageMap();

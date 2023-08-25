@@ -36,14 +36,15 @@ target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=unknown-pragmas>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-error=array-bounds>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-volatile>
+                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-overloaded-virtual>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-g>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-delete-null-pointer-checks>
-                                PRIVATE $<$<COMPILE_LANGUAGE:C>:-fno-delete-null-pointer-checks>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mno-red-zone>
-                                PRIVATE $<$<COMPILE_LANGUAGE:C>:-mno-red-zone>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mcmodel=kernel>
+                                PRIVATE $<$<COMPILE_LANGUAGE:C>:-fno-delete-null-pointer-checks>
+                                PRIVATE $<$<COMPILE_LANGUAGE:C>:-mno-red-zone>
                                 PRIVATE $<$<COMPILE_LANGUAGE:C>:-mcmodel=kernel>
 )
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}")

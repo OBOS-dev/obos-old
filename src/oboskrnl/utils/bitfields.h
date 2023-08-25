@@ -49,7 +49,7 @@ namespace obos
 			virtual void clearBit(UINT8_T bit);
 			virtual bool getBit(UINT8_T bit) const;
 
-			virtual bool operator[](UINT8_T bit) const;
+			virtual bool operator[](UINT8_T bitmask) const;
 
 			virtual operator bool();
 		};
