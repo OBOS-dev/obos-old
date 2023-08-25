@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/src/oboskrnl/**"
+            ],
+            "defines": [],
+            "compilerPath": "/home/omar/opt/cross/bin/x86_64-elf-g++",
+            "cStandard": "c17",
+            "cppStandard": "gnu++20",
+            "intelliSenseMode": "gcc-x64",
+            "configurationProvider": "ms-vscode.cmake-tools",
+            "compilerArgs": [
+                "-Wall",
+                "-Wextra ",
+                "-Werror ",
+                "-Wno-error=misleading-indentation ",
+                "-Wno-builtin-declaration-mismatch ",
+                "-Wno-error=unknown-pragmas ",
+                "-Wno-error=array-bounds ",
+                "-Wno-volatile ",
+                "-Wno-overloaded-virtual ",
+                "-std=gnu++20 ",
+                "-fno-rtti ",
+                "-fno-exceptions ",
+                "-g ",
+                "-fno-delete-null-pointer-checks ",
+                "-mno-red-zone ",
+                "-mcmodel=kernel"
+            ]
+        }
+    ],
+    "version": 4
+}

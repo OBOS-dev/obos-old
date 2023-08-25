@@ -18,6 +18,8 @@ namespace obos
 
 	namespace memory
 	{
+		UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
+
 		UINT64_T* g_physicalMemoryBitfield = nullptr;
 		SIZE_T g_sizeOfMemory = 0;
 		SIZE_T g_nPagesAllocated = 0;
@@ -75,20 +77,22 @@ namespace obos
 			{
 				for (; s_availablePagesIndex < g_bitfieldCount; s_availablePagesIndex++)
 				{
-					if (g_physicalMemoryBitfield[s_availablePagesIndex] == 0xFFFFFFFF)
+					UINT64_T* physicalMemoryBitfield = (UINT64_T*)kmap_pageTable(g_physicalMemoryBitfield + s_availablePagesIndex);
+					if (*physicalMemoryBitfield == 0xFFFFFFFF)
 						continue;
 					for (; s_availablePagesBit < 32; s_availablePagesBit++)
 					{
-						if (!utils::testBitInBitfield(g_physicalMemoryBitfield[s_availablePagesIndex], s_availablePagesBit))
+						if (!utils::testBitInBitfield(*physicalMemoryBitfield, s_availablePagesBit))
 							break;
 					}
-					if (!utils::testBitInBitfield(g_physicalMemoryBitfield[s_availablePagesIndex], s_availablePagesBit))
+					if (!utils::testBitInBitfield(*physicalMemoryBitfield, s_availablePagesBit))
 						break;
 				}
+				UINT64_T* physicalMemoryBitfield = (UINT64_T*)kmap_pageTable(g_physicalMemoryBitfield + s_availablePagesIndex);
 				UINTPTR_T address = indexToAddress(s_availablePagesIndex, s_availablePagesBit);
 				if (isAddressUsed(address))
 					continue;
-				utils::setBitInBitfield(g_physicalMemoryBitfield[s_availablePagesIndex], s_availablePagesBit);
+				utils::setBitInBitfield(*physicalMemoryBitfield, s_availablePagesBit);
 				return reinterpret_cast<PVOID>(address);
 			}
 			return nullptr;
@@ -100,11 +104,12 @@ namespace obos
 			SIZE_T index = addressToIndex(base, &bit);
 			if (index > g_bitfieldCount)
 				return 1;
-			if (!utils::testBitInBitfield(g_physicalMemoryBitfield[index], bit))
+			UINT64_T* physicalMemoryBitfield = (UINT64_T*)kmap_pageTable(g_physicalMemoryBitfield + s_availablePagesIndex);
+			if (!utils::testBitInBitfield(*physicalMemoryBitfield, bit))
 				return 1;
 			s_availablePagesIndex = index;
 			s_availablePagesBit = bit;
-			utils::clearBitInBitfield(g_physicalMemoryBitfield[index], bit);
+			utils::clearBitInBitfield(*physicalMemoryBitfield, bit);
 			return 0;
 		}
 	}

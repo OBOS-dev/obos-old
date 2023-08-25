@@ -11,6 +11,7 @@
 
 #define ROUND_ADDRESS_DOWN(addr) ((UINTPTR_T)((addr >> 12) << 12))
 #define ROUND_ADDRESS_UP(addr) ((UINTPTR_T)((addr >> 12) << 12) + 4096)
+// 
 
 namespace obos
 {
@@ -22,15 +23,12 @@ namespace obos
 		class VirtualAllocFlags
 		{
 		public:
-			enum
-			{
-				WRITE_ENABLED = 2,
-				GLOBAL = 4,
-				CACHE_DISABLE = 16,
+			static inline constexpr UINTPTR_T WRITE_ENABLED = 2;
+			static inline constexpr UINTPTR_T GLOBAL = 4;
+			static inline constexpr UINTPTR_T CACHE_DISABLE = 16;
 #ifdef __x86_64__
-				EXECUTE_ENABLE = (1 << 63)
+			static inline constexpr UINTPTR_T EXECUTE_ENABLE = 0x8000000000000000;
 #endif
-			};
 			VirtualAllocFlags() = default;
 			VirtualAllocFlags(UINT32_T value) 
 				:m_val{value}
