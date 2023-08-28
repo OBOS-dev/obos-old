@@ -13,6 +13,7 @@
 #include <memory_manager/physical.h>
 
 #include <utils/bitfields.h>
+#include <utils/memory.h>
 
 #include <types.h>
 
@@ -25,7 +26,8 @@ namespace obos
 {
 	namespace memory
 	{
-		UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
+		extern UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
+		extern bool CPUSupportsExecuteDisable();
 	}
 	void pageFault(const interrupt_frame* frame)
 	{
@@ -38,27 +40,36 @@ namespace obos
 		if (utils::testBitInBitfield(frame->errorCode, 0))
 		{
 			// The page was present...
-			if (utils::testBitInBitfield(memory::g_level4PageMap->getPageTableEntry(
-					memory::PageMap::computeIndexAtAddress(location & 0xfff, 3),
-					memory::PageMap::computeIndexAtAddress(location & 0xfff, 2),
-					memory::PageMap::computeIndexAtAddress(location & 0xfff, 2),
-					memory::PageMap::computeIndexAtAddress(location & 0xfff, 1)), 9))
+			if (utils::testBitInBitfield(memory::g_level4PageMap->getRealPageTableEntry(
+					memory::PageMap::computeIndexAtAddress(location & (~0xfff), 3),
+					memory::PageMap::computeIndexAtAddress(location & (~0xfff), 2),
+					memory::PageMap::computeIndexAtAddress(location & (~0xfff), 1),
+					memory::PageMap::computeIndexAtAddress(location & (~0xfff), 0)), 9))
 			{
+				UINTPTR_T* pageTablePhys = nullptr;
 				// Allocate the page, and apply the flags.
-				UINTPTR_T* pageTable = memory::kmap_pageTable(
-					memory::g_level4PageMap->getPageTable(
-							memory::PageMap::computeIndexAtAddress(location & 0xfff, 2), 
-							memory::PageMap::computeIndexAtAddress(location & 0xfff, 1),
-							memory::PageMap::computeIndexAtAddress(location & 0xfff, 0)));
-				UINTPTR_T& entry = pageTable[memory::PageMap::computeIndexAtAddress(location, 0)];
-				UINTPTR_T flags = entry >> 52;
-				utils::clearBitInBitfield(flags, 6);
+				UINTPTR_T* pageTable = 
+					memory::g_level4PageMap->getPageTableRealtive(
+							memory::PageMap::computeIndexAtAddress(location & ~(0xfff), 3), 
+							memory::PageMap::computeIndexAtAddress(location & ~(0xfff), 2),
+							memory::PageMap::computeIndexAtAddress(location & ~(0xfff), 1));
+				pageTablePhys = pageTable;
+				pageTablePhys = reinterpret_cast<UINTPTR_T*>(*pageTablePhys & 0xFFFFFFFFFF000);
+				pageTable = memory::kmap_pageTable(pageTablePhys);
+				UINTPTR_T* entry = &pageTable[memory::PageMap::computeIndexAtAddress(location, 0)];
+				UINTPTR_T flags = (*entry >> 52) & 0b11111;
+				//utils::clearBitInBitfield(flags, 6);
 				bool canExecute = !utils::testBitInBitfield(flags, 8);
 				UINTPTR_T newEntry = reinterpret_cast<UINTPTR_T>(memory::kalloc_physicalPage());
 				newEntry |= 1 | flags;
-				if(!canExecute)
+				if(!canExecute && memory::CPUSupportsExecuteDisable())
 					utils::setBitInBitfield(newEntry, 63);
-				entry = newEntry;
+				pageTable = memory::kmap_pageTable(pageTablePhys);
+				*entry = newEntry;
+				memory::tlbFlush(location & (~0xFFF));
+				// Zero out the page, as it would be weird if the program writes to the memory, then the value they wrote is in there, with a lot of garbage 
+				// (or possibly sensitive data from another program) that wasn't there before.
+				utils::dwMemset(reinterpret_cast<DWORD*>(memory::kmap_pageTable(PVOID(newEntry & 0xFFFFFFFFFF000))), 0, 1024);
 				return; // Make it out like nothing happened...
 			}
 		}
@@ -69,10 +80,12 @@ namespace obos
 			if(multitasking::g_currentThread->owner)
 				pid = multitasking::g_currentThread->owner->pid;
 		}
+		if (utils::testBitInBitfield(frame->errorCode, 4))
+			action = "execute";
 		if (!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
 			kpanic((PVOID)frame->rbp, (PVOID)frame->rip,
 				kpanic_format(
-					"Page fault in %s-mode at %p (tid %d, pid %d) while trying to %s a %s page.\r\nThe address of that page is %p.\r\nDumping registers: \r\n"
+					"Page fault in %s-mode at %p (tid %d, pid %d) while trying to %s a %s page.\r\nThe address of that page is %p. Error code: %d\r\nDumping registers: \r\n"
 					"\tRDI: %p\r\n"
 					"\tRSI: %p\r\n"
 					"\tRBP: %p\r\n"
@@ -95,6 +108,7 @@ namespace obos
 					"\tDS: %p\r\n"
 					"\tCS: %p\r\n"),
 				privilegeLevel, frame->rip, multitasking::GetCurrentThreadTid(), pid, action, isPresent, location,
+				frame->errorCode, // Some bits are not translated by the handler.
 				frame->rdi, frame->rsi, frame->rbp, frame->rsp, frame->rbx,
 				frame->rdx, frame->rcx, frame->rax, frame->rip, 
 				frame->r8, frame->r9, frame->r10, frame->r11,
@@ -107,7 +121,7 @@ namespace obos
 	{
 		if (frame->errorCode == 1 && utils::testBitInBitfield(frame->rflags, 8))
 		{
-			//utils::clearBitInBitfield(reinterpret_cast<UINT32_T>(const_cast<interrupt_frame*>(frame)->eflags), 8);
+			utils::clearBitInBitfield(const_cast<interrupt_frame*>(frame)->rflags, 8);
 			return;
 		}
 		DWORD pid = 0xFFFFFFFF;

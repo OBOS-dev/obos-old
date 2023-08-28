@@ -105,6 +105,7 @@ namespace obos
 	{
 		EnterKernelSection();
 		lineSequence = !utils::strcmp(CONSOLE_NEWLINE_SEQUENCE, "LF");
+		s_backbuffer = nullptr;
 		new (s_modifiedLines) utils::IntegerBitfield{};
 		new (s_modifiedLines + 1) utils::IntegerBitfield{};
 		s_framebuffer = (UINT32_T*)0xFFCFF000;
@@ -114,12 +115,12 @@ namespace obos
 		s_framebufferWidth = g_multibootInfo->framebuffer_width;
 		s_nCharsVertical = s_framebufferHeight / 16;
 		s_nCharsHorizontal = s_framebufferWidth / 8;
-		if (!s_consoleMutex)
-			s_consoleMutex = new multitasking::MutexHandle{};
-		if(!s_backbuffer)
-			s_backbuffer = (UINT32_T*)memory::VirtualAlloc(nullptr, (s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12, memory::VirtualAllocFlags::WRITE_ENABLED);
+		s_consoleMutex = new multitasking::MutexHandle{};
+		s_backbuffer = (UINT32_T*)memory::VirtualAlloc(nullptr, (s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12, memory::VirtualAllocFlags::WRITE_ENABLED);
 		s_consoleMutex->Lock();
-		utils::memzero(s_backbuffer, s_framebufferWidth * s_framebufferHeight * 4);
+#ifndef __x86_64__
+		utils::dwMemset(s_backbuffer, backgroundColor, s_framebufferWidth * s_framebufferHeight * 4);
+#endif
 		font = (PBYTE)(((multiboot_module_t*)g_multibootInfo->mods_addr)->mod_start);
 		SetConsoleColor(foregroundColor, backgroundColor);
 		utils::dwMemset(s_framebuffer, s_backgroundColor, s_framebufferWidth * s_framebufferHeight);

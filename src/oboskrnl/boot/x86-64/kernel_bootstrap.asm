@@ -26,17 +26,23 @@ multiboot_header:
 align 4096
 boot_page_table1:
     times 4096 db 0
+boot_page_table2:
+    times 4096 db 0
+boot_page_table3:
+    times 4096 db 0
 boot_page_directory1:
     times 4096 db 0
 boot_page_level3_map:
     times 4096 db 0
+boot_page_level3_map1:
+    times 4096 db 0
 boot_page_level4_map:
     times 4096 db 0
 align 4
-; magic_number:
-;     dd 0xFEFEFEFE
-; multiboot_struct:
-;     dd 0xFEFEFEFE
+magic_number:
+    dd 0xFEFEFEFE
+multiboot_struct:
+    dd 0xFEFEFEFE
 boot_stack_bottom:
     times 1024 db 0
 boot_stack:
@@ -57,6 +63,7 @@ GDT:
     dd GDT
 
 global boot_page_level4_map
+global boot_page_level3_map
 
 section .bootstrap_stack nobits
 _ZN4obos12stack_bottomE:
@@ -93,10 +100,8 @@ _start:
 
     mov esp, boot_stack
 
-    push eax
-    push 0
-    push ebx
-    push 0
+    mov [magic_number], eax
+    mov [multiboot_struct], ebx
 
     ; Check if we have cpuid.
     pushfd
@@ -116,19 +121,30 @@ _start:
 
     mov dword [boot_page_level4_map], boot_page_level3_map
     or dword [boot_page_level4_map], 3
+    
     mov dword [boot_page_level3_map], boot_page_directory1
     or dword [boot_page_level3_map], 3
+    
     mov dword [boot_page_directory1], boot_page_table1
     or dword [boot_page_directory1], 3
+    
+    mov dword [boot_page_directory1+8], boot_page_table2
+    or dword [boot_page_directory1], 3
+    
+    mov dword [boot_page_directory1+16], boot_page_table3
+    or dword [boot_page_directory1], 3
 
-    mov dword [boot_page_level4_map+(511*8)], boot_page_level3_map
+    mov dword [boot_page_level4_map+(511*8)], boot_page_level3_map1
     or dword [boot_page_level4_map+(511*8)], 3
-    mov dword [boot_page_level3_map+(510*8)], boot_page_directory1
-    or dword [boot_page_level3_map+(510*8)], 3
+
+    mov dword [boot_page_level3_map1+(510*8)], boot_page_directory1
+    or dword [boot_page_level3_map1+(510*8)], 3
+
+;   Fill in 3 page tables (6 MiB).
 
     mov esi, 0x00000003
     mov edi, boot_page_table1
-    mov ecx, 512
+    mov ecx, (512*3)
 
 .loop:
     mov [edi], esi
@@ -158,11 +174,8 @@ _start:
     wrmsr
 
     mov eax, cr0
-    or eax, 0x80000001
+    or eax, 0x80010001
     mov cr0, eax
-
-    mov ecx, 0xC0000080
-    rdmsr
 
     lgdt [GDT.Pointer]
 
@@ -186,16 +199,18 @@ segment .text
 ; We're done setting up long mode!
 
 ;   Restore rax and rbx
-    pop rbx
-    pop rax
+    mov rax, 0
+    mov rbx, 0
+    mov eax, [magic_number]
+    mov ebx, [multiboot_struct]
 
 ; Setup the stack
     mov rsp, _ZN4obos9stack_topE
     xor rbp, rbp
 
     ; Call the kernel.
-    push rax
-    push rbx
+    mov rsi, rax
+    mov rdi, rbx
     call _ZN4obos5kmainEP14multiboot_infoj
     
 ;   Reset the computer.

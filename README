@@ -27,7 +27,7 @@
 - You must be on Linux. If you are on windows, I recommend you use WSL2.
 - You must have an i686-elf-gcc (or x86_64-elf-gcc to build the operating system in x86_64)
   cross-compiler. Instructions on how to get can be found here: https://wiki.osdev.org/GCC_Cross-Compiler
-  You will need GCC 11.4.0 and binutils 2.40. You will need cmake aswell.
+  You will need GCC 11.4.0 and binutils 2.40 (future versions might work, but I didn't test them). You will need cmake aswell.
 - To generate the operating system's iso, you must have xorriso installed.
 --------------------------------------------
   ____        _ _     _ _             

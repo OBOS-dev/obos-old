@@ -36,6 +36,7 @@ namespace obos
 	{
 		UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
 	}
+	extern char kernelStart;
 	namespace driverAPI
 	{
 		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS, DWORD driverID, serviceType type);
@@ -292,9 +293,9 @@ namespace obos
 		}
 		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS, UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags)
 		{
-			if (inRange(virtualAddress, 0xC0000000, 0xE0000000))
+			if (inRange(virtualAddress, &kernelStart, &memory::endKernel))
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			if(!memory::kmap_physical(virtualAddress, 1, flags, (PVOID)physicalAddress))
+			if(!memory::kmap_physical(virtualAddress, flags, (PVOID)physicalAddress))
 				return exitStatus::EXIT_STATUS_ADDRESS_NOT_AVAILABLE;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
@@ -327,9 +328,29 @@ namespace obos
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 #elif defined(__x86_64__)
-		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS, PVOID, PVOID*)
+		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS, PVOID _virtualAddress, PVOID* physicalAddress)
 		{
-			return exitStatus::EXIT_STATUS_NOT_IMPLEMENTED;
+			PBYTE virtualAddress = (PBYTE)_virtualAddress;
+			if (!memory::HasVirtualAddress(virtualAddress, 1))
+				return exitStatus::EXIT_STATUS_ADDRESS_NOT_AVAILABLE;
+			UINTPTR_T addr = memory::g_level4PageMap->getPageTableEntry(
+																		  memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 2),
+																		  memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 1),
+																		  memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 0),
+																		  memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 0));
+			if (utils::testBitInBitfield(addr, 9))
+			{
+				*virtualAddress = 0; // Allocate the page, as it would be a problem if give them the zero page and a device writes to it when the driver issues a write to that device.
+				addr = memory::g_level4PageMap->getPageTableEntry(
+					memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 2),
+					memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 1),
+					memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 0),
+					memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 0));
+			}
+			UINTPTR_T* phys = (UINTPTR_T*)physicalAddress;
+			*phys = addr;
+			*phys &= 0x1FFFFEFFFFF000;
+			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 #endif
 

@@ -146,4 +146,17 @@ namespace obos
 		}*/
 	}
 }
+#else
+#include <types.h>
+
+namespace obos
+{
+	namespace elfLoader
+	{
+		DWORD LoadElfFile(PBYTE, SIZE_T, UINTPTR_T&, UINTPTR_T&)
+		{
+			return -1;
+		}
+	}
+}
 #endif

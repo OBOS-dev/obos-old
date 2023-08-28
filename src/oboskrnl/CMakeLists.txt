@@ -39,7 +39,6 @@ target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-overloaded-virtual>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
-                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-g>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-delete-null-pointer-checks>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mno-red-zone>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mcmodel=kernel>
@@ -74,7 +73,6 @@ message("crtend.o is at ${CRTBEGIN_DIRECTORY}")
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     message("Debug configuration.")
     target_compile_definitions(oboskrnl PUBLIC _DEBUG=1)
-    target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:-g>)
 else()
     message(FATAL_ERROR "CMAKE_BUILD_TYPE must be \"Debug\".")
 endif()

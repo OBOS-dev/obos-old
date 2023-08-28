@@ -10,11 +10,11 @@
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "OUTPUT_DIR": "/Code/obos/out/",
+        "OUTPUT_DIR": "/mnt/c/Code/obos/out/",
         "CURSOR_SLEEP_TIME_2_5_MS": "75",
         "CONSOLE_NEWLINE_SEQUENCE": "LF",
         "OBOS_ARCHITECTURE": "i686",
-        "CMAKE_TOOLCHAIN_FILE": "/Code/obos/scripts/toolchains/i686_OBOS.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "/mnt/c/Code/obos/scripts/toolchains/i686_OBOS.cmake"
       },
       "vendor": {
         "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
@@ -30,11 +30,11 @@
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "OUTPUT_DIR": "/Code/obos/out/",
+        "OUTPUT_DIR": "/mnt/c/Code/obos/out/",
         "CURSOR_SLEEP_TIME_2_5_MS": "75",
         "CONSOLE_NEWLINE_SEQUENCE": "LF",
         "OBOS_ARCHITECTURE": "x86_64",
-        "CMAKE_TOOLCHAIN_FILE": "/Code/obos/scripts/toolchains/x86_64_OBOS.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "/mnt/c/Code/obos/scripts/toolchains/x86_64_OBOS.cmake"
       },
       "vendor": {
         "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {

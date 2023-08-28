@@ -15,10 +15,10 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 
-set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64")
+set(CMAKE_ASM_NASM_OBJECT_FORMAT "elf64 -g")
 
 set(oboskrnl_asmSources "boot/x86-64/kernel_bootstrap.asm"		"x86-64/inline-asm.asm" "descriptors/idt/x86-64/handlers.asm" "descriptors/idt/x86-64/idt.asm" "utils/memcpy_x86-64.asm"
-						"memory_manager/paging/x86-64/init.asm")
+						"memory_manager/paging/x86-64/init.asm" "multitasking/multitasking_x86-64.asm")
 
 set(oboskrnl_platformSpecific "descriptors/idt/x86-64/idt.cpp" "x86-64/exception_handlers.cpp" "memory_manager/paging/x86-64/init.cpp" "memory_manager/paging/x86-64/allocate.cpp"
 							  "memory_manager/x86-64/physical.cpp")

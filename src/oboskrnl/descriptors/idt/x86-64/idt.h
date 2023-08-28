@@ -27,12 +27,20 @@ namespace obos
 
 	struct interrupt_frame
 	{
+		// (ds) 0
 		UINT64_T ds;
+		// (r8-r15) 8,16,24,32,40,48,56,64
+		// (rdi-rax) 72,80,88,96,104,112,120,128
 		UINTPTR_T r8, r9, r10, r11, r12, r13, r14, r15, 
 				  rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax;
+		// (intNumber) 136
 		UINT8_T intNumber;
+		// (errorCode) 144
 		UINT64_T errorCode;
+		// (rip,cs,rflags,useresp,ss)
+		// 152,160,168,176,184
 		UINTPTR_T rip, cs, rflags, useresp, ss;
+		// 192
 	};
 
 	void InitializeIdt();

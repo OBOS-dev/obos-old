@@ -31,29 +31,31 @@ global memcpy
 memcpy:
 _ZN4obos5utils6memcpyEPvPKvy:
 	push rbp
-	mov ebp, esp
+	mov rbp, rsp
 	
 	xor rax, rax
 	
-	mov rcx, rsi
+	mov rcx, rdx
 
 	test rcx, rcx
 	jz .finish
 
-	; Convieviently, rdi is the first parameter in System V x86_64.
-;	mov rdi, [ebp+8]
-	
+	mov r8, rcx
+	and r8, 0xFFFFFFFFFFFFFFFB
+	jnz .loop
+	call _ZN4obos5utils8dwMemcpyEPjPKjy
+	jmp .finish
+
 .loop:
-; The third parameter is in rdx, so instead of taking a few nanoseconds to 'mov rdx, rsi', we just use rdx
-	mov al, [rdx]
+	mov al, [rsi]
 	mov byte [rdi], al
 
-	inc rdx
+	inc rsi
 	inc rdi
 	loop .loop
 
 	mov rax, rdi
-	sub rax, rsi
+	sub rax, rdx
 
 .finish:
 	leave
@@ -73,7 +75,8 @@ _ZN4obos5utils7memzeroEPvy:
 	inc rdi
 	loop .loop
 
-	mov eax, [ebp+8]
+	mov rax, rdi
+	sub rdi, rdx
 
 .finish:
 	leave
@@ -98,7 +101,8 @@ _ZN4obos5utils8dwMemsetEPjjy:
 	loop .loop
 
 	mov rax, rdi
-	sub rax, rdx
+	lea r8, [rdx*4]
+	sub rax, r8
 
 .finish:
 	leave
@@ -120,7 +124,8 @@ _ZN4obos5utils8dwMemcpyEPjPKjy:
 	loop .loop
 
 	mov rax, rdi
-	lea rax, [rax+rdx*4]
+	lea r8, [rdx*4]
+	sub rax, r8
 
 .finish:
 	leave

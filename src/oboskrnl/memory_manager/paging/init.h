@@ -64,6 +64,7 @@ namespace obos
 			UINTPTR_T* getPageTableRealtive(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex);
 			// Returns a physical address.
 			UINTPTR_T getPageTableEntry(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex, UINT16_T index);
+			UINTPTR_T getRealPageTableEntry(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex, UINT16_T index);
 			
 			UINTPTR_T* getPageMap() const { return m_array; }
 

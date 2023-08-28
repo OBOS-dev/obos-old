@@ -60,10 +60,12 @@ namespace obos
 {
 #if defined(__x86_64__)
 	obos::multiboot_info* g_multibootInfo;
+	static obos::multiboot_info s_multibootInfo;
+	static obos::multiboot_module_t s_modules;
 #elif defined(__i686__)
 	multiboot_info_t* g_multibootInfo;
-#endif
 	memory::PageDirectory g_pageDirectory;
+#endif
 	extern char kernelStart;
 	
 	extern void pageFault(const interrupt_frame* frame);
@@ -72,9 +74,13 @@ namespace obos
 	// Initial boot sequence. Initializes all platform-specific things, and sets up multitasking, and jumps to kmainThr.
 	void kmain(::multiboot_info_t* header, DWORD magic)
 	{
-		obos::g_multibootInfo = reinterpret_cast<obos::multiboot_info_t*>(reinterpret_cast<UINTPTR_T>(header) + reinterpret_cast<UINTPTR_T>(&kernelStart));
+#if defined(__i686__)
+		obos::g_multibootInfo = reinterpret_cast<::multiboot_info_t*>(reinterpret_cast<UINTPTR_T>(header) + reinterpret_cast<UINTPTR_T>(&kernelStart));
+#elif defined(__x86_64__)
+		g_multibootInfo = &s_multibootInfo;
+#endif
 
-		if (magic != MULTIBOOT_BOOTLOADER_MAGIC || g_multibootInfo->mods_count != NUM_MODULES)
+		if (magic != MULTIBOOT_BOOTLOADER_MAGIC || header->mods_count != NUM_MODULES)
 			return;
 
 #if defined(__x86_64__)
@@ -83,7 +89,7 @@ namespace obos
 		g_multibootInfo->mem_lower = header->mem_lower;
 		g_multibootInfo->boot_device = header->boot_device;
 		g_multibootInfo->cmdline = header->cmdline;
-		g_multibootInfo->mods_addr = header->mods_addr;
+		g_multibootInfo->mods_addr = reinterpret_cast<UINTPTR_T>(&s_modules) - reinterpret_cast<UINTPTR_T>(&kernelStart);
 		g_multibootInfo->mods_count = header->mods_count;
 		utils::memcpy(&g_multibootInfo->u, &header->u, sizeof(header->u));
 		g_multibootInfo->mmap_addr = header->mmap_addr;
@@ -117,6 +123,8 @@ namespace obos
 				modules[i].mod_end += modules32[i].mod_end + reinterpret_cast<UINTPTR_T>(&kernelStart);
 			}
 		}
+#elif defined(__i686__)
+		memory::g_pageDirectory = &g_pageDirectory;
 #endif
 
 		g_multibootInfo->apm_table += reinterpret_cast<UINTPTR_T>(&kernelStart);
@@ -126,8 +134,23 @@ namespace obos
 		g_multibootInfo->drives_addr += reinterpret_cast<UINTPTR_T>(&kernelStart);
 		g_multibootInfo->mmap_addr += reinterpret_cast<UINTPTR_T>(&kernelStart);
 		g_multibootInfo->mods_addr += reinterpret_cast<UINTPTR_T>(&kernelStart);
+#if defined(__x86_64__)
 		{
 			obos::multiboot_module_t* modules = (obos::multiboot_module_t*)g_multibootInfo->mods_addr;
+			::multiboot_module_t* real_modules = (::multiboot_module_t*)((UINTPTR_T)header->mods_addr);
+			for (SIZE_T i = 0; i < g_multibootInfo->mods_count; i++)
+			{
+				modules[i].cmdline = real_modules[i].cmdline;
+				modules[i].mod_start = real_modules[i].mod_start;
+				modules[i].mod_end = real_modules[i].mod_end;
+				modules[i].cmdline += reinterpret_cast<UINTPTR_T>(&kernelStart);
+				modules[i].mod_start += reinterpret_cast<UINTPTR_T>(&kernelStart);
+				modules[i].mod_end += reinterpret_cast<UINTPTR_T>(&kernelStart);
+			}
+		}
+#elif defined(__i686__)
+		{
+			::multiboot_module_t* modules = (obos::multiboot_module_t*)g_multibootInfo->mods_addr;
 			for(SIZE_T i = 0; i < g_multibootInfo->mods_count; i++)
 			{
 				modules[i].cmdline += reinterpret_cast<UINTPTR_T>(&kernelStart);
@@ -135,19 +158,18 @@ namespace obos
 				modules[i].mod_end += reinterpret_cast<UINTPTR_T>(&kernelStart);
 			}
 		}
+#endif
 		
 		EnterKernelSection();
-
-		memory::g_pageDirectory = &g_pageDirectory;
-
-		memory::InitializePaging();
-
-		RegisterInterruptHandler(14, pageFault);
 
 		obos::InitializeGdt();
 		obos::InitializeIdt();
 
+		RegisterInterruptHandler(14, pageFault);
+		
 		memory::InitializePhysicalMemoryManager();
+
+		memory::InitializePaging();
 
 		if ((g_multibootInfo->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) != MULTIBOOT_INFO_FRAMEBUFFER_INFO)
 			kpanic(nullptr, getEIP(), kpanic_format("No framebuffer info from the bootloader.\r\n"));
@@ -158,10 +180,14 @@ namespace obos
 		for (UINTPTR_T physAddress = g_multibootInfo->framebuffer_addr, virtAddress = 0xFFCFF000;
 			virtAddress < 0xFFFFF000;
 			virtAddress += 4096, physAddress += 4096)
-			memory::kmap_physical((PVOID)virtAddress, 1, memory::VirtualAllocFlags::WRITE_ENABLED, (PVOID)physAddress);
+			memory::kmap_physical((PVOID)virtAddress, memory::VirtualAllocFlags::WRITE_ENABLED, (PVOID)physAddress);
 
 		// Initialize the console.
 		InitializeConsole(0xFFFFFFFF, 0x00000000);
+
+		ConsoleOutputString("No way!\r\nWe're on x86-64.");
+
+		while (1);
 
 		obos::Pic currentPic{ obos::Pic::PIC1_CMD, obos::Pic::PIC1_DATA };
 		// Interrupt 32-40 (0x20-0x27)

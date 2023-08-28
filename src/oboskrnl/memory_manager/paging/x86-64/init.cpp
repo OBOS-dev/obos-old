@@ -11,6 +11,8 @@
 
 #include <new>
 
+#include <utils/memory.h>
+
 extern UINTPTR_T boot_page_level4_map;
 
 namespace obos
@@ -37,11 +39,11 @@ namespace obos
 		UINTPTR_T* PageMap::getLevel3PageMap(UINT16_T level3PageMap)
 		{
 			kmap_pageTable(m_array);
-			return reinterpret_cast<UINTPTR_T*>(*reinterpret_cast<UINTPTR_T*>(0xFFFFF000 + level3PageMap * sizeof(UINTPTR_T)) & 0xFFFFFFFFFE000);
+			return reinterpret_cast<UINTPTR_T*>(*reinterpret_cast<UINTPTR_T*>(0xFFFFF000 + level3PageMap * sizeof(UINTPTR_T)) & 0xFFFFFFFFFF000);
 		}
 		UINTPTR_T *PageMap::getPageDirectory(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex)
         {
-            return reinterpret_cast<UINTPTR_T*>(kmap_pageTable(getLevel3PageMap(level3PageMap))[pageDirectoryIndex] & 0xFFFFFFFFFE000);
+            return reinterpret_cast<UINTPTR_T*>(kmap_pageTable(getLevel3PageMap(level3PageMap))[pageDirectoryIndex] & 0xFFFFFFFFFF000);
         }
         UINTPTR_T *PageMap::getPageDirectoryRealtive(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex)
         {
@@ -49,7 +51,7 @@ namespace obos
         }
         UINTPTR_T *PageMap::getPageTable(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex)
         {
-            return reinterpret_cast<UINTPTR_T*>(kmap_pageTable(getPageDirectory(level3PageMap, pageDirectoryIndex))[pageTableIndex] & 0xFFFFFFFFFE000);
+            return reinterpret_cast<UINTPTR_T*>(kmap_pageTable(getPageDirectory(level3PageMap, pageDirectoryIndex))[pageTableIndex] & 0xFFFFFFFFFF000);
         }
         UINTPTR_T *PageMap::getPageTableRealtive(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex)
         {
@@ -57,8 +59,12 @@ namespace obos
         }
         UINTPTR_T PageMap::getPageTableEntry(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex, UINT16_T index)
         {
-            return kmap_pageTable(getPageTable(level3PageMap, pageDirectoryIndex, pageTableIndex))[index] & 0xFFFFFFFFFE000;
+            return kmap_pageTable(getPageTable(level3PageMap, pageDirectoryIndex, pageTableIndex))[index] & 0xFFFFFFFFFF000;
         }
+		UINTPTR_T PageMap::getRealPageTableEntry(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex, UINT16_T index)
+		{
+			return kmap_pageTable(getPageTable(level3PageMap, pageDirectoryIndex, pageTableIndex))[index];
+		}
 
         void PageMap::switchToThis()
         {
@@ -82,6 +88,7 @@ namespace obos
 			g_level4PageMap = &g_kernelPageMap;
 			new (g_level4PageMap) PageMap{ &boot_page_level4_map };
 			g_zeroPage = reinterpret_cast<UINTPTR_T*>(kalloc_physicalPage());
+			utils::dwMemset((DWORD*)kmap_pageTable(g_zeroPage), 0, 4096 / 4);
 		}
 	}
 }

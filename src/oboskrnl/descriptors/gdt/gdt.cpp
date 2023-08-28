@@ -103,10 +103,7 @@ namespace obos
 	{
 		// If we're not on i686, then do nothing.
 	}
-	void* st = nullptr;
-	void SetTssStack(void* par) 
-	{
-		st = par;
-	}
+	void SetTSSStack(void*)
+	{}
 }
 #endif

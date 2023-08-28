@@ -38,7 +38,7 @@ pop r8
 pop rdi
 pop rsi
 pop rbp
-add esp, 8
+add rsp, 8
 pop rbx
 pop rdx
 pop rcx
@@ -50,8 +50,8 @@ pop rax
   [BITS 64]
   isr%1:
     cli
-    push byte 0
-    push byte %1
+    push 0
+    push %1
     jmp isr_common_stub
 %endmacro
 
@@ -59,7 +59,7 @@ pop rax
   [GLOBAL isr%1]
   isr%1:
     cli
-    push byte %1
+    push %1
     jmp isr_common_stub
 %endmacro
 
@@ -125,7 +125,7 @@ extern defaultInterruptHandler
 global isr_common_stub
 
 isr_common_stub:
-    pushfq
+    pushaq
 
     mov rax, 0
     mov ax, ds
@@ -133,20 +133,21 @@ isr_common_stub:
 
 ;   Push a pointer to the interrupt frame.
     mov rax, rsp
-    add rax, 56
+    add rax, 17*8
     mov rax, [rax]
     lea rax, [rax*8]
+    add rax, _ZN4obos19g_interruptHandlersE
+
+    mov rax, [rax]
 
     test rax, rax
-    jz .finished
+    je .finished
 
-    call [rax]
+    mov rdi, rsp
+
+    call rax
 
 .finished:
-
-    ; Pop the pointer.
-    lea rsp, [esp+8]
-    
 ;   Restore the pushed registers.
 
     pop rax
@@ -155,7 +156,7 @@ isr_common_stub:
     popaq
 
 ;   Pop the interrupt number and error code.
-    lea rsp, [esp+16]
+    lea rsp, [rsp+16]
 
 ;   Finally return from the interrupt.
     iretq
