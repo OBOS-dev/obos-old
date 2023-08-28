@@ -108,6 +108,7 @@ namespace obos
 		s_backbuffer = nullptr;
 		new (s_modifiedLines) utils::IntegerBitfield{};
 		new (s_modifiedLines + 1) utils::IntegerBitfield{};
+		s_reachedEndTerminal = false;
 		s_framebuffer = (UINT32_T*)0xFFCFF000;
 		s_terminalColumn = 0;
 		s_terminalRow = 0;
