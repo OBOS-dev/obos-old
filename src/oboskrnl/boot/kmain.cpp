@@ -61,7 +61,7 @@ namespace obos
 #if defined(__x86_64__)
 	obos::multiboot_info* g_multibootInfo;
 	static obos::multiboot_info s_multibootInfo;
-	static obos::multiboot_module_t s_modules;
+	static obos::multiboot_module_t s_modules[NUM_MODULES];
 #elif defined(__i686__)
 	multiboot_info_t* g_multibootInfo;
 	memory::PageDirectory g_pageDirectory;
@@ -113,7 +113,7 @@ namespace obos
 		g_multibootInfo->framebuffer_type = header->framebuffer_type;
 		utils::memcpy(&g_multibootInfo->framebuffer_palette_addr, &header->framebuffer_palette_addr, 6);
 
-		{
+		/*{
 			obos::multiboot_module_t* modules = (obos::multiboot_module_t*)g_multibootInfo->mods_addr;
 			::multiboot_module_t* modules32 = (::multiboot_module_t*)g_multibootInfo->mods_addr;
 			for (SIZE_T i = 0; i < g_multibootInfo->mods_count; i++)
@@ -122,7 +122,7 @@ namespace obos
 				modules[i].mod_start += modules32[i].mod_start + reinterpret_cast<UINTPTR_T>(&kernelStart);
 				modules[i].mod_end += modules32[i].mod_end + reinterpret_cast<UINTPTR_T>(&kernelStart);
 			}
-		}
+		}*/
 #elif defined(__i686__)
 		memory::g_pageDirectory = &g_pageDirectory;
 #endif
@@ -185,10 +185,6 @@ namespace obos
 		// Initialize the console.
 		InitializeConsole(0xFFFFFFFF, 0x00000000);
 
-		ConsoleOutputString("No way!\r\nWe're on x86-64.");
-
-		while (1);
-
 		obos::Pic currentPic{ obos::Pic::PIC1_CMD, obos::Pic::PIC1_DATA };
 		// Interrupt 32-40 (0x20-0x27)
 		currentPic.remap(0x20, 4);
@@ -238,7 +234,12 @@ namespace obos
 		process::RegisterSyscalls();
 		
 		{
-			PCHAR ptr = (PCHAR)memory::VirtualAlloc((PVOID)0x400000, 1, memory::VirtualAllocFlags::GLOBAL | memory::VirtualAllocFlags::WRITE_ENABLED);
+#if defined(__i686__)
+			process::ProcEntryPointBase = 0x400000;
+#elif defined(__x86_64__)
+			process::ProcEntryPointBase = 0x1000000;
+#endif
+			PCHAR ptr = (PCHAR)memory::VirtualAlloc((PVOID)process::ProcEntryPointBase, 1, memory::VirtualAllocFlags::GLOBAL | memory::VirtualAllocFlags::WRITE_ENABLED);
 
 			memory::tlbFlush((UINTPTR_T)ptr);
 
@@ -252,7 +253,7 @@ namespace obos
 		process::Process* initrdDriver = new process::Process{};
 		auto ret = 
 			initrdDriver->CreateProcess(
-				(PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start, 
+				(PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
 				((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
 				(PVOID)&mainThread, true);
 		if (ret)

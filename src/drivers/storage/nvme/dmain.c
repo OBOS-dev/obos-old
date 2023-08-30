@@ -34,7 +34,7 @@ NVME_MEM* g_abar = 0;
 
 int _start()
 {
-	RegisterDriver(DRIVER_ID, SERVICE_TYPE_STORAGE_DEVICE);
+	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, SERVICE_TYPE_STORAGE_DEVICE);
 	
 	return 2;
 
@@ -46,19 +46,19 @@ int _start()
 
 	if (!enumeratePci(0x01, 0x08, 0x02, &slot, &function, &bus))
 	{
-		Printf("NVME Fatal Error: No nvme controller!\r\n");
+		Printf(PASS_OBOS_API_PARS "NVME Fatal Error: No nvme controller!\r\n");
 		sti();
 		return 1;
 	}
 
 	UINTPTR_T baseAddr = pciReadDwordRegister(bus, slot, function, getRegisterOffset(4, 0)) & (~0b1111);
 
-	Printf("NVME Log: Found nvme controller at pci bus %d, function %d, slot %d. Base address: %p.\r\n", bus, function, slot,
+	Printf(PASS_OBOS_API_PARS "NVME Log: Found nvme controller at pci bus %d, function %d, slot %d. Base address: %p.\r\n", bus, function, slot,
 		baseAddr);
 
 	pciWriteDwordRegister(bus,slot,function,getRegisterOffset(4,0), 0xFFFFFFFF);
 	SIZE_T hbaSize = (~pciReadDwordRegister(bus, slot, function, getRegisterOffset(4, 0)) & (~0b1111)) + 1;
-	Printf("NVME Log: The hba base takes up %d bytes.\r\n", hbaSize);
+	Printf(PASS_OBOS_API_PARS "NVME Log: The hba base takes up %d bytes.\r\n", hbaSize);
 	hbaSize = ((hbaSize >> 12) + 1) << 12;
 	pciWriteDwordRegister(bus,slot,function,getRegisterOffset(4,0), baseAddr);
 
@@ -69,7 +69,7 @@ int _start()
 	pciWriteDwordRegister(bus, slot, function, getRegisterOffset(1,0), pciStatus | pciCommand);
 
 	for(UINTPTR_T base = 0x410000, virt = 0x410000, phys = baseAddr; virt < (base + hbaSize); virt += 4096, phys += 4096)
-		MapPhysicalTo(phys, (PVOID)virt, ALLOC_FLAGS_CACHE_DISABLE | ALLOC_FLAGS_WRITE_ENABLED);
+		MapPhysicalTo(PASS_OBOS_API_PARS phys, (PVOID)virt, ALLOC_FLAGS_CACHE_DISABLE | ALLOC_FLAGS_WRITE_ENABLED);
 
 	g_abar = (PVOID)0x410000;
 	const char* versionStr = "Unknown. Rather the driver is living in the past, or the nvme controller is broken.";
@@ -102,11 +102,11 @@ int _start()
 		break;
 	}
 
-	Printf("NVME Log: Controller is nvme version %s.\r\n", versionStr);
+	Printf(PASS_OBOS_API_PARS "NVME Log: Controller is nvme version %s.\r\n", versionStr);
 	
 	if (leave)
 	{
-		Printf("NVME Fatal Error: Unsupported nvme version for the controller.\r\n");
+		Printf(PASS_OBOS_API_PARS "NVME Fatal Error: Unsupported nvme version for the controller.\r\n");
 		return 1;
 	}
 

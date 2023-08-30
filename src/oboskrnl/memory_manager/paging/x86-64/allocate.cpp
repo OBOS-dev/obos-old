@@ -106,7 +106,7 @@ namespace obos
 				if (!base)
 					return nullptr;
 			}
-			if (HasVirtualAddress(_base, nPages))
+			if (HasVirtualAddress(reinterpret_cast<PCVOID>(base), nPages))
 				return nullptr;
 			for (UINTPTR_T addr = base; addr < (base + nPages * 4096); addr += 4096)
 			{
@@ -114,9 +114,9 @@ namespace obos
 				pageTable += PageMap::computeIndexAtAddress(addr, 0);
 				extern UINTPTR_T* g_zeroPage;
 				UINTPTR_T entry = reinterpret_cast<UINTPTR_T>(g_zeroPage);
-				entry |= 1 | ((UINTPTR_T)1 << 63);
-				if (!CPUSupportsExecuteDisable())
-					utils::clearBitInBitfield(entry, 63);
+				entry |= 1 | ((UINTPTR_T)CPUSupportsExecuteDisable() << 63);
+				/*if (!CPUSupportsExecuteDisable())
+					utils::clearBitInBitfield(entry, 63);*/
 				entry |= (flags & 0b10100);
 				if ((flags & 0b10))
 				{
@@ -157,32 +157,32 @@ namespace obos
 		}
 		bool HasVirtualAddress(PCVOID _base, SIZE_T nPages)
 		{
-			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base);
+			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base) & (~0xFFF);
 			if ((base + nPages * 4096) < base)
 				return false;
-			for (UINTPTR_T addr = base; base < (base + nPages * 4096); base += 4096)
+			for (UINTPTR_T addr = base; addr < (base + nPages * 4096); addr += 4096)
 			{
 				if (!g_level4PageMap->getLevel3PageMapAddress(PageMap::computeIndexAtAddress(addr, 3)))
 					return false;
-				if (!g_level4PageMap->getLevel3PageMap(PageMap::computeIndexAtAddress(addr, 2)))
+				if (!g_level4PageMap->getLevel3PageMap(PageMap::computeIndexAtAddress(addr, 3)))
 					return false;
-				if (!g_level4PageMap->getPageDirectory(PageMap::computeIndexAtAddress(addr, 2),
+				if (!g_level4PageMap->getPageDirectory(PageMap::computeIndexAtAddress(addr, 3),
+					PageMap::computeIndexAtAddress(addr, 2)))
+					return false;
+				if (!g_level4PageMap->getPageTable(PageMap::computeIndexAtAddress(addr, 3),
+					PageMap::computeIndexAtAddress(addr, 2),
 					PageMap::computeIndexAtAddress(addr, 1)))
 					return false;
-				if (!g_level4PageMap->getPageTable(PageMap::computeIndexAtAddress(addr, 2),
-					PageMap::computeIndexAtAddress(addr, 1),
-					PageMap::computeIndexAtAddress(addr, 0)))
-					return false;
-				if (!g_level4PageMap->getPageTableEntry(PageMap::computeIndexAtAddress(addr, 2),
-					PageMap::computeIndexAtAddress(addr, 1),
-					PageMap::computeIndexAtAddress(addr, 0), PageMap::computeIndexAtAddress(addr, 0)))
+				if (!g_level4PageMap->getPageTableEntry(PageMap::computeIndexAtAddress(addr, 3),
+					PageMap::computeIndexAtAddress(addr, 2),
+					PageMap::computeIndexAtAddress(addr, 1), PageMap::computeIndexAtAddress(addr, 0)))
 					return false;
 			}
 			return true;
 		}
 		DWORD MemoryProtect(PVOID _base, SIZE_T nPages, UINTPTR_T flags)
 		{
-			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base);
+			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base) & (~0xFFF);
 			if ((base + nPages * 4096) < base)
 				return 1; // If the amount of pages overflows the address, return 1.
 			if (!HasVirtualAddress(_base, nPages) || !base)
@@ -192,27 +192,31 @@ namespace obos
 			else
 				utils::setBitInBitfield(flags, 63);
 			flags &= 0x8000000000000017;
-			for (UINTPTR_T addr = base; base < (base + nPages * 4096); base += 4096)
+			for (UINTPTR_T addr = base; addr < (base + nPages * 4096); addr += 4096)
 			{
-				UINTPTR_T* pageTable = memory::kmap_pageTable(
-					memory::g_level4PageMap->getPageTable(
-						memory::PageMap::computeIndexAtAddress(addr & 0xfff, 2),
-						memory::PageMap::computeIndexAtAddress(addr & 0xfff, 1),
-						memory::PageMap::computeIndexAtAddress(addr & 0xfff, 0)));
-				UINTPTR_T entry = pageTable[memory::PageMap::computeIndexAtAddress(addr & 0xfff, 0)];
+				UINTPTR_T entry = memory::g_level4PageMap->getRealPageTableEntry(
+					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 3),
+					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 2),
+					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 1),
+					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 0));
 				if (!utils::testBitInBitfield(entry, 9) && utils::testBitInBitfield(entry, 1))
 				{
 					// The page is commited and write enabled, so change the flags directly.
-					entry |= flags;
+					entry &= 0xFFFFFFFFFF000;
+					entry |= flags | 1;
 				}
 				else if (utils::testBitInBitfield(entry, 9))
 				{
 					// Page isn't commited, so change the flags at bit offset 52.
+					entry &= 0xF80FFFFFFFFFFFFF; // Clear bits 52-58
 					entry |= (flags << 52);
-					if (!utils::testBitInBitfield(flags, 63))
+					if (!utils::testBitInBitfield(flags, 63) && CPUSupportsExecuteDisable())
 						utils::setBitInBitfield(entry, 63); // If EXECUTE_ENABLE is cleared in flags, set XD (execute disable) in entry.
 				}
-				pageTable[memory::PageMap::computeIndexAtAddress(addr & 0xfff, 0)] = entry;
+				memory::g_level4PageMap->getPageTable(
+					memory::PageMap::computeIndexAtAddress(addr & 0xfff, 3),
+					memory::PageMap::computeIndexAtAddress(addr & 0xfff, 2),
+					memory::PageMap::computeIndexAtAddress(addr & 0xfff, 1))[memory::PageMap::computeIndexAtAddress(addr & 0xfff, 0)] = entry;
 			}
 			return 0;
 		}

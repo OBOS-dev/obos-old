@@ -45,8 +45,8 @@ HBA_MEM* g_hbaMem = 0;
 
 int _start()
 {
-	RegisterDriver(DRIVER_ID, SERVICE_TYPE_STORAGE_DEVICE);
-	
+	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, SERVICE_TYPE_STORAGE_DEVICE);
+
 	cli();
 
 	UINT8_T bus = 0;
@@ -55,24 +55,24 @@ int _start()
 
 	if (!enumeratePci(0x01, 0x06, 0x01, &slot, &function, &bus))
 	{
-		Printf("AHCI Fatal Error: No ahci controller!\r\n");
+		Printf(PASS_OBOS_API_PARS "AHCI Fatal Error: No ahci controller!\r\n");
 		sti();
 		return 1;
 	}
 
 	UINTPTR_T baseAddr = pciReadDwordRegister(bus, slot, function, getRegisterOffset(9, 0)) & (~0b1111);
 
-	Printf("AHCI Log: Found ahci controller at pci bus %d, function %d, slot %d. Base address: %p.\r\n", bus, function, slot,
+	Printf(PASS_OBOS_API_PARS "AHCI Log: Found ahci controller at pci bus %d, function %d, slot %d. Base address: %p.\r\n", bus, function, slot,
 		baseAddr);
 
-	pciWriteDwordRegister(bus,slot,function,getRegisterOffset(9,0), 0xFFFFFFFF);
+	pciWriteDwordRegister(bus, slot, function, getRegisterOffset(9, 0), 0xFFFFFFFF);
 	SIZE_T hbaSize = (~pciReadDwordRegister(bus, slot, function, getRegisterOffset(9, 0)) & (~0b1111)) + 1;
-	Printf("AHCI Log: The hba base takes up %d bytes.\r\n", hbaSize);
+	Printf(PASS_OBOS_API_PARS "AHCI Log: The hba base takes up %d bytes.\r\n", hbaSize);
 	hbaSize = ((hbaSize >> 12) + 1) << 12;
-	pciWriteDwordRegister(bus,slot,function,getRegisterOffset(9,0), baseAddr);
+	pciWriteDwordRegister(bus, slot, function, getRegisterOffset(9, 0), baseAddr);
 
-	for(UINTPTR_T base = 0x410000, virt = 0x410000, phys = baseAddr; virt < (base + hbaSize); virt += 4096, phys += 4096)
-		MapPhysicalTo(phys, (PVOID)virt, ALLOC_FLAGS_CACHE_DISABLE | ALLOC_FLAGS_WRITE_ENABLED);
+	for (UINTPTR_T base = 0x410000, virt = 0x410000, phys = baseAddr; virt < (base + hbaSize); virt += 4096, phys += 4096)
+		MapPhysicalTo(PASS_OBOS_API_PARS phys, (PVOID)virt, ALLOC_FLAGS_CACHE_DISABLE | ALLOC_FLAGS_WRITE_ENABLED);
 
 	UINT16_T pciCommand = pciReadWordRegister(bus, slot, function, getRegisterOffset(1, 2));
 	// DMA Bus mastering, and memory space access are on.
@@ -87,7 +87,7 @@ int _start()
 	g_hbaMem->ghc.ie = false;
 
 	g_hbaMem->bohc |= (1 << 1);
-	
+
 	UINT32_T implementedPorts = g_hbaMem->pi;
 
 	// Probe the hba ports and initialize them.
@@ -104,7 +104,7 @@ int _start()
 
 		if (det != HBA_PORT_DET_PRESENT || ipm != HBA_PORT_IPM_ACTIVE)
 		{
-			Printf("AHCI Warning: No drive found at port %d, even though it is implemented.\r\n", i);
+			Printf(PASS_OBOS_API_PARS "AHCI Warning: No drive found at port %d, even though it is implemented.\r\n", i);
 			continue;
 		}
 
@@ -112,7 +112,7 @@ int _start()
 		{
 		case SATA_SIG_ATAPI:
 		{
-			Printf("AHCI Log: Found satapi drive at port %d.\r\n", i);
+			Printf(PASS_OBOS_API_PARS "AHCI Log: Found satapi drive at port %d.\r\n", i);
 			g_availablePorts[i].available = true;
 			g_availablePorts[i].driveType = DRIVE_TYPE_SATAPI;
 			g_availablePorts[i].hbaPort = port;
@@ -120,12 +120,12 @@ int _start()
 		}
 		case SATA_SIG_SEMB:
 		{
-			Printf("AHCI Log: Found semb drive at port %d.\r\n", i);
+			Printf(PASS_OBOS_API_PARS "AHCI Log: Found semb drive at port %d.\r\n", i);
 			break;
 		}
 		case SATA_SIG_PM:
 		{
-			Printf("AHCI Log: Found pm drive at port %d.\r\n", i);
+			Printf(PASS_OBOS_API_PARS "AHCI Log: Found pm drive at port %d.\r\n", i);
 			break;
 		}
 		default:
@@ -133,7 +133,7 @@ int _start()
 			g_availablePorts[i].available = true;
 			g_availablePorts[i].driveType = DRIVE_TYPE_SATA;
 			g_availablePorts[i].hbaPort = port;
-			Printf("AHCI Log: Found sata drive at port %d.\r\n", i);
+			Printf(PASS_OBOS_API_PARS "AHCI Log: Found sata drive at port %d.\r\n", i);
 			break;
 		}
 		}
@@ -149,11 +149,11 @@ int _start()
 	}
 
 	UINTPTR_T bufferPhys = 0;
-	GetPhysicalAddress(buffer, (PVOID*)&bufferPhys);
+	GetPhysicalAddress(PASS_OBOS_API_PARS buffer, (PVOID*)&bufferPhys);
 
 	AHCI_PORT* port = &g_availablePorts[0];
 
-	for(int i = 0; i < 32; i++)
+	for (int i = 0; i < 32; i++)
 	{
 		if (g_availablePorts[i].available && g_availablePorts[i].driveType == DRIVE_TYPE_SATA)
 		{
@@ -164,12 +164,12 @@ int _start()
 
 	ReadFromDrive(port, 0, 1, 1, (UINT16_T*)bufferPhys);
 
-	Printf("Hexdump of disk sector offset 0:15.\r\n");
+	Printf(PASS_OBOS_API_PARS "Hexdump of disk sector offset 0:15.\r\n");
 
 	for (int i = 0; i < 512; i++)
-		Printf("%x%s", buffer[i] & 0xFF, (!(i % 32) && i) ? "\r\n" : " ");
+		Printf(PASS_OBOS_API_PARS "%x%s", buffer[i] & 0xFF, (!(i % 32) && i) ? "\r\n" : " ");
 
-	Printf("\r\n");
+	Printf(PASS_OBOS_API_PARS "\r\n");
 
 	sti();
 
@@ -188,7 +188,7 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T startl, UINTPTR_T starth, SIZE_T 
 
 	port->is = (UINT32_T)-1;		// Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter
-	int find_cmdslot(HBA_PORT* port);
+	int find_cmdslot(HBA_PORT * port);
 	int slot = find_cmdslot(port);
 	if (slot == -1)
 		return;
@@ -199,10 +199,10 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T startl, UINTPTR_T starth, SIZE_T 
 	cmdheader->w = 0;		// Read from device
 	cmdheader->prdtl = (UINT16_T)((count - 1) >> 4) + 1;	// PRDT entries count
 
-	HBA_CMD_TBL* cmdtbl = (HBA_CMD_TBL*)(cmdheader->ctba);
+	HBA_CMD_TBL* cmdtbl = (HBA_CMD_TBL*)((UINTPTR_T)(((UINTPTR_T)cmdheader->ctba << 32) | cmdheader->ctbau));
 	{
 		UINTPTR_T phys = 0;
-		GetPhysicalAddress(_port->clbVirtualAddress, (PVOID*)&phys);
+		GetPhysicalAddress(PASS_OBOS_API_PARS _port->clbVirtualAddress, (PVOID*)&phys);
 		cmdtbl = (HBA_CMD_TBL*)((PBYTE)_port->clbVirtualAddress + (cmdheader->ctba - phys));
 	}
 	memzero(cmdtbl, sizeof(HBA_CMD_TBL) +
@@ -213,14 +213,14 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T startl, UINTPTR_T starth, SIZE_T 
 	// 8K bytes (16 sectors) per PRDT
 	for (; i < cmdheader->prdtl - 1; i++)
 	{
-		cmdtbl->prdt_entry[i].dba = (UINT32_T)buf;
+		cmdtbl->prdt_entry[i].dba = (UINTPTR_T)buf;
 		cmdtbl->prdt_entry[i].dbc = 8 * 1024 - 1;	// 8K bytes (this value should always be set to 1 less than the actual value)
 		cmdtbl->prdt_entry[i].i = 1;
 		buf += 4 * 1024;	// 4K words
 		count -= 16;	// 16 sectors
 	}
 	// Last entry
-	cmdtbl->prdt_entry[i].dba = (UINT32_T)buf;
+	cmdtbl->prdt_entry[i].dba = (UINTPTR_T)buf;
 	cmdtbl->prdt_entry[i].dbc = (count << 9) - 1;	// 512 bytes per sector
 	cmdtbl->prdt_entry[i].i = 1;
 
@@ -252,14 +252,14 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T startl, UINTPTR_T starth, SIZE_T 
 	}
 	if (spin == 1000000)
 	{
-		Printf("Port is hung\n");
+		Printf(PASS_OBOS_API_PARS "Port is hung\n");
 		return;
 	}
 
 	StartCommandEngine(port);
 
 	port->ci = 1 << slot;	// Issue command
-	
+
 #define HBA_PxIS_TFES (1 << 30)
 
 	// Wait for completion
@@ -271,7 +271,7 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T startl, UINTPTR_T starth, SIZE_T 
 			break;
 		if (port->is & HBA_PxIS_TFES)	// Task file error
 		{
-			Printf("Read disk error\r\n");
+			Printf(PASS_OBOS_API_PARS "Read disk error\r\n");
 			return;
 		}
 	}
@@ -279,7 +279,7 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T startl, UINTPTR_T starth, SIZE_T 
 	// Check again
 	if (port->is & HBA_PxIS_TFES)
 	{
-		Printf("Read disk error\r\n");
+		Printf(PASS_OBOS_API_PARS "Read disk error\r\n");
 		return;
 	}
 
@@ -287,7 +287,7 @@ void ReadFromDrive(AHCI_PORT* _port, UINTPTR_T startl, UINTPTR_T starth, SIZE_T 
 }
 
 // Find a free command list slot
-int find_cmdslot(HBA_PORT * port)
+int find_cmdslot(HBA_PORT* port)
 {
 	// If not set in SACT and CI, the slot is free
 	UINT32_T slots = (port->sact | port->ci);
@@ -297,7 +297,7 @@ int find_cmdslot(HBA_PORT * port)
 			return i;
 		slots >>= 1;
 	}
-	Printf("Cannot find free command list entry\n");
+	Printf(PASS_OBOS_API_PARS "Cannot find free command list entry\n");
 	return -1;
 }
 #define HBA_PxCMD_ST    0x0001
@@ -357,13 +357,13 @@ void RemapPort(AHCI_PORT* _port)
 	PVOID clbBase = _port->clbVirtualAddress = VirtualAlloc(0, 1, ALLOC_FLAGS_WRITE_ENABLED | ALLOC_FLAGS_CACHE_DISABLE);
 	if (!clbBase)
 	{
-		Printf("AHCI Fatal Error: VirtualAlloc returned nullptr\r\n.");
+		Printf(PASS_OBOS_API_PARS "AHCI Fatal Error: VirtualAlloc returned nullptr\r\n.");
 		return;
 	}
 	UINTPTR_T clbBasePhys = 0;
-	
+
 	port->fbs &= ~(1 << 0);
-	GetPhysicalAddress(clbBase, (PVOID*)&clbBasePhys);
+	GetPhysicalAddress(PASS_OBOS_API_PARS clbBase, (PVOID*)&clbBasePhys);
 	port->clb = clbBasePhys & ~(0b1111111111);
 	port->clbu = 0;
 	port->fb = clbBasePhys + 1024;
@@ -379,7 +379,7 @@ void RemapPort(AHCI_PORT* _port)
 	memzero(ctbaBase, 8192);
 
 	UINTPTR_T ctbaBasePhys = 0;
-	GetPhysicalAddress(ctbaBase, (PVOID*)&ctbaBasePhys);
+	GetPhysicalAddress(PASS_OBOS_API_PARS ctbaBase, (PVOID*)&ctbaBasePhys);
 
 	for (int i = 0; i < g_hbaMem->cap.nsc; i++)
 	{

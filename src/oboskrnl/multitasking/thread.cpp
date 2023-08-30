@@ -94,7 +94,7 @@ namespace obos
 			frame.rsp = (UINTPTR_T)stack;
 			frame.rip = (UINTPTR_T)entry;
 			frame.rbp = 0;
-			frame.rflags |= (1 << 9);
+			frame.rflags |= (1 << 9) | getEflags();
 #endif
 			// If our owner wasn't set before, then we'll use from the current thread's owner.
 			if(!owner)

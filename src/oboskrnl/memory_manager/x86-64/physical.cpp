@@ -49,6 +49,11 @@ namespace obos
 			}
 			if ((address >= (reinterpret_cast<UINTPTR_T>(g_physicalMemoryBitfield) & (~0xFFF))) && address < ((reinterpret_cast<UINTPTR_T>(g_physicalMemoryBitfield + g_bitfieldCount) + 0xFFF) & (~0xFFF)))
 				return true;
+			if (inRange(address, 0x100000, 0x600000))
+				return true;
+			UINTPTR_T mmap_addr = g_multibootInfo->mmap_addr - 0xFFFFFFFF80000000;
+			if (inRange(address, mmap_addr & (~0xFFF), ((mmap_addr + (g_mmapLength * sizeof(multiboot_memory_map_t)) + 0xFFF) & (~0xFFF))))
+				return true;
 			return false;
 		}
 
@@ -87,6 +92,8 @@ namespace obos
 				UINT32_T* physicalMemoryBitfield = (UINT32_T*)kmap_pageTable(g_physicalMemoryBitfield + addressToIndex(0, nullptr));
 				for (; ; address += 4096)
 				{
+					if (address == 0x100000)
+						address = 0x601000; // Optimization.
 					if (isAddressUsed(address))
 						continue;
 					physicalMemoryBitfield = (UINT32_T*)kmap_pageTable(g_physicalMemoryBitfield + addressToIndex(address, &bit));

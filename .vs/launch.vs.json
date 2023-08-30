@@ -15,7 +15,7 @@
           "description": "Adds the kernel's symbol file."
         },
         {
-          "text": "add-symbol-file C:/Code/obos/out/nvme",
+          "text": "add-symbol-file C:/Code/obos/out/ustarFilesystem",
           "ignoreFailures": true
         },
         {

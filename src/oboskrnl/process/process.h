@@ -19,6 +19,7 @@ namespace obos
 		VOID DriverEntryPoint(PVOID entry);
 		extern DWORD g_nextProcessId;
 		extern list_t* g_processList;
+		extern UINTPTR_T ProcEntryPointBase;
 		class Process
 		{
 		public:

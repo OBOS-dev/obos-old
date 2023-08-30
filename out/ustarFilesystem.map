@@ -1,0 +1,116 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+                0x0000000008000000                . = 0x8000000
+
+.text           0x0000000008000000      0x497
+ *(.multiboot)
+ *(.text)
+ .text          0x0000000008000000      0x41d src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                0x0000000008000000                _start
+                0x00000000080000dc                oct2bin
+                0x0000000008000123                memcmp
+                0x00000000080001b2                strlen
+                0x00000000080001e1                strcmp
+ *fill*         0x000000000800041d        0x3 
+ .text          0x0000000008000420       0x77 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+                0x0000000008000420                RegisterDriver
+                0x0000000008000428                RegisterInterruptHandler
+                0x0000000008000430                PicSendEoi
+                0x0000000008000438                EnableIRQ
+                0x0000000008000440                DisableIRQ
+                0x0000000008000448                RegisterReadCallback
+                0x0000000008000450                PrintChar
+                0x0000000008000458                GetMultibootModule
+                0x0000000008000460                RegisterFileReadCallback
+                0x0000000008000468                RegisterFileExistsCallback
+                0x0000000008000470                MapPhysicalTo
+                0x0000000008000478                UnmapPhysicalTo
+                0x0000000008000480                Printf
+                0x0000000008000488                GetPhysicalAddress
+                0x0000000008000490                CallSyscall
+
+.iplt           0x0000000008000497        0x0
+ .iplt          0x0000000008000497        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.rodata         0x0000000008001000        0x6
+ *(.rodata)
+ .rodata        0x0000000008001000        0x6 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.rela.dyn       0x0000000008001008        0x0
+ .rela.got      0x0000000008001008        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .rela.iplt     0x0000000008001008        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.data           0x0000000008002000        0x0
+ *(.data)
+ .data          0x0000000008002000        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.eh_frame       0x0000000008001008      0x150
+ .eh_frame      0x0000000008001008      0x150 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                                        0x168 (size before relaxing)
+
+.got            0x0000000008001158        0x0
+ .got           0x0000000008001158        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.got.plt        0x0000000008001158        0x0
+ .got.plt       0x0000000008001158        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.igot.plt       0x0000000008001158        0x0
+ .igot.plt      0x0000000008001158        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.bss            0x0000000008002000       0x10
+ *(COMMON)
+ *(.bss)
+ .bss           0x0000000008002000       0x10 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                0x0000000008002000                g_archivePosition
+                0x0000000008002008                g_archiveSize
+OUTPUT(/mnt/c/Code/obos/out/ustarFilesystem elf64-x86-64)
+
+.debug_frame    0x0000000000000000      0x170
+ .debug_frame   0x0000000000000000      0x170 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_frame   0x0000000000000170        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_info     0x0000000000000000      0xa12
+ .debug_info    0x0000000000000000      0x98f src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_info    0x000000000000098f       0x83 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_abbrev   0x0000000000000000      0x1b3
+ .debug_abbrev  0x0000000000000000      0x198 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_abbrev  0x0000000000000198       0x1b src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_aranges  0x0000000000000000       0x60
+ .debug_aranges
+                0x0000000000000000       0x30 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_aranges
+                0x0000000000000030       0x30 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_rnglists
+                0x0000000000000000       0x75
+ .debug_rnglists
+                0x0000000000000000       0x75 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.debug_line     0x0000000000000000      0x85c
+ .debug_line    0x0000000000000000      0x7bd src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_line    0x00000000000007bd       0x9f src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_str      0x0000000000000000       0x12
+ .debug_str     0x0000000000000000       0x12 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.comment        0x0000000000000000       0x12
+ .comment       0x0000000000000000       0x12 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                                         0x13 (size before relaxing)
+
+.debug_pubnames
+                0x0000000000000000        0x0
+ .debug_pubnames
+                0x0000000000000000        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_loc      0x0000000000000000        0x0
+ .debug_loc     0x0000000000000000        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj

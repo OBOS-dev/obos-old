@@ -27,6 +27,7 @@
 #include <utils/list.h>
 
 extern "C" UINTPTR_T boot_page_directory1;
+extern "C" UINTPTR_T boot_page_level4_map;
 
 namespace obos
 {
@@ -39,6 +40,7 @@ namespace obos
 	{
 		DWORD g_nextProcessId = 0;
 		list_t* g_processList = nullptr;
+		UINTPTR_T ProcEntryPointBase = 0;
 
 		Process::Process()
 		{}
@@ -47,7 +49,7 @@ namespace obos
 		{
 			DWORD(*main)() = (DWORD(*)())entry;
 			main();
-			// Call syscall 1 (ExitProcess) as we cannot call functions located in the kernel in user mode, which we are in.
+			// Call syscall 1 (ExitProcess) as we cannot call functions located in the kernel in user mode.
 #if defined (__i686__)
 			asm volatile("push %eax; mov $1, %eax; mov %esp, %ebx; int $0x40;");
 #elif defined (__x86_64__)
@@ -101,12 +103,21 @@ namespace obos
 			pBoot_page_directory1 += 0x30000000/*0xC0000000*/;
 			// Clone the kernel page directory.
 			for (int i = 0; i < 1024; i++)
-				if(pBoot_page_directory1[i])
+				if (pBoot_page_directory1[i])
 					newPageDirectory[i] = pBoot_page_directory1[i];
-			
+
 			pageDirectory->switchToThis();
 #elif defined(__x86_64__)
-
+			level4PageMap = new memory::PageMap{};
+			UINTPTR_T* newPageMap = memory::kmap_pageTable(level4PageMap->getPageMap());
+			utils::dwMemset((DWORD*)newPageMap, 0, 1024);
+			UINTPTR_T* pBoot_page_directory1 = &boot_page_level4_map;
+			pBoot_page_directory1 += 0x1ffffffff0000000/*0xffffffff80000000*/;
+			// Clone the page map.
+			for (int l4 = 0; l4 < 512; l4++)
+				if (pBoot_page_directory1[l4])
+					newPageMap[l4] = pBoot_page_directory1[l4];
+			level4PageMap->switchToThis();
 #endif
 
 			children = list_new();
@@ -131,7 +142,7 @@ namespace obos
 			mainThread->owner = this;
 
 			DWORD ret = mainThread->CreateThread(multitasking::Thread::priority_t::NORMAL,
-				!isDriver ? (VOID(*)(PVOID))0x400000 : DriverEntryPoint,
+				!isDriver ? (VOID(*)(PVOID))ProcEntryPointBase : DriverEntryPoint,
 				(PVOID)entry,
 				(DWORD)multitasking::Thread::status_t::PAUSED,
 				0);

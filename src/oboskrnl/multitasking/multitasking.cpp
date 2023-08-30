@@ -95,6 +95,7 @@ namespace obos
 				if(g_currentThread->isServicingSyscall || isInKernelCode(g_currentThread->frame))
 					SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
 				
+				setFrameAddress(&g_currentThread->frame);
 				switchToTaskAsm();
 			}
 			SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);

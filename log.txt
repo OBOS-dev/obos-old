@@ -1,0 +1,28 @@
+Kernel panic at line 136, file /home/omar/.vs/obos/src/oboskrnl/x86-64/exception_handlers.cpp, message:
+Unhandled exception 6 at 0x9 (tid 1, pid 1). Error code: 0. Dumping registers: 
+	RDI: 0x4
+	RSI: 0x0
+	RBP: 0x900fe8
+	RSP: 0x900f68
+	RBX: 0x0
+	RDX: 0x0
+	RCX: 0x0
+	RAX: 0x9
+	RIP: 0x9
+	R8: 0x0
+	R9: 0x0
+	R10: 0x0
+	R11: 0x0
+	R12: 0x0
+	R13: 0x0
+	R14: 0x0
+	R15: 0x0
+	RFLAGS: 0x200206
+	SS: 0x10
+	DS: 0x10
+	CS: 0x8
+
+Stack trace:
+	0: 0x8011411d ([external code]+0)
+Disassembly of address 0x9 (Unknown file.):
+Press any key to restart...
