@@ -474,17 +474,17 @@ namespace obos
 		return string[i] ? i : npos;
 	}
 	
-	UINT32_T hex2bin(const char* str, unsigned size)
+	UINTPTR_T hex2bin(const char* str, unsigned size)
 	{
-		UINT32_T ret = 0;
-		if (size > 8)
+		UINTPTR_T ret = 0;
+		if (size > sizeof(UINTPTR_T) * 2)
 			return 0;
 		str += *str == '\n';
 		//unsigned size = utils::strlen(str);
 		for (int i = size - 1, j = 0; i > -1; i--, j++)
 		{
 			char c = str[i];
-			UINT32_T digit = 0;
+			UINTPTR_T digit = 0;
 			switch (c)
 			{
 			case '0':

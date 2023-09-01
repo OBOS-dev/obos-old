@@ -360,6 +360,9 @@ namespace obos
 		// Uncomment this line to kpanic.
 		//*((PBYTE)0x486594834) = 'L';
 
+		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendEOI();
+		Pic(Pic::PIC2_CMD, Pic::PIC2_DATA).sendEOI();
+
 		asm volatile (".byte 0xeb, 0xfe;");
 	}
 

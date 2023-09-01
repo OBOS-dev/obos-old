@@ -20,17 +20,14 @@ namespace obos
 	extern char kernelStart;
 	namespace memory
 	{
-		extern bool CPUSupportsExecuteDisable();
-
 		// Freestanding. Does not need the physical memory manager, or anything.
 		UINTPTR_T* kmap_pageTable(PVOID physicalAddress)
 		{
 			static UINTPTR_T pageDirectory[512] alignas(4096);
 			static UINTPTR_T pageTable[512] alignas(4096);
-			PageMap* oldMap = g_level4PageMap;
 			UINTPTR_T flags = static_cast<UINTPTR_T>(CPUSupportsExecuteDisable()) << 63;
 			flags |= 3;
-			reinterpret_cast<UINTPTR_T*>((UINTPTR_T)(oldMap->getPageMap()[0]) & 0xFFFFFFFFFF000)[3] = 0;
+			reinterpret_cast<UINTPTR_T*>((UINTPTR_T)(g_level4PageMap->getPageMap()[0]) & 0xFFFFFFFFFF000)[3] = 0;
 			pageDirectory[511] = 0;
 			pageTable[511] = 0;
 
@@ -38,7 +35,7 @@ namespace obos
 			pageTable[511] = reinterpret_cast<UINTPTR_T>(physicalAddress);
 			pageTable[511] &= (~0xFFF);
 			pageTable[511] |= flags;
-			reinterpret_cast<UINTPTR_T*>((UINTPTR_T)(oldMap->getPageMap()[0]) & 0xFFFFFFFFFF000)[3]
+			reinterpret_cast<UINTPTR_T*>((UINTPTR_T)(g_level4PageMap->getPageMap()[0]) & 0xFFFFFFFFFF000)[3]
 				= (reinterpret_cast<UINTPTR_T>(pageDirectory) - reinterpret_cast<UINTPTR_T>(&kernelStart)) | flags;
 			tlbFlush(0xFFFFF000);
 			return (UINTPTR_T*)0xFFFFF000;

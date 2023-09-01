@@ -28,6 +28,7 @@
 
 extern "C" UINTPTR_T boot_page_directory1;
 extern "C" UINTPTR_T boot_page_level4_map;
+extern "C" UINTPTR_T boot_page_table1;
 
 namespace obos
 {
@@ -117,13 +118,19 @@ namespace obos
 			for (int l4 = 1; l4 < 512; l4++)
 				if (pBoot_page_directory1[l4])
 					newPageMap[l4] = pBoot_page_directory1[l4];
-			UINTPTR_T firstEntry = 0;
-			utils::memzero(memory::kmap_pageTable((PVOID)(firstEntry = (UINTPTR_T)memory::kalloc_physicalPage())), 4096);
-			memory::kmap_pageTable(level4PageMap->getPageMap());
-			newPageMap[0] = firstEntry | 7;
+			UINTPTR_T l3PageMap = (UINTPTR_T)memory::kalloc_physicalPage();
+			utils::memzero(memory::kmap_pageTable((PVOID)l3PageMap), 4096);
+			newPageMap = memory::kmap_pageTable(level4PageMap->getPageMap());
+			newPageMap[0] = l3PageMap | 7;
+			UINTPTR_T* l3PageMapPtr = (UINTPTR_T*)memory::kmap_pageTable((PVOID)l3PageMap);
+			UINTPTR_T* pageDirectory = (UINTPTR_T*)memory::kalloc_physicalPage();
+			memory::kmap_pageTable((PVOID)l3PageMap);
+			l3PageMapPtr[0] = (UINTPTR_T)pageDirectory;
+			l3PageMapPtr[0] |= 7;
+			UINTPTR_T* pageDirectoryPtr = memory::kmap_pageTable(pageDirectory);
+			pageDirectoryPtr[0] = (UINTPTR_T)&boot_page_table1;
+			pageDirectoryPtr[0] |= 3;
 			level4PageMap->switchToThis();
-			for (UINTPTR_T i = 0; i < 0x100000; i++)
-				memory::kmap_physical((PVOID)i, 3, (PVOID)i, true);
 #endif
 
 			children = list_new();

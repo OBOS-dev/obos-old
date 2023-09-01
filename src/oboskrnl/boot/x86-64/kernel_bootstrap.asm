@@ -64,6 +64,7 @@ GDTPointer:
 
 global boot_page_level4_map
 global boot_page_level3_map
+global boot_page_table1
 global GDTPointer
 
 section .bootstrap_stack nobits

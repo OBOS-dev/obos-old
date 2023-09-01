@@ -13,7 +13,7 @@ extern _ZN4obos18LeaveKernelSectionEv
 
 ; Dispatch driver syscalls.
 ; The syscall id is in e(r)ax.
-; Arguments are passed on the stack backwards.
+; A pointer to the arguments backwards is in e(r)di
 ; The return value is in e(r)ax.
 ; Registers are NOT preserved.
 isr80:
@@ -33,14 +33,9 @@ isr80:
 	lea accumulator, [accumulator*ptr_sz]
 	lea accumulator, [_ZN4obos9driverAPI14g_syscallTableE+accumulator]
 
-	push accumulator
-	call _ZN4obos18EnterKernelSectionEv
-	pop accumulator
-
+%ifdef __i686__
+	push edi
+%endif
 	call [accumulator]
-
-	push accumulator
-	call _ZN4obos18LeaveKernelSectionEv
-	pop accumulator
 
 	int_ret

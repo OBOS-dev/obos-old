@@ -84,9 +84,16 @@ namespace obos
 		}
 		if (utils::testBitInBitfield(frame->errorCode, 4))
 			action = "execute";
+		UINTPTR_T entry = 0;
+		if (utils::testBitInBitfield(frame->errorCode, 0))
+			entry = memory::g_level4PageMap->getRealPageTableEntry(
+				memory::PageMap::computeIndexAtAddress(location, 3),
+				memory::PageMap::computeIndexAtAddress(location, 2),
+				memory::PageMap::computeIndexAtAddress(location, 1),
+				memory::PageMap::computeIndexAtAddress(location, 0));
 		if (!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
 			kpanic((PVOID)frame->rbp, (PVOID)frame->rip,
-					"Page fault in %s-mode at %p (tid %d, pid %d) while trying to %s a %s page.\r\nThe address of that page is %p. Error code: %d\r\nDumping registers: \r\n"
+					"Page fault in %s-mode at %p (tid %d, pid %d) while trying to %s a %s page.\r\nThe address of that page is %p. Error code: %d. Page table entry: %p.\r\nDumping registers: \r\n"
 					"\tRDI: %p\r\n"
 					"\tRSI: %p\r\n"
 					"\tRBP: %p\r\n"
@@ -110,6 +117,7 @@ namespace obos
 					"\tCS: %p\r\n",
 				privilegeLevel, frame->rip, multitasking::GetCurrentThreadTid(), pid, action, isPresent, location,
 				frame->errorCode, // Some bits are not translated by the handler.
+				entry,
 				frame->rdi, frame->rsi, frame->rbp, frame->rsp, frame->rbx,
 				frame->rdx, frame->rcx, frame->rax, frame->rip, 
 				frame->r8, frame->r9, frame->r10, frame->r11,

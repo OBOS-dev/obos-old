@@ -10,7 +10,7 @@ LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
                 0x0000000008000000                . = 0x8000000
 
-.text           0x0000000008000000      0x497
+.text           0x0000000008000000      0x501
  *(.multiboot)
  *(.text)
  .text          0x0000000008000000      0x41d src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
@@ -20,25 +20,25 @@ LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/obosk
                 0x00000000080001b2                strlen
                 0x00000000080001e1                strcmp
  *fill*         0x000000000800041d        0x3 
- .text          0x0000000008000420       0x77 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+ .text          0x0000000008000420       0xe1 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
                 0x0000000008000420                RegisterDriver
-                0x0000000008000428                RegisterInterruptHandler
-                0x0000000008000430                PicSendEoi
-                0x0000000008000438                EnableIRQ
-                0x0000000008000440                DisableIRQ
-                0x0000000008000448                RegisterReadCallback
-                0x0000000008000450                PrintChar
-                0x0000000008000458                GetMultibootModule
-                0x0000000008000460                RegisterFileReadCallback
-                0x0000000008000468                RegisterFileExistsCallback
-                0x0000000008000470                MapPhysicalTo
-                0x0000000008000478                UnmapPhysicalTo
-                0x0000000008000480                Printf
-                0x0000000008000488                GetPhysicalAddress
-                0x0000000008000490                CallSyscall
+                0x000000000800042f                RegisterInterruptHandler
+                0x000000000800043e                PicSendEoi
+                0x000000000800044d                EnableIRQ
+                0x000000000800045c                DisableIRQ
+                0x000000000800046b                RegisterReadCallback
+                0x000000000800047a                PrintChar
+                0x0000000008000489                GetMultibootModule
+                0x0000000008000498                RegisterFileReadCallback
+                0x00000000080004a7                RegisterFileExistsCallback
+                0x00000000080004b6                MapPhysicalTo
+                0x00000000080004c5                UnmapPhysicalTo
+                0x00000000080004d4                Printf
+                0x00000000080004e3                GetPhysicalAddress
+                0x00000000080004f2                CallSyscall
 
-.iplt           0x0000000008000497        0x0
- .iplt          0x0000000008000497        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.iplt           0x0000000008000501        0x0
+ .iplt          0x0000000008000501        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 
 .rodata         0x0000000008001000        0x6
  *(.rodata)
@@ -96,9 +96,9 @@ OUTPUT(/mnt/c/Code/obos/out/ustarFilesystem elf64-x86-64)
  .debug_rnglists
                 0x0000000000000000       0x75 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 
-.debug_line     0x0000000000000000      0x85c
+.debug_line     0x0000000000000000      0x87c
  .debug_line    0x0000000000000000      0x7bd src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
- .debug_line    0x00000000000007bd       0x9f src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+ .debug_line    0x00000000000007bd       0xbf src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
 .debug_str      0x0000000000000000       0x12
  .debug_str     0x0000000000000000       0x12 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj

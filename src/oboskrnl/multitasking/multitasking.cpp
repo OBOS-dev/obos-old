@@ -245,9 +245,11 @@ namespace obos
 			kmainThread->frame.eflags = getEflags();
 #else
 			kmainThread->frame.rip = GET_FUNC_ADDR(kmainThr);
-			kmainThread->frame.rsp = GET_FUNC_ADDR(&thrstack_top);
-			kmainThread->frame.rbp = 0;
+			kmainThread->frame.rsp = GET_FUNC_ADDR(&thrstack_top) + 8;
+			kmainThread->frame.rbp = GET_FUNC_ADDR(&thrstack_top) + 8;
 			kmainThread->frame.rflags = getEflags();
+			UINTPTR_T* _thrstack_top = (UINTPTR_T*)&thrstack_top;
+			_thrstack_top[-1] = 0;
 #endif
 			kmainThread->priority = Thread::priority_t::NORMAL;
 			kmainThread->status = (UINT32_T)Thread::status_t::RUNNING;

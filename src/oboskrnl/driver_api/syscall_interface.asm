@@ -6,7 +6,15 @@
 [global %1]
 %1:
 %assign current_syscall current_syscall + 1
+%ifdef __i686__
 	mov eax, %2
+	mov edi, esp
+	add edi, 4
+%elifdef __x86_64__
+	mov rax, %2
+	mov rdi, rsp
+	add rdi, 8
+%endif
 	int 0x50
 	ret
 %endmacro

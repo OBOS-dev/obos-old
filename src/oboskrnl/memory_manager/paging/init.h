@@ -12,6 +12,7 @@ namespace obos
 {
 	namespace memory
 	{
+		extern bool CPUSupportsExecuteDisable();
 		// Only implemented on i686
 		class PageDirectory final
 		{
