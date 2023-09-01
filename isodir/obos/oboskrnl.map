@@ -1,7 +1,7 @@
-ffffffff80109000 t _start.paging_enabled	/home/omar/.vs/obos/src/oboskrnl/boot/x86-64/kernel_bootstrap.asm:193
-ffffffff80109000 T _stext	/home/omar/.vs/obos/src/oboskrnl/boot/x86-64/kernel_bootstrap.asm:193
-ffffffff8010903e T obos::RestartComputer()	/home/omar/.vs/obos/src/oboskrnl/boot/x86-64/kernel_bootstrap.asm:221
-ffffffff8010903e t wait1	/home/omar/.vs/obos/src/oboskrnl/boot/x86-64/kernel_bootstrap.asm:221
+ffffffff80109000 t _start.paging_enabled	/home/omar/.vs/obos/src/oboskrnl/boot/x86-64/kernel_bootstrap.asm:194
+ffffffff80109000 T _stext	/home/omar/.vs/obos/src/oboskrnl/boot/x86-64/kernel_bootstrap.asm:194
+ffffffff8010903e T obos::RestartComputer()	/home/omar/.vs/obos/src/oboskrnl/boot/x86-64/kernel_bootstrap.asm:222
+ffffffff8010903e t wait1	/home/omar/.vs/obos/src/oboskrnl/boot/x86-64/kernel_bootstrap.asm:222
 ffffffff80109050 T getEflags()	/home/omar/.vs/obos/src/oboskrnl/x86-64/inline-asm.asm:11
 ffffffff80109058 T getEIP()	/home/omar/.vs/obos/src/oboskrnl/x86-64/inline-asm.asm:20
 ffffffff8010905b T getEBP	/home/omar/.vs/obos/src/oboskrnl/x86-64/inline-asm.asm:23
@@ -70,522 +70,525 @@ ffffffff801092ef T obos::utils::dwMemset(unsigned int*, unsigned int, unsigned l
 ffffffff801092fd t obos::utils::dwMemset(unsigned int*, unsigned int, unsigned long long) [clone .loop]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:98
 ffffffff80109313 t obos::utils::dwMemset(unsigned int*, unsigned int, unsigned long long) [clone .finish]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:108
 ffffffff80109315 T obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:111
-ffffffff80109321 t obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long long) [clone .loop]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:119
-ffffffff8010933d t obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long long) [clone .finish]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:131
-ffffffff8010933f T obos::utils::memset(void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:135
-ffffffff8010933f T memset	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:135
-ffffffff8010934b t obos::utils::memset(void*, unsigned int, unsigned int) [clone .loop]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:144
-ffffffff80109358 t obos::utils::memset(void*, unsigned int, unsigned int) [clone .finish]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:153
-ffffffff8010935a T obos::utils::strlen(char const*)	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:156
-ffffffff80109363 t obos::utils::strlen(char const*) [clone .loop]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:162
-ffffffff8010936d t obos::utils::strlen(char const*) [clone .finish]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:171
+ffffffff80109326 t obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long long) [clone .loop]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:123
+ffffffff80109342 t obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long long) [clone .finish]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:135
+ffffffff80109344 T obos::utils::memset(void*, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:139
+ffffffff80109344 T memset	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:139
+ffffffff80109350 t obos::utils::memset(void*, unsigned int, unsigned int) [clone .loop]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:148
+ffffffff8010935d t obos::utils::memset(void*, unsigned int, unsigned int) [clone .finish]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:157
+ffffffff8010935f T obos::utils::strlen(char const*)	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:160
+ffffffff80109368 t obos::utils::strlen(char const*) [clone .loop]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:166
+ffffffff80109372 t obos::utils::strlen(char const*) [clone .finish]	/home/omar/.vs/obos/src/oboskrnl/utils/memcpy_x86-64.asm:175
 ffffffff80109380 T obos::memory::CPUSupportsExecuteDisable()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.asm:10
 ffffffff801093a0 T obos::multitasking::switchToTaskAsm()	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking_x86-64.asm:13
-ffffffff80109411 T obos::multitasking::switchToUserModeTask()	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking_x86-64.asm:50
-ffffffff80109414 T obos::IdtEntry::IdtEntry(unsigned long long, unsigned short, unsigned char, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/x86-64/idt.cpp:72
-ffffffff80109414 T obos::IdtEntry::IdtEntry(unsigned long long, unsigned short, unsigned char, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/x86-64/idt.cpp:72
-ffffffff80109499 T obos::InitializeIdt()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/x86-64/idt.cpp:89
-ffffffff80109e89 T obos::RegisterInterruptHandler(unsigned char, void (*)(obos::interrupt_frame const*))	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/x86-64/idt.cpp:145
-ffffffff80109eaf T obos::pageFault(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/x86-64/exception_handlers.cpp:32
-ffffffff8010a500 T obos::defaultExceptionHandler(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/x86-64/exception_handlers.cpp:120
-ffffffff8010a7e6 T obos::memory::PageMap::PageMap()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:24
-ffffffff8010a7e6 T obos::memory::PageMap::PageMap()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:24
-ffffffff8010a82c T obos::memory::PageMap::PageMap(unsigned long long*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:30
-ffffffff8010a82c T obos::memory::PageMap::PageMap(unsigned long long*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:30
-ffffffff8010a85a T obos::memory::PageMap::getLevel3PageMapAddress(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:34
-ffffffff8010a88c T obos::memory::PageMap::getLevel3PageMap(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:39
-ffffffff8010a8ce T obos::memory::PageMap::getPageDirectory(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:44
-ffffffff8010a922 T obos::memory::PageMap::getPageDirectoryRealtive(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:48
-ffffffff8010a966 T obos::memory::PageMap::getPageTable(unsigned short, unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:52
-ffffffff8010a9c0 T obos::memory::PageMap::getPageTableRealtive(unsigned short, unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:56
-ffffffff8010aa0a T obos::memory::PageMap::getPageTableEntry(unsigned short, unsigned short, unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:60
-ffffffff8010aa6e T obos::memory::PageMap::getRealPageTableEntry(unsigned short, unsigned short, unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:64
-ffffffff8010aac4 T obos::memory::PageMap::switchToThis()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:69
-ffffffff8010aae8 T obos::memory::PageMap::~PageMap()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:75
-ffffffff8010aae8 T obos::memory::PageMap::~PageMap()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:75
-ffffffff8010ab12 T obos::memory::InitializePaging()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:86
-ffffffff8010ab74 t __static_initialization_and_destruction_0(int, int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:94
-ffffffff8010abba t _GLOBAL__sub_I__ZN4obos6memory7PageMapC2Ev
-ffffffff8010abcf T obos::memory::kmap_pageTable(void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:26
-ffffffff8010ac94 t obos::memory::allocatePagingStructures(unsigned long long, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:47
-ffffffff8010b002 T obos::memory::VirtualAlloc(void*, unsigned long long, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:92
-ffffffff8010b20f T obos::memory::VirtualFree(void*, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:133
-ffffffff8010b3cb T obos::memory::HasVirtualAddress(void const*, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:158
-ffffffff8010b5ff T obos::memory::MemoryProtect(void*, unsigned long long, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:183
-ffffffff8010b935 T obos::memory::kmap_physical(void*, unsigned long long, void*, bool)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:224
-ffffffff8010ba75 t obos::memory::addressToIndex(unsigned long long, unsigned long long*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:32
-ffffffff8010baab t obos::memory::isAddressUsed(unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:42
-ffffffff8010bc0b T obos::memory::InitializePhysicalMemoryManager()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:60
-ffffffff8010bdb5 T obos::memory::kalloc_physicalPage()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:85
-ffffffff8010bed1 T obos::memory::kfree_physicalPage(void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:111
-ffffffff8010bf8e t obos::kmain(multiboot_info*, unsigned int)::{lambda(obos::interrupt_frame const*)#1}::operator()(obos::interrupt_frame const*) const	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:196
-ffffffff8010bfb9 t obos::kmain(multiboot_info*, unsigned int)::{lambda(obos::interrupt_frame const*)#1}::_FUN(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:196
-ffffffff8010bfd8 t obos::kmain(multiboot_info*, unsigned int)::{lambda(obos::interrupt_frame const*)#1}::operator void (*)(obos::interrupt_frame const*)() const	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:196
-ffffffff8010bfed T obos::kmain(multiboot_info*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:75
-ffffffff8010c6ea T obos::kmainThr()	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:209
-ffffffff8010cc7f T __cxa_atexit	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:345
-ffffffff8010cd26 T __cxa_finalize	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:356
-ffffffff8010ce4c t obos::putPixel(unsigned int, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:61
-ffffffff8010ce88 t obos::putcharAt(unsigned int, unsigned int, unsigned char, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:65
-ffffffff8010cf95 t obos::on_newline()	/home/omar/.vs/obos/src/oboskrnl/console.cpp:83
-ffffffff8010d124 T obos::InitializeConsole(unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:104
-ffffffff8010d2ed T obos::SetConsoleColor(unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:132
-ffffffff8010d310 T obos::GetConsoleColor(unsigned int&, unsigned int&)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:137
-ffffffff8010d33b t obos::__Impl_OutputCharacter(char)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:145
-ffffffff8010d5b5 T obos::ConsoleOutput(char const*, unsigned long long, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:193
-ffffffff8010d647 T obos::ConsoleOutputString(char const*, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:205
-ffffffff8010d6dd T obos::ConsoleFillLine(char, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:217
-ffffffff8010d76c T obos::ConsoleOutputCharacter(char, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:236
-ffffffff8010d7d2 T obos::ConsoleOutputCharacter(char, unsigned int, unsigned int, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:248
-ffffffff8010d874 T obos::SetTerminalCursorPosition(unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:266
-ffffffff8010d897 T obos::GetTerminalCursorPosition(unsigned int&, unsigned int&)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:272
-ffffffff8010d8c2 t obos::__Impl_swapBuffers()	/home/omar/.vs/obos/src/oboskrnl/console.cpp:279
-ffffffff8010da5a T obos::ClearConsole()	/home/omar/.vs/obos/src/oboskrnl/console.cpp:299
-ffffffff8010dada T obos::swapBuffers()	/home/omar/.vs/obos/src/oboskrnl/console.cpp:309
-ffffffff8010db13 t __static_initialization_and_destruction_0(int, int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:318
-ffffffff8010db63 t _GLOBAL__sub_I__ZN4obos17s_foregroundColorE
-ffffffff8010db78 t itoa(int, char*, int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:26
-ffffffff8010dc5b T strreverse(char*, int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:49
-ffffffff8010dce8 T itoa_unsigned(unsigned int, char*, int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:62
-ffffffff8010dd7a t toupper(char)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:96
-ffffffff8010ddac T obos::consoleOutputCharacter(unsigned char, void*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:163
-ffffffff8010ddf3 T obos::_vprintf(void (*)(unsigned char, void*), void*, char const*, __va_list_tag*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:169
-ffffffff8010e4d0 T obos::printf(char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:266
-ffffffff8010e583 t obos::sprintf_callback(unsigned char, void*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:274
-ffffffff8010e5e8 T obos::sprintf(char*, char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:282
-ffffffff8010e6c2 T obos::vprintf(char const*, __va_list_tag*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:291
-ffffffff8010e6f9 t obos::irq1(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:298
-ffffffff8010e70d T obos::kpanic(void*, void*, char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:302
-ffffffff8010e940 T obos::printf_noFlush(char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:357
-ffffffff8010e9ee T obos::printStackTrace(void*, char const*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:364
-ffffffff8010eba1 T obos::disassemble(void*, char const*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:394
-ffffffff8010edbe T obos::countTo(char const*, char)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:456
-ffffffff8010ee2c T obos::hex2bin(char const*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:463
-ffffffff8010ef03 T obos::addr2func(void*, char*&, unsigned long long&)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:517
-ffffffff8010f0b7 T obos::addr2file(void*, char*&)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:547
-ffffffff8010f237 T obos::rand()	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:574
-ffffffff8010f268 T obos::srand(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:580
-ffffffff8010f280 t obos::rdtsc()	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:586
-ffffffff8010f294 T obos::poop()	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:592
-ffffffff8010f331 T outb(unsigned short, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:13
-ffffffff8010f352 T outw(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:17
-ffffffff8010f373 T inb(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:21
-ffffffff8010f391 T inw(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:30
-ffffffff8010f3b1 T io_wait()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:39
-ffffffff8010f3c7 T cli()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:46
-ffffffff8010f3dc T sti()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:52
-ffffffff8010f3f1 T hlt()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:58
-ffffffff8010f3f9 T _int(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:65
-ffffffff8010fab5 T obos::EnterKernelSection()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:332
-ffffffff8010fafe T obos::LeaveKernelSection()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:339
-ffffffff8010fb65 T obos::EnterSyscall()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:349
-ffffffff8010fb7a T obos::ExitSyscall()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:353
-ffffffff8010fb90 t makeBitmask(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:10
-ffffffff8010fbae T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
-ffffffff8010fbae T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
-ffffffff8010fbd6 T obos::utils::BitfieldBase::setBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:25
-ffffffff8010fbfc T obos::utils::BitfieldBase::clearBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:29
-ffffffff8010fc24 T obos::utils::BitfieldBase::getBit(unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:33
-ffffffff8010fc46 T obos::utils::BitfieldBase::operator[](unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:38
-ffffffff8010fc74 T obos::utils::BitfieldBase::operator unsigned int()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:43
-ffffffff8010fc8a T obos::utils::BitfieldBase::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:47
-ffffffff8010fca6 T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
-ffffffff8010fca6 T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
-ffffffff8010fcd0 T obos::utils::Bitfield::setBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:59
-ffffffff8010fd0a T obos::utils::Bitfield::clearBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:65
-ffffffff8010fd44 T obos::utils::Bitfield::getBit(unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:71
-ffffffff8010fd96 T obos::utils::Bitfield::operator[](unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:78
-ffffffff8010fdc6 T obos::utils::Bitfield::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:83
-ffffffff8010fde0 T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
-ffffffff8010fde0 T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
-ffffffff8010fe0a T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
-ffffffff8010fe0a T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
-ffffffff8010fe40 T obos::utils::IntegerBitfield::setBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:100
-ffffffff8010fe5c T obos::utils::setBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:107
-ffffffff8010fe8d T obos::utils::clearBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:111
-ffffffff8010fec0 T obos::utils::testBitInBitfield(unsigned int, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:115
-ffffffff8010ff0d T obos::utils::setBitInBitfield(unsigned long long&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:126
-ffffffff8010ff43 T obos::utils::clearBitInBitfield(unsigned long long&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:130
-ffffffff8010ff7c T obos::utils::testBitInBitfield(unsigned long long, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:134
-ffffffff8010ffbe T obos::Pic::Pic(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:27
-ffffffff8010ffbe T obos::Pic::Pic(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:27
-ffffffff8011000c T obos::Pic::setPorts(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:31
-ffffffff80110048 T obos::Pic::sendCommandByte(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:38
-ffffffff8011008a T obos::Pic::sendCommandWord(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:45
-ffffffff801100cc T obos::Pic::sendDataByte(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:52
-ffffffff8011010e T obos::Pic::sendDataWord(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:59
-ffffffff80110152 T obos::Pic::recvCommandByte()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:67
-ffffffff80110188 T obos::Pic::recvCommandWord()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:73
-ffffffff801101be T obos::Pic::recvDataByte()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:79
-ffffffff801101f6 T obos::Pic::recvDataWord()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:85
-ffffffff8011022e T obos::Pic::sendEOI()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:92
-ffffffff8011024e T obos::Pic::remap(unsigned char, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:97
-ffffffff801102b0 T obos::Pic::enableIrq(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:109
-ffffffff80110306 T obos::Pic::disableIrq(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:117
-ffffffff8011035c T obos::Pic::disable()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:126
-ffffffff8011037c T obos::Pic::issuedInterrupt(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:131
-ffffffff801103ca T obos::SendEOI(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:140
-ffffffff80110472 T list_iterator_new	/home/omar/.vs/obos/src/oboskrnl/external/list/list_iterator.c:17
-ffffffff801104af T list_iterator_new_from_node	/home/omar/.vs/obos/src/oboskrnl/external/list/list_iterator.c:30
-ffffffff801104f5 T list_iterator_next	/home/omar/.vs/obos/src/oboskrnl/external/list/list_iterator.c:45
-ffffffff8011053c T list_iterator_destroy	/home/omar/.vs/obos/src/oboskrnl/external/list/list_iterator.c:60
-ffffffff8011055f T memcmp	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:14
-ffffffff8011058c T obos::utils::memcmp(void const*, void const*, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:23
-ffffffff80110677 T obos::utils::memchr(void*, unsigned char, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:40
-ffffffff801106f4 T obos::utils::memchr(void const*, unsigned char, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:49
-ffffffff80110721 T obos::utils::strcmp(char const*, char const*)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:53
-ffffffff80110787 T liballoc_alloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:30
-ffffffff801107e1 T liballoc_free	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:41
-ffffffff80110818 T liballoc_lock	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:47
-ffffffff80110828 T liballoc_unlock	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:53
-ffffffff80110838 T operator new(unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:62
-ffffffff80110857 T operator new[](unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:66
-ffffffff80110876 T operator delete(void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:70
-ffffffff80110891 T operator delete[](void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:74
-ffffffff801108ac T operator delete(void*, unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:78
-ffffffff801108cb T operator delete[](void*, unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:82
-ffffffff801108ea T operator new(unsigned long, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:87
-ffffffff80110900 T operator new[](unsigned long, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:91
-ffffffff80110916 T operator delete(void*, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:95
-ffffffff80110929 T operator delete[](void*, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:97
-ffffffff8011093c t liballoc_memset	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:110
-ffffffff8011097a t liballoc_memcpy	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:118
-ffffffff80110a09 t allocate_new_page	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:188
-ffffffff80110b10 T kmalloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:244
-ffffffff801112ac T kfree	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:597
-ffffffff80111547 T kcalloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:726
-ffffffff80111595 T krealloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:742
-ffffffff80111708 T obos::multitasking::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:28
-ffffffff80111708 T obos::multitasking::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:28
-ffffffff8011176e T obos::multitasking::ThreadHandle::CreateThread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:36
-ffffffff8011181a T obos::multitasking::ThreadHandle::OpenThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:42
-ffffffff801118d2 T obos::multitasking::ThreadHandle::OpenThread(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:61
-ffffffff80111968 T obos::multitasking::ThreadHandle::PauseThread(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:75
-ffffffff80111a0a T obos::multitasking::ThreadHandle::ResumeThread()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:90
-ffffffff80111a68 T obos::multitasking::ThreadHandle::SetThreadPriority(obos::multitasking::Thread::priority_t)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:100
-ffffffff80111c22 T obos::multitasking::ThreadHandle::SetThreadStatus(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:157
-ffffffff80111cda T obos::multitasking::ThreadHandle::TerminateThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:174
-ffffffff80111e16 T obos::multitasking::ThreadHandle::GetTid()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:195
-ffffffff80111e44 T obos::multitasking::ThreadHandle::GetExitCode()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:202
-ffffffff80111ea0 T obos::multitasking::ThreadHandle::GetThreadPriority()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:213
-ffffffff80111ee4 T obos::multitasking::ThreadHandle::GetThreadStatus()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:222
-ffffffff80111f28 t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
-ffffffff80111f51 t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
-ffffffff80111f78 t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
-ffffffff80111f8e T obos::multitasking::ThreadHandle::WaitForThreadExit()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:231
-ffffffff80112054 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:263
-ffffffff8011208f t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:263
-ffffffff801120b6 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:263
-ffffffff801120cc t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#2}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:272
-ffffffff80112107 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#2}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:272
-ffffffff8011212e t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#2}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:272
-ffffffff80112144 T obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:250
-ffffffff80112288 T obos::multitasking::ThreadHandle::duplicate()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:285
-ffffffff8011233c T obos::multitasking::ThreadHandle::closeHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:300
-ffffffff801124f3 T obos::multitasking::ExitThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:340
-ffffffff801125a7 T obos::multitasking::GetCurrentThreadTid()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:352
-ffffffff801125ca T obos::multitasking::GetCurrentThreadPriority()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:358
-ffffffff801125da T obos::multitasking::GetCurrentThreadStatus()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:362
-ffffffff801125ea T obos::multitasking::GetCurrentThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:366
-ffffffff8011262c T list_node_new	/home/omar/.vs/obos/src/oboskrnl/external/list/list_node.c:15
-ffffffff8011267d T list_new	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:16
-ffffffff801126e1 T list_destroy	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:34
-ffffffff80112762 T list_rpush	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:57
-ffffffff80112814 T list_rpop	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:80
-ffffffff801128b8 T list_lpop	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:101
-ffffffff80112957 T list_lpush	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:124
-ffffffff80112a05 T list_find	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:148
-ffffffff80112ab5 T list_at	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:177
-ffffffff80112b55 T list_remove	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:206
-ffffffff80112c07 T obos::multitasking::canRanTask(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:52
-ffffffff80112c46 T obos::multitasking::switchToTask(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:61
-ffffffff80112db0 T obos::multitasking::findNewTask(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:106
-ffffffff80113413 T obos::multitasking::InitializeMultitasking()	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:230
-ffffffff801135ec t obos::elfLoader::load(unsigned char*, unsigned long long, unsigned long long&)	/home/omar/.vs/obos/src/oboskrnl/elf/elf.cpp:103
-ffffffff80113787 T obos::elfLoader::LoadElfFile(unsigned char*, unsigned long long, unsigned long long&, unsigned long long&)	/home/omar/.vs/obos/src/oboskrnl/elf/elf.cpp:135
-ffffffff8011384a T obos::multitasking::Thread::Thread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:21
-ffffffff8011384a T obos::multitasking::Thread::Thread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:21
-ffffffff80113952 T obos::multitasking::Thread::CreateThread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:26
-ffffffff80113c08 T obos::multitasking::MutexLockCallback(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:16
-ffffffff80113c48 T obos::multitasking::Mutex::Lock(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:22
-ffffffff80113d1a T obos::multitasking::Mutex::Unlock()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:40
-ffffffff80113d6c T obos::multitasking::Mutex::~Mutex()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:48
-ffffffff80113d6c T obos::multitasking::Mutex::~Mutex()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:48
-ffffffff80113d96 T obos::multitasking::MutexHandle::MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:18
-ffffffff80113d96 T obos::multitasking::MutexHandle::MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:18
-ffffffff80113e3e T obos::multitasking::MutexHandle::duplicate()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:27
-ffffffff80113ec4 T obos::multitasking::MutexHandle::closeHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:37
-ffffffff80113f6c T obos::multitasking::MutexHandle::Lock(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:46
-ffffffff80113fb8 T obos::multitasking::MutexHandle::Unlock()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:55
-ffffffff80113fee T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
-ffffffff80113fee T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
-ffffffff80114024 T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
-ffffffff80114050 T obos::process::Process::Process()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:45
-ffffffff80114050 T obos::process::Process::Process()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:45
-ffffffff801140c6 t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:75
-ffffffff801140e1 t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:75
-ffffffff80114108 t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:75
-ffffffff8011411d T obos::process::DriverEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:59
-ffffffff80114206 T obos::process::Process::CreateProcess(unsigned char*, unsigned long long, void*, bool)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:83
-ffffffff8011456c T obos::process::Process::TerminateProcess(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:185
-ffffffff801147ec T obos::process::Process::doContextSwitch()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:286
-ffffffff8011480a T do_nothing()	/home/omar/.vs/obos/src/oboskrnl/driver_api/interrupts.cpp:11
-ffffffff80114815 T obos::driverAPI::ResetSyscallHandlers()	/home/omar/.vs/obos/src/oboskrnl/driver_api/interrupts.cpp:19
-ffffffff8011484b T obos::driverAPI::RegisterSyscallHandler(unsigned char, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/driver_api/interrupts.cpp:29
-ffffffff80114871 T obos::driverAPI::UnregisterSyscallHandler(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/driver_api/interrupts.cpp:33
-ffffffff80114896 T obos::driverAPI::RegisterSyscalls()	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:77
-ffffffff80114a54 t obos::driverAPI::RegisterDriver(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, obos::driverAPI::serviceType)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:98
-ffffffff80114b56 t obos::driverAPI::RegisterInterruptHandler(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned char, void (*)(obos::interrupt_frame const*))	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:124
-ffffffff80114e64 t obos::driverAPI::PicSendEoi(unsigned int, unsigned int, unsigned int, unsigned int, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:227
-ffffffff80114e90 t obos::driverAPI::DisableIRQ(unsigned int, unsigned int, unsigned int, unsigned int, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:232
-ffffffff80114ef5 t obos::driverAPI::EnableIRQ(unsigned int, unsigned int, unsigned int, unsigned int, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:240
-ffffffff80114f5a t obos::driverAPI::RegisterReadCallback(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, void (*)(char*, unsigned long long))	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:248
-ffffffff80114ff2 t obos::driverAPI::PrintChar(unsigned int, unsigned int, unsigned int, unsigned int, char, bool)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:259
-ffffffff8011502c t obos::driverAPI::GetMultibootModule(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned long long*, unsigned long long*)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:264
-ffffffff8011509f t obos::driverAPI::RegisterFileReadCallback(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, void (*)(char const*, char*, unsigned long long))	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:273
-ffffffff80115136 t obos::driverAPI::RegisterFileExistsCallback(unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, char (*)(char const*, unsigned long long*))	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:284
-ffffffff801151cd t obos::driverAPI::MapPhysicalTo(unsigned int, unsigned int, unsigned int, unsigned int, unsigned long long, void*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:295
-ffffffff80115240 t obos::driverAPI::UnmapPhysicalTo(unsigned int, unsigned int, unsigned int, unsigned int, void*)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:303
-ffffffff801152a4 t obos::driverAPI::Printf(unsigned int, unsigned int, unsigned int, unsigned int, char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:311
-ffffffff80115346 t obos::driverAPI::GetPhysicalAddress(unsigned int, unsigned int, unsigned int, unsigned int, void*, void**)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:332
-ffffffff801154d1 t obos::driverAPI::interruptHandler(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:358
-ffffffff80115570 t checkUserPtr(void const*, bool)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:27
-ffffffff801155ee t checkUserHandle(unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:40
-ffffffff80115633 T obos::process::RegisterSyscalls()	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:93
-ffffffff80115a81 t obos::process::ConsoleOutputString(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:145
-ffffffff80115ae4 t obos::process::ExitProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:157
-ffffffff80115b4c t obos::process::CreateProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:167
-ffffffff80115bfb t obos::process::TerminateProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:184
-ffffffff80115cb6 t obos::process::OpenCurrentProcessHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:204
-ffffffff80115d2a t obos::process::OpenProcessHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:217
-ffffffff80115e2a t obos::process::CreateThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:238
-ffffffff80115f0f t obos::process::OpenThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:259
-ffffffff80116031 t obos::process::PauseThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:284
-ffffffff801160d8 t obos::process::ResumeThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:302
-ffffffff80116172 t obos::process::SetThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:319
-ffffffff80116215 t obos::process::SetThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:337
-ffffffff801162b8 t obos::process::TerminateThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:355
-ffffffff8011637b t obos::process::GetTid(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:375
-ffffffff80116493 t obos::process::GetExitCode(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:400
-ffffffff801165bf t obos::process::GetThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:430
-ffffffff801166d4 t obos::process::GetThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:457
-ffffffff801167e9 t obos::process::WaitForThreadExit(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:484
-ffffffff801168b1 t obos::process::ExitThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:504
-ffffffff801168f7 t obos::process::GetCurrentThreadTid(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:514
-ffffffff8011690a t obos::process::GetCurrentThreadHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:519
-ffffffff8011691d t obos::process::GetCurrentThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:524
-ffffffff80116930 t obos::process::GetCurrentThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:529
-ffffffff80116943 t obos::process::CloseHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:534
-ffffffff801169d4 t obos::process::OpenProcessParentHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:549
-ffffffff80116ab7 t obos::process::SetConsoleColor(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:572
-ffffffff80116b07 t obos::process::GetConsoleColor(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:584
-ffffffff80116ba0 t obos::process::ConsoleOutputCharacter(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:600
-ffffffff80116bf8 t obos::process::ConsoleOutputCharacterAt(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:612
-ffffffff80116c5c t obos::process::ConsoleOutput(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:625
-ffffffff80116cdd t obos::process::ConsoleFillLine(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:640
-ffffffff80116d35 t obos::process::SetConsoleCursorPosition(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:652
-ffffffff80116d85 t obos::process::GetConsoleCursorPosition(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:663
-ffffffff80116dd9 t obos::process::ConsoleSwapBuffers(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:674
-ffffffff80116df1 t obos::process::ClearConsole(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:680
-ffffffff80116e09 t obos::process::VirtualAlloc(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:686
-ffffffff80116ea3 t obos::process::VirtualFree(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:700
-ffffffff80116f15 t obos::process::HasVirtualAddress(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:713
-ffffffff80116fb1 t obos::process::MemoryProtect(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:726
-ffffffff8011702f t ZYAN_MEMCPY	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:308
-ffffffff80117089 t ZYAN_MEMSET	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:339
-ffffffff801170ce t ZYAN_STRLEN	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:412
-ffffffff801170fe t ZydisDecoderTreeGetRootNode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:856
-ffffffff8011710b t ZydisInputPeek	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2077
-ffffffff8011715e t ZydisInputSkip	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2108
-ffffffff801171ab t ZydisInputNext	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2131
-ffffffff80117230 t ZydisInputNextBytes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2168
-ffffffff801172e6 t ZydisDecodeREX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2205
-ffffffff801173b1 t ZydisDecodeXOP	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2233
-ffffffff801175a8 t ZydisDecodeVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2285
-ffffffff8011787e t ZydisDecodeEVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2361
-ffffffff80117c1e t ZydisDecodeMVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2456
-ffffffff80117ea7 t ZydisDecodeModRM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2514
-ffffffff80117f0e t ZydisDecodeSIB	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2532
-ffffffff80117f75 t ZydisReadDisplacement	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2557
-ffffffff801180eb t ZydisReadImmediate	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2618
-ffffffff8011845d t ZydisCalcRegisterId	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2713
-ffffffff801185a2 t ZydisSetOperandSizeAndElementInfo	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2794
-ffffffff80118ba0 t ZydisDecodeOperandRegister	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3049
-ffffffff80118c21 t ZydisDecodeOperandMemory	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3092
-ffffffff80119096 t ZydisDecodeOperandImplicitRegister	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3284
-ffffffff80119276 t ZydisDecodeOperandImplicitMemory	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3358
-ffffffff801194d4 T ZydisDecodeOperands	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3423
-ffffffff8011a6bb t ZydisSetAttributes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3824
-ffffffff8011affe t ZydisSetAVXInformation	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:4127
-ffffffff8011bc8a t ZydisCollectOptionalPrefixes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:4911
-ffffffff8011c036 t ZydisDecodeOptionalInstructionParts	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5043
-ffffffff8011c445 t ZydisSetEffectiveOperandWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5178
-ffffffff8011c4fe t ZydisSetEffectiveAddressWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5310
-ffffffff8011c58e t ZydisNodeHandlerXOP	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5368
-ffffffff8011c5f4 t ZydisNodeHandlerVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5388
-ffffffff8011c657 t ZydisNodeHandlerEMVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5408
-ffffffff8011c6f1 t ZydisNodeHandlerOpcode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5432
-ffffffff8011ccd8 t ZydisNodeHandlerMode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5641
-ffffffff8011cd29 t ZydisNodeHandlerModeCompact	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5666
-ffffffff8011cd55 t ZydisNodeHandlerModrmMod	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5676
-ffffffff8011cde1 t ZydisNodeHandlerModrmModCompact	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5694
-ffffffff8011ce3a t ZydisNodeHandlerModrmReg	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5702
-ffffffff8011cec6 t ZydisNodeHandlerModrmRm	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5720
-ffffffff8011cf52 t ZydisNodeHandlerMandatoryPrefix	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5738
-ffffffff8011d03d t ZydisNodeHandlerOperandSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5772
-ffffffff8011d11f t ZydisNodeHandlerAddressSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5810
-ffffffff8011d1bf t ZydisNodeHandlerVectorLength	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5841
-ffffffff8011d231 t ZydisNodeHandlerRexW	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5874
-ffffffff8011d279 t ZydisNodeHandlerRexB	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5905
-ffffffff8011d2c1 t ZydisNodeHandlerEvexB	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5937
-ffffffff8011d2ed t ZydisNodeHandlerMvexE	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5950
-ffffffff8011d319 t ZydisPopulateRegisterIds	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5984
-ffffffff8011d6b2 t ZydisCheckErrorConditions	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6177
-ffffffff8011dc19 t ZydisDecodeInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6504
-ffffffff8011e438 T ZydisDecoderInit	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6727
-ffffffff8011e4cc T ZydisDecoderEnableMode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6780
-ffffffff8011e50a T ZydisDecoderDecodeFull	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6799
-ffffffff8011e639 T ZydisDecoderDecodeInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6826
-ffffffff8011e79b T ZydisDecoderDecodeOperands	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6867
-ffffffff8011e849 T ZydisDecoderTreeGetChildNode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:14593
-ffffffff8011ee53 T ZydisGetInstructionEncodingInfo	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:14688
-ffffffff8011ee95 t ZydisGetEncodableEncoding	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15215
-ffffffff8011eeac t ZydisGetMachineModeWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15237
-ffffffff8011eee3 t ZydisGetAszFromHint	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15262
-ffffffff8011eefa t ZydisGetOszFromHint	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15276
-ffffffff8011ef11 t ZydisGetOperandSizeFromElementSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15294
-ffffffff8011f0b8 t ZydisGetScaledImmSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15355
-ffffffff8011f16e t ZydisGetSignedImmSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15376
-ffffffff8011f1d3 t ZydisGetUnsignedImmSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15401
-ffffffff8011f21a t ZydisIsImmSigned	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15426
-ffffffff8011f25c t ZydisGetEffectiveImmSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15475
-ffffffff8011f488 t ZydisCheckOsz	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15598
-ffffffff8011f4e6 t ZydisCheckAsz	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15622
-ffffffff8011f551 t ZydisIsRegisterAllowed	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15648
-ffffffff8011f5e1 t ZydisIsScaleValid	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15685
-ffffffff8011f624 t ZydisValidateRexType	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15710
-ffffffff8011f729 t ZydisIsValidAddressingClass	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15782
-ffffffff8011f7e8 t ZydisGetRm16	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15815
-ffffffff8011f83d t ZydisEncodeMvexBroadcastMode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15847
-ffffffff8011f880 t ZydisEncodeMvexConversionMode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15871
-ffffffff8011f8cc t ZydisGetCompDispScaleEvex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15899
-ffffffff8011fafc t ZydisGetCompDispScaleMvex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:16036
-ffffffff8011fd3f t ZydisGetCompDispScale	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:16146
-ffffffff8011fda0 t ZydisIsRegisterOperandCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:16173
-ffffffff80120569 t ZydisIsMemoryOperandCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:16505
-ffffffff8012120d t ZydisIsPointerOperandCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17027
-ffffffff801212bd t ZydisIsImmediateOperandCompabile	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17056
-ffffffff801213a9 t ZydisIsBroadcastModeCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17111
-ffffffff801214d8 t ZydisAreEvexFeaturesCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17204
-ffffffff801216ac t ZydisAreMvexFeaturesCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17285
-ffffffff80121d43 t ZydisCheckConstraints	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17494
-ffffffff80121f91 t ZydisIsDefinitionCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17603
-ffffffff80122212 t ZydisArePrefixesCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17713
-ffffffff8012249e t ZydisGetOperandMask	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17797
-ffffffff80122506 t ZydisHandleSwappableDefinition	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17819
-ffffffff8012266b t ZydisFindMatchingDefinition	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17864
-ffffffff80122c1e t ZydisEmitUInt	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18074
-ffffffff80122d48 t ZydisEmitByte	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18120
-ffffffff80122d70 t ZydisEmitLegacyPrefixes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18133
-ffffffff8012306c t ZydisEncodeRexLowNibble	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18229
-ffffffff801231bd t ZydisEmitRex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18300
-ffffffff80123224 t ZydisEncodeVexCommons	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18323
-ffffffff8012331b t ZydisEmitXop	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18372
-ffffffff80123407 t ZydisEmitVex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18393
-ffffffff80123595 t ZydisEncodeEvexCommons	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18430
-ffffffff80123640 t ZydisEmitEvex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18452
-ffffffff80123766 t ZydisEmitMvex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18485
-ffffffff80123876 t ZydisEmitInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18514
-ffffffff80123c77 T ZydisBuildRegisterOperand	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18605
-ffffffff80123dd4 t ZydisBuildMemoryOperand	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18671
-ffffffff801240f6 t ZydisBuildInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18817
-ffffffff8012486e t ZydisEncoderCheckRequestSanity	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19068
-ffffffff80124cef t ZydisEncoderEncodeInstructionInternal	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19240
-ffffffff80124daf T ZydisEncoderEncodeInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19259
-ffffffff80124e14 T ZydisEncoderEncodeInstructionAbsolute	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19272
-ffffffff8012543b T ZydisEncoderDecodedInstructionToEncoderRequest	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19477
-ffffffff801259e6 T ZydisEncoderNopFill	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19659
-ffffffff80125a6c T ZydisGetRelInfo	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29200
-ffffffff80125b20 T ZydisGetEncodableInstructions	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29259
-ffffffff80125b85 t ZyanAbsI64	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29499
-ffffffff80125bbd t ZydisStringAppend	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29807
-ffffffff80125c92 t ZydisStringAppendShort	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29906
-ffffffff80125d4c t ZydisStringAppendShortCase	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29937
-ffffffff80125f36 t ZydisStringAppendDecS	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30038
-ffffffff80126028 t ZydisStringAppendHexS	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30110
-ffffffff80126153 t ZydisFormatterBufferAppendPredefined	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30333
-ffffffff8012627a T ZydisFormatterBufferInit	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30879
-ffffffff8012630b T ZydisFormatterBufferInitTokenized	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30901
-ffffffff801263ca T ZydisFormatterInit	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30941
-ffffffff80126413 T ZydisFormatterSetProperty	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30957
-ffffffff80126ace T ZydisFormatterSetHook	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31197
-ffffffff80126b99 T ZydisFormatterFormatInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31271
-ffffffff80126d59 T ZydisFormatterFormatOperand	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31307
-ffffffff80127003 T ZydisFormatterTokenizeInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31364
-ffffffff80127209 T ZydisFormatterTokenizeOperand	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31411
-ffffffff801274fc T ZydisFormatterATTFormatInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32344
-ffffffff80127c0b T ZydisFormatterATTFormatOperandMEM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32501
-ffffffff801280c7 T ZydisFormatterATTPrintMnemonic	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32575
-ffffffff80128437 T ZydisFormatterATTPrintRegister	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32647
-ffffffff801284fd T ZydisFormatterATTPrintAddressABS	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32666
-ffffffff8012859e T ZydisFormatterATTPrintDISP	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32682
-ffffffff80128906 T ZydisFormatterATTPrintIMM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32710
-ffffffff80128989 T ZydisFormatterHelperGetExplicitSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32805
-ffffffff80128b83 T ZydisFormatterBaseFormatOperandREG	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32874
-ffffffff80128bc1 T ZydisFormatterBaseFormatOperandPTR	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32884
-ffffffff80128f9c T ZydisFormatterBaseFormatOperandIMM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32916
-ffffffff80129055 T ZydisFormatterBasePrintAddressABS	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32943
-ffffffff801292a6 T ZydisFormatterBasePrintAddressREL	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32983
-ffffffff801296b4 T ZydisFormatterBasePrintIMM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33036
-ffffffff80129b19 T ZydisFormatterBasePrintSegment	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33101
-ffffffff80129d03 T ZydisFormatterBasePrintPrefixes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33148
-ffffffff8012ac84 T ZydisFormatterBasePrintDecorator	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33303
-ffffffff8012c177 T ZydisFormatterTokenGetValue	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33563
-ffffffff8012c1ca T ZydisFormatterTokenNext	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33577
-ffffffff8012c22b T ZydisFormatterBufferGetToken	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33598
-ffffffff8012c27f T ZydisFormatterBufferGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33615
-ffffffff8012c2df T ZydisFormatterBufferAppend	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33636
-ffffffff8012c403 T ZydisFormatterBufferRemember	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33672
-ffffffff8012c45d T ZydisFormatterBufferRestore	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33690
-ffffffff8012c51e T ZydisFormatterIntelFormatInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33762
-ffffffff8012cc2f T ZydisFormatterIntelFormatOperandMEM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33913
-ffffffff8012d107 T ZydisFormatterIntelPrintMnemonic	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33982
-ffffffff8012d2b3 T ZydisFormatterIntelPrintRegister	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34023
-ffffffff8012d395 T ZydisFormatterIntelPrintDISP	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34043
-ffffffff8012d863 T ZydisFormatterIntelPrintTypecast	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34086
-ffffffff8012dcbd T ZydisFormatterIntelFormatInstructionMASM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34115
-ffffffff8012dcf6 T ZydisFormatterIntelPrintAddressMASM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34130
-ffffffff8012df8f T ZydisCategoryGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34619
-ffffffff8012dfb4 T ZydisISASetGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34628
-ffffffff8012dfdc T ZydisISAExtGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34637
-ffffffff8012e001 T ZydisMnemonicGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:36446
-ffffffff8012e034 T ZydisMnemonicGetStringWrapped	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:36455
-ffffffff8012e064 T ZydisRegisterEncode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37158
-ffffffff8012e0e2 T ZydisRegisterGetId	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37181
-ffffffff8012e118 T ZydisRegisterGetClass	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37191
-ffffffff8012e14d T ZydisRegisterGetWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37201
-ffffffff8012e1a7 T ZydisRegisterGetLargestEnclosing	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37213
-ffffffff8012e2a5 T ZydisRegisterGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37287
-ffffffff8012e2d8 T ZydisRegisterGetStringWrapped	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37297
-ffffffff8012e308 T ZydisRegisterClassGetWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37311
-ffffffff8012e35f T ZydisGetInstructionSegments	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37363
-ffffffff8012e91e T ZydisGetInstructionDefinition	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53334
-ffffffff8012ea23 T ZydisGetOperandDefinitions	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53371
-ffffffff8012ea8a T ZydisGetElementInfo	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53388
-ffffffff8012eac2 T ZydisGetAccessedFlags	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53435
-ffffffff8012eb33 T ZydisStringAppendDecU64	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53563
-ffffffff8012ed19 T ZydisStringAppendHexU64	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53684
-ffffffff8012efa7 T ZydisStringAppendDecU	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53767
-ffffffff8012f036 T ZydisStringAppendHexU	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53792
-ffffffff8012f0d1 T ZydisCalcAbsoluteAddress	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53870
-ffffffff8012f2ed T ZydisCalcAbsoluteAddressEx	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53953
-ffffffff8012f448 T ZydisGetVersion	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54037
-ffffffff8012f458 T ZydisIsFeatureEnabled	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54042
-ffffffff8012f4a7 t ZydisDisassemble	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54127
-ffffffff8012f6c1 T ZydisDisassembleIntel	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54182
-ffffffff8012f701 T ZydisDisassembleATT	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54190
-ffffffff8012f741 T obos::InitializeGdt()	/home/omar/.vs/obos/src/oboskrnl/descriptors/gdt/gdt.cpp:102
-ffffffff8012f748 T obos::SetTSSStack(void*)	/home/omar/.vs/obos/src/oboskrnl/descriptors/gdt/gdt.cpp:106
-ffffffff8012f757 T obos::process::ProcEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:48
-ffffffff8012f757 T _glb_text_start	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:49
-ffffffff8012f781 T _glb_text_end	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.h:75
+ffffffff801093f9 T obos::multitasking::switchToUserModeTask()	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking_x86-64.asm:55
+ffffffff80109400 T isr80	/home/omar/.vs/obos/src/oboskrnl/driver_api/interrupts.asm:20
+ffffffff80109430 T isr64	/home/omar/.vs/obos/src/oboskrnl/syscalls/interrupts.asm:90
+ffffffff8010950e T obos::IdtEntry::IdtEntry(unsigned long long, unsigned short, unsigned char, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/x86-64/idt.cpp:75
+ffffffff8010950e T obos::IdtEntry::IdtEntry(unsigned long long, unsigned short, unsigned char, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/x86-64/idt.cpp:75
+ffffffff80109593 T obos::InitializeIdt()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/x86-64/idt.cpp:92
+ffffffff80109fe9 T obos::RegisterInterruptHandler(unsigned char, void (*)(obos::interrupt_frame const*))	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/x86-64/idt.cpp:150
+ffffffff8010a00f T obos::pageFault(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/x86-64/exception_handlers.cpp:34
+ffffffff8010a660 T obos::debugExceptionHandler(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/x86-64/exception_handlers.cpp:121
+ffffffff8010a9a8 T obos::defaultExceptionHandler(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/x86-64/exception_handlers.cpp:182
+ffffffff8010ac8e T obos::memory::PageMap::PageMap()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:24
+ffffffff8010ac8e T obos::memory::PageMap::PageMap()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:24
+ffffffff8010acd4 T obos::memory::PageMap::PageMap(unsigned long long*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:30
+ffffffff8010acd4 T obos::memory::PageMap::PageMap(unsigned long long*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:30
+ffffffff8010ad02 T obos::memory::PageMap::getLevel3PageMapAddress(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:34
+ffffffff8010ad34 T obos::memory::PageMap::getLevel3PageMap(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:39
+ffffffff8010ad76 T obos::memory::PageMap::getPageDirectory(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:44
+ffffffff8010adca T obos::memory::PageMap::getPageDirectoryRealtive(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:48
+ffffffff8010ae0e T obos::memory::PageMap::getPageTable(unsigned short, unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:52
+ffffffff8010ae68 T obos::memory::PageMap::getPageTableRealtive(unsigned short, unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:56
+ffffffff8010aeb2 T obos::memory::PageMap::getPageTableEntry(unsigned short, unsigned short, unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:60
+ffffffff8010af16 T obos::memory::PageMap::getRealPageTableEntry(unsigned short, unsigned short, unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:64
+ffffffff8010af6c T obos::memory::PageMap::switchToThis()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:69
+ffffffff8010af90 T obos::memory::PageMap::~PageMap()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:75
+ffffffff8010af90 T obos::memory::PageMap::~PageMap()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:75
+ffffffff8010afba T obos::memory::InitializePaging()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:86
+ffffffff8010afef t __static_initialization_and_destruction_0(int, int)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/init.cpp:92
+ffffffff8010b035 t _GLOBAL__sub_I__ZN4obos6memory7PageMapC2Ev
+ffffffff8010b04a T obos::memory::kmap_pageTable(void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:26
+ffffffff8010b154 T obos::memory::allocatePagingStructures(unsigned long long, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:47
+ffffffff8010b4c2 T obos::memory::VirtualAlloc(void*, unsigned long long, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:93
+ffffffff8010b6cf T obos::memory::VirtualFree(void*, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:134
+ffffffff8010b88b T obos::memory::HasVirtualAddress(void const*, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:159
+ffffffff8010babf T obos::memory::MemoryProtect(void*, unsigned long long, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:184
+ffffffff8010be01 T obos::memory::kmap_physical(void*, unsigned long long, void*, bool)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/x86-64/allocate.cpp:225
+ffffffff8010bf41 t obos::memory::addressToIndex(unsigned long long, unsigned long long*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:32
+ffffffff8010bf77 t obos::memory::isAddressUsed(unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:42
+ffffffff8010c0c3 T obos::memory::InitializePhysicalMemoryManager()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:60
+ffffffff8010c2b8 T obos::memory::kalloc_physicalPage()	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:93
+ffffffff8010c3d4 T obos::memory::kfree_physicalPage(void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/x86-64/physical.cpp:119
+ffffffff8010c490 t obos::kmain(multiboot_info*, unsigned int)::{lambda(obos::interrupt_frame const*)#1}::operator()(obos::interrupt_frame const*) const	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:221
+ffffffff8010c4bb t obos::kmain(multiboot_info*, unsigned int)::{lambda(obos::interrupt_frame const*)#1}::_FUN(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:221
+ffffffff8010c4da t obos::kmain(multiboot_info*, unsigned int)::{lambda(obos::interrupt_frame const*)#1}::operator void (*)(obos::interrupt_frame const*)() const	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:221
+ffffffff8010c4ef T obos::kmain(multiboot_info*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:81
+ffffffff8010cc00 T obos::kmainThr()	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:239
+ffffffff8010d18d T __cxa_atexit	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:391
+ffffffff8010d234 T __cxa_finalize	/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp:402
+ffffffff8010d35a t obos::putPixel(unsigned int, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:61
+ffffffff8010d396 t obos::putcharAt(unsigned int, unsigned int, unsigned char, unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:65
+ffffffff8010d4a3 t obos::on_newline()	/home/omar/.vs/obos/src/oboskrnl/console.cpp:83
+ffffffff8010d632 T obos::InitializeConsole(unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:104
+ffffffff8010d7ca T obos::SetConsoleColor(unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:132
+ffffffff8010d7ed T obos::GetConsoleColor(unsigned int&, unsigned int&)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:137
+ffffffff8010d818 t obos::__Impl_OutputCharacter(char)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:145
+ffffffff8010da92 T obos::ConsoleOutput(char const*, unsigned long long, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:193
+ffffffff8010db24 T obos::ConsoleOutputString(char const*, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:205
+ffffffff8010dbba T obos::ConsoleFillLine(char, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:217
+ffffffff8010dc49 T obos::ConsoleOutputCharacter(char, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:236
+ffffffff8010dcaf T obos::ConsoleOutputCharacter(char, unsigned int, unsigned int, bool)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:248
+ffffffff8010dd51 T obos::SetTerminalCursorPosition(unsigned int, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:266
+ffffffff8010dd74 T obos::GetTerminalCursorPosition(unsigned int&, unsigned int&)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:272
+ffffffff8010dd9f t obos::__Impl_swapBuffers()	/home/omar/.vs/obos/src/oboskrnl/console.cpp:279
+ffffffff8010df37 T obos::ClearConsole()	/home/omar/.vs/obos/src/oboskrnl/console.cpp:299
+ffffffff8010dfb7 T obos::swapBuffers()	/home/omar/.vs/obos/src/oboskrnl/console.cpp:309
+ffffffff8010dff0 t __static_initialization_and_destruction_0(int, int)	/home/omar/.vs/obos/src/oboskrnl/console.cpp:318
+ffffffff8010e040 t _GLOBAL__sub_I__ZN4obos17s_foregroundColorE
+ffffffff8010e055 t itoa(long long, char*, int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:27
+ffffffff8010e14b T strreverse(char*, int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:50
+ffffffff8010e1d8 T itoa_unsigned(unsigned long long, char*, int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:63
+ffffffff8010e27d t toupper(char)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:97
+ffffffff8010e2af T obos::consoleOutputCharacter(unsigned char, void*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:168
+ffffffff8010e2f6 T obos::_vprintf(void (*)(unsigned char, void*), void*, char const*, __va_list_tag*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:174
+ffffffff8010e9e9 T obos::printf(char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:271
+ffffffff8010ea9c t obos::sprintf_callback(unsigned char, void*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:279
+ffffffff8010eb01 T obos::sprintf(char*, char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:287
+ffffffff8010ebdb T obos::vprintf(char const*, __va_list_tag*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:296
+ffffffff8010ec12 t obos::irq1(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:303
+ffffffff8010ec37 T obos::kpanic(void*, void*, char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:308
+ffffffff8010ee6c T obos::printf_noFlush(char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:371
+ffffffff8010ef1a T obos::printStackTrace(void*, char const*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:378
+ffffffff8010f0cd T obos::disassemble(void*, char const*)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:408
+ffffffff8010f2ea T obos::countTo(char const*, char)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:470
+ffffffff8010f358 T obos::hex2bin(char const*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:477
+ffffffff8010f42f T obos::addr2func(void*, char*&, unsigned long long&)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:531
+ffffffff8010f5e3 T obos::addr2file(void*, char*&)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:561
+ffffffff8010f763 T obos::rand()	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:588
+ffffffff8010f794 T obos::srand(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:594
+ffffffff8010f7ac t obos::rdtsc()	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:600
+ffffffff8010f7c0 T obos::poop()	/home/omar/.vs/obos/src/oboskrnl/klog.cpp:606
+ffffffff8010f85d T outb(unsigned short, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:13
+ffffffff8010f87e T outw(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:17
+ffffffff8010f89f T inb(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:21
+ffffffff8010f8bd T inw(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:30
+ffffffff8010f8dd T io_wait()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:39
+ffffffff8010f8f3 T cli()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:46
+ffffffff8010f908 T sti()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:52
+ffffffff8010f91d T hlt()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:58
+ffffffff8010f925 T _int(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:65
+ffffffff8010ffe1 T obos::EnterKernelSection()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:332
+ffffffff8011002a T obos::LeaveKernelSection()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:339
+ffffffff80110091 T obos::EnterSyscall()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:349
+ffffffff801100a6 T obos::ExitSyscall()	/home/omar/.vs/obos/src/oboskrnl/inline-asm.cpp:353
+ffffffff801100bc t makeBitmask(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:10
+ffffffff801100da T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
+ffffffff801100da T obos::utils::BitfieldBase::BitfieldBase()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:20
+ffffffff80110102 T obos::utils::BitfieldBase::setBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:25
+ffffffff80110128 T obos::utils::BitfieldBase::clearBit(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:29
+ffffffff80110150 T obos::utils::BitfieldBase::getBit(unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:33
+ffffffff80110172 T obos::utils::BitfieldBase::operator[](unsigned int) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:38
+ffffffff801101a0 T obos::utils::BitfieldBase::operator unsigned int()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:43
+ffffffff801101b6 T obos::utils::BitfieldBase::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:47
+ffffffff801101d2 T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
+ffffffff801101d2 T obos::utils::Bitfield::Bitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:54
+ffffffff801101fc T obos::utils::Bitfield::setBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:59
+ffffffff80110236 T obos::utils::Bitfield::clearBit(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:65
+ffffffff80110270 T obos::utils::Bitfield::getBit(unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:71
+ffffffff801102c2 T obos::utils::Bitfield::operator[](unsigned char) const	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:78
+ffffffff801102f2 T obos::utils::Bitfield::operator bool()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:83
+ffffffff8011030c T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
+ffffffff8011030c T obos::utils::IntegerBitfield::IntegerBitfield()	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:90
+ffffffff80110336 T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
+ffffffff80110336 T obos::utils::IntegerBitfield::IntegerBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:95
+ffffffff8011036c T obos::utils::IntegerBitfield::setBitfield(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:100
+ffffffff80110388 T obos::utils::setBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:107
+ffffffff801103b9 T obos::utils::clearBitInBitfield(unsigned int&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:111
+ffffffff801103ec T obos::utils::testBitInBitfield(unsigned int, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:115
+ffffffff80110439 T obos::utils::setBitInBitfield(unsigned long long&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:126
+ffffffff8011046f T obos::utils::clearBitInBitfield(unsigned long long&, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:130
+ffffffff801104a8 T obos::utils::testBitInBitfield(unsigned long long, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/utils/bitfields.cpp:134
+ffffffff801104ea T obos::Pic::Pic(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:27
+ffffffff801104ea T obos::Pic::Pic(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:27
+ffffffff80110538 T obos::Pic::setPorts(unsigned short, unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:31
+ffffffff80110574 T obos::Pic::sendCommandByte(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:38
+ffffffff801105b6 T obos::Pic::sendCommandWord(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:45
+ffffffff801105f8 T obos::Pic::sendDataByte(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:52
+ffffffff8011063a T obos::Pic::sendDataWord(unsigned short)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:59
+ffffffff8011067e T obos::Pic::recvCommandByte()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:67
+ffffffff801106b4 T obos::Pic::recvCommandWord()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:73
+ffffffff801106ea T obos::Pic::recvDataByte()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:79
+ffffffff80110722 T obos::Pic::recvDataWord()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:85
+ffffffff8011075a T obos::Pic::sendEOI()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:92
+ffffffff8011077a T obos::Pic::remap(unsigned char, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:97
+ffffffff801107dc T obos::Pic::enableIrq(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:109
+ffffffff80110832 T obos::Pic::disableIrq(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:117
+ffffffff80110888 T obos::Pic::disable()	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:126
+ffffffff801108a8 T obos::Pic::issuedInterrupt(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:131
+ffffffff801108f6 T obos::SendEOI(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/descriptors/idt/pic.cpp:140
+ffffffff8011099e T list_iterator_new	/home/omar/.vs/obos/src/oboskrnl/external/list/list_iterator.c:17
+ffffffff801109db T list_iterator_new_from_node	/home/omar/.vs/obos/src/oboskrnl/external/list/list_iterator.c:30
+ffffffff80110a21 T list_iterator_next	/home/omar/.vs/obos/src/oboskrnl/external/list/list_iterator.c:45
+ffffffff80110a68 T list_iterator_destroy	/home/omar/.vs/obos/src/oboskrnl/external/list/list_iterator.c:60
+ffffffff80110a8b T memcmp	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:14
+ffffffff80110ab8 T obos::utils::memcmp(void const*, void const*, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:23
+ffffffff80110ba3 T obos::utils::memchr(void*, unsigned char, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:40
+ffffffff80110c20 T obos::utils::memchr(void const*, unsigned char, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:49
+ffffffff80110c4d T obos::utils::strcmp(char const*, char const*)	/home/omar/.vs/obos/src/oboskrnl/utils/memory.cpp:53
+ffffffff80110cb3 T liballoc_alloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:30
+ffffffff80110d0d T liballoc_free	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:41
+ffffffff80110d44 T liballoc_lock	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:47
+ffffffff80110d54 T liballoc_unlock	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:53
+ffffffff80110d64 T operator new(unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:62
+ffffffff80110d83 T operator new[](unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:66
+ffffffff80110da2 T operator delete(void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:70
+ffffffff80110dbd T operator delete[](void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:74
+ffffffff80110dd8 T operator delete(void*, unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:78
+ffffffff80110df7 T operator delete[](void*, unsigned long)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:82
+ffffffff80110e16 T operator new(unsigned long, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:87
+ffffffff80110e2c T operator new[](unsigned long, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:91
+ffffffff80110e42 T operator delete(void*, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:95
+ffffffff80110e55 T operator delete[](void*, void*)	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/liballoc_hooks.cpp:97
+ffffffff80110e68 t liballoc_memset	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:110
+ffffffff80110ea6 t liballoc_memcpy	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:118
+ffffffff80110f35 t allocate_new_page	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:188
+ffffffff8011103c T kmalloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:244
+ffffffff801117d8 T kfree	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:597
+ffffffff80111a73 T kcalloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:726
+ffffffff80111ac1 T krealloc	/home/omar/.vs/obos/src/oboskrnl/memory_manager/liballoc/liballoc.c:742
+ffffffff80111c34 T obos::multitasking::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:28
+ffffffff80111c34 T obos::multitasking::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:28
+ffffffff80111c9a T obos::multitasking::ThreadHandle::CreateThread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:36
+ffffffff80111d46 T obos::multitasking::ThreadHandle::OpenThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:42
+ffffffff80111dfe T obos::multitasking::ThreadHandle::OpenThread(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:61
+ffffffff80111e94 T obos::multitasking::ThreadHandle::PauseThread(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:75
+ffffffff80111f36 T obos::multitasking::ThreadHandle::ResumeThread()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:90
+ffffffff80111f94 T obos::multitasking::ThreadHandle::SetThreadPriority(obos::multitasking::Thread::priority_t)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:100
+ffffffff8011214e T obos::multitasking::ThreadHandle::SetThreadStatus(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:157
+ffffffff80112206 T obos::multitasking::ThreadHandle::TerminateThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:174
+ffffffff80112342 T obos::multitasking::ThreadHandle::GetTid()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:195
+ffffffff80112370 T obos::multitasking::ThreadHandle::GetExitCode()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:202
+ffffffff801123cc T obos::multitasking::ThreadHandle::GetThreadPriority()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:213
+ffffffff80112410 T obos::multitasking::ThreadHandle::GetThreadStatus()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:222
+ffffffff80112454 t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
+ffffffff8011247d t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
+ffffffff801124a4 t obos::multitasking::ThreadHandle::WaitForThreadExit()::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:241
+ffffffff801124ba T obos::multitasking::ThreadHandle::WaitForThreadExit()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:231
+ffffffff80112580 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:263
+ffffffff801125bb t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:263
+ffffffff801125e2 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:263
+ffffffff801125f8 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#2}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:272
+ffffffff80112633 t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#2}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:272
+ffffffff8011265a t obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)::{lambda(obos::multitasking::Thread*, void*)#2}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:272
+ffffffff80112670 T obos::multitasking::ThreadHandle::WaitForThreadStatusChange(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:250
+ffffffff801127b4 T obos::multitasking::ThreadHandle::duplicate()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:285
+ffffffff80112868 T obos::multitasking::ThreadHandle::closeHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:300
+ffffffff80112a1f T obos::multitasking::ExitThread(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:340
+ffffffff80112ad3 T obos::multitasking::GetCurrentThreadTid()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:352
+ffffffff80112af6 T obos::multitasking::GetCurrentThreadPriority()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:358
+ffffffff80112b06 T obos::multitasking::GetCurrentThreadStatus()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:362
+ffffffff80112b16 T obos::multitasking::GetCurrentThreadHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/threadHandle.cpp:366
+ffffffff80112b58 T list_node_new	/home/omar/.vs/obos/src/oboskrnl/external/list/list_node.c:15
+ffffffff80112ba9 T list_new	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:16
+ffffffff80112c0d T list_destroy	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:34
+ffffffff80112c8e T list_rpush	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:57
+ffffffff80112d40 T list_rpop	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:80
+ffffffff80112de4 T list_lpop	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:101
+ffffffff80112e83 T list_lpush	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:124
+ffffffff80112f31 T list_find	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:148
+ffffffff80112fe1 T list_at	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:177
+ffffffff80113081 T list_remove	/home/omar/.vs/obos/src/oboskrnl/external/list/list.c:206
+ffffffff80113133 T obos::multitasking::canRanTask(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:52
+ffffffff80113172 T obos::multitasking::switchToTask(obos::multitasking::Thread*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:61
+ffffffff80113309 T obos::multitasking::findNewTask(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:109
+ffffffff801137f9 T obos::multitasking::InitializeMultitasking()	/home/omar/.vs/obos/src/oboskrnl/multitasking/multitasking.cpp:234
+ffffffff801139d2 t obos::elfLoader::load(unsigned char*, unsigned long long, unsigned long long&)	/home/omar/.vs/obos/src/oboskrnl/elf/elf.cpp:103
+ffffffff80113b7d T obos::elfLoader::LoadElfFile(unsigned char*, unsigned long long, unsigned long long&, unsigned long long&)	/home/omar/.vs/obos/src/oboskrnl/elf/elf.cpp:135
+ffffffff80113c40 T obos::multitasking::Thread::Thread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:21
+ffffffff80113c40 T obos::multitasking::Thread::Thread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:21
+ffffffff80113d48 T obos::multitasking::Thread::CreateThread(obos::multitasking::Thread::priority_t, void (*)(void*), void*, unsigned int, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/multitasking/thread.cpp:26
+ffffffff8011400a T obos::multitasking::MutexLockCallback(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:16
+ffffffff8011404a T obos::multitasking::Mutex::Lock(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:22
+ffffffff8011411c T obos::multitasking::Mutex::Unlock()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:40
+ffffffff8011416e T obos::multitasking::Mutex::~Mutex()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:48
+ffffffff8011416e T obos::multitasking::Mutex::~Mutex()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutex.cpp:48
+ffffffff80114198 T obos::multitasking::MutexHandle::MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:18
+ffffffff80114198 T obos::multitasking::MutexHandle::MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:18
+ffffffff80114240 T obos::multitasking::MutexHandle::duplicate()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:27
+ffffffff801142c6 T obos::multitasking::MutexHandle::closeHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:37
+ffffffff8011436e T obos::multitasking::MutexHandle::Lock(bool)	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:46
+ffffffff801143ba T obos::multitasking::MutexHandle::Unlock()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:55
+ffffffff801143f0 T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
+ffffffff801143f0 T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
+ffffffff80114426 T obos::multitasking::MutexHandle::~MutexHandle()	/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp:63
+ffffffff80114452 T obos::process::Process::Process()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:45
+ffffffff80114452 T obos::process::Process::Process()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:45
+ffffffff801144c8 t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::operator()(obos::multitasking::Thread*, void*) const	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:75
+ffffffff801144e3 t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::_FUN(obos::multitasking::Thread*, void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:75
+ffffffff8011450a t obos::process::DriverEntryPoint(void*)::{lambda(obos::multitasking::Thread*, void*)#1}::operator bool (*)(obos::multitasking::Thread*, void*)() const	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:75
+ffffffff8011451f T obos::process::DriverEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:59
+ffffffff80114608 T obos::process::Process::CreateProcess(unsigned char*, unsigned long long, void*, bool)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:83
+ffffffff80114a02 T obos::process::Process::TerminateProcess(unsigned int)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:191
+ffffffff80114c82 T obos::process::Process::doContextSwitch()	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:292
+ffffffff80114ca0 T do_nothing()	/home/omar/.vs/obos/src/oboskrnl/driver_api/interrupts.cpp:11
+ffffffff80114cab T obos::driverAPI::ResetSyscallHandlers()	/home/omar/.vs/obos/src/oboskrnl/driver_api/interrupts.cpp:19
+ffffffff80114ce1 T obos::driverAPI::RegisterSyscallHandler(unsigned char, unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/driver_api/interrupts.cpp:29
+ffffffff80114d07 T obos::driverAPI::UnregisterSyscallHandler(unsigned char)	/home/omar/.vs/obos/src/oboskrnl/driver_api/interrupts.cpp:33
+ffffffff80114d2c T obos::driverAPI::RegisterSyscalls()	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:82
+ffffffff80114eea t obos::driverAPI::RegisterDriver(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned int, obos::driverAPI::serviceType)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:103
+ffffffff80114ff0 t obos::driverAPI::RegisterInterruptHandler(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned int, unsigned char, void (*)(obos::interrupt_frame const*))	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:129
+ffffffff80115343 t obos::driverAPI::PicSendEoi(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:232
+ffffffff8011537b t obos::driverAPI::DisableIRQ(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:237
+ffffffff801153ec t obos::driverAPI::EnableIRQ(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned char)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:245
+ffffffff8011545d t obos::driverAPI::RegisterReadCallback(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned int, void (*)(char*, unsigned long long))	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:253
+ffffffff801154f9 t obos::driverAPI::PrintChar(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, char, bool)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:264
+ffffffff8011553d t obos::driverAPI::GetMultibootModule(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned int, unsigned long long*, unsigned long long*)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:269
+ffffffff801155b4 t obos::driverAPI::RegisterFileReadCallback(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned int, void (*)(char const*, char*, unsigned long long))	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:278
+ffffffff8011564f t obos::driverAPI::RegisterFileExistsCallback(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned int, char (*)(char const*, unsigned long long*))	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:289
+ffffffff801156ea t obos::driverAPI::MapPhysicalTo(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, void*, unsigned int)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:300
+ffffffff80115761 t obos::driverAPI::UnmapPhysicalTo(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, void*)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:308
+ffffffff801157cd t obos::driverAPI::Printf(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, char const*, ...)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:316
+ffffffff80115870 t obos::driverAPI::GetPhysicalAddress(unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, unsigned long long, void*, void**)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:337
+ffffffff801159ff t obos::driverAPI::interruptHandler(obos::interrupt_frame const*)	/home/omar/.vs/obos/src/oboskrnl/driver_api/syscalls.cpp:363
+ffffffff80115a9e t checkUserPtr(void const*, bool)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:27
+ffffffff80115b1c t checkUserHandle(unsigned long long)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:40
+ffffffff80115b61 T obos::process::RegisterSyscalls()	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:93
+ffffffff80115faf t obos::process::ConsoleOutputString(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:145
+ffffffff80116012 t obos::process::ExitProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:157
+ffffffff8011607a t obos::process::CreateProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:167
+ffffffff80116129 t obos::process::TerminateProcess(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:184
+ffffffff801161e4 t obos::process::OpenCurrentProcessHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:204
+ffffffff80116258 t obos::process::OpenProcessHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:217
+ffffffff80116358 t obos::process::CreateThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:238
+ffffffff8011643d t obos::process::OpenThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:259
+ffffffff8011655f t obos::process::PauseThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:284
+ffffffff80116606 t obos::process::ResumeThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:302
+ffffffff801166a0 t obos::process::SetThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:319
+ffffffff80116743 t obos::process::SetThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:337
+ffffffff801167e6 t obos::process::TerminateThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:355
+ffffffff801168a9 t obos::process::GetTid(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:375
+ffffffff801169c1 t obos::process::GetExitCode(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:400
+ffffffff80116aed t obos::process::GetThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:430
+ffffffff80116c02 t obos::process::GetThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:457
+ffffffff80116d17 t obos::process::WaitForThreadExit(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:484
+ffffffff80116ddf t obos::process::ExitThread(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:504
+ffffffff80116e25 t obos::process::GetCurrentThreadTid(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:514
+ffffffff80116e38 t obos::process::GetCurrentThreadHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:519
+ffffffff80116e4b t obos::process::GetCurrentThreadPriority(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:524
+ffffffff80116e5e t obos::process::GetCurrentThreadStatus(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:529
+ffffffff80116e71 t obos::process::CloseHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:534
+ffffffff80116f02 t obos::process::OpenProcessParentHandle(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:549
+ffffffff80116fe5 t obos::process::SetConsoleColor(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:572
+ffffffff80117035 t obos::process::GetConsoleColor(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:584
+ffffffff801170ce t obos::process::ConsoleOutputCharacter(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:600
+ffffffff80117126 t obos::process::ConsoleOutputCharacterAt(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:612
+ffffffff8011718a t obos::process::ConsoleOutput(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:625
+ffffffff8011720b t obos::process::ConsoleFillLine(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:640
+ffffffff80117263 t obos::process::SetConsoleCursorPosition(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:652
+ffffffff801172b3 t obos::process::GetConsoleCursorPosition(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:663
+ffffffff80117307 t obos::process::ConsoleSwapBuffers(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:674
+ffffffff8011731f t obos::process::ClearConsole(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:680
+ffffffff80117337 t obos::process::VirtualAlloc(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:686
+ffffffff801173d1 t obos::process::VirtualFree(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:700
+ffffffff80117443 t obos::process::HasVirtualAddress(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:713
+ffffffff801174df t obos::process::MemoryProtect(void*)	/home/omar/.vs/obos/src/oboskrnl/syscalls/syscalls.cpp:726
+ffffffff8011755d t ZYAN_MEMCPY	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:308
+ffffffff801175b7 t ZYAN_MEMSET	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:339
+ffffffff801175fc t ZYAN_STRLEN	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:412
+ffffffff8011762c t ZydisDecoderTreeGetRootNode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:856
+ffffffff80117639 t ZydisInputPeek	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2077
+ffffffff8011768c t ZydisInputSkip	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2108
+ffffffff801176d9 t ZydisInputNext	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2131
+ffffffff8011775e t ZydisInputNextBytes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2168
+ffffffff80117814 t ZydisDecodeREX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2205
+ffffffff801178df t ZydisDecodeXOP	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2233
+ffffffff80117ad6 t ZydisDecodeVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2285
+ffffffff80117dac t ZydisDecodeEVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2361
+ffffffff8011814c t ZydisDecodeMVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2456
+ffffffff801183d5 t ZydisDecodeModRM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2514
+ffffffff8011843c t ZydisDecodeSIB	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2532
+ffffffff801184a3 t ZydisReadDisplacement	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2557
+ffffffff80118619 t ZydisReadImmediate	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2618
+ffffffff8011898b t ZydisCalcRegisterId	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2713
+ffffffff80118ad0 t ZydisSetOperandSizeAndElementInfo	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:2794
+ffffffff801190ce t ZydisDecodeOperandRegister	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3049
+ffffffff8011914f t ZydisDecodeOperandMemory	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3092
+ffffffff801195c4 t ZydisDecodeOperandImplicitRegister	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3284
+ffffffff801197a4 t ZydisDecodeOperandImplicitMemory	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3358
+ffffffff80119a02 T ZydisDecodeOperands	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3423
+ffffffff8011abe9 t ZydisSetAttributes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:3824
+ffffffff8011b52c t ZydisSetAVXInformation	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:4127
+ffffffff8011c1b8 t ZydisCollectOptionalPrefixes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:4911
+ffffffff8011c564 t ZydisDecodeOptionalInstructionParts	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5043
+ffffffff8011c973 t ZydisSetEffectiveOperandWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5178
+ffffffff8011ca2c t ZydisSetEffectiveAddressWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5310
+ffffffff8011cabc t ZydisNodeHandlerXOP	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5368
+ffffffff8011cb22 t ZydisNodeHandlerVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5388
+ffffffff8011cb85 t ZydisNodeHandlerEMVEX	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5408
+ffffffff8011cc1f t ZydisNodeHandlerOpcode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5432
+ffffffff8011d206 t ZydisNodeHandlerMode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5641
+ffffffff8011d257 t ZydisNodeHandlerModeCompact	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5666
+ffffffff8011d283 t ZydisNodeHandlerModrmMod	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5676
+ffffffff8011d30f t ZydisNodeHandlerModrmModCompact	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5694
+ffffffff8011d368 t ZydisNodeHandlerModrmReg	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5702
+ffffffff8011d3f4 t ZydisNodeHandlerModrmRm	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5720
+ffffffff8011d480 t ZydisNodeHandlerMandatoryPrefix	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5738
+ffffffff8011d56b t ZydisNodeHandlerOperandSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5772
+ffffffff8011d64d t ZydisNodeHandlerAddressSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5810
+ffffffff8011d6ed t ZydisNodeHandlerVectorLength	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5841
+ffffffff8011d75f t ZydisNodeHandlerRexW	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5874
+ffffffff8011d7a7 t ZydisNodeHandlerRexB	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5905
+ffffffff8011d7ef t ZydisNodeHandlerEvexB	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5937
+ffffffff8011d81b t ZydisNodeHandlerMvexE	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5950
+ffffffff8011d847 t ZydisPopulateRegisterIds	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:5984
+ffffffff8011dbe0 t ZydisCheckErrorConditions	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6177
+ffffffff8011e147 t ZydisDecodeInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6504
+ffffffff8011e966 T ZydisDecoderInit	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6727
+ffffffff8011e9fa T ZydisDecoderEnableMode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6780
+ffffffff8011ea38 T ZydisDecoderDecodeFull	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6799
+ffffffff8011eb67 T ZydisDecoderDecodeInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6826
+ffffffff8011ecc9 T ZydisDecoderDecodeOperands	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:6867
+ffffffff8011ed77 T ZydisDecoderTreeGetChildNode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:14593
+ffffffff8011f381 T ZydisGetInstructionEncodingInfo	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:14688
+ffffffff8011f3c3 t ZydisGetEncodableEncoding	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15215
+ffffffff8011f3da t ZydisGetMachineModeWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15237
+ffffffff8011f411 t ZydisGetAszFromHint	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15262
+ffffffff8011f428 t ZydisGetOszFromHint	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15276
+ffffffff8011f43f t ZydisGetOperandSizeFromElementSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15294
+ffffffff8011f5e6 t ZydisGetScaledImmSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15355
+ffffffff8011f69c t ZydisGetSignedImmSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15376
+ffffffff8011f701 t ZydisGetUnsignedImmSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15401
+ffffffff8011f748 t ZydisIsImmSigned	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15426
+ffffffff8011f78a t ZydisGetEffectiveImmSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15475
+ffffffff8011f9b6 t ZydisCheckOsz	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15598
+ffffffff8011fa14 t ZydisCheckAsz	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15622
+ffffffff8011fa7f t ZydisIsRegisterAllowed	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15648
+ffffffff8011fb0f t ZydisIsScaleValid	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15685
+ffffffff8011fb52 t ZydisValidateRexType	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15710
+ffffffff8011fc57 t ZydisIsValidAddressingClass	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15782
+ffffffff8011fd16 t ZydisGetRm16	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15815
+ffffffff8011fd6b t ZydisEncodeMvexBroadcastMode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15847
+ffffffff8011fdae t ZydisEncodeMvexConversionMode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15871
+ffffffff8011fdfa t ZydisGetCompDispScaleEvex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:15899
+ffffffff8012002a t ZydisGetCompDispScaleMvex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:16036
+ffffffff8012026d t ZydisGetCompDispScale	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:16146
+ffffffff801202ce t ZydisIsRegisterOperandCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:16173
+ffffffff80120a97 t ZydisIsMemoryOperandCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:16505
+ffffffff8012173b t ZydisIsPointerOperandCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17027
+ffffffff801217eb t ZydisIsImmediateOperandCompabile	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17056
+ffffffff801218d7 t ZydisIsBroadcastModeCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17111
+ffffffff80121a06 t ZydisAreEvexFeaturesCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17204
+ffffffff80121bda t ZydisAreMvexFeaturesCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17285
+ffffffff80122271 t ZydisCheckConstraints	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17494
+ffffffff801224bf t ZydisIsDefinitionCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17603
+ffffffff80122740 t ZydisArePrefixesCompatible	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17713
+ffffffff801229cc t ZydisGetOperandMask	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17797
+ffffffff80122a34 t ZydisHandleSwappableDefinition	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17819
+ffffffff80122b99 t ZydisFindMatchingDefinition	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:17864
+ffffffff8012314c t ZydisEmitUInt	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18074
+ffffffff80123276 t ZydisEmitByte	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18120
+ffffffff8012329e t ZydisEmitLegacyPrefixes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18133
+ffffffff8012359a t ZydisEncodeRexLowNibble	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18229
+ffffffff801236eb t ZydisEmitRex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18300
+ffffffff80123752 t ZydisEncodeVexCommons	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18323
+ffffffff80123849 t ZydisEmitXop	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18372
+ffffffff80123935 t ZydisEmitVex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18393
+ffffffff80123ac3 t ZydisEncodeEvexCommons	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18430
+ffffffff80123b6e t ZydisEmitEvex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18452
+ffffffff80123c94 t ZydisEmitMvex	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18485
+ffffffff80123da4 t ZydisEmitInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18514
+ffffffff801241a5 T ZydisBuildRegisterOperand	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18605
+ffffffff80124302 t ZydisBuildMemoryOperand	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18671
+ffffffff80124624 t ZydisBuildInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:18817
+ffffffff80124d9c t ZydisEncoderCheckRequestSanity	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19068
+ffffffff8012521d t ZydisEncoderEncodeInstructionInternal	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19240
+ffffffff801252dd T ZydisEncoderEncodeInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19259
+ffffffff80125342 T ZydisEncoderEncodeInstructionAbsolute	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19272
+ffffffff80125969 T ZydisEncoderDecodedInstructionToEncoderRequest	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19477
+ffffffff80125f14 T ZydisEncoderNopFill	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:19659
+ffffffff80125f9a T ZydisGetRelInfo	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29200
+ffffffff8012604e T ZydisGetEncodableInstructions	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29259
+ffffffff801260b3 t ZyanAbsI64	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29499
+ffffffff801260eb t ZydisStringAppend	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29807
+ffffffff801261c0 t ZydisStringAppendShort	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29906
+ffffffff8012627a t ZydisStringAppendShortCase	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:29937
+ffffffff80126464 t ZydisStringAppendDecS	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30038
+ffffffff80126556 t ZydisStringAppendHexS	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30110
+ffffffff80126681 t ZydisFormatterBufferAppendPredefined	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30333
+ffffffff801267a8 T ZydisFormatterBufferInit	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30879
+ffffffff80126839 T ZydisFormatterBufferInitTokenized	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30901
+ffffffff801268f8 T ZydisFormatterInit	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30941
+ffffffff80126941 T ZydisFormatterSetProperty	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:30957
+ffffffff80126ffc T ZydisFormatterSetHook	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31197
+ffffffff801270c7 T ZydisFormatterFormatInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31271
+ffffffff80127287 T ZydisFormatterFormatOperand	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31307
+ffffffff80127531 T ZydisFormatterTokenizeInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31364
+ffffffff80127737 T ZydisFormatterTokenizeOperand	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:31411
+ffffffff80127a2a T ZydisFormatterATTFormatInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32344
+ffffffff80128139 T ZydisFormatterATTFormatOperandMEM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32501
+ffffffff801285f5 T ZydisFormatterATTPrintMnemonic	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32575
+ffffffff80128965 T ZydisFormatterATTPrintRegister	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32647
+ffffffff80128a2b T ZydisFormatterATTPrintAddressABS	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32666
+ffffffff80128acc T ZydisFormatterATTPrintDISP	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32682
+ffffffff80128e34 T ZydisFormatterATTPrintIMM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32710
+ffffffff80128eb7 T ZydisFormatterHelperGetExplicitSize	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32805
+ffffffff801290b1 T ZydisFormatterBaseFormatOperandREG	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32874
+ffffffff801290ef T ZydisFormatterBaseFormatOperandPTR	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32884
+ffffffff801294ca T ZydisFormatterBaseFormatOperandIMM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32916
+ffffffff80129583 T ZydisFormatterBasePrintAddressABS	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32943
+ffffffff801297d4 T ZydisFormatterBasePrintAddressREL	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:32983
+ffffffff80129be2 T ZydisFormatterBasePrintIMM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33036
+ffffffff8012a047 T ZydisFormatterBasePrintSegment	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33101
+ffffffff8012a231 T ZydisFormatterBasePrintPrefixes	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33148
+ffffffff8012b1b2 T ZydisFormatterBasePrintDecorator	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33303
+ffffffff8012c6a5 T ZydisFormatterTokenGetValue	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33563
+ffffffff8012c6f8 T ZydisFormatterTokenNext	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33577
+ffffffff8012c759 T ZydisFormatterBufferGetToken	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33598
+ffffffff8012c7ad T ZydisFormatterBufferGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33615
+ffffffff8012c80d T ZydisFormatterBufferAppend	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33636
+ffffffff8012c931 T ZydisFormatterBufferRemember	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33672
+ffffffff8012c98b T ZydisFormatterBufferRestore	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33690
+ffffffff8012ca4c T ZydisFormatterIntelFormatInstruction	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33762
+ffffffff8012d15d T ZydisFormatterIntelFormatOperandMEM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33913
+ffffffff8012d635 T ZydisFormatterIntelPrintMnemonic	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:33982
+ffffffff8012d7e1 T ZydisFormatterIntelPrintRegister	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34023
+ffffffff8012d8c3 T ZydisFormatterIntelPrintDISP	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34043
+ffffffff8012dd91 T ZydisFormatterIntelPrintTypecast	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34086
+ffffffff8012e1eb T ZydisFormatterIntelFormatInstructionMASM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34115
+ffffffff8012e224 T ZydisFormatterIntelPrintAddressMASM	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34130
+ffffffff8012e4bd T ZydisCategoryGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34619
+ffffffff8012e4e2 T ZydisISASetGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34628
+ffffffff8012e50a T ZydisISAExtGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:34637
+ffffffff8012e52f T ZydisMnemonicGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:36446
+ffffffff8012e562 T ZydisMnemonicGetStringWrapped	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:36455
+ffffffff8012e592 T ZydisRegisterEncode	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37158
+ffffffff8012e610 T ZydisRegisterGetId	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37181
+ffffffff8012e646 T ZydisRegisterGetClass	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37191
+ffffffff8012e67b T ZydisRegisterGetWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37201
+ffffffff8012e6d5 T ZydisRegisterGetLargestEnclosing	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37213
+ffffffff8012e7d3 T ZydisRegisterGetString	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37287
+ffffffff8012e806 T ZydisRegisterGetStringWrapped	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37297
+ffffffff8012e836 T ZydisRegisterClassGetWidth	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37311
+ffffffff8012e88d T ZydisGetInstructionSegments	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:37363
+ffffffff8012ee4c T ZydisGetInstructionDefinition	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53334
+ffffffff8012ef51 T ZydisGetOperandDefinitions	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53371
+ffffffff8012efb8 T ZydisGetElementInfo	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53388
+ffffffff8012eff0 T ZydisGetAccessedFlags	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53435
+ffffffff8012f061 T ZydisStringAppendDecU64	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53563
+ffffffff8012f247 T ZydisStringAppendHexU64	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53684
+ffffffff8012f4d5 T ZydisStringAppendDecU	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53767
+ffffffff8012f564 T ZydisStringAppendHexU	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53792
+ffffffff8012f5ff T ZydisCalcAbsoluteAddress	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53870
+ffffffff8012f81b T ZydisCalcAbsoluteAddressEx	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:53953
+ffffffff8012f976 T ZydisGetVersion	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54037
+ffffffff8012f986 T ZydisIsFeatureEnabled	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54042
+ffffffff8012f9d5 t ZydisDisassemble	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54127
+ffffffff8012fbef T ZydisDisassembleIntel	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54182
+ffffffff8012fc2f T ZydisDisassembleATT	/home/omar/.vs/obos/src/oboskrnl/external/amalgamated-dist/Zydis.c:54190
+ffffffff8012fc6f T obos::InitializeGdt()	/home/omar/.vs/obos/src/oboskrnl/descriptors/gdt/gdt.cpp:103
+ffffffff8012fcbb T obos::SetTSSStack(void*)	/home/omar/.vs/obos/src/oboskrnl/descriptors/gdt/gdt.cpp:111
+ffffffff8012fcca T obos::process::ProcEntryPoint(void*)	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:48
+ffffffff8012fcca T _glb_text_start	/home/omar/.vs/obos/src/oboskrnl/process/process.cpp:49
+ffffffff8012fcf4 T _glb_text_end	/home/omar/.vs/obos/src/oboskrnl/memory_manager/paging/init.h:75

@@ -58,12 +58,13 @@ GDT:
     dq 0x0000920000000000
 
     dw 0
-.Pointer:
+GDTPointer:
     dw $ - GDT - 1
-    dd GDT
+    dq GDT
 
 global boot_page_level4_map
 global boot_page_level3_map
+global GDTPointer
 
 section .bootstrap_stack nobits
 _ZN4obos12stack_bottomE:
@@ -177,7 +178,7 @@ _start:
     or eax, 0x80010001
     mov cr0, eax
 
-    lgdt [GDT.Pointer]
+    lgdt [GDTPointer]
 
 ;   Jump to the bootstrap
     jmp 0x08:.set_cs

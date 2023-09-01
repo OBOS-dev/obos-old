@@ -87,12 +87,13 @@ namespace obos
 			this->stackSizePages = stackSizePages;
 			stack += stackSizePages * 512;
 			stack -= 1;
-			*stack = (UINTPTR_T)userData;
+			*stack = (UINTPTR_T)nullptr;
 			stack -= 1;
 			*stack = (UINTPTR_T)entry;
 
 			frame.rsp = (UINTPTR_T)stack;
 			frame.rip = (UINTPTR_T)entry;
+			frame.rdi = (UINTPTR_T)userData;
 			frame.rbp = 0;
 			frame.rflags |= (1 << 9) | getEflags();
 #endif

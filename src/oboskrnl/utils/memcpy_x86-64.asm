@@ -115,6 +115,10 @@ _ZN4obos5utils8dwMemcpyEPjPKjy:
 
 	test rcx, rcx
 	jz .finish
+
+	test rdi, rsi
+	jz .finish
+
 .loop:
 	mov eax, dword [rsi]
 	mov dword [rdi], eax

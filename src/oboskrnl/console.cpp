@@ -109,7 +109,6 @@ namespace obos
 		new (s_modifiedLines) utils::IntegerBitfield{};
 		new (s_modifiedLines + 1) utils::IntegerBitfield{};
 		s_reachedEndTerminal = false;
-		s_framebuffer = (UINT32_T*)0xFFCFF000;
 		s_terminalColumn = 0;
 		s_terminalRow = 0;
 		s_framebufferHeight = g_multibootInfo->framebuffer_height;
@@ -117,7 +116,8 @@ namespace obos
 		s_nCharsVertical = s_framebufferHeight / 16;
 		s_nCharsHorizontal = s_framebufferWidth / 8;
 		s_consoleMutex = new multitasking::MutexHandle{};
-		s_backbuffer = (UINT32_T*)memory::VirtualAlloc(nullptr, (s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12, memory::VirtualAllocFlags::WRITE_ENABLED);
+		s_backbuffer = s_framebuffer;
+		//s_backbuffer = (UINT32_T*)memory::VirtualAlloc(nullptr, (s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12, memory::VirtualAllocFlags::WRITE_ENABLED);
 		s_consoleMutex->Lock();
 #ifndef __x86_64__
 		utils::dwMemset(s_backbuffer, backgroundColor, s_framebufferWidth * s_framebufferHeight * 4);

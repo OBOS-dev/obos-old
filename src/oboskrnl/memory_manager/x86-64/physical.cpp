@@ -43,7 +43,7 @@ namespace obos
 			multiboot_memory_map_t* current = reinterpret_cast<multiboot_memory_map_t*>(g_multibootInfo->mmap_addr);
 			for (SIZE_T i = 0; i < g_mmapLength; i++, current++)
 			{
-				if (current->type != MULTIBOOT_MEMORY_AVAILABLE && current->addr >= (UINTPTR_T)&endImage)
+				if (current->type != MULTIBOOT_MEMORY_AVAILABLE)
 					if (inRange(address, current->addr & (~0xFFF), ((current->addr + current->len) + 0xFFF) & (~0xFFF)))
 						return true;
 			}
@@ -62,6 +62,14 @@ namespace obos
 			// Calculate the size of memory.
 			multiboot_memory_map_t* mmap = reinterpret_cast<multiboot_memory_map_t*>(g_multibootInfo->mmap_addr);
 			g_mmapLength = g_multibootInfo->mmap_length / mmap[0].size;
+			for (SIZE_T i = 0; i < g_mmapLength; i++)
+			{
+				if (!mmap[i].type)
+				{
+					g_mmapLength = i;
+					break;
+				}
+			}
 			for (SIZE_T i = 0; i < g_mmapLength; i++)
 				g_sizeOfMemory += mmap[i].len;
 			g_bitfieldCount = g_sizeOfMemory >> 20;

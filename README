@@ -56,11 +56,9 @@ cmake ./ -G Ninja \
 -DOBOS_ARCHITECTURE=$OBOS_ARCHITECTURE \
 -DCMAKE_TOOLCHAIN_FILE=$PWD/scripts/toolchains/$OBOS_ARCHITECTURE_OBOS.cmake
 
-* Fourth, build everything with this command:
+* Fourth, build everything with this command, this will also generate the iso:
 ninja -j 0 all
 
-* Finally, generate an iso with this script:
-./generate_iso.sh
 The generated iso will be stored in ./out
 
   _   _  ____ _______ _____ _____ ______ 

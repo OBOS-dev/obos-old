@@ -87,8 +87,6 @@ namespace obos
 		{
 			g_level4PageMap = &g_kernelPageMap;
 			new (g_level4PageMap) PageMap{ &boot_page_level4_map };
-			g_zeroPage = reinterpret_cast<UINTPTR_T*>(kalloc_physicalPage());
-			utils::dwMemset((DWORD*)kmap_pageTable(g_zeroPage), 0, 4096 / 4);
 		}
 	}
 }

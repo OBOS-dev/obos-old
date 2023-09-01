@@ -12,7 +12,7 @@ target_compile_options(nvme PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<C
 target_link_options(nvme
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/nvme.map"
     PUBLIC "-ffreestanding"
-#    PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/src/drivers/storage/nvme/linker.ld"
+    PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/src/drivers/storage/nvme/linker.ld"
     PUBLIC "-nostdlib")
 
 set_target_properties(nvme PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")

@@ -58,6 +58,11 @@ extern "C" char _glb_text_end;
 
 namespace obos
 {
+	namespace memory
+	{
+		extern UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
+		extern UINTPTR_T* g_zeroPage;
+	}
 #if defined(__x86_64__)
 	obos::multiboot_info* g_multibootInfo;
 	static obos::multiboot_info s_multibootInfo;
@@ -69,6 +74,7 @@ namespace obos
 	extern char kernelStart;
 	
 	extern void pageFault(const interrupt_frame* frame);
+	extern void debugExceptionHandler(const interrupt_frame* frame);
 	extern void defaultExceptionHandler(const interrupt_frame* frame);
 
 	// Initial boot sequence. Initializes all platform-specific things, and sets up multitasking, and jumps to kmainThr.
@@ -167,18 +173,37 @@ namespace obos
 
 		RegisterInterruptHandler(14, pageFault);
 		
+		memory::InitializePaging();
+
 		memory::InitializePhysicalMemoryManager();
 
-		memory::InitializePaging();
+#ifdef __x86_64__
+		memory::g_zeroPage = reinterpret_cast<UINTPTR_T*>(memory::kalloc_physicalPage());
+		utils::dwMemset((DWORD*)memory::kmap_pageTable(memory::g_zeroPage), 0, 4096 / 4);
+#endif
+
+		extern UINT32_T* s_framebuffer;
 
 		if ((g_multibootInfo->flags & MULTIBOOT_INFO_FRAMEBUFFER_INFO) != MULTIBOOT_INFO_FRAMEBUFFER_INFO)
 			kpanic(nullptr, getEIP(), kpanic_format("No framebuffer info from the bootloader.\r\n"));
+#ifndef __x86_64__
 		if (g_multibootInfo->framebuffer_height != 768 || g_multibootInfo->framebuffer_width != 1024)
 			kpanic(nullptr, getEIP(), kpanic_format("The framebuffer set up by the bootloader is not 1024x768. Instead, it is %dx%d\r\n"),
 				g_multibootInfo->framebuffer_width, g_multibootInfo->framebuffer_height);
+#endif
 
-		for (UINTPTR_T physAddress = g_multibootInfo->framebuffer_addr, virtAddress = 0xFFCFF000;
-			virtAddress < 0xFFFFF000;
+		UINTPTR_T framebuffer_limit = 0;
+
+#if defined(__x86_64__)
+		s_framebuffer = (UINT32_T*)0xFFFFFFFF80600000;
+		framebuffer_limit = 0xFFFFFFFF80600000 + g_multibootInfo->framebuffer_height * g_multibootInfo->framebuffer_width * 4;
+#elif defined(__i686__)
+		s_framebuffer = (UINT32_T*)0xFFCFF000;
+		framebuffer_limit = 0xFFFFF000;
+#endif
+
+		for (UINTPTR_T physAddress = g_multibootInfo->framebuffer_addr, virtAddress = (UINTPTR_T)s_framebuffer;
+			virtAddress < framebuffer_limit;
 			virtAddress += 4096, physAddress += 4096)
 			memory::kmap_physical((PVOID)virtAddress, memory::VirtualAllocFlags::WRITE_ENABLED, (PVOID)physAddress);
 
@@ -196,9 +221,14 @@ namespace obos
 			RegisterInterruptHandler(i, [](const obos::interrupt_frame* frame) {
 				SendEOI(frame->intNumber - 32);
 				});
+#if defined(__x86_64__)
+		RegisterInterruptHandler(1, debugExceptionHandler);
+		for (BYTE i = 0; i < 32; i++)
+			RegisterInterruptHandler((i == 14 || i == 1) ? 0 : i, defaultExceptionHandler);
+#else
 		for (BYTE i = 0; i < 32; i++)
 			RegisterInterruptHandler(i == 14 ? 0 : i, defaultExceptionHandler);
-
+#endif
 		LeaveKernelSection();
 
 		multitasking::InitializeMultitasking();
@@ -261,19 +291,31 @@ namespace obos
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
 		mainThread.closeHandle();
 
-		char(*existsCallback)(CSTRING filename, SIZE_T* size) = (char(*)(CSTRING filename, SIZE_T* size))driverAPI::g_registeredDrivers[1]->existsCallback;
-		void(*readCallback)(CSTRING filename, STRING output, SIZE_T size) = (void(*)(CSTRING filename, STRING output, SIZE_T size))driverAPI::g_registeredDrivers[1]->readCallback;
+		char(*const existsCallback)(CSTRING filename, SIZE_T * size) = (char(*)(CSTRING filename, SIZE_T * size))driverAPI::g_registeredDrivers[1]->existsCallback;
+		void(*const readCallback)(CSTRING filename, STRING output, SIZE_T size) = (void(*)(CSTRING filename, STRING output, SIZE_T size))driverAPI::g_registeredDrivers[1]->readCallback;
+
+		//// Set a write breakpoint for exists callback.
+		//asm volatile(".intel_syntax noprefix;" 
+		//			 "mov dr0, %0;"
+		//			 "mov rax, dr7;"
+		//			 "or rax, 0x10002;"
+		//			 "mov dr7, rax;"
+		//			 ".att_syntax"
+		//	:
+		//	: "r"(existsCallback)
+		//	: "memory"
+		//	);
 
 		SIZE_T filesize = 0;
 		initrdDriver->doContextSwitch();
 		char existsData = existsCallback("nvme", &filesize);
-		multitasking::g_currentThread->owner->doContextSwitch();
+		g_kernelProcess->doContextSwitch();
 		if (!existsData)
 			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/nvme doesn't exist."));
 		PBYTE filedata = new BYTE[filesize];
 		initrdDriver->doContextSwitch();
 		readCallback("nvme", (STRING)filedata, filesize);
-		multitasking::g_currentThread->owner->doContextSwitch();
+		g_kernelProcess->doContextSwitch();
 
 		process::Process* nvmeDriver = new process::Process{};
 		nvmeDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
@@ -285,15 +327,19 @@ namespace obos
 		mainThread.closeHandle();
 
 		filesize = 0;
+		EnterKernelSection();
 		initrdDriver->doContextSwitch();
 		existsData = existsCallback("ps2Keyboard", &filesize);
-		multitasking::g_currentThread->owner->doContextSwitch();
+		g_kernelProcess->doContextSwitch();
+		LeaveKernelSection();
 		if (!existsData)
 			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/ps2Keyboard doesn't exist."));
 		filedata = new BYTE[filesize];
+		EnterKernelSection();
 		initrdDriver->doContextSwitch();
 		readCallback("ps2Keyboard", (STRING)filedata, filesize);
-		multitasking::g_currentThread->owner->doContextSwitch();
+		g_kernelProcess->doContextSwitch();
+		LeaveKernelSection();
 
 		process::Process* keyboardDriver = new process::Process{};
 		keyboardDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);

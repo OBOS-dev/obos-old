@@ -114,10 +114,16 @@ namespace obos
 			UINTPTR_T* pBoot_page_directory1 = &boot_page_level4_map;
 			pBoot_page_directory1 += 0x1ffffffff0000000/*0xffffffff80000000*/;
 			// Clone the page map.
-			for (int l4 = 0; l4 < 512; l4++)
+			for (int l4 = 1; l4 < 512; l4++)
 				if (pBoot_page_directory1[l4])
 					newPageMap[l4] = pBoot_page_directory1[l4];
+			UINTPTR_T firstEntry = 0;
+			utils::memzero(memory::kmap_pageTable((PVOID)(firstEntry = (UINTPTR_T)memory::kalloc_physicalPage())), 4096);
+			memory::kmap_pageTable(level4PageMap->getPageMap());
+			newPageMap[0] = firstEntry | 7;
 			level4PageMap->switchToThis();
+			for (UINTPTR_T i = 0; i < 0x100000; i++)
+				memory::kmap_physical((PVOID)i, 3, (PVOID)i, true);
 #endif
 
 			children = list_new();

@@ -27,7 +27,12 @@
 
 #include <process/process.h>
 
+#if defined(__i686__)
 #define DEFINE_RESERVED_PARAMETERS volatile UINT32_T, volatile UINT32_T, volatile UINT32_T, volatile UINT32_T
+#elif defined(__x86_64__)
+#define DEFINE_RESERVED_PARAMETERS volatile UINTPTR_T, volatile UINTPTR_T, volatile UINTPTR_T, volatile UINTPTR_T, volatile UINTPTR_T, \
+volatile UINTPTR_T, volatile UINTPTR_T, volatile UINTPTR_T, volatile UINTPTR_T, volatile UINTPTR_T, volatile UINTPTR_T, volatile UINTPTR_T
+#endif
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
 
 namespace obos

@@ -21,22 +21,26 @@ isr80:
 
 	; Get the syscall id.
 %ifdef __i686__
-	lea eax, [eax*4]
-	lea eax, [_ZN4obos9driverAPI14g_syscallTableE+eax]
+%define accumulator eax
+%define int_ret iret
+%define	ptr_sz 4
 %endif __i686__
 %ifdef __x86_64__
-	lea rax, [rax*4]
-	lea rax, [_ZN4obos9driverAPI14g_syscallTableE+rax]
+%define accumulator rax
+%define int_ret iretq
+%define	ptr_sz 8
 %endif
+	lea accumulator, [accumulator*ptr_sz]
+	lea accumulator, [_ZN4obos9driverAPI14g_syscallTableE+accumulator]
 
-	push eax
+	push accumulator
 	call _ZN4obos18EnterKernelSectionEv
-	pop eax
+	pop accumulator
 
-	call [eax]
+	call [accumulator]
 
-	push eax
+	push accumulator
 	call _ZN4obos18LeaveKernelSectionEv
-	pop eax
+	pop accumulator
 
-	iret
+	int_ret

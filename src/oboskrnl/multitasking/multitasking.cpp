@@ -86,6 +86,7 @@ namespace obos
 				g_currentThread = s_newThread;
 			if (g_currentThread->tid == 0)
 			{
+				g_schedulerMutex->Unlock();
 				setFrameAddress(&g_currentThread->frame);
 				switchToTaskAsm();
 			}
@@ -95,17 +96,19 @@ namespace obos
 				if(g_currentThread->isServicingSyscall || isInKernelCode(g_currentThread->frame))
 					SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
 				
+				g_schedulerMutex->Unlock();
 				setFrameAddress(&g_currentThread->frame);
 				switchToTaskAsm();
 			}
 			SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
+			g_schedulerMutex->Unlock();
 			setFrameAddress(&g_currentThread->frame);
 			switchToUserModeTask();
 		}
 
 		void findNewTask(const interrupt_frame* frame)
 		{
-			static BYTE s_cursorCounter = 0;
+			/*static BYTE s_cursorCounter = 0;
 			static bool s_isCursorOn = false;
 			static SIZE_T s_cursorRow = 0;
 			static SIZE_T s_cursorColumn = 0;
@@ -134,7 +137,7 @@ namespace obos
 					ConsoleOutputCharacter(' ', s_cursorColumn, s_cursorRow);
 				s_isCursorOn = !s_isCursorOn;
 				s_cursorCounter = 0;
-			}
+			}*/
 			if (!g_initialized)
 			{
 				if (frame->intNumber != 0x30)
@@ -217,13 +220,14 @@ namespace obos
 			if (!currentNode && (utils::testBitInBitfield(g_currentThread->status, 2) || utils::testBitInBitfield(g_currentThread->status, 3) || utils::testBitInBitfield(g_currentThread->status, 0)))
 				goto findNew;
 
-			g_schedulerMutex->Unlock();
-
 			LeaveKernelSection();
 			if (frame->intNumber != 0x30)
 				SendEOI(frame->intNumber - 32);
 			if (currentThread == g_currentThread)
+			{
+				g_schedulerMutex->Unlock();
 				return;
+			}
 			switchToTask(const_cast<Thread*>(currentThread));
 		}
 

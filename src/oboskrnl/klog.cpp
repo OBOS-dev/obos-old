@@ -14,6 +14,7 @@
 #include <utils/memory.h>
 
 #include <memory_manager/paging/allocate.h>
+#include <memory_manager/physical.h>
 
 #include <descriptors/idt/idt.h>
 #include <descriptors/idt/pic.h>
@@ -23,12 +24,12 @@
 #include <boot/boot.h>
 
 // Credit: http://www.strudel.org.uk/itoa/
-static char* itoa(int value, char* result, int base) {
+static char* itoa(INTPTR_T value, char* result, int base) {
 	// check that the base if valid
 	if (base < 2 || base > 36) { *result = '\0'; return result; }
 
 	char* ptr = result, * ptr1 = result, tmp_char;
-	int tmp_value;
+	INTPTR_T tmp_value;
 
 	do {
 		tmp_value = value;
@@ -59,7 +60,7 @@ void strreverse(char* begin, int size)
 	}
 }
 // Credit: http://www.strudel.org.uk/itoa/
-char* itoa_unsigned(unsigned int value, char* result, int base)
+char* itoa_unsigned(UINTPTR_T value, char* result, int base)
 {
 	// check that the base if valid
 
@@ -71,12 +72,12 @@ char* itoa_unsigned(unsigned int value, char* result, int base)
 
 	char* out = result;
 
-	unsigned int quotient = value;
+	UINTPTR_T quotient = value;
 
 	do
 	{
 
-		unsigned int abs = /*(quotient % base) < 0 ? (-(quotient % base)) : */(quotient % base);
+		UINTPTR_T abs = /*(quotient % base) < 0 ? (-(quotient % base)) : */(quotient % base);
 
 		*out = "0123456789abcdef"[abs];
 
@@ -160,6 +161,10 @@ extern "C" PVOID getEBP();
 
 namespace obos
 {
+	namespace memory
+	{
+		UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
+	}
 	void consoleOutputCharacter(BYTE ch, PVOID)
 	{
 		obos::ConsoleOutputCharacter(ch, false);
@@ -237,7 +242,7 @@ namespace obos
 				}
 				case 'p':
 				{
-					char str[9];
+					char str[17];
 					utils::memzero(str, 17);
 					itoa_unsigned(va_arg(list, UINTPTR_T), str, 16);
 					printChar('0', printCharUserdata);
@@ -297,6 +302,7 @@ namespace obos
 	static void irq1(const interrupt_frame*)
 	{
 		extern void RestartComputer();
+		printf("Restarting the computer...\r\n");
 		RestartComputer();
 	}
 	void kpanic(PVOID printStackTracePar, PVOID eip, CSTRING format, ...)
@@ -317,7 +323,14 @@ namespace obos
 			SetConsoleColor(0xFFFFFFFF, kpanicBackgroundColour);
 
 			utils::dwMemset(s_framebuffer, kpanicBackgroundColour, s_framebufferWidth * s_framebufferHeight);
+#if defined(__i686__)
 			utils::dwMemset(s_backbuffer, kpanicBackgroundColour, s_framebufferWidth * s_framebufferHeight);
+#else
+			/*PVOID backbuffer = memory::kalloc_physicalPage();
+			utils::dwMemset((DWORD*)memory::kmap_pageTable(backbuffer), kpanicBackgroundColour, 1024);
+			for(SIZE_T i = 0; i < (s_framebufferWidth * s_framebufferHeight) >> 12; i++)
+				memory::kmap_physical(reinterpret_cast<PVOID>(reinterpret_cast<UINTPTR_T>(s_backbuffer) + static_cast<unsigned long long>(i) * 4096), (static_cast<unsigned long long>(1) << 9) | (memory::VirtualAllocFlags::WRITE_ENABLED << 52), backbuffer, true);*/
+#endif
 			s_terminalRow = 0;
 			s_terminalColumn = 0;
 			s_reachedEndTerminal = false;
@@ -347,6 +360,7 @@ namespace obos
 			swapBuffers();
 		}
 		
+		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendEOI();
 		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(1);
 		RegisterInterruptHandler(33, irq1);
 

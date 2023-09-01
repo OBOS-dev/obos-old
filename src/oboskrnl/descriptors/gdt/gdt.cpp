@@ -4,7 +4,7 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
-#ifdef __i686__
+#if defined(__i686__)
 #include <descriptors/gdt/gdt.h>
 
 #include <new>
@@ -96,12 +96,27 @@ namespace obos
 		g_tssEntry.esp0 = (UINTPTR_T)esp0;
 	}
 }
+#elif defined(__x86_64__)
+extern "C" char GDTPointer;
+namespace obos
+{
+	void InitializeGdt()
+	{
+		__UINT64_TYPE__ gdtPos = reinterpret_cast<__UINT64_TYPE__>(&GDTPointer) + 0xFFFFFFFF80000000;
+		__UINT64_TYPE__ igdtPtr = gdtPos + 2;
+		__UINT64_TYPE__* gdtPtr = (__UINT64_TYPE__*)igdtPtr;
+		*gdtPtr += 0xFFFFFFFF80000000;
+		asm volatile("lgdt (%0)" : : "r"(gdtPos) : "memory");
+	}
+	void SetTSSStack(void*)
+	{}
+}
 #else
 namespace obos
 {
 	void InitializeGdt()
 	{
-		// If we're not on i686, then do nothing.
+		// If we're not on x86, then do nothing.
 	}
 	void SetTSSStack(void*)
 	{}

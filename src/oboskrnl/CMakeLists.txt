@@ -66,7 +66,7 @@ target_compile_definitions(oboskrnl PUBLIC CURSOR_SLEEP_TIME_2_5_MS=${CURSOR_SLE
                                     PUBLIC OBOS_ARCHITECTURE=${OBOS_ARCHITECTURE} 
                                     PUBLIC ZYAN_NO_LIBC=1)
 
-message("Using linker script at " "${CMAKE_SOURCE_DIR}/scripts/linker.ld")
+message("Using linker script at " "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}")
 message("crtbegin.o is at ${CRTBEGIN_DIRECTORY}")
 message("crtend.o is at ${CRTBEGIN_DIRECTORY}")
 
@@ -86,3 +86,21 @@ elseif(${OBOS_ARCHITECTURE} STREQUAL "i686")
 else()
     message(FATAL_ERROR "Unknown architecture \"" ${OBOS_ARCHITECTURE} "\" make sure to set it to x86_64 to build for x86_64, or i686 for x86.")
 endif()
+
+add_custom_command(TARGET oboskrnl POST_BUILD
+                   COMMAND cp -u out/nvme isodir/obos/initrd/nvme
+                   COMMAND objcopy -S isodir/obos/initrd/nvme
+                   COMMAND cp -u out/ps2Keyboard isodir/obos/initrd/ps2Keyboard
+                   COMMAND objcopy -S isodir/obos/initrd/ps2Keyboard
+                   COMMAND nm out/oboskrnl --demangle=gnu-v3 -ln | grep -w --ignore-case T > isodir/obos/oboskrnl.map
+                   COMMAND cd scripts
+                   COMMAND ./make_initrd.sh
+                   COMMAND cd ..
+                   COMMAND cp -u out/oboskrnl isodir/obos/oboskrnl
+                   COMMAND objcopy -S isodir/obos/oboskrnl
+                   COMMAND cp -u out/ps2Keyboard isodir/obos/drivers/input/ps2Keyboard
+                   COMMAND cp -u out/ustarFilesystem isodir/obos/drivers/filesystems/ustarFilesystem
+                   COMMAND grub-mkrescue -o out/obos.iso isodir
+                   COMMENT "Generating the iso..."
+                   WORKING_DIRECTORY ${OUTPUT_DIR}/../
+                   BYPRODUCTS "out/obos.iso")

@@ -1,10 +1,13 @@
 /*
-	oboskrnl/descriptors/idt/idt.h
+	oboskrnl/descriptors/idt/idt.cpp
 
 	Copyright (c) 2023 Omar Berrow
 */
 
 #include "idt.h"
+
+#include <driver_api/interrupts.h>
+#include <syscalls/syscalls.h>
 
 #include <types.h>
 #include <new>
@@ -137,6 +140,8 @@ namespace obos
 		REGISTER_INTERRUPT(46);
 		REGISTER_INTERRUPT(47);
 		REGISTER_INTERRUPT(48);
+		REGISTER_INTERRUPT(64);
+		REGISTER_INTERRUPT(80);
 
 		s_idtPointer.limit = sizeof(s_idtEntries) - 1;
 		s_idtPointer.base = (UINTPTR_T)&s_idtEntries;

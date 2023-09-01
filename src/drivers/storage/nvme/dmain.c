@@ -36,7 +36,7 @@ int _start()
 {
 	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, SERVICE_TYPE_STORAGE_DEVICE);
 	
-	return 2;
+	return 0;
 
 	cli();
 

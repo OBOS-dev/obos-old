@@ -113,7 +113,7 @@ namespace obos
 					allocFlags |= memory::VirtualAllocFlags::EXECUTE_ENABLE;
 				if (programHeader->p_flags & PF_W)
 					allocFlags |= memory::VirtualAllocFlags::WRITE_ENABLED;
-				if (programHeader->p_vaddr > 0xFFFFFFFF80000000)
+				if (programHeader->p_vaddr > 0xFFFFFFFF80000000 || programHeader->p_vaddr < 0x1000000)
 					return BASE_ADDRESS_USED;
 				DWORD nPages = programHeader->p_memsz >> 12;
 				if ((programHeader->p_memsz % 4096) != 0)

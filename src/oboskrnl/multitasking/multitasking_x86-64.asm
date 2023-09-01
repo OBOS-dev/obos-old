@@ -1,8 +1,8 @@
 [BITS 64]
 
-segment .data
-instruction_pointer: dq 0
-temp: dq 0
+; segment .data
+; instruction_pointer: dq 0
+; temp: dq 0
 
 segment .text
 
@@ -33,18 +33,23 @@ _ZN4obos12multitasking15switchToTaskAsmEv:
 	; rax is to be the last register to be restored.
 
 	; Store rip at instruction_pointer
-	mov [temp], rax
-	mov rax, [rax+152]
-	mov [instruction_pointer], rax
-	mov rax, [temp]
+	; mov [temp], rax
+	; mov rax, [rax+152]
+	; mov [instruction_pointer], rax
+	; mov rax, [temp]
 	
 	; Restore rflags
+	
+	push 0x10
+	push qword [rax+96]
 	push qword [rax+168]
-	popfq
+	push 0x08
+	push qword [rax+152]
 
 	mov rax, [rax+128]
-	
-	jmp [instruction_pointer]
+
+	; Using iretq instead of jmp fixes two bugs (probably a lot more too): interrupts being enabled and ruining stuff, the trap bit being set in rflags.
+	iretq
 _ZN4obos12multitasking20switchToUserModeTaskEv:
 	; Unimplemented.
 	jmp _ZN4obos12multitasking15switchToTaskAsmEv
