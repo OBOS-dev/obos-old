@@ -46,7 +46,7 @@ namespace obos
 		UINT16_T iomap_base;
 	} attribute(packed);
 
-	GdtEntry::GdtEntry(UINT32_T base, UINT32_T limit, UINT8_T access, UINT8_T gran)
+	GdtEntry::GdtEntry(UINTPTR_T base, UINT32_T limit, UINT8_T access, UINT8_T gran)
 	{
 		m_baseLow = (base & 0xFFFF);
 		m_baseMiddle = (base >> 16) & 0xFF;
@@ -97,19 +97,74 @@ namespace obos
 	}
 }
 #elif defined(__x86_64__)
-extern "C" char GDTPointer;
+#include <types.h>
+
+#include <descriptors/gdt/gdt.h>
+
+#include <utils/memory.h>
+
+extern "C" char TSS;
+extern "C" char GDT;
 namespace obos
 {
+	struct gdtEntry
+	{
+		UINT16_T limitLow;
+		UINT16_T baseLow;
+		UINT8_T  baseMiddle1;
+		UINT8_T  access;
+		UINT8_T  granularity;
+		UINT8_T  baseMiddle2;
+		UINT64_T baseHigh;
+	};
+
+	struct tssEntry
+	{
+		UINT32_T resv1;
+		UINT64_T rsp0;
+		BYTE unused[0x5A];
+		UINT16_T iopb;
+	} attribute(packed);
+
+	tssEntry s_tssEntry alignas(8);
+
+	static_assert(sizeof(tssEntry) == 104, "sizeof(tssEntry) != 104");
+
+	extern void InitializeGDTASM();
+
 	void InitializeGdt()
 	{
-		__UINT64_TYPE__ gdtPos = reinterpret_cast<__UINT64_TYPE__>(&GDTPointer) + 0xFFFFFFFF80000000;
-		__UINT64_TYPE__ igdtPtr = gdtPos + 2;
-		__UINT64_TYPE__* gdtPtr = (__UINT64_TYPE__*)igdtPtr;
-		*gdtPtr += 0xFFFFFFFF80000000;
-		asm volatile("lgdt (%0)" : : "r"(gdtPos) : "memory");
+		utils::memzero(&s_tssEntry, sizeof(tssEntry));
+
+		gdtEntry* tss = (gdtEntry*)&TSS;
+
+		UINTPTR_T base = GET_FUNC_ADDR(&s_tssEntry);
+		tss->access = 0x89;
+		tss->granularity = 0x40;
+		tss->limitLow = sizeof(tssEntry);
+		tss->baseLow = base & 0xFFFF;
+		tss->baseMiddle1 = (base >> 16) & 0xFF;
+		tss->baseMiddle2 = (base >> 24) & 0xFF;
+		tss->baseHigh = base >> 32;
+		gdtEntry* userCodeSeg = (gdtEntry*)((&GDT) + 0x18);
+		gdtEntry* userDataSeg = (gdtEntry*)((&GDT) + 0x20);
+		
+		s_tssEntry.iopb = 104;
+
+		userCodeSeg->access = 0xFA;
+		userCodeSeg->granularity = 0xAF;
+		userCodeSeg->limitLow = 0xFFFF;
+
+		userDataSeg->access = 0xF2;
+		userDataSeg->granularity = 0xCF;
+		userDataSeg->limitLow = 0xFFFF;
+
+		InitializeGDTASM();
 	}
-	void SetTSSStack(void*)
-	{}
+	void SetTSSStack(void* rsp)
+	{
+		s_tssEntry.rsp0 = (UINTPTR_T)rsp;
+	}
 }
 #else
 namespace obos

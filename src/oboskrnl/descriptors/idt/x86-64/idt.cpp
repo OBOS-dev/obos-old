@@ -80,7 +80,7 @@ namespace obos
 
 		m_selector = sel;
 		m_ist = ist;
-		m_typeAttributes = typeAttributes;
+		m_typeAttributes = typeAttributes | 0x60;
 		m_resv1 = 0;
 	}
 

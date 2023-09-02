@@ -92,6 +92,8 @@ add_custom_command(TARGET oboskrnl POST_BUILD
                    COMMAND objcopy -S isodir/obos/initrd/nvme
                    COMMAND cp -u out/ps2Keyboard isodir/obos/initrd/ps2Keyboard
                    COMMAND objcopy -S isodir/obos/initrd/ps2Keyboard
+                   COMMAND cp -u out/testProgram isodir/obos/initrd/testProgram
+                   COMMAND objcopy -S isodir/obos/initrd/testProgram
                    COMMAND nm out/oboskrnl --demangle=gnu-v3 -ln | grep -w --ignore-case T > isodir/obos/oboskrnl.map
                    COMMAND cd scripts
                    COMMAND ./make_initrd.sh

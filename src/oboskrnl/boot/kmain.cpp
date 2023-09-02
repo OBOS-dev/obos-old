@@ -349,7 +349,28 @@ namespace obos
 		//mainThread.WaitForThreadStatusChange(0);
 		// We don't need the handle anymore.
 		mainThread.closeHandle();
+		
+		filesize = 0;
+		EnterKernelSection();
+		initrdDriver->doContextSwitch();
+		existsData = existsCallback("testProgram", &filesize);
+		g_kernelProcess->doContextSwitch();
+		LeaveKernelSection();
+		if (!existsData)
+			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/testProgram doesn't exist."));
+		filedata = new BYTE[filesize];
+		EnterKernelSection();
+		initrdDriver->doContextSwitch();
+		readCallback("testProgram", (STRING)filedata, filesize);
+		g_kernelProcess->doContextSwitch();
+		LeaveKernelSection();
 
+		process::Process* testProgram = new process::Process{};
+		testProgram->CreateProcess(filedata, filesize, nullptr);
+		delete[] filedata;
+		if (ret)
+			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
+		
 		char* ascii_art = (STRING)((multiboot_mod_list64*)g_multibootInfo->mods_addr)[1].mod_start;
 		
 		SetConsoleColor(0x003399FF, 0x00000000);

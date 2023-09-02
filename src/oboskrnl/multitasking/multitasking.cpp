@@ -108,7 +108,7 @@ namespace obos
 
 		void findNewTask(const interrupt_frame* frame)
 		{
-			/*static BYTE s_cursorCounter = 0;
+			static BYTE s_cursorCounter = 0;
 			static bool s_isCursorOn = false;
 			static SIZE_T s_cursorRow = 0;
 			static SIZE_T s_cursorColumn = 0;
@@ -137,7 +137,7 @@ namespace obos
 					ConsoleOutputCharacter(' ', s_cursorColumn, s_cursorRow);
 				s_isCursorOn = !s_isCursorOn;
 				s_cursorCounter = 0;
-			}*/
+			}
 			if (!g_initialized)
 			{
 				if (frame->intNumber != 0x30)
