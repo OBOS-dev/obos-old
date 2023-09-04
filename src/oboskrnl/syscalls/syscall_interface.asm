@@ -7,10 +7,11 @@
 %1:
 %assign current_syscall current_syscall + 1
 %ifdef __x86_64__
+	mov rax, %2
+	lea rbx, [rsp+8]
+%elifdef __i686__
 	mov eax, %2
 	lea ebx, [esp+4]
-%else
-%error test
 %endif
 	int 0x40
 	ret

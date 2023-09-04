@@ -33,7 +33,7 @@ namespace obos
 
 		void PageDirectory::init()
 		{
-			m_array = (UINTPTR_T*)kalloc_physicalPages();
+			m_array = (UINTPTR_T*)kalloc_physicalPage();
 			m_owns = m_initialized = true;
 		}
 
@@ -72,7 +72,7 @@ namespace obos
 		PageDirectory::~PageDirectory()
 		{
 			if (m_owns)
-				kfree_physicalPages(m_array, 1);
+				kfree_physicalPage(m_array);
 		}
 
 		UINT16_T PageDirectory::addressToIndex(UINTPTR_T base)

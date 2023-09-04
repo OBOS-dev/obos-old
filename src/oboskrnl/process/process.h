@@ -24,7 +24,7 @@ namespace obos
 		{
 		public:
 			Process();
-			
+
 			/// <summary>
 			/// Creates the process from an elf file's data.
 			/// </summary>
@@ -62,9 +62,20 @@ namespace obos
 			list_t* children = nullptr;
 			list_t* threads = nullptr;
 			list_t* abstractHandles = nullptr;
+			struct allocatedBlock
+			{
+				PBYTE start = nullptr;
+				SIZE_T size = 0;
+			};
+			// a list of "address"
+			list_t* allocatedBlocks;
 			bool isUserMode = false;
 			DWORD exitCode = 0;
+			DWORD consoleForegroundColour;
+			DWORD consoleBackgroundColour;
 			UINTPTR_T magicNumber = 0xCA44C071;
+		private:
+			void UncommitProcessMemory();
 		};
 	}
 }

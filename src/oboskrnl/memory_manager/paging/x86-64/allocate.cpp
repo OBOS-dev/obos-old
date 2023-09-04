@@ -13,6 +13,10 @@
 
 #include <utils/memory.h>
 
+#include <process/process.h>
+
+#include <multitasking/multitasking.h>
+
 extern "C" UINTPTR_T boot_page_level3_map;
 
 namespace obos
@@ -87,7 +91,7 @@ namespace obos
 				PageMap::computeIndexAtAddress(at, 1)));
 		}
 
-		PVOID VirtualAlloc(PVOID _base, SIZE_T nPages, UINTPTR_T flags)
+		PVOID VirtualAlloc(PVOID _base, SIZE_T nPages, UINTPTR_T flags, bool commit)
 		{
 			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base);
 			if ((base + nPages * 4096) < base)
@@ -97,6 +101,12 @@ namespace obos
 				utils::clearBitInBitfield(flags, 63);
 			else
 				utils::setBitInBitfield(flags, 63);
+			// To prevent future problems, do this.
+			UINTPTR_T pageStructureFlags =
+				VirtualAllocFlags::GLOBAL |
+				(UINTPTR_T)CPUSupportsExecuteDisable() << 63 |
+				VirtualAllocFlags::WRITE_ENABLED |
+				1;
 			flags &= 0x8000000000000017;
 			if (!base)
 			{
@@ -108,23 +118,42 @@ namespace obos
 				return nullptr;
 			for (UINTPTR_T addr = base; addr < (base + nPages * 4096); addr += 4096)
 			{
-				UINTPTR_T* pageTable = allocatePagingStructures(addr, flags);
-				pageTable += PageMap::computeIndexAtAddress(addr, 0);
-				extern UINTPTR_T* g_zeroPage;
-				UINTPTR_T entry = reinterpret_cast<UINTPTR_T>(g_zeroPage);
-				entry |= 1 | ((UINTPTR_T)CPUSupportsExecuteDisable() << 63);
-				/*if (!CPUSupportsExecuteDisable())
-					utils::clearBitInBitfield(entry, 63);*/
-				entry |= (flags & 0b10100);
-				if ((flags & 0b10))
+				UINTPTR_T entry = 0;
+				if (!commit)
 				{
-					if (executeDisable)
-						entry |= ((UINTPTR_T)1 << 58);
-					entry |= (flags << 52);
-					entry |= (1 << 9); // Set allocate on write.
+					extern UINTPTR_T* g_zeroPage;
+					entry = reinterpret_cast<UINTPTR_T>(g_zeroPage);
+					entry |= 1 | ((UINTPTR_T)CPUSupportsExecuteDisable() << 63);
+					/*if (!CPUSupportsExecuteDisable())
+						utils::clearBitInBitfield(entry, 63);*/
+					entry |= (flags & 0b10100);
+					if ((flags & 0b10))
+					{
+						if (executeDisable)
+							entry |= ((UINTPTR_T)1 << 58);
+						entry |= (flags << 52);
+						entry |= (1 << 9); // Set allocate on write.
+					}
 				}
+				else
+				{
+					entry = reinterpret_cast<UINTPTR_T>(kalloc_physicalPage());
+					entry |= 1 | flags;
+				}
+				UINTPTR_T* pageTable = allocatePagingStructures(addr, pageStructureFlags);
+				tlbFlush((UINTPTR_T)pageTable);
+				pageTable += PageMap::computeIndexAtAddress(addr, 0);
 				*pageTable = entry;
 			}
+			if (multitasking::g_initialized && multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->pid != 0 && base < 0xFFFFFFFF80000000)
+			{
+				process::Process::allocatedBlock* block = new process::Process::allocatedBlock{};
+				block->start = (PBYTE)base;
+				block->size = nPages;
+				process::Process* currentProcess = multitasking::g_currentThread->owner;
+				list_rpush(currentProcess->allocatedBlocks, list_node_new(block));
+			}
+			
 			return (PVOID)base;
 		}
 
@@ -133,16 +162,26 @@ namespace obos
 			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base);
 			if ((base + nPages * 4096) < base)
 				return 1; // If the amount of pages overflows the address, return 1.
-			if (!HasVirtualAddress(_base, nPages) || !base)
+			if (!HasVirtualAddress(_base, nPages, true) || !base)
 				return 1;
-			for (UINTPTR_T addr = base; base < (base + nPages * 4096); base += 4096)
+			if (multitasking::g_initialized && multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->pid != 0 && base < 0xFFFFFFFF80000000)
+			{
+				process::Process::allocatedBlock block;
+				block.start = (PBYTE)base;
+				block.size = nPages;
+				process::Process* currentProcess = multitasking::g_currentThread->owner;
+				list_node_t* currentNode = list_find(currentProcess->allocatedBlocks, &block);
+				delete (process::Process::allocatedBlock*)currentNode->val;
+				list_remove(currentProcess->allocatedBlocks, currentNode);
+			}
+			for (UINTPTR_T addr = base; addr < (base + nPages * 4096); addr += 4096)
 			{
 				UINTPTR_T* pageTable = memory::kmap_pageTable(
 					memory::g_level4PageMap->getPageTable(
-						memory::PageMap::computeIndexAtAddress(addr & 0xfff, 2),
-						memory::PageMap::computeIndexAtAddress(addr & 0xfff, 1),
-						memory::PageMap::computeIndexAtAddress(addr & 0xfff, 0)));
-				auto pageTableIndex = memory::PageMap::computeIndexAtAddress(addr & 0xfff, 0);
+						memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 3),
+						memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 2),
+						memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 1)));
+				auto pageTableIndex = memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 0);
 				if (!utils::testBitInBitfield(pageTable[pageTableIndex], 9))
 				{
 					// Free the physical page.
@@ -153,7 +192,7 @@ namespace obos
 			}
 			return 0;
 		}
-		bool HasVirtualAddress(PCVOID _base, SIZE_T nPages)
+		bool HasVirtualAddress(PCVOID _base, SIZE_T nPages, bool checkAllocationSize)
 		{
 			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base) & (~0xFFF);
 			if ((base + nPages * 4096) < base)
@@ -176,14 +215,23 @@ namespace obos
 					PageMap::computeIndexAtAddress(addr, 1), PageMap::computeIndexAtAddress(addr, 0)))
 					return false;
 			}
+			if (multitasking::g_initialized && multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->pid != 0 && base < 0xFFFFFFFF80000000 && checkAllocationSize)
+			{
+				process::Process::allocatedBlock block;
+				block.start = (PBYTE)base;
+				block.size = nPages;
+				process::Process* currentProcess = multitasking::g_currentThread->owner;
+				list_node_t* currentNode = list_find(currentProcess->allocatedBlocks, &block);
+				return currentNode != nullptr;
+			}
 			return true;
 		}
-		DWORD MemoryProtect(PVOID _base, SIZE_T nPages, UINTPTR_T flags)
+		DWORD MemoryProtect(PVOID _base, SIZE_T nPages, UINTPTR_T flags, bool checkAllocationSize)
 		{
 			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base) & (~0xFFF);
 			if ((base + nPages * 4096) < base)
 				return 1; // If the amount of pages overflows the address, return 1.
-			if (!HasVirtualAddress(_base, nPages) || !base)
+			if (!HasVirtualAddress(_base, nPages, checkAllocationSize) || !base)
 				return 1;
 			if (utils::testBitInBitfield(flags, 63) || !CPUSupportsExecuteDisable())
 				utils::clearBitInBitfield(flags, 63);
@@ -214,7 +262,7 @@ namespace obos
 				kmap_pageTable(memory::g_level4PageMap->getPageTable(
 					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 3),
 					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 2),
-					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 1)))[memory::PageMap::computeIndexAtAddress(addr & (~ 0xfff), 0)] = entry;
+					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 1)))[memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 0)] = entry;
 			}
 			return 0;
 		}
@@ -228,12 +276,17 @@ namespace obos
 				utils::clearBitInBitfield(flags, 63);
 			else
 				utils::setBitInBitfield(flags, 63);
+			UINTPTR_T pageStructureFlags =
+				VirtualAllocFlags::GLOBAL |
+				(CPUSupportsExecuteDisable() ? VirtualAllocFlags::EXECUTE_ENABLE : 0) |
+				VirtualAllocFlags::WRITE_ENABLED |
+				1;
 			flags &= 0x87F0000000000217;
 			if (!base)
 				return nullptr; // Not supported.
 			if (HasVirtualAddress(_base, 1) && !force)
 				return nullptr;
-			UINTPTR_T* pageTable = allocatePagingStructures(base, flags);
+			UINTPTR_T* pageTable = allocatePagingStructures(base, pageStructureFlags);
 			pageTable += PageMap::computeIndexAtAddress(base, 0);
 			UINTPTR_T entry = reinterpret_cast<UINTPTR_T>(physicalAddress);
 			entry |= flags | 1;

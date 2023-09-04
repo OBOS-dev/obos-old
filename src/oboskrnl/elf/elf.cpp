@@ -118,7 +118,7 @@ namespace obos
 				DWORD nPages = programHeader->p_memsz >> 12;
 				if ((programHeader->p_memsz % 4096) != 0)
 					nPages++;
-				PBYTE addr = (PBYTE)memory::VirtualAlloc((PVOID)programHeader->p_vaddr, nPages, memory::VirtualAllocFlags::WRITE_ENABLED);
+				PBYTE addr = (PBYTE)memory::VirtualAlloc((PVOID)programHeader->p_vaddr, nPages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
 				if (programHeader->p_filesz)
 				{
 					UINTPTR_T offset = programHeader->p_vaddr - (UINTPTR_T)addr;

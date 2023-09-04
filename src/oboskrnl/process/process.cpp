@@ -131,11 +131,29 @@ namespace obos
 			pageDirectoryPtr[0] = (UINTPTR_T)&boot_page_table1;
 			pageDirectoryPtr[0] |= 3;
 			level4PageMap->switchToThis();
+
+			UINTPTR_T glbTextPos = memory::g_kernelPageMap.getPageTableEntry(
+				memory::PageMap::computeIndexAtAddress(ProcEntryPointBase, 3),
+				memory::PageMap::computeIndexAtAddress(ProcEntryPointBase, 2),
+				memory::PageMap::computeIndexAtAddress(ProcEntryPointBase, 1),
+				memory::PageMap::computeIndexAtAddress(ProcEntryPointBase, 0));
+			memory::kmap_physical((PVOID)ProcEntryPointBase, 6, (PVOID)glbTextPos, true);
 #endif
 
 			children = list_new();
 			threads = list_new();
 			abstractHandles = list_new();
+			allocatedBlocks = list_new();
+			
+			allocatedBlocks->match = [](PVOID _block1, PVOID _block2)->int {
+				allocatedBlock* block1 = reinterpret_cast<allocatedBlock*>(_block1);
+				allocatedBlock* block2 = reinterpret_cast<allocatedBlock*>(_block2);
+				return block1->start == block2->start &&
+					   block1->size == block2->size;
+				};
+
+			Process* oldThreadOwner = multitasking::g_currentThread->owner;
+			multitasking::g_currentThread->owner = this;
 
 			UINTPTR_T entry = 0;
 			UINTPTR_T base = 0;
@@ -143,6 +161,8 @@ namespace obos
 			DWORD loaderRet = elfLoader::LoadElfFile(file, size, entry, base);
 			if (loaderRet)
 			{
+				UncommitProcessMemory();
+				multitasking::g_currentThread->owner = oldThreadOwner;
 				multitasking::g_currentThread->owner->doContextSwitch();
 				LeaveKernelSection();
 				return loaderRet;
@@ -152,8 +172,6 @@ namespace obos
 
 			multitasking::Thread* mainThread = new multitasking::Thread{};
 			
-			mainThread->owner = this;
-
 			DWORD ret = mainThread->CreateThread(multitasking::Thread::priority_t::NORMAL,
 				!isDriver ? (VOID(*)(PVOID))ProcEntryPointBase : DriverEntryPoint,
 				(PVOID)entry,
@@ -161,16 +179,17 @@ namespace obos
 				0);
 			if (ret)
 			{
+				multitasking::g_currentThread->owner = oldThreadOwner;
 				multitasking::g_currentThread->owner->doContextSwitch();
 				LeaveKernelSection();
 				return 3 + ret;
 			}
 
 			mainThread->owner = this;
-			parent = multitasking::g_currentThread->owner;
+			parent = oldThreadOwner;
 
 			list_rpush(threads, list_node_new(mainThread));
-			list_rpush(multitasking::g_currentThread->owner->children, list_node_new(this));
+			list_rpush(oldThreadOwner->children, list_node_new(this));
 
 			if (_mainThread)
 			{
@@ -178,6 +197,7 @@ namespace obos
 				mainThreadHandle->OpenThread(mainThread);
 			}
 			
+			multitasking::g_currentThread->owner = oldThreadOwner;
 			// Switch back the parent's page directory.
 			multitasking::g_currentThread->owner->doContextSwitch();
 
@@ -191,17 +211,14 @@ namespace obos
 		}
 		/*static BYTE s_temporaryStack[8192] attribute(aligned(4096));
 		static multitasking::MutexHandle* s_temporaryStackMutex = nullptr;*/
-#if defined(__i686__)
-		static SIZE_T s_localVariable = 0;
-#endif
 		static DWORD s_exitCode = 0;
 		DWORD Process::TerminateProcess(DWORD exitCode)
 		{
 #if defined(__i686__)
-			if (pageDirectory)
+			if (!pageDirectory)
 				return (DWORD)-1;
 #elif defined(__x86_64__)
-			if (level4PageMap)
+			if (!level4PageMap)
 				return (DWORD)-1;
 #endif
 			EnterKernelSection();
@@ -239,53 +256,15 @@ namespace obos
 			list_destroy(abstractHandles);
 			list_remove(g_processList, list_find(g_processList, this));
 			s_exitCode = exitCode;
-			//if (this == multitasking::g_currentThread->owner)
-			//{
-			//	if (!s_temporaryStackMutex)
-			//		s_temporaryStackMutex = new multitasking::MutexHandle{};
-			//	else
-			//		s_temporaryStackMutex->Lock(); // Take ownership of the temporary stack.
-			//	UINTPTR_T* stack = (UINTPTR_T*)s_temporaryStack;
-			//	utils::memzero(s_temporaryStack, 8192);
-			//	stack[2047] = (UINTPTR_T)this;
-			//	stack += 2045;
-			//	asm volatile("mov %0, %%ebp;"
-			//				 "mov %0, %%esp;" : : "r"(stack) : "memory");
-			//}
+
 			// Free everything.
-#if defined(__i686__)
-			for (s_localVariable = 0; s_localVariable != 768; s_localVariable++)
-			{
-				if (!pageDirectory->getPageTable(s_localVariable))
-					continue;
-				for (int i = 0; i < 1024; i++)
-				{
-					UINTPTR_T address = memory::kmap_pageTable(pageDirectory->getPageTable(s_localVariable))[i] & 0xFFFFF000;
-					if (address == 0x400000)
-						continue;
-					if (address)
-						utils::clearBitInBitfield(memory::g_availablePages[address >> 17], (address >> 12) % 32);
-				}
-			}
-			for (s_localVariable = 896; s_localVariable < 1023; s_localVariable++)
-			{
-				if (!pageDirectory->getPageTable(s_localVariable))
-					continue;
-				for (int i = 0; i < 1024; i++)
-				{
-					UINTPTR_T address = memory::kmap_pageTable(pageDirectory->getPageTable(s_localVariable))[i] & 0xFFFFF000;
-					if (address)
-						utils::clearBitInBitfield(memory::g_availablePages[address >> 17], (address >> 12) % 32);
-				}
-			}
-#endif
+			UncommitProcessMemory();
 
 #if defined(__i686__)
 			delete pageDirectory;
 #elif defined(__x86_64__)
 			delete level4PageMap;
 #endif
-
 			LeaveKernelSection();
 			this->exitCode = s_exitCode;
 			if (this == multitasking::g_currentThread->owner)
@@ -303,6 +282,27 @@ namespace obos
 #elif defined(__x86_64__)
 			level4PageMap->switchToThis();
 #endif
+		}
+		void Process::UncommitProcessMemory()
+		{
+			if (!this->allocatedBlocks)
+				return;
+			list_iterator_t* iter = list_iterator_new(allocatedBlocks, LIST_HEAD);
+			for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
+			{
+				allocatedBlock* block = (allocatedBlock*)node->val;
+				for (SIZE_T page = 0; page < block->size; page++)
+				{
+					UINTPTR_T phys = memory::g_level4PageMap->getPageTableEntry(
+						memory::PageMap::computeIndexAtAddress(reinterpret_cast<UINTPTR_T>(block->start + (page << 12)), 3),
+						memory::PageMap::computeIndexAtAddress(reinterpret_cast<UINTPTR_T>(block->start + (page << 12)), 2),
+						memory::PageMap::computeIndexAtAddress(reinterpret_cast<UINTPTR_T>(block->start + (page << 12)), 1),
+						memory::PageMap::computeIndexAtAddress(reinterpret_cast<UINTPTR_T>(block->start + (page << 12)), 0)
+					);
+					if (phys != reinterpret_cast<UINTPTR_T>(memory::g_zeroPage))
+						memory::kfree_physicalPage((PVOID)phys);
+				}
+			}
 		}
 	}
 }

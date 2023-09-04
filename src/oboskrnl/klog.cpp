@@ -400,7 +400,7 @@ namespace obos
 			STRING func = nullptr;
 			SIZE_T functionAddress = 0;
 			addr2func((PVOID)current->eip, func, functionAddress);
-			printf_noFlush("%s%d: %p (%s+%d)\r\n", prefix, i, current->eip, func ? func : "[external code]", functionAddress ? (current->eip - functionAddress) : 0);
+			printf_noFlush("%s%d: %p (%s+%d)\r\n", prefix, i, current->eip, func ? func : "[external code]", functionAddress ? ((UINTPTR_T)current->eip - functionAddress) : 0);
 			if(func)
 				delete[] func;
 		}

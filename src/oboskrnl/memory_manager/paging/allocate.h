@@ -46,7 +46,11 @@ namespace obos
 		/// <param name="nPages">The amount of pages to allocate.</param>
 		/// <param name="flags">The allocation flags.</param>
 		/// <returns>The base address. If the base address was already allocated, nullptr.</returns>
+#ifndef __x86_64__
 		PVOID VirtualAlloc(PVOID base, SIZE_T nPages, UINTPTR_T flags);
+#else
+		PVOID VirtualAlloc(PVOID base, SIZE_T nPages, UINTPTR_T flags, bool commit = false);
+#endif
 		/// <summary>
 		/// Frees virtual memory. This will clear the pages if it doesn't fail.
 		/// </summary>
@@ -60,11 +64,19 @@ namespace obos
 		/// <param name="base">The base address of the pages.</param>
 		/// <param name="nPages">The amount of pages to check.</param>
 		/// <returns>false if the pages were never allocated, otherwise true.</returns>
+#ifndef __x86_64__
 		bool HasVirtualAddress(PCVOID base, SIZE_T nPages);
+#else
+		bool HasVirtualAddress(PCVOID base, SIZE_T nPages, bool checkAllocationSize = true);
+#endif
 		/// <summary>
 		/// Changes the flags of the specified area of memory.
 		/// </summary>
 		/// <returns>Zero on success, and if the base is less 0x400000, or if you haven't allocated the pages, one..</returns>
+#ifndef __x86_64__
 		DWORD MemoryProtect(PVOID base, SIZE_T nPages, UINTPTR_T flags);
+#else
+		DWORD MemoryProtect(PVOID base, SIZE_T nPages, UINTPTR_T flags, bool checkAllocationSize = true);
+#endif
 	}
 }

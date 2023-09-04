@@ -18,7 +18,7 @@
 #include <console.h>
 
 #if defined(__i686__)
-#define isInKernelCode(frame) frame.eip >= 0xC0000000 && frame.eip < 0xE0000000
+#define isInKernelCode(frame) ((frame.eip >= 0xC0000000) && (frame.eip < 0xE0000000))
 #define setFrameAddress(frame_addr) \
 asm volatile("mov %0, %%eax" :\
 	: "r"(frame_addr)\

@@ -82,6 +82,7 @@ namespace obos
 		extern PageDirectory* g_pageDirectory;
 		extern PageMap* g_level4PageMap;
 		extern PageMap g_kernelPageMap;
+		extern UINTPTR_T* g_zeroPage;
 		void InitializePaging();
 
 		void tlbFlush(UINTPTR_T addr);

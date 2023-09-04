@@ -19,7 +19,7 @@ namespace obos
 		void ResetSyscallHandlers()
 		{
 #ifdef __i686__
-			utils::dwMemset(g_syscallTable, do_nothing, 256);
+			utils::dwMemset(g_syscallTable, (UINTPTR_T)do_nothing, 256);
 #else
 			for (int i = 0; i < 256; i++)
 				g_syscallTable[i] = (UINTPTR_T)do_nothing;

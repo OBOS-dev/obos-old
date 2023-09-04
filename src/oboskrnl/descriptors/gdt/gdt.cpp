@@ -141,15 +141,15 @@ namespace obos
 		UINTPTR_T base = GET_FUNC_ADDR(&s_tssEntry);
 		tss->access = 0x89;
 		tss->granularity = 0x40;
-		tss->limitLow = sizeof(tssEntry);
+		tss->limitLow = sizeof(tssEntry) - 1;
 		tss->baseLow = base & 0xFFFF;
 		tss->baseMiddle1 = (base >> 16) & 0xFF;
 		tss->baseMiddle2 = (base >> 24) & 0xFF;
 		tss->baseHigh = base >> 32;
+		s_tssEntry.iopb = 103;
+		
 		gdtEntry* userCodeSeg = (gdtEntry*)((&GDT) + 0x18);
 		gdtEntry* userDataSeg = (gdtEntry*)((&GDT) + 0x20);
-		
-		s_tssEntry.iopb = 104;
 
 		userCodeSeg->access = 0xFA;
 		userCodeSeg->granularity = 0xAF;

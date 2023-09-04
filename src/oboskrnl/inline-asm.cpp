@@ -41,7 +41,7 @@ void io_wait(void)
     outb(0x80, 0);
 }
 
-static bool inKernelSection = false;
+bool inKernelSection = false;
 
 void cli()
 {
@@ -327,7 +327,7 @@ void _int(BYTE interrupt)
 
 namespace obos
 {
-    static int countCalled = 0;
+    int countCalled = 0;
     
     void EnterKernelSection()
     {

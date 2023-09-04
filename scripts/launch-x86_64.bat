@@ -1,7 +1,6 @@
 @echo off
 cd ..
 echo Launching the virutal machine.
-@rem Add -debugcon file:log.txt to use debugcon.
 qemu-system-x86_64 -cdrom out/obos.iso ^
 -drive file=disk.img,if=none,id=nvm,format=raw ^
 -device nvme,drive=nvm,serial=0,use-intel-id=on ^
@@ -14,5 +13,6 @@ qemu-system-x86_64 -cdrom out/obos.iso ^
 -D qemu_log.txt ^
 -d int ^
 -debugcon file:log.txt ^
+-M q35,smm=off ^
 -cpu qemu64,+nx
 cd scripts

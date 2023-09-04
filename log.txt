@@ -1,0 +1,115 @@
+Page fault in user-mode at 0xffffffff80114c55 (tid 1, pid 1) while trying to read a present page.
+The address of that page is 0xffffffff80114c55. Error code: 5. Page table entry: 0x114023.
+Dumping registers: 
+	RDI: 0xfffffffff00005e0
+	RSI: 0x0
+	RBP: 0xffffffff801b2e18
+	RSP: 0x1fc8
+	RBX: 0x10
+	RDX: 0x1
+	RCX: 0x0
+	RAX: 0x0
+	RIP: 0xffffffff80114c55
+	R8: 0x0
+	R9: 0x0
+	R10: 0x0
+	R11: 0x0
+	R12: 0x0
+	R13: 0x0
+	R14: 0x0
+	R15: 0x8
+	RFLAGS: 0x200202
+	SS: 0x23
+	DS: 0x0
+	CS: 0x1b
+Stack trace:
+	0: 0xffffffff80113992 (obos::multitasking::switchToTask(obos::multitasking::Thread*)+404)
+Disassembly of address 0xffffffff80114c55 (/home/omar/.vs/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp):
+	0xffffffff80114c55 (obos::multitasking::MutexHandle::Unlock()+49): jmp 0xFFFFFFFF80114C58
+	0xffffffff80114c57 (obos::multitasking::MutexHandle::Unlock()+51): nop
+	0xffffffff80114c58 (obos::multitasking::MutexHandle::Unlock()+52): leave
+	0xffffffff80114c59 (obos::multitasking::MutexHandle::Unlock()+53): ret
+	0xffffffff80114c5a (obos::multitasking::MutexHandle::~MutexHandle()+0): push rbp
+	0xffffffff80114c5b (obos::multitasking::MutexHandle::~MutexHandle()+1): mov rbp, rsp
+	0xffffffff80114c5e (obos::multitasking::MutexHandle::~MutexHandle()+4): sub rsp, 0x10
+	0xffffffff80114c62 (obos::multitasking::MutexHandle::~MutexHandle()+8): mov [rbp-0x08], rdi
+	0xffffffff80114c66 (obos::multitasking::MutexHandle::~MutexHandle()+12): mov rdx, 0xFFFFFFFF8019F840
+	0xffffffff80114c6d (obos::multitasking::MutexHandle::~MutexHandle()+19): mov rax, [rbp-0x08]
+Press any key to restart...
+Restarting the computer...
+Unhandled exception 2 at 0xffffffff8010d722 (tid 0, pid 0). Error code: 0. Dumping registers: 
+	RDI: 0x80
+	RSI: 0x0
+	RBP: 0xffffffff801b74e8
+	RSP: 0xffffffff801b73e8
+	RBX: 0xfffffffff0001b20
+	RDX: 0x80
+	RCX: 0x0
+	RAX: 0x0
+	RIP: 0xffffffff8010d722
+	R8: 0x10000
+	R9: 0x0
+	R10: 0x0
+	R11: 0x0
+	R12: 0x8
+	R13: 0x0
+	R14: 0x0
+	R15: 0x0
+	RFLAGS: 0x200282
+	SS: 0x10
+	DS: 0x0
+	CS: 0x8
+Stack trace:
+	1: 0xb10019f870 ([external code]+0)
+	0: 0x2d3c2808 ([external code]+0)
+Disassembly of address 0xffffffff8010d722 (/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp):
+	0xffffffff8010d722 (obos::kmainThr()+1816): jmp 0xFFFFFFFF8010D720
+	0xffffffff8010d724 (obos::kmainThr()+1818): lea rax, [rbp-0xB0]
+	0xffffffff8010d72b (obos::kmainThr()+1825): mov rdi, rax
+	0xffffffff8010d72e (obos::kmainThr()+1828): call 0xFFFFFFFF80130AFA
+	0xffffffff8010d733 (obos::kmainThr()+1833): mov rbx, [rbp-0x08]
+	0xffffffff8010d737 (obos::kmainThr()+1837): leave
+	0xffffffff8010d738 (obos::kmainThr()+1838): ret
+	0xffffffff8010d739 (obos::kmainThr()+1839): push rbp
+	0xffffffff8010d73a (obos::kmainThr()+1840): mov rbp, rsp
+	0xffffffff8010d73d (obos::kmainThr()+1843): call 0xFFFFFFFF80109058
+Press any key to restart...
+Restarting the computer...
+Unhandled exception 2 at 0xffffffff8010d722 (tid 0, pid 0). Error code: 0. Dumping registers: 
+	RDI: 0x80
+	RSI: 0x0
+	RBP: 0xffffffff801b74e8
+	RSP: 0xffffffff801b73e8
+	RBX: 0xfffffffff0001b80
+	RDX: 0x80
+	RCX: 0x0
+	RAX: 0x0
+	RIP: 0xffffffff8010d722
+	R8: 0x10000
+	R9: 0x0
+	R10: 0x0
+	R11: 0x0
+	R12: 0x8
+	R13: 0x0
+	R14: 0x0
+	R15: 0x0
+	RFLAGS: 0x200282
+	SS: 0x10
+	DS: 0x0
+	CS: 0x8
+Stack trace:
+	1: 0xb10019f870 ([external code]+0)
+	0: 0x2d3c2808 ([external code]+0)
+Disassembly of address 0xffffffff8010d722 (/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp):
+	0xffffffff8010d722 (obos::kmainThr()+1816): jmp 0xFFFFFFFF8010D720
+	0xffffffff8010d724 (obos::kmainThr()+1818): lea rax, [rbp-0xB0]
+	0xffffffff8010d72b (obos::kmainThr()+1825): mov rdi, rax
+	0xffffffff8010d72e (obos::kmainThr()+1828): call 0xFFFFFFFF80130AFA
+	0xffffffff8010d733 (obos::kmainThr()+1833): mov rbx, [rbp-0x08]
+	0xffffffff8010d737 (obos::kmainThr()+1837): leave
+	0xffffffff8010d738 (obos::kmainThr()+1838): ret
+	0xffffffff8010d739 (obos::kmainThr()+1839): push rbp
+	0xffffffff8010d73a (obos::kmainThr()+1840): mov rbp, rsp
+	0xffffffff8010d73d (obos::kmainThr()+1843): call 0xFFFFFFFF80109058
+Press any key to restart...
+Restarting the computer...

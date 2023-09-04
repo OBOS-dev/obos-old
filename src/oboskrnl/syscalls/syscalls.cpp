@@ -23,6 +23,12 @@ extern int do_nothing();
 
 #define DEFINE_RESERVED_PARAMETERS PVOID parameters
 
+#if defined(__x86_64__)
+#define STACK_SIZE 8
+#elif defined(__i686__)
+#define STACK_SIZE 4
+#endif
+
 static bool checkUserPtr(PCVOID ptr, bool isAllocCall = false)
 {
 	UINTPTR_T iPtr = reinterpret_cast<UINTPTR_T>(ptr);
@@ -32,13 +38,23 @@ static bool checkUserPtr(PCVOID ptr, bool isAllocCall = false)
 		return false;
 	if (iPtr >= 0xFFCFF000)
 		return false;
+#ifndef __x86_64__
 	if (!obos::memory::HasVirtualAddress(ptr, 1))
 		return isAllocCall;
+#else
+	if (!obos::memory::HasVirtualAddress(ptr, 1, false))
+		return isAllocCall;
+#endif
 	return true;
 }
 static bool checkUserHandle(HANDLE handle)
 {
-	return (handle >= 0xC0000000 && handle < 0xE0000000) && (obos::memory::HasVirtualAddress(reinterpret_cast<PVOID>(handle), 1));
+	return (handle >= 0xC0000000 && handle < 0xE0000000) 
+#ifndef __x86_64__
+		&& (obos::memory::HasVirtualAddress(reinterpret_cast<PVOID>(handle), 1));
+#else
+		&& (obos::memory::HasVirtualAddress(reinterpret_cast<PVOID>(handle), 1, false));
+#endif
 }
 
 namespace obos
@@ -147,7 +163,7 @@ namespace obos
 				return;
 			struct _par
 			{
-				CSTRING string;
+				alignas(STACK_SIZE) CSTRING string;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr((PVOID)par->string))
 				return;
@@ -159,7 +175,7 @@ namespace obos
 				multitasking::g_currentThread->owner->TerminateProcess(0);
 			struct _par
 			{
-				DWORD exitCode;
+				alignas(STACK_SIZE) DWORD exitCode;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			multitasking::g_currentThread->owner->TerminateProcess(par->exitCode);
 		}
@@ -169,10 +185,10 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				PBYTE elfFile; 
-				SIZE_T size; 
-				HANDLE* mainThread;
-				HANDLE* procHandle; 
+				alignas(STACK_SIZE) PBYTE elfFile; 
+				alignas(STACK_SIZE) SIZE_T size; 
+				alignas(STACK_SIZE) HANDLE* mainThread;
+				alignas(STACK_SIZE) HANDLE* procHandle; 
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->procHandle))
 				return 0xFFFFF000;
@@ -186,8 +202,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE procHandle;
-				DWORD exitCode;
+				alignas(STACK_SIZE) HANDLE procHandle;
+				alignas(STACK_SIZE) DWORD exitCode;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->procHandle))
 				return 0xFFFFF000;
@@ -206,7 +222,7 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE* procHandle;
+				alignas(STACK_SIZE) HANDLE* procHandle;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->procHandle))
 				return 0xFFFFF000;
@@ -219,8 +235,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE* procHandle;
-				DWORD pid;
+				alignas(STACK_SIZE) HANDLE* procHandle;
+				alignas(STACK_SIZE) DWORD pid;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->procHandle))
 				return 0xFFFFF000;
@@ -240,12 +256,12 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE* thrHandle;
-				multitasking::Thread::priority_t threadPriority;
-				VOID(*entry)(PVOID userData);
-				PVOID userData;
-				utils::RawBitfield threadStatus;
-				SIZE_T stackSizePages;
+				alignas(STACK_SIZE) HANDLE* thrHandle;
+				alignas(STACK_SIZE) multitasking::Thread::priority_t threadPriority;
+				alignas(STACK_SIZE) VOID(*entry)(PVOID userData);
+				alignas(STACK_SIZE) PVOID userData;
+				alignas(STACK_SIZE) utils::RawBitfield threadStatus;
+				alignas(STACK_SIZE) SIZE_T stackSizePages;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->thrHandle))
 				return 0xFFFFF000;
@@ -261,8 +277,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE* thrHandle;
-				DWORD tid;
+				alignas(STACK_SIZE) HANDLE* thrHandle;
+				alignas(STACK_SIZE) DWORD tid;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->thrHandle))
 				return 0xFFFFF000;
@@ -286,8 +302,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
-				bool force;
+				alignas(STACK_SIZE) HANDLE thrHandle;
+				alignas(STACK_SIZE) bool force;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -304,7 +320,7 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
+				alignas(STACK_SIZE) HANDLE thrHandle;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -321,8 +337,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
-				multitasking::Thread::priority_t newPriority;
+				alignas(STACK_SIZE) HANDLE thrHandle;
+				alignas(STACK_SIZE) multitasking::Thread::priority_t newPriority;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -339,8 +355,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
-				utils::RawBitfield newStatus;
+				alignas(STACK_SIZE) HANDLE thrHandle;
+				alignas(STACK_SIZE) utils::RawBitfield newStatus;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -357,8 +373,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
-				DWORD exitCode;
+				alignas(STACK_SIZE) HANDLE thrHandle;
+				alignas(STACK_SIZE) DWORD exitCode;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -377,8 +393,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
-				DWORD* tid;
+				alignas(STACK_SIZE) HANDLE thrHandle;
+				alignas(STACK_SIZE) DWORD* tid;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -402,8 +418,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
-				DWORD* exitCode;
+				alignas(STACK_SIZE) HANDLE thrHandle;
+				alignas(STACK_SIZE) DWORD* exitCode;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -432,8 +448,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
-				multitasking::Thread::priority_t* priority;
+				alignas(STACK_SIZE) HANDLE thrHandle;
+				alignas(STACK_SIZE) multitasking::Thread::priority_t* priority;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -459,8 +475,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
-				DWORD* status;
+				alignas(STACK_SIZE) HANDLE thrHandle;
+				alignas(STACK_SIZE) DWORD* status;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -486,7 +502,7 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE thrHandle;
+				alignas(STACK_SIZE) HANDLE thrHandle;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->thrHandle))
 				return 0xFFFFF000;
@@ -506,7 +522,7 @@ namespace obos
 				multitasking::ExitThread(0xFFFFF000);
 			struct _par
 			{
-				DWORD exitCode;
+				alignas(STACK_SIZE) DWORD exitCode;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			multitasking::ExitThread(par->exitCode);
 		}
@@ -536,7 +552,7 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE handle;
+				alignas(STACK_SIZE) HANDLE handle;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->handle))
 				return 0xFFFFF000;
@@ -551,8 +567,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				HANDLE procHandle;
-				HANDLE* parentHandle;
+				alignas(STACK_SIZE) HANDLE procHandle;
+				alignas(STACK_SIZE) HANDLE* parentHandle;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserHandle(par->procHandle))
 				return 0xFFFFF000;
@@ -574,8 +590,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				DWORD fgColour;
-				DWORD bgColour;
+				alignas(STACK_SIZE) DWORD fgColour;
+				alignas(STACK_SIZE) DWORD bgColour;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			obos::SetConsoleColor(par->fgColour, par->bgColour);
 			return 0;
@@ -586,8 +602,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				DWORD* fgColour;
-				DWORD* bgColour;
+				alignas(STACK_SIZE) DWORD* fgColour;
+				alignas(STACK_SIZE) DWORD* bgColour;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->fgColour))
 				return 0xFFFFF000;
@@ -602,8 +618,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				CHAR ch;
-				bool swapBuffers;
+				alignas(STACK_SIZE) CHAR ch;
+				alignas(STACK_SIZE) bool swapBuffers;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			obos::ConsoleOutputCharacter(par->ch, par->swapBuffers);
 			return 0;
@@ -614,9 +630,9 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				CHAR ch;
-				DWORD x, y;
-				bool swapBuffers;
+				alignas(STACK_SIZE) CHAR ch;
+				alignas(STACK_SIZE) DWORD x, y;
+				alignas(STACK_SIZE) bool swapBuffers;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			obos::ConsoleOutputCharacter(par->ch, par->x, par->y, par->swapBuffers);
 			return 0;
@@ -627,9 +643,9 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				CSTRING out;
-				SIZE_T size;
-				bool swapBuffers;
+				alignas(STACK_SIZE) CSTRING out;
+				alignas(STACK_SIZE) SIZE_T size;
+				alignas(STACK_SIZE) bool swapBuffers;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->out))
 				return 0xFFFFF000;
@@ -642,8 +658,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				CHAR ch;
-				bool swapBuffers;
+				alignas(STACK_SIZE) CHAR ch;
+				alignas(STACK_SIZE) bool swapBuffers;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			obos::ConsoleFillLine(par->ch, par->swapBuffers);
 			return 0;
@@ -654,7 +670,7 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				DWORD x, y;
+				alignas(STACK_SIZE) DWORD x, y;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			obos::SetTerminalCursorPosition(par->x, par->y);
 			return 0;
@@ -665,7 +681,7 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				DWORD *x, *y;
+				alignas(STACK_SIZE) DWORD *x, *y;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			obos::GetTerminalCursorPosition(*par->x, *par->y);
 			return 0;
@@ -688,9 +704,9 @@ namespace obos
 				return nullptr;
 			struct _par
 			{
-				PVOID _base;
-				SIZE_T nPages; 
-				utils::RawBitfield flags;
+				alignas(STACK_SIZE) PVOID _base;
+				alignas(STACK_SIZE) SIZE_T nPages; 
+				alignas(STACK_SIZE) utils::RawBitfield flags;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->_base, true) && par->_base != nullptr)
 				return nullptr;
@@ -702,8 +718,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				PVOID _base;
-				SIZE_T nPages;
+				alignas(STACK_SIZE) PVOID _base;
+				alignas(STACK_SIZE) SIZE_T nPages;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->_base))
 				return 0xFFFFF000;
@@ -715,8 +731,8 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				PCVOID _base;
-				SIZE_T nPages;
+				alignas(STACK_SIZE) PCVOID _base;
+				alignas(STACK_SIZE) SIZE_T nPages;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (par->nPages == 1)
 				return checkUserPtr(par->_base);
@@ -728,9 +744,9 @@ namespace obos
 				return 0xFFFFF000;
 			struct _par
 			{
-				PVOID _base;
-				SIZE_T nPages; 
-				utils::RawBitfield flags;
+				alignas(STACK_SIZE) PVOID _base;
+				alignas(STACK_SIZE) SIZE_T nPages; 
+				alignas(STACK_SIZE) utils::RawBitfield flags;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->_base))
 				return 0xFFFFF000;

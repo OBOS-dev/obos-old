@@ -11,6 +11,7 @@ extern _ZN4obos7process14g_syscallTableE
 
 segment .data
 ret: dq 0
+syscall: dq 0
 
 extern _ZN4obos7process14g_syscallTableE
 
@@ -69,8 +70,9 @@ pop rax
 %define pass_par1 mov rdi, rbx
 %define clean_pass_par1
 %define	ptr_sz 8
+%define	interrupt_return iretq
 
-%elifdef
+%elifdef __i686__
 
 %define push_gpurpose pushad
 %define pop_gpurpose popad
@@ -78,6 +80,7 @@ pop rax
 %define pass_par1 push ebx
 %define clean_pass_par1 add esp, 4
 %define	ptr_sz 4
+%define interrupt_return iret
 
 %endif
 
@@ -88,15 +91,19 @@ pop rax
 ; Registers are preserved, except for eax.
 isr64:
 	cli
-	push_gpurpose
 	
 	; Get the syscall id.
 	lea accumulator, [accumulator*ptr_sz]
 	lea accumulator, [_ZN4obos7process14g_syscallTableE+accumulator]
-
+	mov [syscall], accumulator
+	
+	push_gpurpose
+	
 	push_gpurpose
 	call _ZN4obos12EnterSyscallEv
 	pop_gpurpose
+
+	mov accumulator, [syscall]
 
 	pass_par1
 	call [accumulator]
@@ -112,4 +119,4 @@ isr64:
 
 	mov accumulator, [ret]
 
-	iret
+	interrupt_return

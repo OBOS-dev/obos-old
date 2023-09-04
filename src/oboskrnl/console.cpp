@@ -15,6 +15,7 @@
 #include <memory_manager/paging/allocate.h>
 
 #include <multitasking/mutex/mutexHandle.h>
+#include <multitasking/multitasking.h>
 
 #include <new>
 
@@ -116,11 +117,19 @@ namespace obos
 		s_nCharsVertical = s_framebufferHeight / 16;
 		s_nCharsHorizontal = s_framebufferWidth / 8;
 		s_consoleMutex = new multitasking::MutexHandle{};
-		s_backbuffer = s_framebuffer;
-		//s_backbuffer = (UINT32_T*)memory::VirtualAlloc(nullptr, (s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12, memory::VirtualAllocFlags::WRITE_ENABLED);
 		s_consoleMutex->Lock();
-#ifndef __x86_64__
+		s_backbuffer = s_framebuffer;
+#if defined(__i686__)
+		s_backbuffer = (UINT32_T*)memory::VirtualAlloc(
+			nullptr,
+			(s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12,
+			memory::VirtualAllocFlags::WRITE_ENABLED);
 		utils::dwMemset(s_backbuffer, backgroundColor, s_framebufferWidth * s_framebufferHeight * 4);
+#elif defined(__x86_64__)
+		/*s_backbuffer = (UINT32_T*)memory::VirtualAlloc(
+			(PVOID)0xFFFFFFFF80900000,
+			(s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12,
+			memory::VirtualAllocFlags::WRITE_ENABLED, true);*/
 #endif
 		font = (PBYTE)(((multiboot_module_t*)g_multibootInfo->mods_addr)->mod_start);
 		SetConsoleColor(foregroundColor, backgroundColor);
@@ -131,18 +140,37 @@ namespace obos
 	}
 	void SetConsoleColor(UINT32_T foregroundColor, UINT32_T backgroundColor)
 	{
-		s_foregroundColor = foregroundColor; 
-		s_backgroundColor = backgroundColor;
+		if (multitasking::g_initialized && multitasking::g_currentThread->owner)
+		{
+			multitasking::g_currentThread->owner->consoleForegroundColour = foregroundColor;
+			multitasking::g_currentThread->owner->consoleBackgroundColour = backgroundColor;
+		}
+		else
+		{
+			s_foregroundColor = foregroundColor; 
+			s_backgroundColor = backgroundColor;
+		}
 	}
 	void GetConsoleColor(UINT32_T& foreground, UINT32_T& background)
 	{
-		foreground = s_foregroundColor;
-		background = s_backgroundColor;
+		if (multitasking::g_initialized && multitasking::g_currentThread->owner)
+		{
+			foreground = multitasking::g_currentThread->owner->consoleForegroundColour;
+			background = multitasking::g_currentThread->owner->consoleBackgroundColour;
+		}
+		else
+		{
+			foreground = s_foregroundColor;
+			background = s_backgroundColor;
+		}
 	}
 	static void __Impl_swapBuffers();
 
 	static void __Impl_OutputCharacter(char ch)
 	{
+		DWORD foreground = 0;
+		DWORD background = 0;
+		GetConsoleColor(foreground, background);
 		switch (ch)
 		{
 		case '\n':
@@ -157,9 +185,8 @@ namespace obos
 		}
 		case '\t':
 		{
-			DWORD x = ((s_terminalColumn >> 2) + 1) << 2;
-			for (DWORD i = 0; i < x && s_terminalColumn < s_framebufferWidth; i++)
-				putcharAt(++s_terminalColumn, s_terminalRow * 16, ' ', s_foregroundColor, s_backgroundColor);
+			for (DWORD i = 0; i < 4 - (s_terminalColumn & 3); i++)
+				putcharAt(++s_terminalColumn, s_terminalRow * 16, ' ', foreground, background);
 			s_modifiedLines[s_terminalRow >> 5].setBit(s_terminalRow % 32);
 			break;
 		}
@@ -168,7 +195,7 @@ namespace obos
 			if (s_terminalColumn == 0)
 				// TODO: Make a beep here.
 				break;
-			putcharAt(--s_terminalColumn, s_terminalRow * 16, ' ', s_foregroundColor, s_backgroundColor);
+			putcharAt(--s_terminalColumn, s_terminalRow * 16, ' ', foreground, background);
 			s_modifiedLines[s_terminalRow >> 5].setBit(s_terminalRow % 32);
 			return;
 		}
@@ -179,7 +206,7 @@ namespace obos
 			break;
 		default:
 		{
-			putcharAt(s_terminalColumn, s_terminalRow * 16, ch, s_foregroundColor, s_backgroundColor);
+			putcharAt(s_terminalColumn, s_terminalRow * 16, ch, foreground, background);
 			if (++s_terminalColumn >= s_nCharsHorizontal)
 			{
 				s_terminalColumn = 0;
@@ -209,10 +236,10 @@ namespace obos
 		EnterKernelSection();
 		s_consoleMutex->Lock();
 		for (SIZE_T i = 0; message[i]; __Impl_OutputCharacter(message[i++]));
-		LeaveKernelSection();
 		if(_swapBuffers)
 			__Impl_swapBuffers();
 		s_consoleMutex->Unlock();
+		LeaveKernelSection();
 	}
 	void ConsoleFillLine(char ch, bool _swapBuffers)
 	{

@@ -27,12 +27,14 @@
 
 #include <process/process.h>
 
-#if defined(__i686__)
-#define DEFINE_RESERVED_PARAMETERS volatile UINT32_T, volatile UINT32_T, volatile UINT32_T, volatile UINT32_T
-#elif defined(__x86_64__)
 #define DEFINE_RESERVED_PARAMETERS volatile PVOID parameters
-#endif
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
+
+#if defined(__i686__)
+#define STACK_SIZE 4
+#elif defined(__x86_64__)
+#define STACK_SIZE 8
+#endif
 
 namespace obos
 {
@@ -101,10 +103,9 @@ namespace obos
 		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS)
 		{
 			struct _par
-
 			{
-				UINTPTR_T driverID;
-				serviceType type;
+				alignas(STACK_SIZE) UINTPTR_T driverID;
+				alignas(STACK_SIZE) serviceType type;
 			} *pars = (_par*)parameters;
 			if(!g_registeredDrivers[pars->driverID])
 			{
@@ -134,9 +135,9 @@ namespace obos
 		{
 			struct _par
 			{
-				UINTPTR_T driverId;
-				UINTPTR_T interruptId;
-				void(*handler)(const obos::interrupt_frame* frame);
+				alignas(STACK_SIZE) UINTPTR_T driverId;
+				alignas(STACK_SIZE) UINTPTR_T interruptId;
+				alignas(STACK_SIZE) void(*handler)(const obos::interrupt_frame* frame);
 			} attribute(aligned(8)) *pars = (_par*)parameters;
 			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
@@ -243,7 +244,7 @@ namespace obos
 		{
 			struct _par
 			{
-				BYTE irq;
+				alignas(STACK_SIZE) BYTE irq;
 			} *pars = (_par*)parameters;
 			SendEOI(pars->irq);
 			return exitStatus::EXIT_STATUS_SUCCESS;
@@ -252,7 +253,7 @@ namespace obos
 		{
 			struct _par
 			{
-				BYTE irq;
+				alignas(STACK_SIZE) BYTE irq;
 			} *pars = (_par*)parameters;
 			if (pars->irq == 0)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
@@ -264,7 +265,7 @@ namespace obos
 		{
 			struct _par
 			{
-				BYTE irq;
+				alignas(STACK_SIZE) BYTE irq;
 			} *pars = (_par*)parameters;
 			if (pars->irq == 0)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
@@ -276,8 +277,8 @@ namespace obos
 		{
 			struct _par
 			{
-				UINTPTR_T driverId;
-				void(*callback)(STRING outputBuffer, SIZE_T sizeBuffer);
+				alignas(STACK_SIZE) UINTPTR_T driverId;
+				alignas(STACK_SIZE) void(*callback)(STRING outputBuffer, SIZE_T sizeBuffer);
 			} *pars = (_par*)parameters;
 			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
@@ -292,8 +293,8 @@ namespace obos
 		{
 			struct _par
 			{
-				UINTPTR_T ch;
-				UINTPTR_T flush;
+				alignas(STACK_SIZE) UINTPTR_T ch;
+				alignas(STACK_SIZE) UINTPTR_T flush;
 			} *pars = (_par*)parameters;
 			ConsoleOutputCharacter(pars->ch, pars->flush);
 			return exitStatus::EXIT_STATUS_SUCCESS;
@@ -302,9 +303,9 @@ namespace obos
 		{
 			struct _par
 			{
-				UINTPTR_T moduleIndex; 
-				UINTPTR_T* moduleStart; 
-				SIZE_T* size;
+				alignas(STACK_SIZE) UINTPTR_T moduleIndex; 
+				alignas(STACK_SIZE) UINTPTR_T* moduleStart; 
+				alignas(STACK_SIZE) SIZE_T* size;
 			} *pars = (_par*)parameters;
 			if (pars->moduleIndex >= NUM_MODULES)
 				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
@@ -317,8 +318,8 @@ namespace obos
 		{
 			struct _par
 			{
-				UINTPTR_T driverId;
-				void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer);
+				alignas(STACK_SIZE) UINTPTR_T driverId;
+				alignas(STACK_SIZE) void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer);
 			} *pars = (_par*)parameters;
 			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
@@ -333,8 +334,8 @@ namespace obos
 		{
 			struct _par
 			{
-				UINTPTR_T driverId;
-				void(*callback)(CSTRING filename, SIZE_T* size);
+				alignas(STACK_SIZE) UINTPTR_T driverId;
+				alignas(STACK_SIZE) void(*callback)(CSTRING filename, SIZE_T* size);
 			} *pars = (_par*)parameters;
 			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
@@ -349,9 +350,9 @@ namespace obos
 		{
 			struct _par
 			{
-				UINTPTR_T physicalAddress;
-				PVOID virtualAddress; 
-				UINTPTR_T flags;
+				alignas(STACK_SIZE) UINTPTR_T physicalAddress;
+				alignas(STACK_SIZE) PVOID virtualAddress; 
+				alignas(STACK_SIZE) UINTPTR_T flags;
 			} *pars = (_par*)parameters;
 			if (inRange(pars->virtualAddress, &kernelStart, &memory::endKernel))
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
@@ -384,8 +385,8 @@ namespace obos
 		{
 			struct _par
 			{
-				PVOID linearAddress;
-				PVOID* physicalAddress;
+				alignas(STACK_SIZE) PVOID linearAddress;
+				alignas(STACK_SIZE) PVOID* physicalAddress;
 			} *pars = (_par*)parameters;
 			if (!memory::g_pageDirectory->getPageTableAddress(memory::PageDirectory::addressToIndex((UINTPTR_T)pars->linearAddress)))
 				return exitStatus::EXIT_STATUS_ADDRESS_NOT_AVAILABLE;
@@ -398,8 +399,8 @@ namespace obos
 		{
 			struct _par
 			{
-				PVOID _virtualAddress;
-				PVOID* physicalAddress;
+				alignas(STACK_SIZE) PVOID _virtualAddress;
+				alignas(STACK_SIZE) PVOID* physicalAddress;
 			} *pars = (_par*)parameters;
 			PBYTE virtualAddress = (PBYTE)pars->_virtualAddress;
 			if (!memory::HasVirtualAddress(virtualAddress, 1))

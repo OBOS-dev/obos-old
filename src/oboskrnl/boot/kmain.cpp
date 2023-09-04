@@ -55,6 +55,7 @@ extern "C" UINTPTR_T* boot_page_directory1;
 extern "C" void _init();
 extern "C" char _glb_text_start;
 extern "C" char _glb_text_end;
+extern bool inKernelSection;
 
 namespace obos
 {
@@ -156,7 +157,7 @@ namespace obos
 		}
 #elif defined(__i686__)
 		{
-			::multiboot_module_t* modules = (obos::multiboot_module_t*)g_multibootInfo->mods_addr;
+			::multiboot_module_t* modules = (multiboot_module_t*)g_multibootInfo->mods_addr;
 			for(SIZE_T i = 0; i < g_multibootInfo->mods_count; i++)
 			{
 				modules[i].cmdline += reinterpret_cast<UINTPTR_T>(&kernelStart);
@@ -371,7 +372,7 @@ namespace obos
 		if (ret)
 			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
 		
-		char* ascii_art = (STRING)((multiboot_mod_list64*)g_multibootInfo->mods_addr)[1].mod_start;
+		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
 		
 		SetConsoleColor(0x003399FF, 0x00000000);
 		ConsoleOutputString("\n");
@@ -384,9 +385,15 @@ namespace obos
 		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendEOI();
 		Pic(Pic::PIC2_CMD, Pic::PIC2_DATA).sendEOI();
 
-		asm volatile (".byte 0xeb, 0xfe;");
-	}
+		extern int countCalled;
 
+		countCalled = 0;
+		inKernelSection = false;
+		asm volatile ("sti" : : : "memory");
+		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(0);
+
+		asm volatile ("1: sti; hlt; jmp 1b;");
+	}
 }
 
 extern "C"

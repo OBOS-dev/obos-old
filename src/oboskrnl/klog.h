@@ -26,7 +26,7 @@ namespace obos
 	struct stack_frame
 	{
 		stack_frame* down;
-		UINTPTR_T eip;
+		PVOID eip;
 	};
 
 	void printStackTrace(PVOID first, CSTRING prefix = "");
