@@ -30,6 +30,6 @@ namespace obos
 		PVOID kalloc_physicalPage();
 		INT   kfree_physicalPage(PVOID base);
 
-		UINT32_T* kmap_physical(PVOID _base, UINT64_T flags, PVOID physicalAddress, bool force = false);
+		UINT32_T* kmap_physical(PVOID _base, UINTPTR_T flags, PVOID physicalAddress, bool force = false);
 	}
 }

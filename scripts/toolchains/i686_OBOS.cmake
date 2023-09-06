@@ -25,7 +25,8 @@ set(oboskrnl_asmSources "boot/i686/kernel_bootstrap.asm" "descriptors/gdt/gdt.as
 set (LINKER_SCRIPT "/src/oboskrnl/boot/i686/linker.ld")
 
 set(TARGET_COMPILE_OPTIONS)
-set(oboskrnl_platformSpecific "memory_manager/i686/physical.cpp" "memory_manager/paging/i686/init.cpp" "memory_manager/paging/i686/allocate.cpp" "descriptors/idt/i686/idt.cpp")
+set(oboskrnl_platformSpecific "memory_manager/i686/physical.cpp" "memory_manager/paging/i686/init.cpp" "memory_manager/paging/i686/allocate.cpp" "descriptors/idt/i686/idt.cpp"
+                              "i686/exception_handlers.cpp")
 
 execute_process(COMMAND i686-elf-g++ -print-file-name=crtbegin.o OUTPUT_VARIABLE CRTBEGIN_DIRECTORY)
 execute_process(COMMAND i686-elf-g++ -print-file-name=crtend.o OUTPUT_VARIABLE CRTEND_DIRECTORY)

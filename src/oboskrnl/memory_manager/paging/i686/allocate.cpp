@@ -30,7 +30,7 @@ namespace obos
 			s_lastPageTable[1023] = 0;
 			tlbFlush(0xFFFFF000);
 		}
-		UINT32_T* kmap_physical(PVOID _base, SIZE_T nPages, utils::RawBitfield flags, PVOID physicalAddress, bool force)
+		UINT32_T* kmap_physical(PVOID _base, utils::RawBitfield flags, PVOID physicalAddress, bool force)
 		{
 			UINTPTR_T base = ROUND_ADDRESS_DOWN(GET_FUNC_ADDR(_base));
 			bool isFree = utils::testBitInBitfield(*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)), 0);
@@ -38,19 +38,16 @@ namespace obos
 				*g_pageDirectory->getPageTableAddress(PageDirectory::addressToIndex(base)) = (UINTPTR_T)kalloc_physicalPage() | 3;
 			isFree = !isFree;
 			if (!isFree && !force)
-				base = HasVirtualAddress((PCVOID)base, nPages) ? 0 : base;
+				base = HasVirtualAddress((PCVOID)base, 1) ? 0 : base;
 			if (!base)
 				return nullptr;
-			for (UINTPTR_T address = base; address < (base + nPages * 4096); address += 4096)
-			{
-				UINTPTR_T* pageTable = PageDirectory::addressToIndex(address) != 1023 ? kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(address))) : 
-					(UINTPTR_T*)((UINTPTR_T)&s_lastPageTable);
-				pageTable[PageDirectory::addressToPageTableIndex(address)] = (UINTPTR_T)physicalAddress;
-				pageTable[PageDirectory::addressToPageTableIndex(address)] |= 1;
-				pageTable[PageDirectory::addressToPageTableIndex(address)] |= flags;
-				pageTable[PageDirectory::addressToPageTableIndex(address)] &= 0xFFFFF017;
-				tlbFlush(0xFFFFF000);
-			}
+			UINTPTR_T* pageTable = PageDirectory::addressToIndex(base) != 1023 ? kmap_pageTable(g_pageDirectory->getPageTable(PageDirectory::addressToIndex(base))) :
+				(UINTPTR_T*)((UINTPTR_T)&s_lastPageTable);
+			pageTable[PageDirectory::addressToPageTableIndex(base)] = (UINTPTR_T)physicalAddress;
+			pageTable[PageDirectory::addressToPageTableIndex(base)] |= 1;
+			pageTable[PageDirectory::addressToPageTableIndex(base)] |= flags;
+			pageTable[PageDirectory::addressToPageTableIndex(base)] &= 0xFFFFF017;
+			tlbFlush(0xFFFFF000);
 			return (UINT32_T*)base;
 		}
 

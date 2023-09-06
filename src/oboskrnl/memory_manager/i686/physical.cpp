@@ -101,7 +101,7 @@ namespace obos
 			return g_physicalMemoryManagerInitialized = true;
 		}
 
-		PVOID kalloc_physicalPages()
+		PVOID kalloc_physicalPage()
 		{
 			for (int tries = 0; tries < 8 && g_physicalMemoryManagerInitialized; tries++)
 			{
@@ -136,7 +136,7 @@ namespace obos
 						break;
 				}
 				UINTPTR_T address = indexToAddress(s_availablePagesIndex, s_availablePagesBit);
-				UINT32_T bit = 0;
+				//UINT32_T bit = 0;
 				if (isAddressUsed(address))
 					continue;
 				if (!address)
@@ -149,10 +149,11 @@ namespace obos
 			}
 			return nullptr;
 		}
-		INT kfree_physicalPages(PVOID _base)
+		INT kfree_physicalPage(PVOID _base)
 		{
 			UINTPTR_T base = (UINTPTR_T)_base;
 			base = (base >> 12) << 12;
+			constexpr SIZE_T nPages = 1;
 			UINTPTR_T end = base + (nPages << 12);
 			UINT32_T bit = 0;
 			UINT32_T index = addressToIndex(base, &bit);

@@ -124,7 +124,7 @@ namespace obos
 			nullptr,
 			(s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12,
 			memory::VirtualAllocFlags::WRITE_ENABLED);
-		utils::dwMemset(s_backbuffer, backgroundColor, s_framebufferWidth * s_framebufferHeight * 4);
+		utils::dwMemset(s_backbuffer, backgroundColor, s_framebufferWidth * s_framebufferHeight);
 #elif defined(__x86_64__)
 		/*s_backbuffer = (UINT32_T*)memory::VirtualAlloc(
 			(PVOID)0xFFFFFFFF80900000,

@@ -283,6 +283,7 @@ namespace obos
 			level4PageMap->switchToThis();
 #endif
 		}
+#if defined(__x86_64__)
 		void Process::UncommitProcessMemory()
 		{
 			if (!this->allocatedBlocks)
@@ -304,5 +305,23 @@ namespace obos
 				}
 			}
 		}
+#elif defined(__i686__)
+		void Process::UncommitProcessMemory()
+		{
+			if (!this->allocatedBlocks)
+				return;
+			list_iterator_t* iter = list_iterator_new(allocatedBlocks, LIST_HEAD);
+			for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
+			{
+				allocatedBlock* block = (allocatedBlock*)node->val;
+				for (SIZE_T page = 0; page < block->size; page++)
+				{
+					UINTPTR_T phys = memory::g_pageDirectory->getPageTableAddress(memory::PageDirectory::addressToIndex(reinterpret_cast<UINTPTR_T>(block->start + (page << 12))))[
+						memory::PageDirectory::addressToPageTableIndex(memory::PageDirectory::addressToPageTableIndex(reinterpret_cast<UINTPTR_T>(block->start + (page << 12))))];
+					memory::kfree_physicalPage((PVOID)phys);
+				}
+			}
+		}
+#endif
 	}
 }

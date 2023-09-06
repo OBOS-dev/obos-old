@@ -83,12 +83,14 @@ namespace obos
 	{
 #if defined(__i686__)
 		obos::g_multibootInfo = reinterpret_cast<::multiboot_info_t*>(reinterpret_cast<UINTPTR_T>(header) + reinterpret_cast<UINTPTR_T>(&kernelStart));
+		if (magic != MULTIBOOT_BOOTLOADER_MAGIC || g_multibootInfo->mods_count != NUM_MODULES)
+			return;
 #elif defined(__x86_64__)
 		g_multibootInfo = &s_multibootInfo;
-#endif
-
 		if (magic != MULTIBOOT_BOOTLOADER_MAGIC || header->mods_count != NUM_MODULES)
 			return;
+#endif
+
 
 #if defined(__x86_64__)
 		g_multibootInfo->flags = header->flags;

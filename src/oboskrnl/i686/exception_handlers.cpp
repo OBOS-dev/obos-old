@@ -6,6 +6,15 @@
 
 #include <descriptors/idt/idt.h>
 
+#include <klog.h>
+
+#include <multitasking/multitasking.h>
+#include <multitasking/threadHandle.h>
+
+#include <utils/bitfields.h>
+
+#define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) < ((UINTPTR_T)(rEnd)))
+
 namespace obos
 {
 	void pageFault(const interrupt_frame* frame)
