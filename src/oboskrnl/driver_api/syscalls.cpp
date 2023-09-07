@@ -17,7 +17,7 @@
 
 #include <console.h>
 
-#include <boot/multiboot.h>
+#include <boot/boot.h>
 
 #include <utils/memory.h>
 
@@ -25,32 +25,40 @@
 
 #include <multitasking/multitasking.h>
 
-#define DEFINE_RESERVED_PARAMETERS volatile UINT32_T, volatile UINT32_T, volatile UINT32_T, volatile UINT32_T
+#include <process/process.h>
+
+#define DEFINE_RESERVED_PARAMETERS volatile PVOID parameters
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) <= ((UINTPTR_T)(rEnd)))
+
+#if defined(__i686__)
+#define STACK_SIZE 4
+#elif defined(__x86_64__)
+#define STACK_SIZE 8
+#endif
 
 namespace obos
 {
-	extern multiboot_info_t* g_multibootInfo;
 	namespace memory
 	{
 		UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
 	}
+	extern char kernelStart;
 	namespace driverAPI
 	{
-		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS, DWORD driverID, serviceType type);
-		static exitStatus RegisterInterruptHandler(DEFINE_RESERVED_PARAMETERS, DWORD driverId, BYTE interruptId, void(*handler)(const obos::interrupt_frame* frame));
-		static exitStatus PicSendEoi(DEFINE_RESERVED_PARAMETERS, BYTE irq);
-		static exitStatus EnableIRQ(DEFINE_RESERVED_PARAMETERS, BYTE irq);
-		static exitStatus DisableIRQ(DEFINE_RESERVED_PARAMETERS, BYTE irq);
-		static exitStatus RegisterReadCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, void(*callback)(STRING outputBuffer, SIZE_T sizeBuffer));
-		static exitStatus PrintChar(DEFINE_RESERVED_PARAMETERS, CHAR ch, bool flush);
-		static exitStatus GetMultibootModule(DEFINE_RESERVED_PARAMETERS, DWORD moduleIndex, UINTPTR_T* moduleAddress, SIZE_T* size);
-		static exitStatus RegisterFileReadCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer));
-		static exitStatus RegisterFileExistsCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, char(*callback)(CSTRING filename, SIZE_T* size));
-		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS, UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags);
-		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS, PVOID virtualAddress);
-		static exitStatus Printf(DEFINE_RESERVED_PARAMETERS, CSTRING format, ...);
-		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS, PVOID linearAddress, PVOID* physicalAddress);
+		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus RegisterInterruptHandler(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus PicSendEoi(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus EnableIRQ(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus DisableIRQ(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus RegisterReadCallback(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus PrintChar(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus GetMultibootModule(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus RegisterFileReadCallback(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus RegisterFileExistsCallback(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus Printf(CSTRING format, ...);
+		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS);
 		static void interruptHandler(const obos::interrupt_frame* frame);
 
 		/*struct driverIdentification
@@ -92,41 +100,52 @@ namespace obos
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(GetPhysicalAddress));
 		}
 
-		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS, DWORD driverID, serviceType type)
+		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS)
 		{
-			if(!g_registeredDrivers[driverID])
+			struct _par
 			{
-				if (driverID > g_registeredDriversCapacity)
+				alignas(STACK_SIZE) UINTPTR_T driverID;
+				alignas(STACK_SIZE) serviceType type;
+			} *pars = (_par*)parameters;
+			if(!g_registeredDrivers[pars->driverID])
+			{
+				if (pars->driverID > g_registeredDriversCapacity)
 				{
 					// g_registeredDriversCapacity + g_registeredDriversCapacity / 4 should be the same as g_registeredDriversCapacity * 1.25f, but truncated.
 					g_registeredDriversCapacity += g_registeredDriversCapacity / 4;
 					g_registeredDrivers = (driverIdentification**)krealloc(g_registeredDrivers, g_registeredDriversCapacity);
 				}
-				if (type == serviceType::SERVICE_TYPE_INVALID)
+				if (pars->type == serviceType::SERVICE_TYPE_INVALID)
 					return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
-				if (type > serviceType::SERVICE_TYPE_MAX_VALUE)
+				if (pars->type > serviceType::SERVICE_TYPE_MAX_VALUE)
 					return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
 				driverIdentification* identity = new driverIdentification {
-					driverID,
+					(BYTE)pars->driverID,
 					multitasking::g_currentThread->owner,
-					type,
+					pars->type,
 					nullptr,
 					nullptr
 				};
-				g_registeredDrivers[driverID] = identity;
+				g_registeredDrivers[pars->driverID] = identity;
 				return exitStatus::EXIT_STATUS_SUCCESS;
 			}
 			return exitStatus::EXIT_STATUS_ALREADY_REGISTERED;
 		}
-		static exitStatus RegisterInterruptHandler(DEFINE_RESERVED_PARAMETERS, DWORD driverId, BYTE interruptId, void(*handler)(const obos::interrupt_frame* frame))
+		static exitStatus RegisterInterruptHandler(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (driverId > g_registeredDriversCapacity)
+			struct _par
+			{
+				alignas(STACK_SIZE) UINTPTR_T driverId;
+				alignas(STACK_SIZE) UINTPTR_T interruptId;
+				alignas(STACK_SIZE) void(*handler)(const obos::interrupt_frame* frame);
+			} attribute(aligned(8)) *pars = (_par*)parameters;
+			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (!g_registeredDrivers[driverId])
+			if (!g_registeredDrivers[pars->driverId])
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (interruptId < 0x21)
+			if (pars->interruptId < 0x21)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
-			serviceType type = g_registeredDrivers[driverId]->service_type;
+			serviceType type = g_registeredDrivers[pars->driverId]->service_type;
 			switch (type)
 			{
 			case serviceType::SERVICE_TYPE_INVALID:
@@ -142,8 +161,8 @@ namespace obos
 					0x20 + 15,
 				};
 				SIZE_T i = 0;
-				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i]; i++);
-				if(i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i - 1])
+				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i]; i++);
+				if(i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i - 1])
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
@@ -157,8 +176,8 @@ namespace obos
 					0x20 + 12,
 				};
 				SIZE_T i = 0;
-				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i]; i++);
-				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i - 1])
+				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i]; i++);
+				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i - 1])
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
@@ -170,8 +189,8 @@ namespace obos
 					0x20 + 11,
 				};
 				SIZE_T i = 0;
-				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i]; i++);
-				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i - 1])
+				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i]; i++);
+				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i - 1])
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
@@ -181,13 +200,13 @@ namespace obos
 					0x20 + 8,
 				};
 				SIZE_T i = 0;
-				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i]; i++);
-				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i])
+				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i]; i++);
+				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i])
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
 			case serviceType::SERVICE_TYPE_KERNEL_EXTENSION:
-				if(interruptId >= 0x21 && interruptId < 0x30)
+				if(pars->interruptId >= 0x21 && pars->interruptId < 0x30)
 					break;
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 			case serviceType::SERVICE_TYPE_COMMUNICATION:
@@ -202,8 +221,8 @@ namespace obos
 					0x20 + 11,
 				};
 				SIZE_T i = 0;
-				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i]; i++);
-				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && interruptId != allowedInterrupts[i - 1])
+				for (; i < sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i]; i++);
+				if (i == sizeof(allowedInterrupts) / sizeof(allowedInterrupts[0]) && pars->interruptId != allowedInterrupts[i - 1])
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
@@ -216,96 +235,141 @@ namespace obos
 			default:
 				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
 			}
-			obos::RegisterInterruptHandler(interruptId, interruptHandler);
-			g_registeredInterruptHandlers[interruptId - 0x20].handler = handler;
-			g_registeredInterruptHandlers[interruptId - 0x20].driver = g_registeredDrivers[driverId];
+			obos::RegisterInterruptHandler(pars->interruptId, interruptHandler);
+			g_registeredInterruptHandlers[pars->interruptId - 0x20].handler = pars->handler;
+			g_registeredInterruptHandlers[pars->interruptId - 0x20].driver = g_registeredDrivers[pars->driverId];
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus PicSendEoi(DEFINE_RESERVED_PARAMETERS, BYTE irq)
+		static exitStatus PicSendEoi(DEFINE_RESERVED_PARAMETERS)
 		{
-			SendEOI(irq);
+			struct _par
+			{
+				alignas(STACK_SIZE) BYTE irq;
+			} *pars = (_par*)parameters;
+			SendEOI(pars->irq);
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus DisableIRQ(DEFINE_RESERVED_PARAMETERS, BYTE irq)
+		static exitStatus DisableIRQ(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (irq == 0)
+			struct _par
+			{
+				alignas(STACK_SIZE) BYTE irq;
+			} *pars = (_par*)parameters;
+			if (pars->irq == 0)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			Pic pic{ (irq > 7) ? Pic::PIC2_CMD : Pic::PIC1_CMD, (irq > 7) ? Pic::PIC2_DATA : Pic::PIC2_DATA };
-			pic.disableIrq(irq);
+			Pic pic{ (pars->irq > 7) ? Pic::PIC2_CMD : Pic::PIC1_CMD, (pars->irq > 7) ? Pic::PIC2_DATA : Pic::PIC2_DATA };
+			pic.disableIrq(pars->irq);
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus EnableIRQ(DEFINE_RESERVED_PARAMETERS, BYTE irq)
+		static exitStatus EnableIRQ(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (irq == 0)
+			struct _par
+			{
+				alignas(STACK_SIZE) BYTE irq;
+			} *pars = (_par*)parameters;
+			if (pars->irq == 0)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			Pic pic{ (irq > 7) ? Pic::PIC2_CMD : Pic::PIC1_CMD, (irq > 7) ? Pic::PIC2_DATA : Pic::PIC2_DATA };
-			pic.enableIrq(irq);
+			Pic pic{ (pars->irq > 7) ? Pic::PIC2_CMD : Pic::PIC1_CMD, (pars->irq > 7) ? Pic::PIC2_DATA : Pic::PIC2_DATA };
+			pic.enableIrq(pars->irq);
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus RegisterReadCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, void(*callback)(STRING outputBuffer, SIZE_T sizeBuffer))
+		static exitStatus RegisterReadCallback(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (driverId > g_registeredDriversCapacity)
+			struct _par
+			{
+				alignas(STACK_SIZE) UINTPTR_T driverId;
+				alignas(STACK_SIZE) void(*callback)(STRING outputBuffer, SIZE_T sizeBuffer);
+			} *pars = (_par*)parameters;
+			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (!g_registeredDrivers[driverId])
+			if (!g_registeredDrivers[pars->driverId])
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (g_registeredDrivers[driverId]->service_type != serviceType::SERVICE_TYPE_USER_INPUT_DEVICE)
+			if (g_registeredDrivers[pars->driverId]->service_type != serviceType::SERVICE_TYPE_USER_INPUT_DEVICE)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			g_registeredDrivers[driverId]->readCallback = (PVOID)callback;
+			g_registeredDrivers[pars->driverId]->readCallback = (PVOID)pars->callback;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus PrintChar(DEFINE_RESERVED_PARAMETERS, CHAR ch, bool flush) 
+		static exitStatus PrintChar(DEFINE_RESERVED_PARAMETERS) 
 		{
-			ConsoleOutputCharacter(ch, flush);
+			struct _par
+			{
+				alignas(STACK_SIZE) UINTPTR_T ch;
+				alignas(STACK_SIZE) UINTPTR_T flush;
+			} *pars = (_par*)parameters;
+			ConsoleOutputCharacter(pars->ch, pars->flush);
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus GetMultibootModule(DEFINE_RESERVED_PARAMETERS, DWORD moduleIndex, UINTPTR_T* moduleStart, SIZE_T* size)
+		static exitStatus GetMultibootModule(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (moduleIndex >= NUM_MODULES)
+			struct _par
+			{
+				alignas(STACK_SIZE) UINTPTR_T moduleIndex; 
+				alignas(STACK_SIZE) UINTPTR_T* moduleStart; 
+				alignas(STACK_SIZE) SIZE_T* size;
+			} *pars = (_par*)parameters;
+			if (pars->moduleIndex >= NUM_MODULES)
 				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
-			multiboot_module_t* mod = ((multiboot_module_t*)g_multibootInfo->mods_addr) + moduleIndex;
-			*moduleStart = mod->mod_start;
-			*size = mod->mod_end - mod->mod_start;
+			multiboot_module_t* mod = ((multiboot_module_t*)g_multibootInfo->mods_addr) + pars->moduleIndex;
+			*pars->moduleStart = mod->mod_start;
+			*pars->size = mod->mod_end - mod->mod_start;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus RegisterFileReadCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer))
+		static exitStatus RegisterFileReadCallback(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (driverId > g_registeredDriversCapacity)
+			struct _par
+			{
+				alignas(STACK_SIZE) UINTPTR_T driverId;
+				alignas(STACK_SIZE) void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer);
+			} *pars = (_par*)parameters;
+			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (!g_registeredDrivers[driverId])
+			if (!g_registeredDrivers[pars->driverId])
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (g_registeredDrivers[driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
+			if (g_registeredDrivers[pars->driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			g_registeredDrivers[driverId]->readCallback = (PVOID)callback;
+			g_registeredDrivers[pars->driverId]->readCallback = (PVOID)pars->callback;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus RegisterFileExistsCallback(DEFINE_RESERVED_PARAMETERS, DWORD driverId, char(*callback)(CSTRING filename, SIZE_T* size))
+		static exitStatus RegisterFileExistsCallback(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (driverId > g_registeredDriversCapacity)
+			struct _par
+			{
+				alignas(STACK_SIZE) UINTPTR_T driverId;
+				alignas(STACK_SIZE) void(*callback)(CSTRING filename, SIZE_T* size);
+			} *pars = (_par*)parameters;
+			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (!g_registeredDrivers[driverId])
+			if (!g_registeredDrivers[pars->driverId])
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (g_registeredDrivers[driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
+			if (g_registeredDrivers[pars->driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			g_registeredDrivers[driverId]->existsCallback = (PVOID)callback;
+			g_registeredDrivers[pars->driverId]->existsCallback = (PVOID)pars->callback;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS, UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags)
+		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (inRange(virtualAddress, 0xC0000000, 0xE0000000))
+			struct _par
+			{
+				alignas(STACK_SIZE) UINTPTR_T physicalAddress;
+				alignas(STACK_SIZE) PVOID virtualAddress; 
+				alignas(STACK_SIZE) UINTPTR_T flags;
+			} *pars = (_par*)parameters;
+			if (inRange(pars->virtualAddress, &kernelStart, &memory::endKernel))
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			if(!memory::kmap_physical(virtualAddress, 1, flags, (PVOID)physicalAddress))
+			if(!memory::kmap_physical(pars->virtualAddress, pars->flags, (PVOID)pars->physicalAddress))
 				return exitStatus::EXIT_STATUS_ADDRESS_NOT_AVAILABLE;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS, PVOID virtualAddress)
+		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS)
 		{
+			PVOID* virtualAddress = (PVOID*)parameters;
 			if (inRange(virtualAddress, 0xC0000000, 0xE0000000))
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			if (memory::VirtualFree(virtualAddress, 1) == 1)
+			if (memory::VirtualFree(*virtualAddress, 1) == 1)
 				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus Printf(DEFINE_RESERVED_PARAMETERS, CSTRING format, ...)
+		static exitStatus Printf(CSTRING format, ...)
 		{
 			va_list list;
 			va_start(list, format);
@@ -316,24 +380,59 @@ namespace obos
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 
-		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS, PVOID linearAddress, PVOID* physicalAddress)
+#if defined(__i686__)
+		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!memory::g_pageDirectory->getPageTableAddress(memory::PageDirectory::addressToIndex((UINTPTR_T)linearAddress)))
+			struct _par
+			{
+				alignas(STACK_SIZE) PVOID linearAddress;
+				alignas(STACK_SIZE) PVOID* physicalAddress;
+			} *pars = (_par*)parameters;
+			if (!memory::g_pageDirectory->getPageTableAddress(memory::PageDirectory::addressToIndex((UINTPTR_T)pars->linearAddress)))
 				return exitStatus::EXIT_STATUS_ADDRESS_NOT_AVAILABLE;
-			*physicalAddress = reinterpret_cast<PVOID>(memory::kmap_pageTable(memory::g_pageDirectory->getPageTable(memory::PageDirectory::addressToIndex((UINTPTR_T)linearAddress)))
-				[memory::PageDirectory::addressToPageTableIndex((UINTPTR_T)linearAddress)] & 0xFFFFF000);
+			*pars->physicalAddress = reinterpret_cast<PVOID>(memory::kmap_pageTable(memory::g_pageDirectory->getPageTable(memory::PageDirectory::addressToIndex((UINTPTR_T)pars->linearAddress)))
+				[memory::PageDirectory::addressToPageTableIndex((UINTPTR_T)pars->linearAddress)] & 0xFFFFF000);
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-
+#elif defined(__x86_64__)
+		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS)
+		{
+			struct _par
+			{
+				alignas(STACK_SIZE) PVOID _virtualAddress;
+				alignas(STACK_SIZE) PVOID* physicalAddress;
+			} *pars = (_par*)parameters;
+			PBYTE virtualAddress = (PBYTE)pars->_virtualAddress;
+			if (!memory::HasVirtualAddress(virtualAddress, 1))
+				return exitStatus::EXIT_STATUS_ADDRESS_NOT_AVAILABLE;
+			UINTPTR_T addr = memory::g_level4PageMap->getPageTableEntry(
+																		  memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 2),
+																		  memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 1),
+																		  memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 0),
+																		  memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 0));
+			if (utils::testBitInBitfield(addr, 9))
+			{
+				*virtualAddress = 0; // Allocate the page, as it would be a problem if give them the zero page and a device writes to it when the driver issues a write to that device.
+				addr = memory::g_level4PageMap->getPageTableEntry(
+					memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 2),
+					memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 1),
+					memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 0),
+					memory::PageMap::computeIndexAtAddress((UINTPTR_T)virtualAddress, 0));
+			}
+			UINTPTR_T* phys = (UINTPTR_T*)pars->physicalAddress;
+			*phys = addr;
+			*phys &= 0xFFFFFFFFFF000;
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+#endif
 
 		static void interruptHandler(const obos::interrupt_frame* frame)
 		{
 			if (g_registeredInterruptHandlers[frame->intNumber - 32].driver)
 			{
-				memory::PageDirectory* oldPagedir = memory::g_pageDirectory;
-				g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->pageDirectory->switchToThis();
+				g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->doContextSwitch();
 				g_registeredInterruptHandlers[frame->intNumber - 32].handler(frame);
-				oldPagedir->switchToThis();
+				multitasking::g_currentThread->owner->doContextSwitch();
 			}
 		}
 	}

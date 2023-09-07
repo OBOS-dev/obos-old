@@ -2,22 +2,19 @@
 ;
 ; Copyright (c) 2023 Omar Berrow
 
-; global RegisterDriver
-; global RegisterInterruptHandler
-; global PicSendEoi
-; global EnableIRQ
-; global DisableIRQ
-; global RegisterReadCallback
-; global PrintChar
-; global GetMultibootModule
-; global RegisterFileReadCallback
-; global CallSyscall
-
 %macro SYSCALL_DEFINE 2
 [global %1]
 %1:
 %assign current_syscall current_syscall + 1
+%ifdef __i686__
 	mov eax, %2
+	mov edi, esp
+	add edi, 4
+%elifdef __x86_64__
+	mov rax, %2
+	mov rdi, rsp
+	add rdi, 8
+%endif
 	int 0x50
 	ret
 %endmacro
@@ -40,4 +37,10 @@ SYSCALL_DEFINE Printf, current_syscall
 SYSCALL_DEFINE GetPhysicalAddress, current_syscall
 
 ; All syscalls must be before this.
+
+%ifdef __i686__
 SYSCALL_DEFINE CallSyscall, [esp+8]
+%endif
+%ifdef __x86_64__
+SYSCALL_DEFINE CallSyscall, [rsp+8]
+%endif

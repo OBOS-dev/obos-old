@@ -13,7 +13,7 @@ namespace obos
 {
 	namespace multitasking
 	{
-		bool MutexLockCallback(Thread* _this, PVOID _mutex)
+		bool MutexLockCallback(Thread*, PVOID _mutex)
 		{
 			Mutex* mutex = (Mutex*)_mutex;
 			return !mutex->m_locked || mutex->m_resume;
@@ -23,7 +23,7 @@ namespace obos
 		{
 			if ((m_locked && !waitIfLocked) || !g_initialized)
 				return;
-			if (m_locked && m_locked == g_currentThread->tid)
+			if (m_locked && m_lockOwner == g_currentThread->tid)
 				return;
 			if (m_locked)
 			{
@@ -39,8 +39,9 @@ namespace obos
 		}
 		void Mutex::Unlock()
 		{
-			if (g_currentThread->tid != m_lockOwner || !g_initialized)
-				return;
+			if(g_currentThread)
+				if (g_currentThread->tid != m_lockOwner || !g_initialized)
+					return;
 			m_lockOwner = (DWORD)-1;
 			m_locked = false;
 		}

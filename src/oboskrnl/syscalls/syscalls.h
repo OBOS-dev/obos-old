@@ -6,6 +6,8 @@
 
 #pragma once
 
+extern "C" void isr64();
+
 namespace obos
 {
 	namespace process

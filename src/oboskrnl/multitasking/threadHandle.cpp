@@ -258,12 +258,24 @@ namespace obos
 			if (m_thread == g_currentThread)
 				return false;
 			EnterKernelSection();
-			multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread*, PVOID userdata)->bool {
-				UINTPTR_T* udata = (UINTPTR_T*)userdata;
-				return ((multitasking::Thread*)(udata[0]))->status == udata[1];
-				};
-			UINTPTR_T udata[2] = { (UINTPTR_T)m_thread, newStatus };
-			multitasking::g_currentThread->isBlockedUserdata = udata;
+			if (!newStatus)
+			{
+				multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread*, PVOID userdata)->bool {
+					UINTPTR_T* udata = (UINTPTR_T*)userdata;
+					return ((multitasking::Thread*)(udata[0]))->status != udata[1];
+					};
+				UINTPTR_T udata[2] = { (UINTPTR_T)m_thread, m_thread->status };
+				multitasking::g_currentThread->isBlockedUserdata = udata;
+			}
+			else
+			{
+				multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread*, PVOID userdata)->bool {
+					UINTPTR_T* udata = (UINTPTR_T*)userdata;
+					return ((multitasking::Thread*)(udata[0]))->status == udata[1];
+					};
+				UINTPTR_T udata[2] = { (UINTPTR_T)m_thread, newStatus };
+				multitasking::g_currentThread->isBlockedUserdata = udata;
+			}
 			multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;
 			LeaveKernelSection();
 			_int(0x30);
@@ -287,6 +299,8 @@ namespace obos
 		}
 		int ThreadHandle::closeHandle()
 		{
+			if (!m_thread)
+				return m_origin->getReferences();
 			if (!(--m_thread->nHandles) && m_thread->status == (UINT32_T)status_t::DEAD && !(--m_origin->getReferences()))
 			{
 				// We can free the thread's information.
@@ -337,6 +351,8 @@ namespace obos
 		}
 		DWORD GetCurrentThreadTid()
 		{
+			if (!g_currentThread)
+				return 0xFFFFFFFF;
 			return g_currentThread->tid;
 		}
 		Thread::priority_t GetCurrentThreadPriority()

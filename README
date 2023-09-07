@@ -25,8 +25,9 @@
                                     |_|                           
 -----------------------------------------------------------------------------
 - You must be on Linux. If you are on windows, I recommend you use WSL2.
-- You must have an i686-elf-gcc cross-compiler. Instructions on how to get can be found here: https://wiki.osdev.org/GCC_Cross-Compiler
-  You will need GCC 11.4.0 and binutils 2.40. You will need cmake aswell.
+- You must have an i686-elf-gcc (or x86_64-elf-gcc to build the operating system in x86_64)
+  cross-compiler. Instructions on how to get can be found here: https://wiki.osdev.org/GCC_Cross-Compiler
+  You will need GCC 11.4.0 and binutils 2.40 (future versions might work, but I didn't test them). You will need cmake aswell.
 - To generate the operating system's iso, you must have xorriso installed.
 --------------------------------------------
   ____        _ _     _ _             
@@ -42,21 +43,22 @@
 git clone https://github.com/oberrow/obos.git
 
 * Second, enter the directory that the repository was cloned into.
-* Third, configure CMake with this command:
+* Third, run this command to configure the build to build for x86:
+export OBOS_ARCHITECTURE=i686
+or this command to configure for x86_64
+export OBOS_ARCHITECTURE=x86_64
+* Fourth, configure CMake with this command to build the operating system:
 
 cmake ./ -G Ninja \
-"-DOUTPUT_DIR=$PWD/out" \
 -DCMAKE_BUILD_TYPE=Debug \
--DCRTBEGIN_DIRECTORY=$(i686-elf-g++ -print-file-name=crtbegin.o) \
--DCRTEND_DIRECTORY=$(i686-elf-g++ -print-file-name=crtend.o) \
--DLIBGCC=$(i686-elf-g++ --print-libgcc-file-name) \
--DCURSOR_SLEEP_TIME_2_5_MS=75
+-DCURSOR_SLEEP_TIME_2_5_MS=75 \
+-DCONSOLE_NEWLINE_SEQUENCE=LF \
+-DOBOS_ARCHITECTURE=$OBOS_ARCHITECTURE \
+-DCMAKE_TOOLCHAIN_FILE=$PWD/scripts/toolchains/$OBOS_ARCHITECTURE_OBOS.cmake
 
-* Fourth, build everything with this command:
+* Fourth, build everything with this command, this will also generate the iso:
 ninja -j 0 all
 
-* Finally, generate an iso with this script:
-./generate_iso.sh
 The generated iso will be stored in ./out
 
   _   _  ____ _______ _____ _____ ______ 

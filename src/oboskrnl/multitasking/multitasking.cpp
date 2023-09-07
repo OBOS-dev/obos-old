@@ -17,7 +17,19 @@
 
 #include <console.h>
 
-
+#if defined(__i686__)
+#define isInKernelCode(frame) ((frame.eip >= 0xC0000000) && (frame.eip < 0xE0000000))
+#define setFrameAddress(frame_addr) \
+asm volatile("mov %0, %%eax" :\
+	: "r"(frame_addr)\
+	: "memory");
+#elif defined (__x86_64__)
+#define isInKernelCode(frame) frame.rip >= 0xFFFFFFFF80000000
+#define setFrameAddress(frame_addr) \
+asm volatile("mov %0, %%rax" :\
+	: "r"(frame_addr)\
+	: "memory");
+#endif
 
 namespace obos
 {
@@ -51,6 +63,7 @@ namespace obos
 			static Thread* s_newThread;
 			s_newThread = newThread;
 			if(g_currentThread)
+#if defined(__i686__)
 				if (s_newThread->owner->pageDirectory != memory::g_pageDirectory)
 				{
 					asm volatile("mov %0, %%esp;"
@@ -60,21 +73,36 @@ namespace obos
 					// No more parameters past this point.
 					s_newThread->owner->pageDirectory->switchToThis();
 				}
-			g_currentThread = s_newThread;
-			if (!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall || (g_currentThread->frame.eip >= 0xC0000000 && g_currentThread->frame.eip < 0xE0000000))
+#elif defined(__x86_64__)
+				if (s_newThread->owner->level4PageMap != memory::g_level4PageMap)
+				{
+					asm volatile("mov %0, %%rsp;"
+								 "mov %0, %%rbp" :
+												 : "r"(&stack_top)
+												 : "memory");
+					s_newThread->owner->doContextSwitch();
+				}
+#endif
+				g_currentThread = s_newThread;
+			if (g_currentThread->tid == 0)
+			{
+				g_schedulerMutex->Unlock();
+				setFrameAddress(&g_currentThread->frame);
+				switchToTaskAsm();
+			}
+			if (!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall || isInKernelCode(g_currentThread->frame))
 			{
 				// If we're servicing a syscall, we need to set esp0 in the tss.
-				if(g_currentThread->isServicingSyscall || (g_currentThread->frame.eip >= 0xC0000000 && g_currentThread->frame.eip < 0xE0000000))
+				if(g_currentThread->isServicingSyscall || isInKernelCode(g_currentThread->frame))
 					SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
-				asm volatile("mov %0, %%eax" :
-											 : "r"(&g_currentThread->frame)
-											 : "memory");
+				
+				g_schedulerMutex->Unlock();
+				setFrameAddress(&g_currentThread->frame);
 				switchToTaskAsm();
 			}
 			SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
-			asm volatile("mov %0, %%eax" :
-										 : "r"(&g_currentThread->frame)
-										 : "memory");
+			g_schedulerMutex->Unlock();
+			setFrameAddress(&g_currentThread->frame);
 			switchToUserModeTask();
 		}
 
@@ -148,15 +176,18 @@ namespace obos
 				}
 				list_iterator_destroy(iter);
 			}
-			if (currentThread->iterations >= (UINT32_T)currentThread->priority)
+			if(currentThread)
 			{
-				list_iterator_t* iter = list_iterator_new(g_threads, LIST_HEAD);
-				for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
+				if (currentThread->iterations >= (UINT32_T)currentThread->priority)
 				{
-					currentThread = (Thread*)node->val;
-					currentThread->iterations = 0;
+					list_iterator_t* iter = list_iterator_new(g_threads, LIST_HEAD);
+					for (list_node_t* node = list_iterator_next(iter); node != nullptr; node = list_iterator_next(iter))
+					{
+						currentThread = (Thread*)node->val;
+						currentThread->iterations = 0;
+					}
+					list_iterator_destroy(iter);
 				}
-				list_iterator_destroy(iter);
 			}
 
 			volatile list_node_t* currentNode = nullptr;
@@ -189,13 +220,14 @@ namespace obos
 			if (!currentNode && (utils::testBitInBitfield(g_currentThread->status, 2) || utils::testBitInBitfield(g_currentThread->status, 3) || utils::testBitInBitfield(g_currentThread->status, 0)))
 				goto findNew;
 
-			g_schedulerMutex->Unlock();
-
 			LeaveKernelSection();
 			if (frame->intNumber != 0x30)
 				SendEOI(frame->intNumber - 32);
 			if (currentThread == g_currentThread)
+			{
+				g_schedulerMutex->Unlock();
 				return;
+			}
 			switchToTask(const_cast<Thread*>(currentThread));
 		}
 
@@ -206,10 +238,19 @@ namespace obos
 			for(int i = 0; i < 4; g_threadPriorityList[i++] = list_new());
 			Thread* kmainThread = new Thread{};
 			kmainThread->tid = 0;
+#if defined(__i686__)
 			kmainThread->frame.eip = GET_FUNC_ADDR(kmainThr);
 			kmainThread->frame.esp = GET_FUNC_ADDR(&thrstack_top);
 			kmainThread->frame.ebp = 0;
-			kmainThread->frame.eflags = getEflags() | 0x200;
+			kmainThread->frame.eflags = getEflags();
+#else
+			kmainThread->frame.rip = GET_FUNC_ADDR(kmainThr);
+			kmainThread->frame.rsp = GET_FUNC_ADDR(&thrstack_top) + 8;
+			kmainThread->frame.rbp = GET_FUNC_ADDR(&thrstack_top) + 8;
+			kmainThread->frame.rflags = getEflags();
+			UINTPTR_T* _thrstack_top = (UINTPTR_T*)&thrstack_top;
+			_thrstack_top[-1] = 0;
+#endif
 			kmainThread->priority = Thread::priority_t::NORMAL;
 			kmainThread->status = (UINT32_T)Thread::status_t::RUNNING;
 			kmainThread->exitCode = 0;

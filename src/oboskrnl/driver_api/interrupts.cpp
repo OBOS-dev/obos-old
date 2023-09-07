@@ -18,7 +18,13 @@ namespace obos
 		UINTPTR_T g_syscallTable[256];
 		void ResetSyscallHandlers()
 		{
-			utils::dwMemset(g_syscallTable, (DWORD)do_nothing, 256);
+#ifdef __i686__
+			utils::dwMemset(g_syscallTable, (UINTPTR_T)do_nothing, 256);
+#else
+			for (int i = 0; i < 256; i++)
+				g_syscallTable[i] = (UINTPTR_T)do_nothing;
+#endif
+
 		}
 		void RegisterSyscallHandler(BYTE syscall, UINTPTR_T address)
 		{

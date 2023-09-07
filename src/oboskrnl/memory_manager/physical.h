@@ -1,5 +1,5 @@
 /*
-	physical.h
+	oboskrnl/memory_manager/physical.h
 
 	Copyright (c) 2023 Omar Berrow
 */
@@ -16,8 +16,6 @@ namespace obos
 	{
 		constexpr SIZE_T g_countPages = 1048576;
 		constexpr SIZE_T g_oneMib = 0x100000;
-		// Don't modify unless you're the physical memory manager.
-		extern utils::RawBitfield g_availablePages[g_countPages / 32];
 		// Take the memory address of this for the intended value.
 		extern char __etext;
 		// Take the memory address of this for the intended value.
@@ -29,9 +27,9 @@ namespace obos
 
 		bool InitializePhysicalMemoryManager();
 
-		PVOID kalloc_physicalPages(SIZE_T nPages);
-		INT   kfree_physicalPages(PVOID base, SIZE_T nPages);
+		PVOID kalloc_physicalPage();
+		INT   kfree_physicalPage(PVOID base);
 
-		UINT32_T* kmap_physical(PVOID _base, SIZE_T nPages, utils::RawBitfield flags, PVOID physicalAddress, bool force = false);
+		UINT32_T* kmap_physical(PVOID _base, UINTPTR_T flags, PVOID physicalAddress, bool force = false);
 	}
 }

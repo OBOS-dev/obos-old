@@ -19,13 +19,13 @@ static char FileExists(CSTRING filename, SIZE_T* size);
 
 int _start()
 {
-	RegisterDriver(1, SERVICE_TYPE_FILESYSTEM);
+	RegisterDriver(PASS_OBOS_API_PARS 1, SERVICE_TYPE_FILESYSTEM);
 	
-	if (GetMultibootModule(3, (UINTPTR_T*)&g_archivePosition, &g_archiveSize))
-		return 1;
+	if (GetMultibootModule(PASS_OBOS_API_PARS 3, (UINTPTR_T*)&g_archivePosition, &g_archiveSize))
+		return 1; // Shouldn't ever happen.
 
-	RegisterFileReadCallback(1, ReadFile);
-	RegisterFileExistsCallback(1, FileExists);
+	RegisterFileReadCallback(PASS_OBOS_API_PARS 1, ReadFile);
+	RegisterFileExistsCallback(PASS_OBOS_API_PARS 1, FileExists);
 
 	return 0;
 }

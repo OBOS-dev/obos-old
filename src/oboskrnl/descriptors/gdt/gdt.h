@@ -1,5 +1,5 @@
 /* 
-	gdt.h
+	oboskrnl/descriptors/gdt/gdt.h
 
 	Copyright (c) 2023 Omar Berrow
 */
@@ -10,12 +10,12 @@
 
 namespace obos
 {
-	// A gdt in the entry.
+	// A gdt entry.
 	class GdtEntry
 	{
 	public:
 		GdtEntry() = default;
-		GdtEntry(UINT32_T base, UINT32_T limit, UINT8_T access, UINT8_T gran);
+		GdtEntry(UINTPTR_T base, UINT32_T limit, UINT8_T access, UINT8_T gran);
 	private:
 		UINT16_T m_limitLow;           // The lower 16 bits of the limit.
 		UINT16_T m_baseLow;            // The lower 16 bits of the base.

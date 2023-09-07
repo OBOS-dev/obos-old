@@ -21,12 +21,21 @@ namespace obos
 
 extern "C"
 {
+#if defined(__i686__)
+	UINTPTR_T liballoc_base = 0xD0000000;
+#elif defined(__x86_64__)
+	UINTPTR_T liballoc_base = 0xFFFFFFFFF0000000;
+#endif
+
 	void* liballoc_alloc(size_t nPages)
 	{
-		PVOID block = obos::memory::VirtualAlloc(reinterpret_cast<PVOID>(0xD0000000 + (obos::g_nLiballocPagesAllocated << 12)), nPages, obos::memory::VirtualAllocFlags::WRITE_ENABLED);
+		PVOID block = obos::memory::VirtualAlloc(reinterpret_cast<PVOID>(liballoc_base + (obos::g_nLiballocPagesAllocated << 12)), nPages, obos::memory::VirtualAllocFlags::WRITE_ENABLED);
 		obos::g_nLiballocPagesAllocated += nPages;
+		// On x86_64, the pages are already zeroed out, so we do nothing.
+#ifndef __x86_64__
 		if (block)
 			obos::utils::memzero(block, nPages << 12);
+#endif
 		return block;
 	}
 	int liballoc_free(void* block, size_t nPages)

@@ -155,10 +155,10 @@ static void readCallback(STRING outputBuffer, SIZE_T size)
 
 int _start()
 {
-	RegisterDriver(DRIVER_ID, SERVICE_TYPE_USER_INPUT_DEVICE);
+	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, SERVICE_TYPE_USER_INPUT_DEVICE);
 
 	cli();
-	DisableIRQ(1);
+	DisableIRQ(PASS_OBOS_API_PARS 1);
 
 	// Keys need to held for 250 ms before repeating, and they repeat at a rate of 30 hz (33.33333 ms).
 	sendCommand(2, 0xF3, 0);
@@ -171,11 +171,11 @@ int _start()
 
 	sendCommand(1, 0xED | 0b111);
 	
-	RegisterInterruptHandler(DRIVER_ID, 0x21, keyboardInterrupt);
+	RegisterInterruptHandler(PASS_OBOS_API_PARS DRIVER_ID, 0x21, keyboardInterrupt);
 
-	RegisterReadCallback(DRIVER_ID, readCallback);
+	RegisterReadCallback(PASS_OBOS_API_PARS DRIVER_ID, readCallback);
 
-	EnableIRQ(1);
+	EnableIRQ(PASS_OBOS_API_PARS 1);
 	sti();
 
 	return 0;
@@ -183,7 +183,7 @@ int _start()
 
 void keyboardInterrupt(const struct interrupt_frame* frame)
 {
-	DisableIRQ(1);
+	DisableIRQ(PASS_OBOS_API_PARS 1);
 
 	BYTE scancode = inb(0x60);
 
@@ -217,12 +217,12 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 		if(newKey != '\n')
 		{
 			outb(0x3f8, newKey);
-			PrintChar(newKey, true);
+			PrintChar(PASS_OBOS_API_PARS newKey, true);
 		}
 		else
 		{
-			PrintChar('\r', false);
-			PrintChar('\n', true);
+			PrintChar(PASS_OBOS_API_PARS '\r', false);
+			PrintChar(PASS_OBOS_API_PARS '\n', true);
 			outb(0x3f8, '\r');
 			outb(0x3f8, '\n');
 		}
@@ -271,8 +271,8 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 	}
 
 	done:
-	EnableIRQ(1);
-	PicSendEoi(1);
+	EnableIRQ(PASS_OBOS_API_PARS 1);
+	PicSendEoi(PASS_OBOS_API_PARS 1);
 }
 
 BYTE sendCommand(DWORD nCommands, ...)

@@ -12,6 +12,8 @@ namespace obos
 {
 	namespace memory
 	{
+		extern bool CPUSupportsExecuteDisable();
+		// Only implemented on i686
 		class PageDirectory final
 		{
 		public:
@@ -23,10 +25,8 @@ namespace obos
 			void switchToThis();
 
 			// Always check if the address of the return value of this function is not nullptr.
-			// If there was a page table allocated, it will reallocate it.
 			UINTPTR_T* getPageTableAddress(UINT16_T pageTable);
 			// Always check if the address of the return value of this function is not nullptr.
-			// If there was a page table allocated, it will reallocate it.
 			UINTPTR_T* getPageTable(UINT16_T pageTable);
 
 			UINTPTR_T* getPageDirectory() { return m_array; }
@@ -36,17 +36,56 @@ namespace obos
 			static UINT16_T addressToIndex(UINTPTR_T base);
 			static UINT16_T addressToPageTableIndex(UINTPTR_T base);
 		private:
-			// NOTE: Do not change the position of this variable. Don't to do it if you don't want to have a bad time.
+			// NOTE: Do not change the position of this variable. Don't do it if you don't want to have a bad time.
 			UINTPTR_T* m_array = nullptr;
 			bool m_owns = false;
 			bool m_initialized = false;
 			static void switchToThisAsm(UINTPTR_T address);
 		};
+		// Only valid in x86_64.
+		class PageMap
+		{
+		public:
+			PageMap();
+			// 'address' must be a physical address.
+			PageMap(UINTPTR_T* address);
+
+			// Use if you want to modify the entry in the level 4 page map.
+			UINTPTR_T* getLevel3PageMapAddress(UINT16_T level3PageMap);
+			// Use if you want to modify the entry in the level 3 page map. Returns an array.
+			// Can also be called getLevel4PageMapEntry().	
+			UINTPTR_T* getLevel3PageMap(UINT16_T level3PageMap);
+			// Use if you want to modify the entry in the page directory. Returns an array.
+			// Can also be called getLevel3PageMapEntry()
+			UINTPTR_T* getPageDirectory(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex);
+			UINTPTR_T* getPageDirectoryRealtive(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex);
+			// Use if you want to modify the entry in the page table. Returns an array.
+			// Can also be called getPageDirectoryEntry()
+			UINTPTR_T* getPageTable(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex);
+			UINTPTR_T* getPageTableRealtive(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex);
+			// Returns a physical address.
+			UINTPTR_T getPageTableEntry(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex, UINT16_T index);
+			UINTPTR_T getRealPageTableEntry(UINT16_T level3PageMap, UINT16_T pageDirectoryIndex, UINT16_T pageTableIndex, UINT16_T index);
+			
+			UINTPTR_T* getPageMap() const { return m_array; }
+
+			void switchToThis();
+
+			~PageMap();
+
+			static UINT16_T computeIndexAtAddress(UINTPTR_T address, UINT8_T level) { return (address >> (9 * level + 12)) & 0x1FF; }
+		private:
+			UINTPTR_T* m_array = nullptr;
+			bool m_owns = false;
+			bool m_initialized = false;
+		};
 		extern PageDirectory* g_pageDirectory;
-		// Makes a page directory and switches to it, thus enabling paging.
+		extern PageMap* g_level4PageMap;
+		extern PageMap g_kernelPageMap;
+		extern UINTPTR_T* g_zeroPage;
 		void InitializePaging();
 
-		void tlbFlush(UINT32_T addr);
+		void tlbFlush(UINTPTR_T addr);
 		PVOID GetPageFaultAddress();
 	}
 }

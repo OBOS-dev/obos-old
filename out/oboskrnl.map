@@ -1,62 +1,62 @@
 Archive member included to satisfy reference by file (symbol)
 
 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
-                              src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o (__udivdi3)
+                              src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj (__udivdi3)
 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-                              src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o (__umoddi3)
+                              src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj (__umoddi3)
 
 Discarded input sections
 
  .gnu.linkonce.t._ZN4obos6Handle7getTypeEv
-                0x00000000        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
+                0x00000000        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
  .gnu.linkonce.t._ZN4obos6HandleD2Ev
-                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
+                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD1Ev
+                0x00000000       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
  .gnu.linkonce.r._ZTVN4obos6HandleE
-                0x00000000       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
+                0x00000000       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
  .gnu.linkonce.t._ZN4obos12multitasking6ThreadD1Ev
-                0x00000000       0x41 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
+                0x00000000       0x41 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
  .gnu.linkonce.t._ZN4obos12multitasking6ThreadD0Ev
-                0x00000000       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
+                0x00000000       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .gnu.linkonce.t._ZN4obos12multitasking6ThreadC1Ev
+                0x00000000       0x99 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
  .gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
-                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
+                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .gnu.linkonce.t._ZN4obos12multitasking6ThreadD1Ev
+                0x00000000       0x41 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .gnu.linkonce.t._ZN4obos12multitasking6ThreadD0Ev
+                0x00000000       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
+                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
  .gnu.linkonce.t._ZN4obos6Handle7getTypeEv
-                0x00000000        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
+                0x00000000        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
  .gnu.linkonce.t._ZN4obos6Handle13getReferencesEv
-                0x00000000        0xe src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
+                0x00000000        0xe src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
  .gnu.linkonce.t._ZN4obos6HandleD2Ev
-                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .gnu.linkonce.t._ZN4obos12multitasking6ThreadD1Ev
-                0x00000000       0x41 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .gnu.linkonce.t._ZN4obos12multitasking6ThreadD0Ev
-                0x00000000       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD1Ev
-                0x00000000       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
+                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
  .gnu.linkonce.t._ZN4obos6HandleC2Ev
-                0x00000000       0x2e src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .gnu.linkonce.t._ZN4obos12multitasking6ThreadC1Ev
-                0x00000000       0x99 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
-                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
+                0x00000000       0x2e src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
  .gnu.linkonce.r._ZTVN4obos6HandleE
-                0x00000000       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
+                0x00000000       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
  .gnu.linkonce.t._ZN4obos12multitasking6ThreadD1Ev
-                0x00000000       0x41 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000000       0x41 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
  .gnu.linkonce.t._ZN4obos12multitasking6ThreadD0Ev
-                0x00000000       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000000       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
  .gnu.linkonce.t._ZN4obos6Handle7getTypeEv
-                0x00000000        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000000        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
  .gnu.linkonce.t._ZN4obos6HandleD2Ev
-                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
  .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD1Ev
-                0x00000000       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000000       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
  .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD0Ev
-                0x00000000       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000000       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
  .gnu.linkonce.t._ZN4obos12multitasking6ThreadC1Ev
-                0x00000000       0x99 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000000       0x99 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
  .gnu.linkonce.r._ZTVN4obos6HandleE
-                0x00000000       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000000       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
  .gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
-                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000000       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
 
 Memory Configuration
 
@@ -65,50 +65,45 @@ Name             Origin             Length             Attributes
 
 Linker script and memory map
 
-LOAD /tmp/ccEH2u9W.o
-LOAD /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
-LOAD /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
-LOAD /tmp/cccpZ5g3.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscall_interface.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscall_interface.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy.asm.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
-LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/handlers.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking-i686.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy_i686.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/inline-asm.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+LOAD src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
 LOAD /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a
                 0x00100000                        . = 0x100000
                 0x00100000                        _kernel_start = .
@@ -117,1309 +112,1110 @@ LOAD /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a
                 0x00100000     0x3004
  *(.multiboot.data)
  .multiboot.data
-                0x00100000     0x3004 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+                0x00100000     0x3004 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
                 0x00102000                boot_page_directory1
 
 .multiboot.text
-                0x00103004       0x63
+                0x00103004       0x64
  *(.multiboot.text)
  .multiboot.text
-                0x00103004       0x63 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
+                0x00103004       0x64 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
                 0x00103004                _start
-                0xc0103067                        . = (. + 0xc0000000)
+                0xc0103068                        . = (. + 0xc0000000)
 
-.text           0xc0104000    0x232ce load address 0x00104000
+.text           0xc0104000    0x2367e load address 0x00104000
+                0xc0104000                        _stext = .
  *(.text)
- .text          0xc0104000        0x0 /tmp/ccEH2u9W.o
- .text          0xc0104000      0x145 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
- *fill*         0xc0104145        0xb 
- .text          0xc0104150       0x41 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
- .text          0xc0104191        0x0 /tmp/cccpZ5g3.o
- *fill*         0xc0104191        0xf 
- .text          0xc01041a0       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
-                0xc01041ae                _ZN4obos15RestartComputerEv
- *fill*         0xc01041bb        0x5 
- .text          0xc01041c0       0x25 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
-                0xc01041c0                gdtFlush
-                0xc01041dd                tssFlush
- *fill*         0xc01041e5        0xb 
- .text          0xc01041f0      0x1d0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
-                0xc01041f0                isr0
-                0xc01041fa                isr1
-                0xc0104204                isr2
-                0xc010420e                isr3
-                0xc0104218                isr4
-                0xc0104222                isr5
-                0xc010422c                isr6
-                0xc0104236                isr7
-                0xc0104240                isr8
-                0xc0104248                isr9
-                0xc0104252                isr10
-                0xc010425a                isr11
-                0xc0104262                isr12
-                0xc010426a                isr13
-                0xc0104272                isr14
-                0xc010427a                isr15
-                0xc0104284                isr16
-                0xc010428e                isr17
-                0xc0104298                isr18
-                0xc01042a2                isr19
-                0xc01042ac                isr20
-                0xc01042b6                isr21
-                0xc01042be                isr22
-                0xc01042c8                isr23
-                0xc01042d2                isr24
-                0xc01042dc                isr25
-                0xc01042e6                isr26
-                0xc01042f0                isr27
-                0xc01042fa                isr28
-                0xc0104304                isr29
-                0xc010430c                isr30
-                0xc0104311                isr31
-                0xc0104318                isr32
-                0xc010431f                isr33
-                0xc0104326                isr34
-                0xc010432d                isr35
-                0xc0104334                isr36
-                0xc010433b                isr37
-                0xc0104342                isr38
-                0xc0104349                isr39
-                0xc0104350                isr40
-                0xc0104357                isr41
-                0xc010435e                isr42
-                0xc0104365                isr43
-                0xc010436c                isr44
-                0xc0104373                isr45
-                0xc010437a                isr46
-                0xc0104381                isr47
-                0xc0104388                isr48
-                0xc010438f                isr_common_stub
- .text          0xc01043c0        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
-                0xc01043c0                _ZN4obos8idtFlushEj
- *fill*         0xc01043c8        0x8 
- .text          0xc01043d0       0x1f src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.o
-                0xc01043d0                isr80
- *fill*         0xc01043ef        0x1 
- .text          0xc01043f0       0x77 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscall_interface.asm.o
-                0xc01043f0                RegisterDriver
-                0xc01043f8                RegisterInterruptHandler
-                0xc0104400                PicSendEoi
-                0xc0104408                EnableIRQ
-                0xc0104410                DisableIRQ
-                0xc0104418                RegisterReadCallback
-                0xc0104420                PrintChar
-                0xc0104428                GetMultibootModule
-                0xc0104430                RegisterFileReadCallback
-                0xc0104438                RegisterFileExistsCallback
-                0xc0104440                MapPhysicalTo
-                0xc0104448                UnmapPhysicalTo
-                0xc0104450                Printf
-                0xc0104458                GetPhysicalAddress
-                0xc0104460                CallSyscall
- *fill*         0xc0104467        0x9 
- .text          0xc0104470        0xd src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.asm.o
-                0xc0104470                _Z9getEflagsv
-                0xc0104477                _Z6getEIPv
-                0xc010447a                getEBP
- *fill*         0xc010447d        0x3 
- .text          0xc0104480       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.asm.o
-                0xc0104480                _ZN4obos6memory13PageDirectory15switchToThisAsmEj
-                0xc010448c                _ZN4obos6memory19GetPageFaultAddressEv
-                0xc0104490                _ZN4obos6memory12enablePagingEv
- .text          0xc01044a0       0x7e src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
-                0xc01044a0                _ZN4obos12multitasking15switchToTaskAsmEv
-                0xc01044d4                _ZN4obos12multitasking20switchToUserModeTaskEv
- *fill*         0xc010451e        0x2 
- .text          0xc0104520       0x2d src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
-                0xc0104520                isr64
- *fill*         0xc010454d        0x3 
- .text          0xc0104550      0x1d4 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscall_interface.asm.o
-                0xc0104550                ConsoleOutputString
-                0xc010455c                ExitProcess
-                0xc0104568                CreateProcess
-                0xc0104574                TerminateProcess
-                0xc0104580                OpenCurrentProcessHandle
-                0xc010458c                OpenProcessHandle
-                0xc0104598                CreateThread
-                0xc01045a4                OpenThread
-                0xc01045b0                PauseThread
-                0xc01045bc                ResumeThread
-                0xc01045c8                SetThreadPriority
-                0xc01045d4                SetThreadStatus
-                0xc01045e0                TerminateThread
-                0xc01045ec                GetTid
-                0xc01045f8                GetExitCode
-                0xc0104604                GetThreadPriority
-                0xc0104610                GetThreadStatus
-                0xc010461c                WaitForThreadExit
-                0xc0104628                ExitThread
-                0xc0104634                GetCurrentThreadTid
-                0xc0104640                GetCurrentThreadHandle
-                0xc010464c                GetCurrentThreadPriority
-                0xc0104658                GetCurrentThreadStatus
-                0xc0104664                CloseHandle
-                0xc0104670                OpenProcessParentHandle
-                0xc010467c                SetConsoleColor
-                0xc0104688                GetConsoleColor
-                0xc0104694                ConsoleOutputCharacter
-                0xc01046a0                ConsoleOutputCharacterAt
-                0xc01046ac                ConsoleOutput
-                0xc01046b8                ConsoleFillLine
-                0xc01046c4                SetConsoleCursorPosition
-                0xc01046d0                GetConsoleCursorPosition
-                0xc01046dc                ConsoleSwapBuffers
-                0xc01046e8                ClearConsole
-                0xc01046f4                VirtualAlloc
-                0xc0104700                VirtualFree
-                0xc010470c                HasVirtualAddress
-                0xc0104718                MemoryProtect
- *fill*         0xc0104724        0xc 
- .text          0xc0104730       0xa2 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy.asm.o
-                0xc0104730                memcpy
-                0xc0104730                _ZN4obos5utils6memcpyEPvPKvj
-                0xc010474d                _ZN4obos5utils7memzeroEPvj
-                0xc0104765                _ZN4obos5utils8dwMemsetEPjjj
-                0xc0104781                _ZN4obos5utils8dwMemcpyEPjPKjj
-                0xc01047a2                memset
-                0xc01047a2                _ZN4obos5utils6memsetEPvjj
-                0xc01047bc                _ZN4obos5utils6strlenEPKc
- .text          0xc01047d2      0xc82 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
-                0xc01047d2                _ZN4obos9pageFaultEPKNS_15interrupt_frameE
-                0xc01049bd                _ZN4obos23defaultExceptionHandlerEPKNS_15interrupt_frameE
-                0xc0104b88                _ZN4obos5kmainEP14multiboot_infoj
-                0xc0104d9b                _ZN4obos8kmainThrEv
-                0xc0105281                __cxa_pure_virtual
-                0xc01052a2                __cxa_atexit
-                0xc010531a                __cxa_finalize
- .text          0xc0105454      0xbd7 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
-                0xc01056ba                _ZN4obos17InitializeConsoleEjj
-                0xc0105868                _ZN4obos15SetConsoleColorEjj
-                0xc010587e                _ZN4obos15GetConsoleColorERjS0_
-                0xc0105ae2                _ZN4obos13ConsoleOutputEPKcjb
-                0xc0105b66                _ZN4obos19ConsoleOutputStringEPKcb
-                0xc0105bf1                _ZN4obos15ConsoleFillLineEcb
-                0xc0105c7b                _ZN4obos22ConsoleOutputCharacterEcb
-                0xc0105ce4                _ZN4obos22ConsoleOutputCharacterEcjjb
-                0xc0105d7d                _ZN4obos25SetTerminalCursorPositionEjj
-                0xc0105d93                _ZN4obos25GetTerminalCursorPositionERjS0_
-                0xc0105f1a                _ZN4obos12ClearConsoleEv
-                0xc0105f95                _ZN4obos11swapBuffersEv
- *fill*         0xc010602b        0x1 
- .text          0xc010602c      0x219 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
-                0xc010602c                _ZN4obos8GdtEntryC2Ejjhh
-                0xc010602c                _ZN4obos8GdtEntryC1Ejjhh
-                0xc01060a5                _ZN4obos13InitializeGdtEv
-                0xc0106237                _ZN4obos11SetTSSStackEPv
- *fill*         0xc0106245        0x1 
- .text          0xc0106246      0xa42 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
-                0xc0106246                _ZN4obos8IdtEntryC2Ejth
-                0xc0106246                _ZN4obos8IdtEntryC1Ejth
-                0xc0106299                _ZN4obos13InitializeIdtEv
-                0xc0106c6b                _ZN4obos24RegisterInterruptHandlerEhPFvPKNS_15interrupt_frameEE
- .text          0xc0106c88      0x487 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
-                0xc0106c88                _ZN4obos3PicC2Ett
-                0xc0106c88                _ZN4obos3PicC1Ett
-                0xc0106cd0                _ZN4obos3Pic8setPortsEtt
-                0xc0106d04                _ZN4obos3Pic15sendCommandByteEh
-                0xc0106d42                _ZN4obos3Pic15sendCommandWordEt
-                0xc0106d82                _ZN4obos3Pic12sendDataByteEh
-                0xc0106dc2                _ZN4obos3Pic12sendDataWordEt
-                0xc0106e02                _ZN4obos3Pic15recvCommandByteEv
-                0xc0106e36                _ZN4obos3Pic15recvCommandWordEv
-                0xc0106e6a                _ZN4obos3Pic12recvDataByteEv
-                0xc0106e9e                _ZN4obos3Pic12recvDataWordEv
-                0xc0106ed2                _ZN4obos3Pic7sendEOIEv
-                0xc0106eec                _ZN4obos3Pic5remapEhh
-                0xc0106f48                _ZN4obos3Pic9enableIrqEh
-                0xc0106f9e                _ZN4obos3Pic10disableIrqEh
-                0xc0106ff4                _ZN4obos3Pic7disableEv
-                0xc0107010                _ZN4obos3Pic15issuedInterruptEh
-                0xc010705e                _ZN4obos7SendEOIEh
- .text          0xc010710f       0x6a src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
-                0xc010710f                _Z10do_nothingv
-                0xc0107119                _ZN4obos9driverAPI20ResetSyscallHandlersEv
-                0xc010713d                _ZN4obos9driverAPI22RegisterSyscallHandlerEhj
-                0xc010715a                _ZN4obos9driverAPI24UnregisterSyscallHandlerEh
- .text          0xc0107179      0x9a4 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
-                0xc0107179                _ZN4obos9driverAPI16RegisterSyscallsEv
- .text          0xc0107b1d      0x217 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
-                0xc0107c96                _ZN4obos9elfLoader11LoadElfFileEPhjRjS2_
- .text          0xc0107d34    0x1776a src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
-                0xc0109e33                ZydisDecodeOperands
-                0xc010ecbe                ZydisDecoderInit
-                0xc010ed3a                ZydisDecoderEnableMode
-                0xc010ed71                ZydisDecoderDecodeFull
-                0xc010ee56                ZydisDecoderDecodeInstruction
-                0xc010ef59                ZydisDecoderDecodeOperands
-                0xc010efe9                ZydisDecoderTreeGetChildNode
-                0xc010f434                ZydisGetInstructionEncodingInfo
-                0xc0114489                ZydisBuildRegisterOperand
-                0xc0115965                ZydisEncoderEncodeInstruction
-                0xc01159b8                ZydisEncoderEncodeInstructionAbsolute
-                0xc0115ffd                ZydisEncoderDecodedInstructionToEncoderRequest
-                0xc011657c                ZydisEncoderNopFill
-                0xc01165e1                ZydisGetRelInfo
-                0xc0116670                ZydisGetEncodableInstructions
-                0xc0116ce2                ZydisFormatterBufferInit
-                0xc0116d4d                ZydisFormatterBufferInitTokenized
-                0xc0116dd8                ZydisFormatterInit
-                0xc0116e10                ZydisFormatterSetProperty
-                0xc011734f                ZydisFormatterSetHook
-                0xc01173ef                ZydisFormatterFormatInstruction
-                0xc0117520                ZydisFormatterFormatOperand
-                0xc011770b                ZydisFormatterTokenizeInstruction
-                0xc011787a                ZydisFormatterTokenizeOperand
-                0xc0117aa3                ZydisFormatterATTFormatInstruction
-                0xc0118062                ZydisFormatterATTFormatOperandMEM
-                0xc01184ec                ZydisFormatterATTPrintMnemonic
-                0xc011882c                ZydisFormatterATTPrintRegister
-                0xc01188d8                ZydisFormatterATTPrintAddressABS
-                0xc011895b                ZydisFormatterATTPrintDISP
-                0xc0118c17                ZydisFormatterATTPrintIMM
-                0xc0118c80                ZydisFormatterHelperGetExplicitSize
-                0xc0118e0c                ZydisFormatterBaseFormatOperandREG
-                0xc0118e35                ZydisFormatterBaseFormatOperandPTR
-                0xc011915f                ZydisFormatterBaseFormatOperandIMM
-                0xc011920d                ZydisFormatterBasePrintAddressABS
-                0xc0119425                ZydisFormatterBasePrintAddressREL
-                0xc01197a6                ZydisFormatterBasePrintIMM
-                0xc0119b63                ZydisFormatterBasePrintSegment
-                0xc0119d62                ZydisFormatterBasePrintPrefixes
-                0xc011ae86                ZydisFormatterBasePrintDecorator
-                0xc011c0d7                ZydisFormatterTokenGetValue
-                0xc011c110                ZydisFormatterTokenNext
-                0xc011c15f                ZydisFormatterBufferGetToken
-                0xc011c19d                ZydisFormatterBufferGetString
-                0xc011c1e6                ZydisFormatterBufferAppend
-                0xc011c2d4                ZydisFormatterBufferRemember
-                0xc011c315                ZydisFormatterBufferRestore
-                0xc011c3a7                ZydisFormatterIntelFormatInstruction
-                0xc011c95f                ZydisFormatterIntelFormatOperandMEM
-                0xc011cdfb                ZydisFormatterIntelPrintMnemonic
-                0xc011cf8e                ZydisFormatterIntelPrintRegister
-                0xc011d057                ZydisFormatterIntelPrintDISP
-                0xc011d444                ZydisFormatterIntelPrintTypecast
-                0xc011d839                ZydisFormatterIntelFormatInstructionMASM
-                0xc011d866                ZydisFormatterIntelPrintAddressMASM
-                0xc011dab4                ZydisCategoryGetString
-                0xc011dad0                ZydisISASetGetString
-                0xc011daef                ZydisISAExtGetString
-                0xc011db0b                ZydisMnemonicGetString
-                0xc011db31                ZydisMnemonicGetStringWrapped
-                0xc011db55                ZydisRegisterEncode
-                0xc011dbca                ZydisRegisterGetId
-                0xc011dbf3                ZydisRegisterGetClass
-                0xc011dc1b                ZydisRegisterGetWidth
-                0xc011dc60                ZydisRegisterGetLargestEnclosing
-                0xc011dd4c                ZydisRegisterGetString
-                0xc011dd72                ZydisRegisterGetStringWrapped
-                0xc011dd96                ZydisRegisterClassGetWidth
-                0xc011ddd8                ZydisGetInstructionSegments
-                0xc011e2f5                ZydisGetInstructionDefinition
-                0xc011e3aa                ZydisGetOperandDefinitions
-                0xc011e3f9                ZydisGetElementInfo
-                0xc011e41f                ZydisGetAccessedFlags
-                0xc011e473                ZydisStringAppendDecU32
-                0xc011e5cd                ZydisStringAppendDecU64
-                0xc011e79a                ZydisStringAppendHexU32
-                0xc011e9b8                ZydisStringAppendHexU64
-                0xc011ec53                ZydisStringAppendDecU
-                0xc011ed33                ZydisStringAppendHexU
-                0xc011ee36                ZydisCalcAbsoluteAddress
-                0xc011f088                ZydisCalcAbsoluteAddressEx
-                0xc011f21d                ZydisGetVersion
-                0xc011f22c                ZydisIsFeatureEnabled
-                0xc011f438                ZydisDisassembleIntel
-                0xc011f46b                ZydisDisassembleATT
- .text          0xc011f49e      0x48d src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
-                0xc011f49e                list_new
-                0xc011f4f7                list_destroy
-                0xc011f56a                list_rpush
-                0xc011f5ed                list_rpop
-                0xc011f66d                list_lpop
-                0xc011f6eb                list_lpush
-                0xc011f76a                list_find
-                0xc011f808                list_at
-                0xc011f89e                list_remove
- .text          0xc011f92b       0xbb src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
-                0xc011f92b                list_iterator_new
-                0xc011f95a                list_iterator_new_from_node
-                0xc011f993                list_iterator_next
-                0xc011f9c8                list_iterator_destroy
- .text          0xc011f9e6       0x44 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
-                0xc011f9e6                list_node_new
- .text          0xc011fa2a      0x838 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
-                0xc011fa2a                _Z4outbth
-                0xc011fa4b                _Z4outwtt
-                0xc011fa6c                _Z3inbt
-                0xc011fa89                _Z3inwt
-                0xc011faa8                _Z7io_waitv
-                0xc011fabd                _Z3cliv
-                0xc011fad1                _Z3stiv
-                0xc011fae5                _Z3hltv
-                0xc011faec                _Z4_inth
-                0xc01201a4                _ZN4obos18EnterKernelSectionEv
-                0xc01201e6                _ZN4obos18LeaveKernelSectionEv
-                0xc0120244                _ZN4obos12EnterSyscallEv
-                0xc0120253                _ZN4obos11ExitSyscallEv
- .text          0xc0120262      0xfc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
-                0xc012031d                _Z10strreversePci
-                0xc012038d                _Z13itoa_unsignedjPci
-                0xc0120438                _ZN4obos22consoleOutputCharacterEhPv
-                0xc0120486                _ZN4obos8_vprintfEPFVvhPvES1_PKcPc
-                0xc0120871                _ZN4obos6printfEPKcz
-                0xc01208ef                _ZN4obos7sprintfEPcPKcz
-                0xc012092b                _ZN4obos7vprintfEPKcPc
-                0xc012095c                _ZN4obos6kpanicEPvS0_PKcz
-                0xc0120adb                _ZN4obos14printf_noFlushEPKcz
-                0xc0120b00                _ZN4obos15printStackTraceEPvPKc
-                0xc0120c76                _ZN4obos11disassembleEPvPKc
-                0xc0120e17                _ZN4obos7countToEPKcc
-                0xc0120e45                _ZN4obos7hex2binEPKcj
-                0xc0120f08                _ZN4obos9addr2funcEPvRPcRj
-                0xc0121023                _ZN4obos9addr2fileEPvRPc
-                0xc0121149                _ZN4obos4randEv
-                0xc0121170                _ZN4obos5srandEj
-                0xc0121194                _ZN4obos4poopEv
- .text          0xc0121226      0xc1d src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
-                0xc01213cc                kmalloc
-                0xc0121a58                kfree
-                0xc0121cb5                kcalloc
-                0xc0121cf0                krealloc
- .text          0xc0121e43      0x9c9 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
-                0xc0121e43                _ZN4obos6memory14kmap_pageTableEPv
-                0xc0121e75                _ZN4obos6memory15kfree_pageTableEv
-                0xc0121e98                _ZN4obos6memory13kmap_physicalEPvjjS1_b
-                0xc012208e                _ZN4obos6memory12VirtualAllocEPvjj
-                0xc01223b2                _ZN4obos6memory11VirtualFreeEPvj
-                0xc01225c0                _ZN4obos6memory17HasVirtualAddressEPKvj
-                0xc01226d6                _ZN4obos6memory13MemoryProtectEPvjj
- .text          0xc012280c      0x26e src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
-                0xc012280c                _ZN4obos6memory13PageDirectoryC2Ev
-                0xc012280c                _ZN4obos6memory13PageDirectoryC1Ev
-                0xc012283a                _ZN4obos6memory13PageDirectoryC1EPj
-                0xc012283a                _ZN4obos6memory13PageDirectoryC2EPj
-                0xc0122866                _ZN4obos6memory13PageDirectory4initEv
-                0xc0122896                _ZN4obos6memory13PageDirectory12switchToThisEv
-                0xc01228ce                _ZN4obos6memory13PageDirectory19getPageTableAddressEt
-                0xc012293c                _ZN4obos6memory13PageDirectory12getPageTableEt
-                0xc01229b0                _ZN4obos6memory13PageDirectoryD1Ev
-                0xc01229b0                _ZN4obos6memory13PageDirectoryD2Ev
-                0xc01229d8                _ZN4obos6memory13PageDirectory14addressToIndexEj
-                0xc01229e4                _ZN4obos6memory13PageDirectory23addressToPageTableIndexEj
-                0xc01229f3                _ZN4obos6memory16InitializePagingEv
-                0xc0122a68                _ZN4obos6memory8tlbFlushEj
- .text          0xc0122a7a      0x149 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
-                0xc0122a7a                liballoc_alloc
-                0xc0122ad1                liballoc_free
-                0xc0122af7                liballoc_lock
-                0xc0122b09                liballoc_unlock
-                0xc0122b1b                _Znwm
-                0xc0122b33                _Znam
-                0xc0122b4b                _ZdlPv
-                0xc0122b62                _ZdaPv
-                0xc0122b79                _ZdlPvm
-                0xc0122b90                _ZdaPvm
-                0xc0122ba7                _ZnwmPv
-                0xc0122baf                _ZnamPv
-                0xc0122bb7                _ZdlPvS_
-                0xc0122bbd                _ZdaPvS_
- .text          0xc0122bc3      0x6a3 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
-                0xc0122ca9                _ZN4obos6memory31InitializePhysicalMemoryManagerEv
-                0xc0122ee6                _ZN4obos6memory20kalloc_physicalPagesEj
-                0xc0123133                _ZN4obos6memory19kfree_physicalPagesEPvj
- .text          0xc0123266      0x81e src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
-                0xc0123266                _ZN4obos12multitasking10canRanTaskEPNS0_6ThreadE
-                0xc0123292                _ZN4obos12multitasking12switchToTaskEPNS0_6ThreadE
-                0xc01233a1                _ZN4obos12multitasking11findNewTaskEPKNS_15interrupt_frameE
-                0xc01238be                _ZN4obos12multitasking22InitializeMultitaskingEv
- .text          0xc0123a84      0x149 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
-                0xc0123a84                _ZN4obos12multitasking17MutexLockCallbackEPNS0_6ThreadEPv
-                0xc0123ab6                _ZN4obos12multitasking5Mutex4LockEb
-                0xc0123b74                _ZN4obos12multitasking5Mutex6UnlockEv
-                0xc0123bac                _ZN4obos12multitasking5MutexD2Ev
-                0xc0123bac                _ZN4obos12multitasking5MutexD1Ev
- *fill*         0xc0123bcd        0x1 
- .text          0xc0123bce      0x262 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
-                0xc0123bce                _ZN4obos12multitasking11MutexHandleC2Ev
-                0xc0123bce                _ZN4obos12multitasking11MutexHandleC1Ev
-                0xc0123c66                _ZN4obos12multitasking11MutexHandle9duplicateEv
-                0xc0123cda                _ZN4obos12multitasking11MutexHandle11closeHandleEv
-                0xc0123d6c                _ZN4obos12multitasking11MutexHandle4LockEb
-                0xc0123dae                _ZN4obos12multitasking11MutexHandle6UnlockEv
-                0xc0123dda                _ZN4obos12multitasking11MutexHandleD2Ev
-                0xc0123dda                _ZN4obos12multitasking11MutexHandleD1Ev
-                0xc0123e0a                _ZN4obos12multitasking11MutexHandleD0Ev
- .text          0xc0123e30      0x2d2 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
-                0xc0123e30                _ZN4obos12multitasking6ThreadC2ENS1_10priority_tEPFvPvES3_jj
-                0xc0123e30                _ZN4obos12multitasking6ThreadC1ENS1_10priority_tEPFvPvES3_jj
-                0xc0123eea                _ZN4obos12multitasking6Thread12CreateThreadENS1_10priority_tEPFvPvES3_jj
- .text          0xc0124102      0xba6 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
-                0xc0124102                _ZN4obos12multitasking12ThreadHandleC1Ev
-                0xc0124102                _ZN4obos12multitasking12ThreadHandleC2Ev
-                0xc0124156                _ZN4obos12multitasking12ThreadHandle12CreateThreadENS0_6Thread10priority_tEPFvPvES4_jj
-                0xc01241d6                _ZN4obos12multitasking12ThreadHandle10OpenThreadEj
-                0xc012427c                _ZN4obos12multitasking12ThreadHandle10OpenThreadEPNS0_6ThreadE
-                0xc01242ee                _ZN4obos12multitasking12ThreadHandle11PauseThreadEb
-                0xc012437a                _ZN4obos12multitasking12ThreadHandle12ResumeThreadEv
-                0xc01243c4                _ZN4obos12multitasking12ThreadHandle17SetThreadPriorityENS0_6Thread10priority_tE
-                0xc0124542                _ZN4obos12multitasking12ThreadHandle15SetThreadStatusEj
-                0xc01245e4                _ZN4obos12multitasking12ThreadHandle15TerminateThreadEj
-                0xc01246e2                _ZN4obos12multitasking12ThreadHandle6GetTidEv
-                0xc0124702                _ZN4obos12multitasking12ThreadHandle11GetExitCodeEv
-                0xc012474c                _ZN4obos12multitasking12ThreadHandle17GetThreadPriorityEv
-                0xc0124780                _ZN4obos12multitasking12ThreadHandle15GetThreadStatusEv
-                0xc01247f6                _ZN4obos12multitasking12ThreadHandle17WaitForThreadExitEv
-                0xc01248e0                _ZN4obos12multitasking12ThreadHandle25WaitForThreadStatusChangeEj
-                0xc01249b2                _ZN4obos12multitasking12ThreadHandle9duplicateEv
-                0xc0124a38                _ZN4obos12multitasking12ThreadHandle11closeHandleEv
-                0xc0124b95                _ZN4obos12multitasking10ExitThreadEj
-                0xc0124c40                _ZN4obos12multitasking19GetCurrentThreadTidEv
-                0xc0124c4d                _ZN4obos12multitasking24GetCurrentThreadPriorityEv
-                0xc0124c5a                _ZN4obos12multitasking22GetCurrentThreadStatusEv
-                0xc0124c67                _ZN4obos12multitasking22GetCurrentThreadHandleEv
- .text          0xc0124ca8      0x73b src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
-                0xc0124ca8                _ZN4obos7process7ProcessC1Ev
-                0xc0124ca8                _ZN4obos7process7ProcessC2Ev
-                0xc0124d2e                _ZN4obos7process16DriverEntryPointEPv
-                0xc0124dc2                _ZN4obos7process7Process13CreateProcessEPhjPvb
-                0xc01250b4                _ZN4obos7process7Process16TerminateProcessEj
- .text          0xc01253e3     0x17c3 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
-                0xc012548d                _ZN4obos7process16RegisterSyscallsEv
- .text          0xc0126ba6      0x2c2 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
-                0xc0126bc4                _ZN4obos5utils12BitfieldBaseC2Ev
-                0xc0126bc4                _ZN4obos5utils12BitfieldBaseC1Ev
-                0xc0126bde                _ZN4obos5utils12BitfieldBase6setBitEj
-                0xc0126bf6                _ZN4obos5utils12BitfieldBase8clearBitEj
-                0xc0126c10                _ZNK4obos5utils12BitfieldBase6getBitEj
-                0xc0126c24                _ZNK4obos5utils12BitfieldBaseixEj
-                0xc0126c44                _ZN4obos5utils12BitfieldBasecvjEv
-                0xc0126c50                _ZN4obos5utils12BitfieldBasecvbEv
-                0xc0126c62                _ZN4obos5utils8BitfieldC2Ev
-                0xc0126c62                _ZN4obos5utils8BitfieldC1Ev
-                0xc0126c7e                _ZN4obos5utils8Bitfield6setBitEh
-                0xc0126cb4                _ZN4obos5utils8Bitfield8clearBitEh
-                0xc0126cea                _ZNK4obos5utils8Bitfield6getBitEh
-                0xc0126d36                _ZNK4obos5utils8BitfieldixEh
-                0xc0126d5e                _ZN4obos5utils8BitfieldcvbEv
-                0xc0126d70                _ZN4obos5utils15IntegerBitfieldC2Ev
-                0xc0126d70                _ZN4obos5utils15IntegerBitfieldC1Ev
-                0xc0126d8c                _ZN4obos5utils15IntegerBitfieldC2Ej
-                0xc0126d8c                _ZN4obos5utils15IntegerBitfieldC1Ej
-                0xc0126db2                _ZN4obos5utils15IntegerBitfield11setBitfieldEj
-                0xc0126dc1                _ZN4obos5utils16setBitInBitfieldERjh
-                0xc0126def                _ZN4obos5utils18clearBitInBitfieldERjh
-                0xc0126e1f                _ZN4obos5utils17testBitInBitfieldEjh
- .text          0xc0126e68      0x1c6 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
-                0xc0126e68                memcmp
-                0xc0126e84                _ZN4obos5utils6memcmpEPKvS2_j
-                0xc0126f49                _ZN4obos5utils6memchrEPvhj
-                0xc0126faf                _ZN4obos5utils6memchrEPKvhj
-                0xc0126fd3                _ZN4obos5utils6strcmpEPKcS2_
- *fill*         0xc012702e        0x2 
- .text          0xc0127030      0x12a /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
-                0xc0127030                __udivdi3
- *fill*         0xc012715a        0x6 
- .text          0xc0127160      0x150 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-                0xc0127160                __umoddi3
-                0xc01272b0                        _glb_text_start = .
+ .text          0xc0104000       0x25 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
+                0xc0104018                _ZN4obos15RestartComputerEv
+ *fill*         0xc0104025        0xb 
+ .text          0xc0104030       0x25 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.obj
+                0xc0104030                gdtFlush
+                0xc010404d                tssFlush
+ *fill*         0xc0104055        0xb 
+ .text          0xc0104060        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.asm.obj
+                0xc0104060                _ZN4obos8idtFlushEj
+ *fill*         0xc0104068        0x8 
+ .text          0xc0104070      0x1d0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/handlers.asm.obj
+                0xc0104070                isr0
+                0xc010407a                isr1
+                0xc0104084                isr2
+                0xc010408e                isr3
+                0xc0104098                isr4
+                0xc01040a2                isr5
+                0xc01040ac                isr6
+                0xc01040b6                isr7
+                0xc01040c0                isr8
+                0xc01040c8                isr9
+                0xc01040d2                isr10
+                0xc01040da                isr11
+                0xc01040e2                isr12
+                0xc01040ea                isr13
+                0xc01040f2                isr14
+                0xc01040fa                isr15
+                0xc0104104                isr16
+                0xc010410e                isr17
+                0xc0104118                isr18
+                0xc0104122                isr19
+                0xc010412c                isr20
+                0xc0104136                isr21
+                0xc010413e                isr22
+                0xc0104148                isr23
+                0xc0104152                isr24
+                0xc010415c                isr25
+                0xc0104166                isr26
+                0xc0104170                isr27
+                0xc010417a                isr28
+                0xc0104184                isr29
+                0xc010418c                isr30
+                0xc0104191                isr31
+                0xc0104198                isr32
+                0xc010419f                isr33
+                0xc01041a6                isr34
+                0xc01041ad                isr35
+                0xc01041b4                isr36
+                0xc01041bb                isr37
+                0xc01041c2                isr38
+                0xc01041c9                isr39
+                0xc01041d0                isr40
+                0xc01041d7                isr41
+                0xc01041de                isr42
+                0xc01041e5                isr43
+                0xc01041ec                isr44
+                0xc01041f3                isr45
+                0xc01041fa                isr46
+                0xc0104201                isr47
+                0xc0104208                isr48
+                0xc010420f                isr_common_stub
+ .text          0xc0104240       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.asm.obj
+                0xc0104240                _ZN4obos6memory13PageDirectory15switchToThisAsmEj
+                0xc010424c                _ZN4obos6memory19GetPageFaultAddressEv
+                0xc0104250                _ZN4obos6memory12enablePagingEv
+ .text          0xc0104260       0x7e src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking-i686.asm.obj
+                0xc0104260                _ZN4obos12multitasking15switchToTaskAsmEv
+                0xc0104294                _ZN4obos12multitasking20switchToUserModeTaskEv
+ *fill*         0xc01042de        0x2 
+ .text          0xc01042e0       0xa2 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy_i686.asm.obj
+                0xc01042e0                memcpy
+                0xc01042e0                _ZN4obos5utils6memcpyEPvPKvj
+                0xc01042fd                _ZN4obos5utils7memzeroEPvj
+                0xc0104315                _ZN4obos5utils8dwMemsetEPjjj
+                0xc0104331                _ZN4obos5utils8dwMemcpyEPjPKjj
+                0xc0104352                memset
+                0xc0104352                _ZN4obos5utils6memsetEPvjj
+                0xc010436c                _ZN4obos5utils6strlenEPKc
+ *fill*         0xc0104382        0xe 
+ .text          0xc0104390        0xd src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/inline-asm.asm.obj
+                0xc0104390                _Z9getEflagsv
+                0xc0104397                _Z6getEIPv
+                0xc010439a                getEBP
+ *fill*         0xc010439d        0x3 
+ .text          0xc01043a0       0x12 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.obj
+                0xc01043a0                isr80
+ *fill*         0xc01043b2        0xe 
+ .text          0xc01043c0       0x39 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.obj
+                0xc01043c0                isr64
+ .text          0xc01043f9      0x5d7 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+                0xc01044de                _ZN4obos6memory31InitializePhysicalMemoryManagerEv
+                0xc010471b                _ZN4obos6memory19kalloc_physicalPageEv
+                0xc01048b2                _ZN4obos6memory18kfree_physicalPageEPv
+ .text          0xc01049d0      0x313 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+                0xc01049d0                _ZN4obos6memory13PageDirectoryC2Ev
+                0xc01049d0                _ZN4obos6memory13PageDirectoryC1Ev
+                0xc01049fe                _ZN4obos6memory13PageDirectoryC1EPj
+                0xc01049fe                _ZN4obos6memory13PageDirectoryC2EPj
+                0xc0104a2a                _ZN4obos6memory13PageDirectory4initEv
+                0xc0104a52                _ZN4obos6memory13PageDirectory12switchToThisEv
+                0xc0104a8a                _ZN4obos6memory13PageDirectory19getPageTableAddressEt
+                0xc0104afc                _ZN4obos6memory13PageDirectory12getPageTableEt
+                0xc0104b76                _ZN4obos6memory13PageDirectoryD1Ev
+                0xc0104b76                _ZN4obos6memory13PageDirectoryD2Ev
+                0xc0104b9c                _ZN4obos6memory13PageDirectory14addressToIndexEj
+                0xc0104ba8                _ZN4obos6memory13PageDirectory23addressToPageTableIndexEj
+                0xc0104bb7                _ZN4obos6memory16InitializePagingEv
+                0xc0104cd1                _ZN4obos6memory8tlbFlushEj
+ .text          0xc0104ce3      0x97d src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+                0xc0104ce3                _ZN4obos6memory14kmap_pageTableEPv
+                0xc0104d15                _ZN4obos6memory15kfree_pageTableEv
+                0xc0104d38                _ZN4obos6memory13kmap_physicalEPvjS1_b
+                0xc0104ef8                _ZN4obos6memory12VirtualAllocEPvjj
+                0xc010520c                _ZN4obos6memory11VirtualFreeEPvj
+                0xc0105414                _ZN4obos6memory17HasVirtualAddressEPKvj
+                0xc010552a                _ZN4obos6memory13MemoryProtectEPvjj
+ .text          0xc0105660      0xa42 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+                0xc0105660                _ZN4obos8IdtEntryC2Ejth
+                0xc0105660                _ZN4obos8IdtEntryC1Ejth
+                0xc01056b3                _ZN4obos13InitializeIdtEv
+                0xc0106085                _ZN4obos24RegisterInterruptHandlerEhPFvPKNS_15interrupt_frameEE
+ .text          0xc01060a2      0x382 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+                0xc01060a2                _ZN4obos9pageFaultEPKNS_15interrupt_frameE
+                0xc010629f                _ZN4obos23defaultExceptionHandlerEPKNS_15interrupt_frameE
+ .text          0xc0106424      0xbf2 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+                0xc0106468                _ZN4obos5kmainEP14multiboot_infoj
+                0xc01067d1                _ZN4obos8kmainThrEv
+                0xc0106e43                __cxa_pure_virtual
+                0xc0106e64                __cxa_atexit
+                0xc0106edc                __cxa_finalize
+ .text          0xc0107016      0xc70 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+                0xc0107291                _ZN4obos17InitializeConsoleEjj
+                0xc0107459                _ZN4obos15SetConsoleColorEjj
+                0xc01074a5                _ZN4obos15GetConsoleColorERjS0_
+                0xc010773d                _ZN4obos13ConsoleOutputEPKcjb
+                0xc01077c1                _ZN4obos19ConsoleOutputStringEPKcb
+                0xc010784c                _ZN4obos15ConsoleFillLineEcb
+                0xc01078d6                _ZN4obos22ConsoleOutputCharacterEcb
+                0xc010793f                _ZN4obos22ConsoleOutputCharacterEcjjb
+                0xc01079d8                _ZN4obos25SetTerminalCursorPositionEjj
+                0xc01079ee                _ZN4obos25GetTerminalCursorPositionERjS0_
+                0xc0107b75                _ZN4obos12ClearConsoleEv
+                0xc0107bf0                _ZN4obos11swapBuffersEv
+ .text          0xc0107c86     0x107a src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+                0xc0107d41                _Z10strreversePci
+                0xc0107db1                _Z13itoa_unsignedjPci
+                0xc0107e5c                _ZN4obos22consoleOutputCharacterEhPv
+                0xc0107eaa                _ZN4obos8_vprintfEPFvhPvES0_PKcPc
+                0xc0108295                _ZN4obos6printfEPKcz
+                0xc0108313                _ZN4obos7sprintfEPcPKcz
+                0xc010834f                _ZN4obos7vprintfEPKcPc
+                0xc0108390                _ZN4obos6kpanicEPvS0_PKcz
+                0xc0108531                _ZN4obos14printf_noFlushEPKcz
+                0xc0108556                _ZN4obos15printStackTraceEPvPKc
+                0xc01086cd                _ZN4obos11disassembleEPvPKc
+                0xc0108891                _ZN4obos7countToEPKcc
+                0xc01088eb                _ZN4obos7hex2binEPKcj
+                0xc01089ae                _ZN4obos9addr2funcEPvRPcRj
+                0xc0108afd                _ZN4obos9addr2fileEPvRPc
+                0xc0108c23                _ZN4obos4randEv
+                0xc0108c4a                _ZN4obos5srandEj
+                0xc0108c6e                _ZN4obos4poopEv
+ .text          0xc0108d00      0x838 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+                0xc0108d00                _Z4outbth
+                0xc0108d21                _Z4outwtt
+                0xc0108d42                _Z3inbt
+                0xc0108d5f                _Z3inwt
+                0xc0108d7e                _Z7io_waitv
+                0xc0108d93                _Z3cliv
+                0xc0108da7                _Z3stiv
+                0xc0108dbb                _Z3hltv
+                0xc0108dc2                _Z4_inth
+                0xc010947a                _ZN4obos18EnterKernelSectionEv
+                0xc01094bc                _ZN4obos18LeaveKernelSectionEv
+                0xc010951a                _ZN4obos12EnterSyscallEv
+                0xc0109529                _ZN4obos11ExitSyscallEv
+ .text          0xc0109538      0x2c2 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+                0xc0109556                _ZN4obos5utils12BitfieldBaseC2Ev
+                0xc0109556                _ZN4obos5utils12BitfieldBaseC1Ev
+                0xc0109570                _ZN4obos5utils12BitfieldBase6setBitEj
+                0xc0109588                _ZN4obos5utils12BitfieldBase8clearBitEj
+                0xc01095a2                _ZNK4obos5utils12BitfieldBase6getBitEj
+                0xc01095b6                _ZNK4obos5utils12BitfieldBaseixEj
+                0xc01095d6                _ZN4obos5utils12BitfieldBasecvjEv
+                0xc01095e2                _ZN4obos5utils12BitfieldBasecvbEv
+                0xc01095f4                _ZN4obos5utils8BitfieldC2Ev
+                0xc01095f4                _ZN4obos5utils8BitfieldC1Ev
+                0xc0109610                _ZN4obos5utils8Bitfield6setBitEh
+                0xc0109646                _ZN4obos5utils8Bitfield8clearBitEh
+                0xc010967c                _ZNK4obos5utils8Bitfield6getBitEh
+                0xc01096c8                _ZNK4obos5utils8BitfieldixEh
+                0xc01096f0                _ZN4obos5utils8BitfieldcvbEv
+                0xc0109702                _ZN4obos5utils15IntegerBitfieldC2Ev
+                0xc0109702                _ZN4obos5utils15IntegerBitfieldC1Ev
+                0xc010971e                _ZN4obos5utils15IntegerBitfieldC2Ej
+                0xc010971e                _ZN4obos5utils15IntegerBitfieldC1Ej
+                0xc0109744                _ZN4obos5utils15IntegerBitfield11setBitfieldEj
+                0xc0109753                _ZN4obos5utils16setBitInBitfieldERjh
+                0xc0109781                _ZN4obos5utils18clearBitInBitfieldERjh
+                0xc01097b1                _ZN4obos5utils17testBitInBitfieldEjh
+ .text          0xc01097fa      0x487 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+                0xc01097fa                _ZN4obos3PicC2Ett
+                0xc01097fa                _ZN4obos3PicC1Ett
+                0xc0109842                _ZN4obos3Pic8setPortsEtt
+                0xc0109876                _ZN4obos3Pic15sendCommandByteEh
+                0xc01098b4                _ZN4obos3Pic15sendCommandWordEt
+                0xc01098f4                _ZN4obos3Pic12sendDataByteEh
+                0xc0109934                _ZN4obos3Pic12sendDataWordEt
+                0xc0109974                _ZN4obos3Pic15recvCommandByteEv
+                0xc01099a8                _ZN4obos3Pic15recvCommandWordEv
+                0xc01099dc                _ZN4obos3Pic12recvDataByteEv
+                0xc0109a10                _ZN4obos3Pic12recvDataWordEv
+                0xc0109a44                _ZN4obos3Pic7sendEOIEv
+                0xc0109a5e                _ZN4obos3Pic5remapEhh
+                0xc0109aba                _ZN4obos3Pic9enableIrqEh
+                0xc0109b10                _ZN4obos3Pic10disableIrqEh
+                0xc0109b66                _ZN4obos3Pic7disableEv
+                0xc0109b82                _ZN4obos3Pic15issuedInterruptEh
+                0xc0109bd0                _ZN4obos7SendEOIEh
+ .text          0xc0109c81       0xbb src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+                0xc0109c81                list_iterator_new
+                0xc0109cb0                list_iterator_new_from_node
+                0xc0109ce9                list_iterator_next
+                0xc0109d1e                list_iterator_destroy
+ .text          0xc0109d3c      0x1c6 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+                0xc0109d3c                memcmp
+                0xc0109d58                _ZN4obos5utils6memcmpEPKvS2_j
+                0xc0109e1d                _ZN4obos5utils6memchrEPvhj
+                0xc0109e83                _ZN4obos5utils6memchrEPKvhj
+                0xc0109ea7                _ZN4obos5utils6strcmpEPKcS2_
+ .text          0xc0109f02      0x14d src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+                0xc0109f02                liballoc_alloc
+                0xc0109f5d                liballoc_free
+                0xc0109f83                liballoc_lock
+                0xc0109f95                liballoc_unlock
+                0xc0109fa7                _Znwm
+                0xc0109fbf                _Znam
+                0xc0109fd7                _ZdlPv
+                0xc0109fee                _ZdaPv
+                0xc010a005                _ZdlPvm
+                0xc010a01c                _ZdaPvm
+                0xc010a033                _ZnwmPv
+                0xc010a03b                _ZnamPv
+                0xc010a043                _ZdlPvS_
+                0xc010a049                _ZdaPvS_
+ .text          0xc010a04f      0xc1d src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+                0xc010a1f5                kmalloc
+                0xc010a881                kfree
+                0xc010aade                kcalloc
+                0xc010ab19                krealloc
+ .text          0xc010ac6c      0xc61 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc010ac6c                _ZN4obos12multitasking12ThreadHandleC1Ev
+                0xc010ac6c                _ZN4obos12multitasking12ThreadHandleC2Ev
+                0xc010acc0                _ZN4obos12multitasking12ThreadHandle12CreateThreadENS0_6Thread10priority_tEPFvPvES4_jj
+                0xc010ad40                _ZN4obos12multitasking12ThreadHandle10OpenThreadEj
+                0xc010ade6                _ZN4obos12multitasking12ThreadHandle10OpenThreadEPNS0_6ThreadE
+                0xc010ae58                _ZN4obos12multitasking12ThreadHandle11PauseThreadEb
+                0xc010aee4                _ZN4obos12multitasking12ThreadHandle12ResumeThreadEv
+                0xc010af2e                _ZN4obos12multitasking12ThreadHandle17SetThreadPriorityENS0_6Thread10priority_tE
+                0xc010b0ac                _ZN4obos12multitasking12ThreadHandle15SetThreadStatusEj
+                0xc010b14e                _ZN4obos12multitasking12ThreadHandle15TerminateThreadEj
+                0xc010b24c                _ZN4obos12multitasking12ThreadHandle6GetTidEv
+                0xc010b26c                _ZN4obos12multitasking12ThreadHandle11GetExitCodeEv
+                0xc010b2b6                _ZN4obos12multitasking12ThreadHandle17GetThreadPriorityEv
+                0xc010b2ea                _ZN4obos12multitasking12ThreadHandle15GetThreadStatusEv
+                0xc010b360                _ZN4obos12multitasking12ThreadHandle17WaitForThreadExitEv
+                0xc010b48c                _ZN4obos12multitasking12ThreadHandle25WaitForThreadStatusChangeEj
+                0xc010b5a4                _ZN4obos12multitasking12ThreadHandle9duplicateEv
+                0xc010b62a                _ZN4obos12multitasking12ThreadHandle11closeHandleEv
+                0xc010b7aa                _ZN4obos12multitasking10ExitThreadEj
+                0xc010b855                _ZN4obos12multitasking19GetCurrentThreadTidEv
+                0xc010b872                _ZN4obos12multitasking24GetCurrentThreadPriorityEv
+                0xc010b87f                _ZN4obos12multitasking22GetCurrentThreadStatusEv
+                0xc010b88c                _ZN4obos12multitasking22GetCurrentThreadHandleEv
+ .text          0xc010b8cd       0x44 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+                0xc010b8cd                list_node_new
+ .text          0xc010b911      0x48d src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+                0xc010b911                list_new
+                0xc010b96a                list_destroy
+                0xc010b9dd                list_rpush
+                0xc010ba60                list_rpop
+                0xc010bae0                list_lpop
+                0xc010bb5e                list_lpush
+                0xc010bbdd                list_find
+                0xc010bc7b                list_at
+                0xc010bd11                list_remove
+ .text          0xc010bd9e      0x86c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+                0xc010bd9e                _ZN4obos12multitasking10canRanTaskEPNS0_6ThreadE
+                0xc010bdca                _ZN4obos12multitasking12switchToTaskEPNS0_6ThreadE
+                0xc010bf27                _ZN4obos12multitasking11findNewTaskEPKNS_15interrupt_frameE
+                0xc010c449                _ZN4obos12multitasking22InitializeMultitaskingEv
+ .text          0xc010c60a      0x217 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+                0xc010c783                _ZN4obos9elfLoader11LoadElfFileEPhjRjS2_
+ *fill*         0xc010c821        0x1 
+ .text          0xc010c822      0x2d2 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+                0xc010c822                _ZN4obos12multitasking6ThreadC2ENS1_10priority_tEPFvPvES3_jj
+                0xc010c822                _ZN4obos12multitasking6ThreadC1ENS1_10priority_tEPFvPvES3_jj
+                0xc010c8dc                _ZN4obos12multitasking6Thread12CreateThreadENS1_10priority_tEPFvPvES3_jj
+ .text          0xc010caf4      0x14b src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+                0xc010caf4                _ZN4obos12multitasking17MutexLockCallbackEPNS0_6ThreadEPv
+                0xc010cb26                _ZN4obos12multitasking5Mutex4LockEb
+                0xc010cbdc                _ZN4obos12multitasking5Mutex6UnlockEv
+                0xc010cc1e                _ZN4obos12multitasking5MutexD2Ev
+                0xc010cc1e                _ZN4obos12multitasking5MutexD1Ev
+ *fill*         0xc010cc3f        0x1 
+ .text          0xc010cc40      0x262 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+                0xc010cc40                _ZN4obos12multitasking11MutexHandleC2Ev
+                0xc010cc40                _ZN4obos12multitasking11MutexHandleC1Ev
+                0xc010ccd8                _ZN4obos12multitasking11MutexHandle9duplicateEv
+                0xc010cd4c                _ZN4obos12multitasking11MutexHandle11closeHandleEv
+                0xc010cdde                _ZN4obos12multitasking11MutexHandle4LockEb
+                0xc010ce20                _ZN4obos12multitasking11MutexHandle6UnlockEv
+                0xc010ce4c                _ZN4obos12multitasking11MutexHandleD2Ev
+                0xc010ce4c                _ZN4obos12multitasking11MutexHandleD1Ev
+                0xc010ce7c                _ZN4obos12multitasking11MutexHandleD0Ev
+ .text          0xc010cea2      0x899 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+                0xc010cea2                _ZN4obos7process7ProcessC1Ev
+                0xc010cea2                _ZN4obos7process7ProcessC2Ev
+                0xc010cf28                _ZN4obos7process16DriverEntryPointEPv
+                0xc010d05c                _ZN4obos7process7Process13CreateProcessEPhjPvb
+                0xc010d3a2                _ZN4obos7process7Process16TerminateProcessEj
+                0xc010d622                _ZN4obos7process7Process15doContextSwitchEv
+                0xc010d63c                _ZN4obos7process7Process21UncommitProcessMemoryEv
+ .text          0xc010d73b       0x6a src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+                0xc010d73b                _Z10do_nothingv
+                0xc010d745                _ZN4obos9driverAPI20ResetSyscallHandlersEv
+                0xc010d769                _ZN4obos9driverAPI22RegisterSyscallHandlerEhj
+                0xc010d786                _ZN4obos9driverAPI24UnregisterSyscallHandlerEh
+ .text          0xc010d7a5      0xae8 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+                0xc010d7a5                _ZN4obos9driverAPI16RegisterSyscallsEv
+ .text          0xc010e28d     0x17cb src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+                0xc010e337                _ZN4obos7process16RegisterSyscallsEv
+ .text          0xc010fa58    0x1776a src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+                0xc0111b57                ZydisDecodeOperands
+                0xc01169e2                ZydisDecoderInit
+                0xc0116a5e                ZydisDecoderEnableMode
+                0xc0116a95                ZydisDecoderDecodeFull
+                0xc0116b7a                ZydisDecoderDecodeInstruction
+                0xc0116c7d                ZydisDecoderDecodeOperands
+                0xc0116d0d                ZydisDecoderTreeGetChildNode
+                0xc0117158                ZydisGetInstructionEncodingInfo
+                0xc011c1ad                ZydisBuildRegisterOperand
+                0xc011d689                ZydisEncoderEncodeInstruction
+                0xc011d6dc                ZydisEncoderEncodeInstructionAbsolute
+                0xc011dd21                ZydisEncoderDecodedInstructionToEncoderRequest
+                0xc011e2a0                ZydisEncoderNopFill
+                0xc011e305                ZydisGetRelInfo
+                0xc011e394                ZydisGetEncodableInstructions
+                0xc011ea06                ZydisFormatterBufferInit
+                0xc011ea71                ZydisFormatterBufferInitTokenized
+                0xc011eafc                ZydisFormatterInit
+                0xc011eb34                ZydisFormatterSetProperty
+                0xc011f073                ZydisFormatterSetHook
+                0xc011f113                ZydisFormatterFormatInstruction
+                0xc011f244                ZydisFormatterFormatOperand
+                0xc011f42f                ZydisFormatterTokenizeInstruction
+                0xc011f59e                ZydisFormatterTokenizeOperand
+                0xc011f7c7                ZydisFormatterATTFormatInstruction
+                0xc011fd86                ZydisFormatterATTFormatOperandMEM
+                0xc0120210                ZydisFormatterATTPrintMnemonic
+                0xc0120550                ZydisFormatterATTPrintRegister
+                0xc01205fc                ZydisFormatterATTPrintAddressABS
+                0xc012067f                ZydisFormatterATTPrintDISP
+                0xc012093b                ZydisFormatterATTPrintIMM
+                0xc01209a4                ZydisFormatterHelperGetExplicitSize
+                0xc0120b30                ZydisFormatterBaseFormatOperandREG
+                0xc0120b59                ZydisFormatterBaseFormatOperandPTR
+                0xc0120e83                ZydisFormatterBaseFormatOperandIMM
+                0xc0120f31                ZydisFormatterBasePrintAddressABS
+                0xc0121149                ZydisFormatterBasePrintAddressREL
+                0xc01214ca                ZydisFormatterBasePrintIMM
+                0xc0121887                ZydisFormatterBasePrintSegment
+                0xc0121a86                ZydisFormatterBasePrintPrefixes
+                0xc0122baa                ZydisFormatterBasePrintDecorator
+                0xc0123dfb                ZydisFormatterTokenGetValue
+                0xc0123e34                ZydisFormatterTokenNext
+                0xc0123e83                ZydisFormatterBufferGetToken
+                0xc0123ec1                ZydisFormatterBufferGetString
+                0xc0123f0a                ZydisFormatterBufferAppend
+                0xc0123ff8                ZydisFormatterBufferRemember
+                0xc0124039                ZydisFormatterBufferRestore
+                0xc01240cb                ZydisFormatterIntelFormatInstruction
+                0xc0124683                ZydisFormatterIntelFormatOperandMEM
+                0xc0124b1f                ZydisFormatterIntelPrintMnemonic
+                0xc0124cb2                ZydisFormatterIntelPrintRegister
+                0xc0124d7b                ZydisFormatterIntelPrintDISP
+                0xc0125168                ZydisFormatterIntelPrintTypecast
+                0xc012555d                ZydisFormatterIntelFormatInstructionMASM
+                0xc012558a                ZydisFormatterIntelPrintAddressMASM
+                0xc01257d8                ZydisCategoryGetString
+                0xc01257f4                ZydisISASetGetString
+                0xc0125813                ZydisISAExtGetString
+                0xc012582f                ZydisMnemonicGetString
+                0xc0125855                ZydisMnemonicGetStringWrapped
+                0xc0125879                ZydisRegisterEncode
+                0xc01258ee                ZydisRegisterGetId
+                0xc0125917                ZydisRegisterGetClass
+                0xc012593f                ZydisRegisterGetWidth
+                0xc0125984                ZydisRegisterGetLargestEnclosing
+                0xc0125a70                ZydisRegisterGetString
+                0xc0125a96                ZydisRegisterGetStringWrapped
+                0xc0125aba                ZydisRegisterClassGetWidth
+                0xc0125afc                ZydisGetInstructionSegments
+                0xc0126019                ZydisGetInstructionDefinition
+                0xc01260ce                ZydisGetOperandDefinitions
+                0xc012611d                ZydisGetElementInfo
+                0xc0126143                ZydisGetAccessedFlags
+                0xc0126197                ZydisStringAppendDecU32
+                0xc01262f1                ZydisStringAppendDecU64
+                0xc01264be                ZydisStringAppendHexU32
+                0xc01266dc                ZydisStringAppendHexU64
+                0xc0126977                ZydisStringAppendDecU
+                0xc0126a57                ZydisStringAppendHexU
+                0xc0126b5a                ZydisCalcAbsoluteAddress
+                0xc0126dac                ZydisCalcAbsoluteAddressEx
+                0xc0126f41                ZydisGetVersion
+                0xc0126f50                ZydisIsFeatureEnabled
+                0xc012715c                ZydisDisassembleIntel
+                0xc012718f                ZydisDisassembleATT
+ .text          0xc01271c2      0x219 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
+                0xc01271c2                _ZN4obos8GdtEntryC2Ejjhh
+                0xc01271c2                _ZN4obos8GdtEntryC1Ejjhh
+                0xc012723b                _ZN4obos13InitializeGdtEv
+                0xc01273cd                _ZN4obos11SetTSSStackEPv
+ *fill*         0xc01273db        0x5 
+ .text          0xc01273e0      0x12a /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
+                0xc01273e0                __udivdi3
+ *fill*         0xc012750a        0x6 
+ .text          0xc0127510      0x150 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
+                0xc0127510                __umoddi3
+                0xc0127660                        _glb_text_start = .
  *(.glb.text)
- .glb.text      0xc01272b0       0x1e src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
-                0xc01272b0                _ZN4obos7process14ProcEntryPointEPv
-                0xc01272ce                        _glb_text_end = .
+ .glb.text      0xc0127660       0x1e src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+                0xc0127660                _ZN4obos7process14ProcEntryPointEPv
+                0xc012767e                        _glb_text_end = .
 
-.init           0xc01272ce        0xf load address 0x001272ce
- .init          0xc01272ce        0x3 /tmp/ccEH2u9W.o
-                0xc01272ce                _init
- .init          0xc01272d1        0x5 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
- .init          0xc01272d6        0x5 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
- .init          0xc01272db        0x2 /tmp/cccpZ5g3.o
-
-.fini           0xc01272dd        0xa load address 0x001272dd
- .fini          0xc01272dd        0x3 /tmp/ccEH2u9W.o
-                0xc01272dd                _fini
- .fini          0xc01272e0        0x5 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
- .fini          0xc01272e5        0x2 /tmp/cccpZ5g3.o
-
-.iplt           0xc01272e7        0x0 load address 0x001272e7
- .iplt          0xc01272e7        0x0 /tmp/ccEH2u9W.o
+.iplt           0xc012767e        0x0 load address 0x0012767e
+ .iplt          0xc012767e        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
 
 .gnu.linkonce.t._ZN4obos6Handle7getTypeEv
-                0xc01272e8        0xa load address 0x001272e8
+                0xc012767e        0xa load address 0x0012767e
  .gnu.linkonce.t._ZN4obos6Handle7getTypeEv
-                0xc01272e8        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
-                0xc01272e8                _ZN4obos6Handle7getTypeEv
+                0xc012767e        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+                0xc012767e                _ZN4obos6Handle7getTypeEv
 
 .gnu.linkonce.t._ZN4obos6HandleD2Ev
-                0xc01272f2       0x10 load address 0x001272f2
+                0xc0127688       0x10 load address 0x00127688
  .gnu.linkonce.t._ZN4obos6HandleD2Ev
-                0xc01272f2       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
-                0xc01272f2                _ZN4obos6HandleD2Ev
+                0xc0127688       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+                0xc0127688                _ZN4obos6HandleD2Ev
 
 .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD1Ev
-                0xc0127302       0x30 load address 0x00127302
+                0xc0127698       0x30 load address 0x00127698
  .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD1Ev
-                0xc0127302       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
-                0xc0127302                _ZN4obos12multitasking12ThreadHandleD1Ev
-
-.gnu.linkonce.t._ZN4obos12multitasking6ThreadD1Ev
-                0xc0127332       0x41 load address 0x00127332
- .gnu.linkonce.t._ZN4obos12multitasking6ThreadD1Ev
-                0xc0127332       0x41 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
-                0xc0127332                _ZN4obos12multitasking6ThreadD1Ev
-
-.gnu.linkonce.t._ZN4obos12multitasking6ThreadD0Ev
-                0xc0127374       0x26 load address 0x00127374
- .gnu.linkonce.t._ZN4obos12multitasking6ThreadD0Ev
-                0xc0127374       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
-                0xc0127374                _ZN4obos12multitasking6ThreadD0Ev
-
-.gnu.linkonce.t._ZN4obos12multitasking6ThreadC1Ev
-                0xc012739a       0x99 load address 0x0012739a
- .gnu.linkonce.t._ZN4obos12multitasking6ThreadC1Ev
-                0xc012739a       0x99 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
-                0xc012739a                _ZN4obos12multitasking6ThreadC1Ev
+                0xc0127698       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+                0xc0127698                _ZN4obos12multitasking12ThreadHandleD1Ev
 
 .gnu.linkonce.t._ZN4obos6Handle13getReferencesEv
-                0xc0127434        0xe load address 0x00127434
+                0xc01276c8        0xe load address 0x001276c8
  .gnu.linkonce.t._ZN4obos6Handle13getReferencesEv
-                0xc0127434        0xe src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
-                0xc0127434                _ZN4obos6Handle13getReferencesEv
+                0xc01276c8        0xe src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc01276c8                _ZN4obos6Handle13getReferencesEv
 
-.gnu.linkonce.t._ZN4obos12multitasking11MutexHandle7getTypeEv
-                0xc0127442        0xa load address 0x00127442
- .gnu.linkonce.t._ZN4obos12multitasking11MutexHandle7getTypeEv
-                0xc0127442        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
-                0xc0127442                _ZN4obos12multitasking11MutexHandle7getTypeEv
+.gnu.linkonce.t._ZN4obos12multitasking6ThreadD1Ev
+                0xc01276d6       0x41 load address 0x001276d6
+ .gnu.linkonce.t._ZN4obos12multitasking6ThreadD1Ev
+                0xc01276d6       0x41 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc01276d6                _ZN4obos12multitasking6ThreadD1Ev
 
-.gnu.linkonce.t._ZN4obos6HandleC2Ev
-                0xc012744c       0x2e load address 0x0012744c
- .gnu.linkonce.t._ZN4obos6HandleC2Ev
-                0xc012744c       0x2e src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
-                0xc012744c                _ZN4obos6HandleC2Ev
-
-.gnu.linkonce.t._ZN4obos12multitasking5MutexC1Ev
-                0xc012747a       0x1d load address 0x0012747a
- .gnu.linkonce.t._ZN4obos12multitasking5MutexC1Ev
-                0xc012747a       0x1d src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
-                0xc012747a                _ZN4obos12multitasking5MutexC1Ev
+.gnu.linkonce.t._ZN4obos12multitasking6ThreadD0Ev
+                0xc0127718       0x26 load address 0x00127718
+ .gnu.linkonce.t._ZN4obos12multitasking6ThreadD0Ev
+                0xc0127718       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc0127718                _ZN4obos12multitasking6ThreadD0Ev
 
 .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandle7getTypeEv
-                0xc0127498        0xa load address 0x00127498
+                0xc012773e        0xa load address 0x0012773e
  .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandle7getTypeEv
-                0xc0127498        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
-                0xc0127498                _ZN4obos12multitasking12ThreadHandle7getTypeEv
+                0xc012773e        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc012773e                _ZN4obos12multitasking12ThreadHandle7getTypeEv
 
 .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD0Ev
-                0xc01274a2       0x26 load address 0x001274a2
+                0xc0127748       0x26 load address 0x00127748
  .gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD0Ev
-                0xc01274a2       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
-                0xc01274a2                _ZN4obos12multitasking12ThreadHandleD0Ev
+                0xc0127748       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc0127748                _ZN4obos12multitasking12ThreadHandleD0Ev
+
+.gnu.linkonce.t._ZN4obos6HandleC2Ev
+                0xc012776e       0x2e load address 0x0012776e
+ .gnu.linkonce.t._ZN4obos6HandleC2Ev
+                0xc012776e       0x2e src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc012776e                _ZN4obos6HandleC2Ev
+
+.gnu.linkonce.t._ZN4obos12multitasking6ThreadC1Ev
+                0xc012779c       0x99 load address 0x0012779c
+ .gnu.linkonce.t._ZN4obos12multitasking6ThreadC1Ev
+                0xc012779c       0x99 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc012779c                _ZN4obos12multitasking6ThreadC1Ev
+
+.gnu.linkonce.t._ZN4obos12multitasking11MutexHandle7getTypeEv
+                0xc0127836        0xa load address 0x00127836
+ .gnu.linkonce.t._ZN4obos12multitasking11MutexHandle7getTypeEv
+                0xc0127836        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+                0xc0127836                _ZN4obos12multitasking11MutexHandle7getTypeEv
+
+.gnu.linkonce.t._ZN4obos12multitasking5MutexC1Ev
+                0xc0127840       0x1d load address 0x00127840
+ .gnu.linkonce.t._ZN4obos12multitasking5MutexC1Ev
+                0xc0127840       0x1d src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+                0xc0127840                _ZN4obos12multitasking5MutexC1Ev
 
 .gnu.linkonce.t._ZN4obos6memory13PageDirectory16getPageDirectoryEv
-                0xc01274c8        0xa load address 0x001274c8
+                0xc012785e        0xa load address 0x0012785e
  .gnu.linkonce.t._ZN4obos6memory13PageDirectory16getPageDirectoryEv
-                0xc01274c8        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
-                0xc01274c8                _ZN4obos6memory13PageDirectory16getPageDirectoryEv
+                0xc012785e        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+                0xc012785e                _ZN4obos6memory13PageDirectory16getPageDirectoryEv
 
-.rodata         0xc0128000    0x6abb8 load address 0x00128000
+.rodata         0xc0128000    0x6ad60 load address 0x00128000
  *(.rodata)
- .rodata        0xc0128000      0x805 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- *fill*         0xc0128805        0x3 
- .rodata        0xc0128808       0x40 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
- .rodata        0xc0128848       0x34 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
- .rodata        0xc012887c       0x4c src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- *fill*         0xc01288c8       0x18 
- .rodata        0xc01288e0    0x69a00 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
-                0xc0128d80                FILTERS_XOP
-                0xc0128dc0                FILTERS_VEX
-                0xc0128e40                FILTERS_EMVEX
-                0xc0128ee0                FILTERS_OPCODE
-                0xc01318e0                FILTERS_MODE
-                0xc0131900                FILTERS_MODE_COMPACT
-                0xc0131fe4                FILTERS_PREFIX_GROUP1
-                0xc0131ffc                FILTERS_MODRM_MOD
-                0xc0132020                FILTERS_MODRM_MOD_COMPACT
-                0xc0134b80                FILTERS_MODRM_REG
-                0xc01356e0                FILTERS_MODRM_RM
-                0xc0135d80                FILTERS_MANDATORY_PREFIX
-                0xc0137700                FILTERS_OPERAND_SIZE
-                0xc0137880                FILTERS_ADDRESS_SIZE
-                0xc0137aa0                FILTERS_VECTOR_LENGTH
-                0xc013b1a0                FILTERS_REX_W
-                0xc013d9a4                FILTERS_REX_B
-                0xc013d9c0                FILTERS_EVEX_B
-                0xc013f420                FILTERS_MVEX_E
-                0xc013f700                FILTERS_MODE_AMD
-                0xc013f780                FILTERS_MODE_KNC
-                0xc013f7ac                FILTERS_MODE_MPX
-                0xc013f7b8                FILTERS_MODE_CET
-                0xc013f7d8                FILTERS_MODE_LZCNT
-                0xc013f7e4                FILTERS_MODE_TZCNT
-                0xc013f7f0                FILTERS_MODE_WBNOINVD
-                0xc013f7f8                FILTERS_MODE_CLDEMOTE
-                0xc013f800                FILTERS_MODE_CENTAUR
-                0xc013f806                zydis_decoder_tree_root
-                0xc013fb40                encoder_instruction_lookup
-                0xc01416c0                encoder_instructions
-                0xc015b980                ISTR_DEFINITIONS_LEGACY
-                0xc0162360                ISTR_DEFINITIONS_3DNOW
-                0xc01625a0                ISTR_DEFINITIONS_XOP
-                0xc0162ea0                ISTR_DEFINITIONS_VEX
-                0xc0168660                ISTR_DEFINITIONS_EVEX
-                0xc0176a20                ISTR_DEFINITIONS_MVEX
-                0xc0178200                OPERAND_DEFINITIONS
- .rodata        0xc01922e0      0x400 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .rodata        0xc01926e0      0x1a4 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .rodata        0xc0192884        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
- .rodata        0xc019288c        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
- .rodata        0xc0192894       0x93 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
- *fill*         0xc0192927        0x1 
- .rodata        0xc0192928       0x9f src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
- *fill*         0xc01929c7        0x1 
- .rodata        0xc01929c8       0x9f src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
- *fill*         0xc0192a67        0x1 
- .rodata        0xc0192a68       0x9f src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- *fill*         0xc0192b07        0x1 
- .rodata        0xc0192b08       0xb0 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
-                0xc0192bb8                        _ZN4obos6memory9__erodataE = .
-
-.eh_frame       0xc0192bb8       0xc0 load address 0x00192bb8
- .eh_frame      0xc0192bb8        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
- .eh_frame      0xc0192bb8        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
-                                  0x4 (size before relaxing)
- .eh_frame      0xc0192bb8       0x64 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
- .eh_frame      0xc0192c1c       0x5c /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-                                 0x74 (size before relaxing)
+ .rodata        0xc0128000       0x98 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+ .rodata        0xc0128098        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+ .rodata        0xc01280a0        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+ .rodata        0xc01280a8      0x307 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ *fill*         0xc01283af        0x1 
+ .rodata        0xc01283b0      0x625 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+ *fill*         0xc01289d5        0x3 
+ .rodata        0xc01289d8       0x44 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+ .rodata        0xc0128a1c      0x1c8 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ .rodata        0xc0128be4      0x400 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+ .rodata        0xc0128fe4       0x9f src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ *fill*         0xc0129083        0x1 
+ .rodata        0xc0129084       0x9f src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ *fill*         0xc0129123        0x1 
+ .rodata        0xc0129124       0x50 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .rodata        0xc0129174       0x9f src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ *fill*         0xc0129213        0x1 
+ .rodata        0xc0129214       0xfb src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+ *fill*         0xc012930f        0x1 
+ .rodata        0xc0129310       0x34 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+ *fill*         0xc0129344       0x1c 
+ .rodata        0xc0129360    0x69a00 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+                0xc0129800                FILTERS_XOP
+                0xc0129840                FILTERS_VEX
+                0xc01298c0                FILTERS_EMVEX
+                0xc0129960                FILTERS_OPCODE
+                0xc0132360                FILTERS_MODE
+                0xc0132380                FILTERS_MODE_COMPACT
+                0xc0132a64                FILTERS_PREFIX_GROUP1
+                0xc0132a7c                FILTERS_MODRM_MOD
+                0xc0132aa0                FILTERS_MODRM_MOD_COMPACT
+                0xc0135600                FILTERS_MODRM_REG
+                0xc0136160                FILTERS_MODRM_RM
+                0xc0136800                FILTERS_MANDATORY_PREFIX
+                0xc0138180                FILTERS_OPERAND_SIZE
+                0xc0138300                FILTERS_ADDRESS_SIZE
+                0xc0138520                FILTERS_VECTOR_LENGTH
+                0xc013bc20                FILTERS_REX_W
+                0xc013e424                FILTERS_REX_B
+                0xc013e440                FILTERS_EVEX_B
+                0xc013fea0                FILTERS_MVEX_E
+                0xc0140180                FILTERS_MODE_AMD
+                0xc0140200                FILTERS_MODE_KNC
+                0xc014022c                FILTERS_MODE_MPX
+                0xc0140238                FILTERS_MODE_CET
+                0xc0140258                FILTERS_MODE_LZCNT
+                0xc0140264                FILTERS_MODE_TZCNT
+                0xc0140270                FILTERS_MODE_WBNOINVD
+                0xc0140278                FILTERS_MODE_CLDEMOTE
+                0xc0140280                FILTERS_MODE_CENTAUR
+                0xc0140286                zydis_decoder_tree_root
+                0xc01405c0                encoder_instruction_lookup
+                0xc0142140                encoder_instructions
+                0xc015c400                ISTR_DEFINITIONS_LEGACY
+                0xc0162de0                ISTR_DEFINITIONS_3DNOW
+                0xc0163020                ISTR_DEFINITIONS_XOP
+                0xc0163920                ISTR_DEFINITIONS_VEX
+                0xc01690e0                ISTR_DEFINITIONS_EVEX
+                0xc01774a0                ISTR_DEFINITIONS_MVEX
+                0xc0178c80                OPERAND_DEFINITIONS
+                0xc0192d60                        _ZN4obos6memory9__erodataE = .
 
 .gnu.linkonce.r._ZTVN4obos6HandleE
-                0xc0192c78       0x1c load address 0x00192c78
+                0xc0192d60       0x1c load address 0x00192d60
  .gnu.linkonce.r._ZTVN4obos6HandleE
-                0xc0192c78       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
-                0xc0192c78                _ZTVN4obos6HandleE
-
-.gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
-                0xc0192c94       0x10 load address 0x00192c94
- .gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
-                0xc0192c94       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
-                0xc0192c94                _ZTVN4obos12multitasking6ThreadE
-
-.gnu.linkonce.r._ZTVN4obos12multitasking11MutexHandleE
-                0xc0192ca4       0x1c load address 0x00192ca4
- .gnu.linkonce.r._ZTVN4obos12multitasking11MutexHandleE
-                0xc0192ca4       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
-                0xc0192ca4                _ZTVN4obos12multitasking11MutexHandleE
-
-.gnu.linkonce.r._ZTVN4obos12multitasking12ThreadHandleE
-                0xc0192cc0       0x1c load address 0x00192cc0
- .gnu.linkonce.r._ZTVN4obos12multitasking12ThreadHandleE
-                0xc0192cc0       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
-                0xc0192cc0                _ZTVN4obos12multitasking12ThreadHandleE
+                0xc0192d60       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+                0xc0192d60                _ZTVN4obos6HandleE
 
 .gnu.linkonce.r._ZTVN4obos5utils8BitfieldE
-                0xc0192cdc       0x30 load address 0x00192cdc
+                0xc0192d7c       0x30 load address 0x00192d7c
  .gnu.linkonce.r._ZTVN4obos5utils8BitfieldE
-                0xc0192cdc       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
-                0xc0192cdc                _ZTVN4obos5utils8BitfieldE
+                0xc0192d7c       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+                0xc0192d7c                _ZTVN4obos5utils8BitfieldE
 
 .gnu.linkonce.r._ZTVN4obos5utils12BitfieldBaseE
-                0xc0192d0c       0x20 load address 0x00192d0c
+                0xc0192dac       0x20 load address 0x00192dac
  .gnu.linkonce.r._ZTVN4obos5utils12BitfieldBaseE
-                0xc0192d0c       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
-                0xc0192d0c                _ZTVN4obos5utils12BitfieldBaseE
+                0xc0192dac       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+                0xc0192dac                _ZTVN4obos5utils12BitfieldBaseE
 
 .gnu.linkonce.r._ZTVN4obos5utils15IntegerBitfieldE
-                0xc0192d2c       0x30 load address 0x00192d2c
+                0xc0192dcc       0x30 load address 0x00192dcc
  .gnu.linkonce.r._ZTVN4obos5utils15IntegerBitfieldE
-                0xc0192d2c       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
-                0xc0192d2c                _ZTVN4obos5utils15IntegerBitfieldE
+                0xc0192dcc       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+                0xc0192dcc                _ZTVN4obos5utils15IntegerBitfieldE
 
-.rel.dyn        0xc0192d5c        0x0 load address 0x00192d5c
- .rel.got       0xc0192d5c        0x0 /tmp/ccEH2u9W.o
- .rel.iplt      0xc0192d5c        0x0 /tmp/ccEH2u9W.o
- .rel.text      0xc0192d5c        0x0 /tmp/ccEH2u9W.o
+.gnu.linkonce.r._ZTVN4obos12multitasking12ThreadHandleE
+                0xc0192dfc       0x1c load address 0x00192dfc
+ .gnu.linkonce.r._ZTVN4obos12multitasking12ThreadHandleE
+                0xc0192dfc       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc0192dfc                _ZTVN4obos12multitasking12ThreadHandleE
+
+.gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
+                0xc0192e18       0x10 load address 0x00192e18
+ .gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
+                0xc0192e18       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+                0xc0192e18                _ZTVN4obos12multitasking6ThreadE
+
+.gnu.linkonce.r._ZTVN4obos12multitasking11MutexHandleE
+                0xc0192e28       0x1c load address 0x00192e28
+ .gnu.linkonce.r._ZTVN4obos12multitasking11MutexHandleE
+                0xc0192e28       0x1c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+                0xc0192e28                _ZTVN4obos12multitasking11MutexHandleE
+
+.eh_frame       0xc0192e44       0xc0 load address 0x00192e44
+ .eh_frame      0xc0192e44       0x64 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
+ .eh_frame      0xc0192ea8       0x5c /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
+                                 0x74 (size before relaxing)
+
+.rel.dyn        0xc0192f04        0x0 load address 0x00192f04
+ .rel.got       0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
+ .rel.iplt      0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
+ .rel.text      0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
  .rel.gnu.linkonce.t._ZN4obos6HandleD2Ev
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
  .rel.gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD1Ev
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
  .rel.gnu.linkonce.r._ZTVN4obos6HandleE
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
  .rel.gnu.linkonce.t._ZN4obos12multitasking6ThreadD1Ev
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
  .rel.gnu.linkonce.t._ZN4obos12multitasking6ThreadD0Ev
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
- .rel.gnu.linkonce.t._ZN4obos12multitasking6ThreadC1Ev
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
- .rel.gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
- .rel.gnu.linkonce.t._ZN4obos6HandleC2Ev
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
- .rel.gnu.linkonce.r._ZTVN4obos12multitasking11MutexHandleE
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
  .rel.gnu.linkonce.t._ZN4obos12multitasking12ThreadHandleD0Ev
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
+ .rel.gnu.linkonce.t._ZN4obos6HandleC2Ev
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
+ .rel.gnu.linkonce.t._ZN4obos12multitasking6ThreadC1Ev
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
  .rel.gnu.linkonce.r._ZTVN4obos12multitasking12ThreadHandleE
-                0xc0192d5c        0x0 /tmp/ccEH2u9W.o
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
+ .rel.gnu.linkonce.r._ZTVN4obos12multitasking6ThreadE
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
+ .rel.gnu.linkonce.r._ZTVN4obos12multitasking11MutexHandleE
+                0xc0192f04        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
 
-.data           0xc0193000      0xa54 load address 0x00193000
+.data           0xc0193000      0xa60 load address 0x00193000
  *(.data)
- .data          0xc0193000        0x0 /tmp/ccEH2u9W.o
- .data          0xc0193000        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
-                0xc0193000                __dso_handle
- .data          0xc0193004        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
- .data          0xc0193004        0x0 /tmp/cccpZ5g3.o
- .data          0xc0193004      0x400 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
-                0xc0193004                _ZN4obos19g_interruptHandlersE
- .data          0xc0193404        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
- .data          0xc019340c        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
- .data          0xc0193410        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- .data          0xc0193410        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
- .data          0xc0193410        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
- .data          0xc0193410        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
- .data          0xc0193410        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
- .data          0xc0193410        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
- .data          0xc0193410        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
-                0xc0193410                _ZN4obos9driverAPI27g_registeredDriversCapacityE
- .data          0xc0193414        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- *fill*         0xc0193414        0xc 
- .data          0xc0193420      0x620 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
- .data          0xc0193a40        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
- .data          0xc0193a40        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
- .data          0xc0193a40        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
- .data          0xc0193a40        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .data          0xc0193a40        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .data          0xc0193a44        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
- .data          0xc0193a4c        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
- .data          0xc0193a4c        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
- .data          0xc0193a4c        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
- .data          0xc0193a4c        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
- .data          0xc0193a50        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
- .data          0xc0193a50        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
- .data          0xc0193a50        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
- .data          0xc0193a50        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
-                0xc0193a50                _ZN4obos12multitasking15g_nextThreadTidE
- .data          0xc0193a54        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .data          0xc0193a54        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
- .data          0xc0193a54        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
- .data          0xc0193a54        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
- .data          0xc0193a54        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
- .data          0xc0193a54        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
- .data          0xc0193a54        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
+ .data          0xc0193000      0x400 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/handlers.asm.obj
+                0xc0193000                _ZN4obos19g_interruptHandlersE
+ .data          0xc0193400        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking-i686.asm.obj
+ .data          0xc0193408       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.obj
+ .data          0xc0193418        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+ .data          0xc019341c        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+ .data          0xc019341c        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+ .data          0xc019341c        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+ .data          0xc019341c        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ .data          0xc019341c        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+                0xc019341c                __dso_handle
+ .data          0xc0193420        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+ .data          0xc0193420        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ .data          0xc0193424        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+ .data          0xc0193424        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+ .data          0xc0193424        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+ .data          0xc0193424        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+ .data          0xc0193424        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+ .data          0xc0193424        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+                0xc0193424                liballoc_base
+ .data          0xc0193428        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+ .data          0xc0193430        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .data          0xc0193430        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+ .data          0xc0193430        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+ .data          0xc0193430        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .data          0xc0193430        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .data          0xc0193430        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+                0xc0193430                _ZN4obos12multitasking15g_nextThreadTidE
+ .data          0xc0193434        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+ .data          0xc0193434        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+ .data          0xc0193434        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+ .data          0xc0193434        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+ .data          0xc0193434        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+                0xc0193434                _ZN4obos9driverAPI27g_registeredDriversCapacityE
+ .data          0xc0193438        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+ *fill*         0xc0193438        0x8 
+ .data          0xc0193440      0x620 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+ .data          0xc0193a60        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
+ .data          0xc0193a60        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
+ .data          0xc0193a60        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
 
-.got            0xc0193a54        0x0 load address 0x00193a54
- .got           0xc0193a54        0x0 /tmp/ccEH2u9W.o
+.got            0xc0193a60        0x0 load address 0x00193a60
+ .got           0xc0193a60        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
 
-.got.plt        0xc0193a54        0x0 load address 0x00193a54
- .got.plt       0xc0193a54        0x0 /tmp/ccEH2u9W.o
+.got.plt        0xc0193a60        0x0 load address 0x00193a60
+ .got.plt       0xc0193a60        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
 
-.igot.plt       0xc0193a54        0x0 load address 0x00193a54
- .igot.plt      0xc0193a54        0x0 /tmp/ccEH2u9W.o
+.igot.plt       0xc0193a60        0x0 load address 0x00193a60
+ .igot.plt      0xc0193a60        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
 
-.ctors          0xc0193a54       0x10 load address 0x00193a54
- .ctors         0xc0193a54        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
- .ctors         0xc0193a58        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
- .ctors         0xc0193a5c        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- .ctors         0xc0193a60        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
+.ctors          0xc0193a60        0x8 load address 0x00193a60
+ .ctors         0xc0193a60        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+ .ctors         0xc0193a64        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
 
-.dtors          0xc0193a64        0x8 load address 0x00193a64
- .dtors         0xc0193a64        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
- .dtors         0xc0193a68        0x4 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
-                0xc0193a68                __DTOR_END__
-
-.tm_clone_table
-                0xc0193a6c        0x0 load address 0x00193a6c
- .tm_clone_table
-                0xc0193a6c        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
- .tm_clone_table
-                0xc0193a6c        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
-
-.bss            0xc0194000    0x2f820 load address 0x00194000
+.bss            0xc0194000    0x2c270 load address 0x00194000
  *(COMMON)
  *(.bss)
- .bss           0xc0194000        0x0 /tmp/ccEH2u9W.o
- .bss           0xc0194000       0x20 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
- .bss           0xc0194020        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
- .bss           0xc0194020        0x0 /tmp/cccpZ5g3.o
- .bss           0xc0194020      0xc24 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
-                0xc0194020                _ZN4obos15g_multibootInfoE
-                0xc0194024                _ZN4obos15g_pageDirectoryE
-                0xc019402c                _ZN4obos15g_kernelProcessE
-                0xc0194040                __atexitFuncs
-                0xc0194c40                __atexitFuncCount
- .bss           0xc0194c44       0x44 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
-                0xc0194c44                _ZN4obos17s_foregroundColorE
-                0xc0194c48                _ZN4obos17s_backgroundColorE
-                0xc0194c4c                _ZN4obos16s_terminalColumnE
-                0xc0194c50                _ZN4obos13s_terminalRowE
-                0xc0194c54                _ZN4obos20s_reachedEndTerminalE
-                0xc0194c58                _ZN4obos13s_framebufferE
-                0xc0194c5c                _ZN4obos12s_backbufferE
-                0xc0194c60                _ZN4obos18s_framebufferWidthE
-                0xc0194c64                _ZN4obos19s_framebufferHeightE
-                0xc0194c68                _ZN4obos16s_nCharsVerticalE
-                0xc0194c6c                _ZN4obos18s_nCharsHorizontalE
-                0xc0194c70                _ZN4obos4fontE
- *fill*         0xc0194c88       0x18 
- .bss           0xc0194ca0       0xb0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
-                0xc0194ca0                _ZN4obos10g_tssEntryE
- *fill*         0xc0194d50       0x10 
- .bss           0xc0194d60      0x806 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
- .bss           0xc0195566        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
- *fill*         0xc0195566       0x1a 
- .bss           0xc0195580      0x400 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
-                0xc0195580                _ZN4obos9driverAPI14g_syscallTableE
- .bss           0xc0195980       0xa0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
-                0xc0195980                _ZN4obos9driverAPI19g_registeredDriversE
- .bss           0xc0195a20        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- .bss           0xc0195a20        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
- .bss           0xc0195a20        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
- .bss           0xc0195a20        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
- .bss           0xc0195a20        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
- .bss           0xc0195a20        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .bss           0xc0195a28        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .bss           0xc0195a28       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
- *fill*         0xc0195a58      0x5a8 
- .bss           0xc0196000     0x1000 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
-                0xc0196000                _ZN4obos6memory15s_lastPageTableE
- .bss           0xc0197000        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
-                0xc0197000                _ZN4obos6memory15g_enabledPagingE
-                0xc0197004                _ZN4obos6memory15g_pageDirectoryE
- .bss           0xc0197008        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
-                0xc0197008                _ZN4obos25g_nLiballocPagesAllocatedE
- *fill*         0xc019700c       0x14 
- .bss           0xc0197020    0x2000c src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
-                0xc0197020                _ZN4obos6memory16g_availablePagesE
-                0xc01b7020                _ZN4obos6memory20g_physicalMemorySizeE
-                0xc01b7024                _ZN4obos6memory34g_physicalMemoryManagerInitializedE
- .bss           0xc01b702c       0x31 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
-                0xc01b702c                _ZN4obos12multitasking9g_threadsE
-                0xc01b7030                _ZN4obos12multitasking20g_threadPriorityListE
-                0xc01b7040                _ZN4obos12multitasking15g_currentThreadE
-                0xc01b7044                _ZN4obos12multitasking13g_initializedE
-                0xc01b7048                _ZN4obos12multitasking16g_schedulerMutexE
- .bss           0xc01b705d        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
- .bss           0xc01b705d        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
- .bss           0xc01b705d        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
- .bss           0xc01b705d        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- *fill*         0xc01b705d      0xfa3 
- .bss           0xc01b8000     0x3008 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
-                0xc01b8000                _ZN4obos7process15g_nextProcessIdE
-                0xc01b8004                _ZN4obos7process13g_processListE
- *fill*         0xc01bb008       0x18 
- .bss           0xc01bb020      0x800 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
-                0xc01bb020                _ZN4obos7process14g_syscallTableE
- .bss           0xc01bb820        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
- .bss           0xc01bb820        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
- .bss           0xc01bb820        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
- .bss           0xc01bb820        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
+ .bss           0xc0194000    0x2000c src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+                0xc0194000                _ZN4obos6memory16g_availablePagesE
+                0xc01b4000                _ZN4obos6memory20g_physicalMemorySizeE
+                0xc01b4004                _ZN4obos6memory34g_physicalMemoryManagerInitializedE
+ .bss           0xc01b400c        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+                0xc01b400c                _ZN4obos6memory15g_enabledPagingE
+                0xc01b4010                _ZN4obos6memory15g_pageDirectoryE
+ *fill*         0xc01b4014      0xfec 
+ .bss           0xc01b5000     0x1000 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+                0xc01b5000                _ZN4obos6memory15s_lastPageTableE
+ .bss           0xc01b6000      0x806 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+ .bss           0xc01b6806        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ *fill*         0xc01b6806       0x1a 
+ .bss           0xc01b6820      0xc24 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+                0xc01b6820                _ZN4obos15g_multibootInfoE
+                0xc01b6824                _ZN4obos15g_pageDirectoryE
+                0xc01b682c                _ZN4obos15g_kernelProcessE
+                0xc01b6840                __atexitFuncs
+                0xc01b7440                __atexitFuncCount
+ .bss           0xc01b7444       0x45 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+                0xc01b7444                _ZN4obos17s_foregroundColorE
+                0xc01b7448                _ZN4obos17s_backgroundColorE
+                0xc01b744c                _ZN4obos16s_terminalColumnE
+                0xc01b7450                _ZN4obos13s_terminalRowE
+                0xc01b7454                _ZN4obos20s_reachedEndTerminalE
+                0xc01b7458                _ZN4obos13s_framebufferE
+                0xc01b745c                _ZN4obos12s_backbufferE
+                0xc01b7460                _ZN4obos18s_framebufferWidthE
+                0xc01b7464                _ZN4obos19s_framebufferHeightE
+                0xc01b7468                _ZN4obos16s_nCharsVerticalE
+                0xc01b746c                _ZN4obos18s_nCharsHorizontalE
+                0xc01b7470                _ZN4obos4fontE
+ .bss           0xc01b7489        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ *fill*         0xc01b7489        0x3 
+ .bss           0xc01b748c        0x8 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+                0xc01b748c                inKernelSection
+                0xc01b7490                _ZN4obos11countCalledE
+ .bss           0xc01b7494        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+ .bss           0xc01b7494        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+ .bss           0xc01b7494        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+ .bss           0xc01b7494        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+ .bss           0xc01b7494        0x4 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+                0xc01b7494                _ZN4obos25g_nLiballocPagesAllocatedE
+ .bss           0xc01b7498       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+ .bss           0xc01b74c8        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .bss           0xc01b74c8        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+ .bss           0xc01b74c8        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+ .bss           0xc01b74c8       0x31 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+                0xc01b74c8                _ZN4obos12multitasking9g_threadsE
+                0xc01b74cc                _ZN4obos12multitasking20g_threadPriorityListE
+                0xc01b74dc                _ZN4obos12multitasking15g_currentThreadE
+                0xc01b74e0                _ZN4obos12multitasking13g_initializedE
+                0xc01b74e4                _ZN4obos12multitasking16g_schedulerMutexE
+ .bss           0xc01b74f9        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .bss           0xc01b74f9        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .bss           0xc01b74f9        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+ .bss           0xc01b74f9        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+ *fill*         0xc01b74f9        0x3 
+ .bss           0xc01b74fc       0x10 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+                0xc01b74fc                _ZN4obos7process15g_nextProcessIdE
+                0xc01b7500                _ZN4obos7process13g_processListE
+                0xc01b7504                _ZN4obos7process18ProcEntryPointBaseE
+ *fill*         0xc01b750c       0x14 
+ .bss           0xc01b7520      0x400 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+                0xc01b7520                _ZN4obos9driverAPI14g_syscallTableE
+ .bss           0xc01b7920       0xa0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+                0xc01b7920                _ZN4obos9driverAPI19g_registeredDriversE
+ .bss           0xc01b79c0      0x800 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+                0xc01b79c0                _ZN4obos7process14g_syscallTableE
+ .bss           0xc01b81c0        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+ .bss           0xc01b81c0       0xb0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
+                0xc01b81c0                _ZN4obos10g_tssEntryE
+ .bss           0xc01b8270        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
+ .bss           0xc01b8270        0x0 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
  *(.bootstrap_stack)
  .bootstrap_stack
-                0xc01bb820     0x8000 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
-                0xc01bb820                _ZN4obos12stack_bottomE
-                0xc01bf820                _ZN4obos9stack_topE
-                0xc01bf820                _ZN4obos15thrstack_bottomE
-                0xc01c3820                _ZN4obos12thrstack_topE
-                0xc01c3820                        _kernel_end = .
+                0xc01b8270     0x8000 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/i686/kernel_bootstrap.asm.obj
+                0xc01b8270                _ZN4obos12stack_bottomE
+                0xc01bc270                _ZN4obos9stack_topE
+                0xc01bc270                _ZN4obos15thrstack_bottomE
+                0xc01c0270                _ZN4obos12thrstack_topE
+                0xc01c0270                        _kernel_end = .
                 0x00400000                        _ZN4obos6memory8endImageE = 0x400000
+                0xc0000000                        _ZN4obos11kernelStartE = 0xc0000000
                 0xe0000000                        _ZN4obos6memory9endKernelE = 0xe0000000
 OUTPUT(/mnt/c/Code/obos/out/oboskrnl elf32-i386)
 
+.debug_frame    0x00000000     0x64ec
+ .debug_frame   0x00000000      0x12c src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+ .debug_frame   0x0000012c      0x208 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+ .debug_frame   0x00000334      0x188 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+ .debug_frame   0x000004bc       0x98 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+ .debug_frame   0x00000554       0xa4 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ .debug_frame   0x000005f8      0x26c src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+ .debug_frame   0x00000864      0x3b8 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+ .debug_frame   0x00000c1c      0x440 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ .debug_frame   0x0000105c      0x250 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+ .debug_frame   0x000012ac      0x3ac src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+ .debug_frame   0x00001658      0x300 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+ .debug_frame   0x00001958       0xc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+ .debug_frame   0x00001a1c       0xf8 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+ .debug_frame   0x00001b14      0x27c src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+ .debug_frame   0x00001d90      0x160 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+ .debug_frame   0x00001ef0      0x754 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .debug_frame   0x00002644       0x40 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+ .debug_frame   0x00002684      0x1a0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+ .debug_frame   0x00002824      0x164 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .debug_frame   0x00002988       0x6c src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .debug_frame   0x000029f4       0xc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .debug_frame   0x00002ab8       0xc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+ .debug_frame   0x00002b7c      0x260 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+ .debug_frame   0x00002ddc      0x3e4 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+ .debug_frame   0x000031c0       0xc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+ .debug_frame   0x00003284      0x2dc src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+ .debug_frame   0x00003560      0x798 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+ .debug_frame   0x00003cf8     0x275c src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+ .debug_frame   0x00006454       0x98 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
+
+.debug_info     0x00000000    0x5f949
+ .debug_info    0x00000000      0xf45 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+ .debug_info    0x00000f45      0xba2 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+ .debug_info    0x00001ae7      0xdaa src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+ .debug_info    0x00002891      0x7fd src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+ .debug_info    0x0000308e     0x12c3 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ .debug_info    0x00004351     0x3681 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+ .debug_info    0x000079d2     0x2701 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+ .debug_info    0x0000a0d3    0x15e40 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ .debug_info    0x0001ff13     0x1857 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+ .debug_info    0x0002176a      0xe15 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+ .debug_info    0x0002257f      0xc96 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+ .debug_info    0x00023215      0x3ca src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+ .debug_info    0x000235df      0x548 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+ .debug_info    0x00023b27      0x6d7 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+ .debug_info    0x000241fe      0x776 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+ .debug_info    0x00024974     0x2a17 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .debug_info    0x0002738b      0x1bd src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+ .debug_info    0x00027548      0x5ac src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+ .debug_info    0x00027af4     0x1e4f src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .debug_info    0x00029943      0xa6c src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .debug_info    0x0002a3af     0x14ab src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .debug_info    0x0002b85a     0x1368 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+ .debug_info    0x0002cbc2     0x1a06 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+ .debug_info    0x0002e5c8     0x2629 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+ .debug_info    0x00030bf1      0x44c src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+ .debug_info    0x0003103d     0x2dc6 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+ .debug_info    0x00033e03     0x324a src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+ .debug_info    0x0003704d    0x27b97 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+ .debug_info    0x0005ebe4      0x6f6 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
+ .debug_info    0x0005f2da      0x32c /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
+ .debug_info    0x0005f606      0x343 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
+
+.debug_abbrev   0x00000000     0x66ef
+ .debug_abbrev  0x00000000      0x25e src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+ .debug_abbrev  0x0000025e      0x334 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+ .debug_abbrev  0x00000592      0x283 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+ .debug_abbrev  0x00000815      0x1d8 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+ .debug_abbrev  0x000009ed      0x2f9 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ .debug_abbrev  0x00000ce6      0x7a9 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+ .debug_abbrev  0x0000148f      0x58a src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+ .debug_abbrev  0x00001a19      0x5f2 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ .debug_abbrev  0x0000200b      0x436 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+ .debug_abbrev  0x00002441      0x338 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+ .debug_abbrev  0x00002779      0x231 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+ .debug_abbrev  0x000029aa      0x175 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+ .debug_abbrev  0x00002b1f       0xfd src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+ .debug_abbrev  0x00002c1c      0x1ff src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+ .debug_abbrev  0x00002e1b      0x201 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+ .debug_abbrev  0x0000301c      0x5d3 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .debug_abbrev  0x000035ef       0xbe src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+ .debug_abbrev  0x000036ad      0x1ae src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+ .debug_abbrev  0x0000385b      0x4a4 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .debug_abbrev  0x00003cff      0x192 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .debug_abbrev  0x00003e91      0x3cc src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .debug_abbrev  0x0000425d      0x3b3 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+ .debug_abbrev  0x00004610      0x429 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+ .debug_abbrev  0x00004a39      0x696 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+ .debug_abbrev  0x000050cf      0x124 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+ .debug_abbrev  0x000051f3      0x631 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+ .debug_abbrev  0x00005824      0x644 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+ .debug_abbrev  0x00005e68      0x3c5 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+ .debug_abbrev  0x0000622d      0x1f6 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
+ .debug_abbrev  0x00006423      0x15b /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
+ .debug_abbrev  0x0000657e      0x171 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
+
+.debug_aranges  0x00000000      0x4e8
+ .debug_aranges
+                0x00000000       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+ .debug_aranges
+                0x00000020       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+ .debug_aranges
+                0x00000040       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+ .debug_aranges
+                0x00000060       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+ .debug_aranges
+                0x00000080       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ .debug_aranges
+                0x000000a0       0x38 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+ .debug_aranges
+                0x000000d8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+ .debug_aranges
+                0x000000f8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ .debug_aranges
+                0x00000118       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+ .debug_aranges
+                0x00000138       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+ .debug_aranges
+                0x00000158       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+ .debug_aranges
+                0x00000178       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+ .debug_aranges
+                0x00000198       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+ .debug_aranges
+                0x000001b8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+ .debug_aranges
+                0x000001d8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+ .debug_aranges
+                0x000001f8       0x70 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .debug_aranges
+                0x00000268       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+ .debug_aranges
+                0x00000288       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+ .debug_aranges
+                0x000002a8       0x38 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .debug_aranges
+                0x000002e0       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .debug_aranges
+                0x00000300       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .debug_aranges
+                0x00000330       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+ .debug_aranges
+                0x00000350       0x50 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+ .debug_aranges
+                0x000003a0       0x68 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+ .debug_aranges
+                0x00000408       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+ .debug_aranges
+                0x00000428       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+ .debug_aranges
+                0x00000448       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+ .debug_aranges
+                0x00000468       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+ .debug_aranges
+                0x00000488       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
+ .debug_aranges
+                0x000004a8       0x20 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
+ .debug_aranges
+                0x000004c8       0x20 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
+
+.debug_line     0x00000000    0x28216
+ .debug_line    0x00000000      0x927 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+ .debug_line    0x00000927      0x5db src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+ .debug_line    0x00000f02      0xd14 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+ .debug_line    0x00001c16      0x409 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+ .debug_line    0x0000201f      0x699 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ .debug_line    0x000026b8      0xf71 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+ .debug_line    0x00003629     0x10d9 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+ .debug_line    0x00004702     0x1831 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ .debug_line    0x00005f33      0xeda src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+ .debug_line    0x00006e0d      0x48b src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+ .debug_line    0x00007298      0x693 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+ .debug_line    0x0000792b      0x217 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+ .debug_line    0x00007b42      0x387 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+ .debug_line    0x00007ec9      0x3ab src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+ .debug_line    0x00008274     0x10ec src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+ .debug_line    0x00009360     0x16fc src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .debug_line    0x0000aa5c      0x179 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+ .debug_line    0x0000abd5      0x835 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+ .debug_line    0x0000b40a      0xcb8 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .debug_line    0x0000c0c2      0x4bf src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .debug_line    0x0000c581      0x53e src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .debug_line    0x0000cabf      0x4ca src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+ .debug_line    0x0000cf89      0x62d src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+ .debug_line    0x0000d5b6      0xdc6 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+ .debug_line    0x0000e37c      0x204 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+ .debug_line    0x0000e580     0x13af src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+ .debug_line    0x0000f92f     0x22ac src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+ .debug_line    0x00011bdb    0x15fac src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+ .debug_line    0x00027b87      0x341 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
+ .debug_line    0x00027ec8      0x179 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
+ .debug_line    0x00028041      0x1d5 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
+
+.debug_str      0x00000000     0x1375
+ .debug_str     0x00000000       0x1f src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
+ .debug_str     0x0000001f       0x1d src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+ .debug_str     0x0000003c       0x3d src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+ .debug_str     0x00000079        0x9 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+ .debug_str     0x00000082       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ .debug_str     0x000000b2       0xb0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+ .debug_str     0x00000162       0xc0 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+ .debug_str     0x00000222      0x180 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ .debug_str     0x000003a2       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+ .debug_str     0x000003d2       0x5e src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+ .debug_str     0x00000430       0x39 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+ .debug_str     0x00000469        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+ .debug_str     0x00000473        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+ .debug_str     0x00000473       0x46 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+ .debug_str     0x000004b9       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+ .debug_str     0x000004df      0x10b src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .debug_str     0x000005ea        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+ .debug_str     0x000005ea       0x14 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+ .debug_str     0x000005fe       0x3c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .debug_str     0x0000063a       0x23 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .debug_str     0x0000065d       0x64 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .debug_str     0x000006c1       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+ .debug_str     0x000006f1       0x68 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+ .debug_str     0x00000759       0x81 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+ .debug_str     0x000007da        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+ .debug_str     0x000007da       0xb2 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+ .debug_str     0x0000088c      0x297 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+ .debug_str     0x00000b23      0x6c6 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+ .debug_str     0x000011e9        0x9 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
+ .debug_str     0x000011f2      0x179 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
+                                0x1e3 (size before relaxing)
+ .debug_str     0x0000136b        0xa /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
+                                0x1e3 (size before relaxing)
+
 .comment        0x00000000       0x12
- .comment       0x00000000       0x12 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o
+ .comment       0x00000000       0x12 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/i686/physical.cpp.obj
                                  0x13 (size before relaxing)
- .comment       0x00000012       0x13 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
- .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/init.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/i686/idt.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/i686/exception_handlers.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
+ .comment       0x00000012       0x13 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.obj
  .comment       0x00000012       0x13 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
  .comment       0x00000012       0x13 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-
-.debug_aranges  0x00000000      0x648
- .debug_aranges
-                0x00000000       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
- .debug_aranges
-                0x00000020       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
- .debug_aranges
-                0x00000040       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
- .debug_aranges
-                0x00000060       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
- .debug_aranges
-                0x00000080       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.o
- .debug_aranges
-                0x000000a0       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscall_interface.asm.o
- .debug_aranges
-                0x000000c0       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.asm.o
- .debug_aranges
-                0x000000e0       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.asm.o
- .debug_aranges
-                0x00000100       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
- .debug_aranges
-                0x00000120       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
- .debug_aranges
-                0x00000140       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscall_interface.asm.o
- .debug_aranges
-                0x00000160       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy.asm.o
- .debug_aranges
-                0x00000180       0x38 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- .debug_aranges
-                0x000001b8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
- .debug_aranges
-                0x000001d8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
- .debug_aranges
-                0x000001f8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
- .debug_aranges
-                0x00000218       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
- .debug_aranges
-                0x00000238       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
- .debug_aranges
-                0x00000258       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
- .debug_aranges
-                0x00000278       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- .debug_aranges
-                0x00000298       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
- .debug_aranges
-                0x000002b8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
- .debug_aranges
-                0x000002d8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
- .debug_aranges
-                0x000002f8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
- .debug_aranges
-                0x00000318       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .debug_aranges
-                0x00000338       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .debug_aranges
-                0x00000358       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
- .debug_aranges
-                0x00000378       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
- .debug_aranges
-                0x00000398       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
- .debug_aranges
-                0x000003b8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
- .debug_aranges
-                0x000003d8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
- .debug_aranges
-                0x000003f8       0x38 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
- .debug_aranges
-                0x00000430       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
- .debug_aranges
-                0x00000450       0x50 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
- .debug_aranges
-                0x000004a0       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
- .debug_aranges
-                0x000004d0       0x70 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .debug_aranges
-                0x00000540       0x68 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
- .debug_aranges
-                0x000005a8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
- .debug_aranges
-                0x000005c8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
- .debug_aranges
-                0x000005e8       0x20 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
- .debug_aranges
-                0x00000608       0x20 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
- .debug_aranges
-                0x00000628       0x20 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-
-.debug_pubnames
-                0x00000000        0x0
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscall_interface.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscall_interface.asm.o
- .debug_pubnames
-                0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy.asm.o
-
-.debug_info     0x00000000    0x5d169
- .debug_info    0x00000000       0x71 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
- .debug_info    0x00000071       0x6a src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
- .debug_info    0x000000db       0x6f src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
- .debug_info    0x0000014a       0x6a src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
- .debug_info    0x000001b4       0x6c src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.o
- .debug_info    0x00000220       0x73 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscall_interface.asm.o
- .debug_info    0x00000293       0x61 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.asm.o
- .debug_info    0x000002f4       0x71 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.asm.o
- .debug_info    0x00000365       0x70 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
- .debug_info    0x000003d5       0x6a src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
- .debug_info    0x0000043f       0x71 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscall_interface.asm.o
- .debug_info    0x000004b0       0x63 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy.asm.o
- .debug_info    0x00000513     0x35b0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- .debug_info    0x00003ac3     0x1989 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
- .debug_info    0x0000544c      0x6fb src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
- .debug_info    0x00005b47      0x7fd src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
- .debug_info    0x00006344      0xc9b src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
- .debug_info    0x00006fdf      0x451 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
- .debug_info    0x00007430     0x2d77 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
- .debug_info    0x0000a1a7      0xa4d src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- .debug_info    0x0000abf4    0x27b99 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
- .debug_info    0x0003278d      0x5ae src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
- .debug_info    0x00032d3b      0x3cc src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
- .debug_info    0x00033107      0x1bf src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
- .debug_info    0x000332c6     0x1745 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .debug_info    0x00034a0b    0x15d80 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .debug_info    0x0004a78b      0x778 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
- .debug_info    0x0004af03      0xdf0 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
- .debug_info    0x0004bcf3      0xb3e src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
- .debug_info    0x0004c831      0x6c6 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
- .debug_info    0x0004cef7      0xfa8 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
- .debug_info    0x0004de9f     0x1d52 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
- .debug_info    0x0004fbf1     0x1276 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
- .debug_info    0x00050e67     0x1909 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
- .debug_info    0x00052770     0x13b1 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
- .debug_info    0x00053b21     0x281c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .debug_info    0x0005633d     0x224e src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
- .debug_info    0x0005858b     0x3219 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
- .debug_info    0x0005b7a4      0xe1a src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
- .debug_info    0x0005c5be      0x53c src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
- .debug_info    0x0005cafa      0x32c /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
- .debug_info    0x0005ce26      0x343 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-
-.debug_abbrev   0x00000000     0x60ea
- .debug_abbrev  0x00000000       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
- .debug_abbrev  0x0000001b       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
- .debug_abbrev  0x00000036       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
- .debug_abbrev  0x00000051       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
- .debug_abbrev  0x0000006c       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.o
- .debug_abbrev  0x00000087       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscall_interface.asm.o
- .debug_abbrev  0x000000a2       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.asm.o
- .debug_abbrev  0x000000bd       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.asm.o
- .debug_abbrev  0x000000d8       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
- .debug_abbrev  0x000000f3       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
- .debug_abbrev  0x0000010e       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscall_interface.asm.o
- .debug_abbrev  0x00000129       0x1b src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy.asm.o
- .debug_abbrev  0x00000144      0x7ad src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- .debug_abbrev  0x000008f1      0x3c1 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
- .debug_abbrev  0x00000cb2      0x1f6 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
- .debug_abbrev  0x00000ea8      0x1d8 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
- .debug_abbrev  0x00001080      0x231 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
- .debug_abbrev  0x000012b1      0x124 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
- .debug_abbrev  0x000013d5      0x583 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
- .debug_abbrev  0x00001958      0x188 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- .debug_abbrev  0x00001ae0      0x3c5 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
- .debug_abbrev  0x00001ea5      0x1ae src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
- .debug_abbrev  0x00002053      0x175 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
- .debug_abbrev  0x000021c8       0xbe src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
- .debug_abbrev  0x00002286      0x40a src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .debug_abbrev  0x00002690      0x5c8 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .debug_abbrev  0x00002c58      0x201 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
- .debug_abbrev  0x00002e59      0x26e src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
- .debug_abbrev  0x000030c7      0x304 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
- .debug_abbrev  0x000033cb      0x1ec src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
- .debug_abbrev  0x000035b7      0x24b src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
- .debug_abbrev  0x00003802      0x47f src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
- .debug_abbrev  0x00003c81      0x395 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
- .debug_abbrev  0x00004016      0x414 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
- .debug_abbrev  0x0000442a      0x3b7 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
- .debug_abbrev  0x000047e1      0x5a5 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .debug_abbrev  0x00004d86      0x636 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
- .debug_abbrev  0x000053bc      0x62d src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
- .debug_abbrev  0x000059e9      0x338 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
- .debug_abbrev  0x00005d21       0xfd src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
- .debug_abbrev  0x00005e1e      0x15b /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
- .debug_abbrev  0x00005f79      0x171 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-
-.debug_line     0x00000000    0x27a6b
- .debug_line    0x00000000       0x7b src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
- .debug_line    0x0000007b       0x74 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
- .debug_line    0x000000ef      0x14c src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
- .debug_line    0x0000023b       0x6a src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
- .debug_line    0x000002a5       0x74 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.o
- .debug_line    0x00000319       0x9d src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscall_interface.asm.o
- .debug_line    0x000003b6       0x66 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.asm.o
- .debug_line    0x0000041c       0x7b src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.asm.o
- .debug_line    0x00000497       0x94 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
- .debug_line    0x0000052b       0x78 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
- .debug_line    0x000005a3      0x108 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscall_interface.asm.o
- .debug_line    0x000006ab       0xaf src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy.asm.o
- .debug_line    0x0000075a     0x1183 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- .debug_line    0x000018dd      0xf15 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
- .debug_line    0x000027f2      0x343 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
- .debug_line    0x00002b35      0x401 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
- .debug_line    0x00002f36      0x695 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
- .debug_line    0x000035cb      0x201 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
- .debug_line    0x000037cc      0xfee src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
- .debug_line    0x000047ba      0x4c1 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- .debug_line    0x00004c7b    0x15fae src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
- .debug_line    0x0001ac29      0x837 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
- .debug_line    0x0001b460      0x219 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
- .debug_line    0x0001b679      0x17b src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
- .debug_line    0x0001b7f4      0xea6 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .debug_line    0x0001c69a     0x1705 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .debug_line    0x0001dd9f     0x10ee src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
- .debug_line    0x0001ee8d      0xd15 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
- .debug_line    0x0001fba2      0x526 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
- .debug_line    0x000200c8      0x3ad src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
- .debug_line    0x00020475      0xa01 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
- .debug_line    0x00020e76      0xc7c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
- .debug_line    0x00021af2      0x4b3 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
- .debug_line    0x00021fa5      0x62a src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
- .debug_line    0x000225cf      0x53b src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
- .debug_line    0x00022b0a     0x15df src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .debug_line    0x000240e9      0xb8f src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
- .debug_line    0x00024c78     0x228f src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
- .debug_line    0x00026f07      0x48d src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
- .debug_line    0x00027394      0x389 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
- .debug_line    0x0002771d      0x179 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
- .debug_line    0x00027896      0x1d5 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-
-.debug_frame    0x00000000     0x6370
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscall_interface.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscall_interface.asm.o
- .debug_frame   0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy.asm.o
- .debug_frame   0x00000000      0x2fc src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- .debug_frame   0x000002fc      0x3b8 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
- .debug_frame   0x000006b4       0x98 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
- .debug_frame   0x0000074c       0x98 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
- .debug_frame   0x000007e4      0x300 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
- .debug_frame   0x00000ae4       0xc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
- .debug_frame   0x00000ba8      0x2dc src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
- .debug_frame   0x00000e84       0x6c src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- .debug_frame   0x00000ef0     0x275c src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
- .debug_frame   0x0000364c      0x1a0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
- .debug_frame   0x000037ec       0xc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
- .debug_frame   0x000038b0       0x40 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
- .debug_frame   0x000038f0      0x250 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .debug_frame   0x00003b40      0x440 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .debug_frame   0x00003f80      0x160 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
- .debug_frame   0x000040e0      0x188 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
- .debug_frame   0x00004268      0x208 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
- .debug_frame   0x00004470      0x27c src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
- .debug_frame   0x000046ec      0x12c src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
- .debug_frame   0x00004818      0x164 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
- .debug_frame   0x0000497c       0xc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
- .debug_frame   0x00004a40      0x260 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
- .debug_frame   0x00004ca0       0xc4 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
- .debug_frame   0x00004d64      0x6d0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .debug_frame   0x00005434      0x300 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
- .debug_frame   0x00005734      0x798 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
- .debug_frame   0x00005ecc      0x3ac src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
- .debug_frame   0x00006278       0xf8 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
-
-.debug_loc      0x00000000        0x0
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kernel_bootstrap-i686.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/handlers.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscall_interface.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/interrupts.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscall_interface.asm.o
- .debug_loc     0x00000000        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memcpy.asm.o
 
 .debug_rnglists
                 0x00000000      0x402
  .debug_rnglists
-                0x00000000       0x31 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
+                0x00000000       0x1f src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/i686/allocate.cpp.obj
  .debug_rnglists
-                0x00000031       0x6b src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
+                0x0000001f       0x31 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.obj
  .debug_rnglists
-                0x0000009c      0x14f src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
+                0x00000050       0x32 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.obj
  .debug_rnglists
-                0x000001eb       0x32 src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
+                0x00000082       0x70 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.obj
  .debug_rnglists
-                0x0000021d       0x1f src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
+                0x000000f2       0x31 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.obj
  .debug_rnglists
-                0x0000023c       0x31 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
+                0x00000123       0x28 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.obj
  .debug_rnglists
-                0x0000026d       0x4c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
+                0x0000014b       0x4c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.obj
  .debug_rnglists
-                0x000002b9       0x28 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
+                0x00000197       0x67 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.obj
  .debug_rnglists
-                0x000002e1       0x70 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
+                0x000001fe       0x6b src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.obj
  .debug_rnglists
-                0x00000351       0x67 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
+                0x00000269      0x14f src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.obj
  .debug_rnglists
                 0x000003b8       0x2a /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
  .debug_rnglists
                 0x000003e2       0x20 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-
-.debug_str      0x00000000     0x1276
- .debug_str     0x00000000       0xa5 src/oboskrnl/CMakeFiles/oboskrnl.dir/boot/kmain.cpp.o
- .debug_str     0x000000a5       0x69 src/oboskrnl/CMakeFiles/oboskrnl.dir/console.cpp.o
- .debug_str     0x0000010e        0x9 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/gdt/gdt.cpp.o
- .debug_str     0x00000117        0x9 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/idt.cpp.o
- .debug_str     0x00000120       0x39 src/oboskrnl/CMakeFiles/oboskrnl.dir/descriptors/idt/pic.cpp.o
- .debug_str     0x00000159        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/interrupts.cpp.o
- .debug_str     0x00000159       0x8c src/oboskrnl/CMakeFiles/oboskrnl.dir/driver_api/syscalls.cpp.o
- .debug_str     0x000001e5       0x23 src/oboskrnl/CMakeFiles/oboskrnl.dir/elf/elf.cpp.o
- .debug_str     0x00000208      0x6c6 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/amalgamated-dist/Zydis.c.o
- .debug_str     0x000008ce       0x14 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list.c.o
- .debug_str     0x000008e2        0xa src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_iterator.c.o
- .debug_str     0x000008ec        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/external/list/list_node.c.o
- .debug_str     0x000008ec       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/inline-asm.cpp.o
- .debug_str     0x0000091c      0x16f src/oboskrnl/CMakeFiles/oboskrnl.dir/klog.cpp.o
- .debug_str     0x00000a8b       0x26 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/liballoc/liballoc.c.o
- .debug_str     0x00000ab1       0x3d src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/allocate.cpp.o
- .debug_str     0x00000aee       0x1d src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/init.cpp.o
- .debug_str     0x00000b0b       0x46 src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/paging/liballoc_hooks.cpp.o
- .debug_str     0x00000b51        0xe src/oboskrnl/CMakeFiles/oboskrnl.dir/memory_manager/physical.cpp.o
- .debug_str     0x00000b5f       0x3c src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/multitasking.cpp.o
- .debug_str     0x00000b9b       0x30 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutex.cpp.o
- .debug_str     0x00000bcb       0x68 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/mutex/mutexHandle.cpp.o
- .debug_str     0x00000c33       0x64 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/thread.cpp.o
- .debug_str     0x00000c97      0x105 src/oboskrnl/CMakeFiles/oboskrnl.dir/multitasking/threadHandle.cpp.o
- .debug_str     0x00000d9c       0x62 src/oboskrnl/CMakeFiles/oboskrnl.dir/process/process.cpp.o
- .debug_str     0x00000dfe      0x297 src/oboskrnl/CMakeFiles/oboskrnl.dir/syscalls/syscalls.cpp.o
- .debug_str     0x00001095       0x5e src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/bitfields.cpp.o
- .debug_str     0x000010f3        0x0 src/oboskrnl/CMakeFiles/oboskrnl.dir/utils/memory.cpp.o
- .debug_str     0x000010f3      0x179 /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_udivdi3.o)
-                                0x1e3 (size before relaxing)
- .debug_str     0x0000126c        0xa /home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a(_umoddi3.o)
-                                0x1e3 (size before relaxing)
 
 .debug_loclists
                 0x00000000      0x9a0

@@ -12,25 +12,30 @@ extern _ZN4obos18EnterKernelSectionEv
 extern _ZN4obos18LeaveKernelSectionEv
 
 ; Dispatch driver syscalls.
-; The syscall id is in eax.
-; Arguments are passed on the stack backwards.
-; The return value is in eax.
+; The syscall id is in e(r)ax.
+; A pointer to the arguments backwards is in e(r)di
+; The return value is in e(r)ax.
 ; Registers are NOT preserved.
 isr80:
 	cli
 
 	; Get the syscall id.
-	lea eax, [eax*4]
-	lea eax, [_ZN4obos9driverAPI14g_syscallTableE+eax]
+%ifdef __i686__
+%define accumulator eax
+%define int_ret iret
+%define	ptr_sz 4
+%endif __i686__
+%ifdef __x86_64__
+%define accumulator rax
+%define int_ret iretq
+%define	ptr_sz 8
+%endif
+	lea accumulator, [accumulator*ptr_sz]
+	lea accumulator, [_ZN4obos9driverAPI14g_syscallTableE+accumulator]
 
-	push eax
-	call _ZN4obos18EnterKernelSectionEv
-	pop eax
+%ifdef __i686__
+	push edi
+%endif
+	call [accumulator]
 
-	call [eax]
-
-	push eax
-	call _ZN4obos18LeaveKernelSectionEv
-	pop eax
-
-	iret
+	int_ret

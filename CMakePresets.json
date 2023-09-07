@@ -1,78 +1,20 @@
 ﻿{
     "version": 3,
   "configurePresets": [
-    {
-      "name": "windows-base",
-      "hidden": true,
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
-      "cacheVariables": {
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      }
-    },
-    {
-      "name": "x64-debug",
-      "displayName": "x64 Debug",
-      "inherits": "windows-base",
-      "architecture": {
-        "value": "x64",
-        "strategy": "external"
-      },
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "x64-release",
-      "displayName": "x64 Release",
-      "inherits": "x64-debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
+
     {
       "name": "x86-debug",
-      "displayName": "x86 Debug",
-      "inherits": "windows-base",
-      "architecture": {
-        "value": "x86",
-        "strategy": "external"
-      },
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "x86-release",
-      "displayName": "x86 Release",
-      "inherits": "x86-debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
-      "name": "linux-debug",
-      "displayName": "Linux Debug",
+      "displayName": "x86 OBOS",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "OUTPUT_DIR": "/mnt/c/Code/obos/out/",
-        "CRTBEGIN_DIRECTORY": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o",
-        "CRTEND_DIRECTORY": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o",
-        "LIBGCC": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a",
-        "CURSOR_SLEEP_TIME_2_5_MS": "75"
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
+        "CURSOR_SLEEP_TIME_2_5_MS": "75",
+        "CONSOLE_NEWLINE_SEQUENCE": "LF",
+        "OBOS_ARCHITECTURE": "i686",
+        "CMAKE_TOOLCHAIN_FILE": "/mnt/c/Code/obos/scripts/toolchains/i686_OBOS.cmake"
       },
       "vendor": {
         "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
@@ -81,23 +23,18 @@
       }
     },
     {
-      "name": "linux-debug2",
-      "displayName": "No cursor",
+      "name": "x86_64-debug",
+      "displayName": "x86_64 OBOS",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "installDir": "${sourceDir}/out/install/${presetName}",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "OUTPUT_DIR": "/mnt/c/Code/obos/out/",
-        "CRTBEGIN_DIRECTORY": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtbegin.o",
-        "CRTEND_DIRECTORY": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/crtend.o",
-        "LIBGCC": "/home/omar/opt/cross/lib/gcc/i686-elf/11.4.0/libgcc.a",
-        "CURSOR_SLEEP_TIME_2_5_MS": "0"
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Linux"
+        "CURSOR_SLEEP_TIME_2_5_MS": "75",
+        "CONSOLE_NEWLINE_SEQUENCE": "LF",
+        "OBOS_ARCHITECTURE": "x86_64",
+        "CMAKE_TOOLCHAIN_FILE": "/mnt/c/Code/obos/scripts/toolchains/x86_64_OBOS.cmake"
       },
       "vendor": {
         "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {

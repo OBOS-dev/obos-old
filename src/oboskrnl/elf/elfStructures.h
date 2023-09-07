@@ -45,12 +45,18 @@ namespace obos
 		// Must be EV_CURRENT.
 		constexpr DWORD EI_VERSION = 6;
 		constexpr DWORD EI_PAD = 7;
-		struct Elf32_Ehdr
+
+		struct Elf_CommonEhdr
 		{
 			unsigned char e_ident[EI_NIDENT];
 			Elf32_Half e_type;
 			Elf32_Half e_machine;
 			Elf32_Word e_version;
+		};
+
+		struct Elf32_Ehdr
+		{
+			Elf_CommonEhdr e_common;
 			Elf32_Addr e_entry;
 			Elf32_Off  e_phoff;
 			Elf32_Off  e_shoff;
@@ -102,6 +108,41 @@ namespace obos
 			Elf32_Word sh_info;
 			Elf32_Word sh_addralign;
 			Elf32_Word sh_entsize;
+		};
+
+		// 64-bit
+
+		typedef UINTPTR_T Elf64_Addr;
+		typedef UINTPTR_T Elf64_Off;
+		typedef Elf32_Word Elf64_Word;
+		typedef UINT64_T Elf64_Qword;
+		typedef Elf32_Half Elf64_Half;
+
+		struct Elf64_Ehdr
+		{
+			Elf_CommonEhdr e_common;
+			Elf64_Addr e_entry;
+			Elf64_Off  e_phoff;
+			Elf64_Off  e_shoff;
+			Elf64_Word e_flags;
+			Elf32_Half e_ehsize;
+			Elf32_Half e_phentsize;
+			Elf32_Half e_phnum;
+			Elf32_Half e_shentsize;
+			Elf32_Half e_shnum;
+			Elf32_Half e_shstrndx;
+		};
+
+		struct Elf64_Phdr
+		{
+			Elf64_Word p_type;
+			Elf64_Word p_flags;
+			Elf64_Off  p_offset;
+			Elf64_Addr p_vaddr;
+			Elf64_Addr p_paddr;
+			Elf64_Qword p_filesz;
+			Elf64_Qword p_memsz;
+			Elf64_Qword p_align;
 		};
 	}
 }

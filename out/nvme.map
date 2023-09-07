@@ -1,0 +1,137 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+*default*        0x0000000000000000 0xffffffffffffffff
+
+Linker script and memory map
+
+LOAD src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+LOAD src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+LOAD src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+                0x0000000008000000                . = 0x8000000
+
+.text           0x0000000008000000      0x60e
+ *(.multiboot)
+ *(.text)
+ .text          0x0000000008000000       0xe1 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+                0x0000000008000000                RegisterDriver
+                0x000000000800000f                RegisterInterruptHandler
+                0x000000000800001e                PicSendEoi
+                0x000000000800002d                EnableIRQ
+                0x000000000800003c                DisableIRQ
+                0x000000000800004b                RegisterReadCallback
+                0x000000000800005a                PrintChar
+                0x0000000008000069                GetMultibootModule
+                0x0000000008000078                RegisterFileReadCallback
+                0x0000000008000087                RegisterFileExistsCallback
+                0x0000000008000096                MapPhysicalTo
+                0x00000000080000a5                UnmapPhysicalTo
+                0x00000000080000b4                Printf
+                0x00000000080000c3                GetPhysicalAddress
+                0x00000000080000d2                CallSyscall
+ .text          0x00000000080000e1       0xa8 src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+                0x00000000080000e1                testBit
+                0x0000000008000104                memzero
+                0x0000000008000140                _start
+ .text          0x0000000008000189      0x485 src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+                0x0000000008000189                outb
+                0x00000000080001a6                outw
+                0x00000000080001c3                outl
+                0x00000000080001db                inb
+                0x00000000080001f5                inw
+                0x0000000008000211                inl
+                0x000000000800022a                pciReadByteRegister
+                0x00000000080002b4                pciReadWordRegister
+                0x000000000800033f                pciReadDwordRegister
+                0x00000000080003c2                pciWriteDwordRegister
+                0x0000000008000441                enumerateBus
+                0x000000000800058a                enumeratePci
+
+.iplt           0x000000000800060e        0x0
+ .iplt          0x000000000800060e        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.rela.dyn       0x0000000008000610        0x0
+ .rela.got      0x0000000008000610        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+ .rela.iplt     0x0000000008000610        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.rodata
+ *(.rodata)
+
+.data           0x0000000008001000        0x0
+ *(.data)
+ .data          0x0000000008001000        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+ .data          0x0000000008001000        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+
+.got            0x0000000008000610        0x0
+ .got           0x0000000008000610        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.got.plt        0x0000000008000610        0x0
+ .got.plt       0x0000000008000610        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.igot.plt       0x0000000008000610        0x0
+ .igot.plt      0x0000000008000610        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.eh_frame       0x0000000008000610      0x2b0
+ .eh_frame      0x0000000008000610       0xa0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+                                         0xa8 (size before relaxing)
+ .eh_frame      0x00000000080006b0      0x210 src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+                                        0x258 (size before relaxing)
+
+.bss            0x0000000008001000        0x8
+ *(COMMON)
+ *(.bss)
+ .bss           0x0000000008001000        0x8 src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+                0x0000000008001000                g_abar
+ .bss           0x0000000008001008        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+OUTPUT(/mnt/c/Code/obos/out/nvme elf64-x86-64)
+
+.debug_aranges  0x0000000000000000       0x90
+ .debug_aranges
+                0x0000000000000000       0x30 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+ .debug_aranges
+                0x0000000000000030       0x30 src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+ .debug_aranges
+                0x0000000000000060       0x30 src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+
+.debug_pubnames
+                0x0000000000000000        0x0
+ .debug_pubnames
+                0x0000000000000000        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_info     0x0000000000000000     0x1877
+ .debug_info    0x0000000000000000       0x83 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+ .debug_info    0x0000000000000083     0x109e src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+ .debug_info    0x0000000000001121      0x756 src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+
+.debug_abbrev   0x0000000000000000      0x2ee
+ .debug_abbrev  0x0000000000000000       0x1b src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+ .debug_abbrev  0x000000000000001b      0x1b5 src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+ .debug_abbrev  0x00000000000001d0      0x11e src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+
+.debug_line     0x0000000000000000      0xbcf
+ .debug_line    0x0000000000000000       0xbf src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+ .debug_line    0x00000000000000bf      0x243 src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+ .debug_line    0x0000000000000302      0x8cd src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+
+.debug_frame    0x0000000000000000      0x300
+ .debug_frame   0x0000000000000000        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+ .debug_frame   0x0000000000000000       0xa8 src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+ .debug_frame   0x00000000000000a8      0x258 src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+
+.debug_loc      0x0000000000000000        0x0
+ .debug_loc     0x0000000000000000        0x0 src/drivers/storage/nvme/CMakeFiles/nvme.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_str      0x0000000000000000       0x6c
+ .debug_str     0x0000000000000000        0xc src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+ .debug_str     0x000000000000000c       0x60 src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+
+.comment        0x0000000000000000       0x12
+ .comment       0x0000000000000000       0x12 src/drivers/storage/nvme/CMakeFiles/nvme.dir/dmain.c.obj
+                                         0x13 (size before relaxing)
+ .comment       0x0000000000000012       0x13 src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj
+
+.debug_rnglists
+                0x0000000000000000       0x2f
+ .debug_rnglists
+                0x0000000000000000       0x2f src/drivers/storage/nvme/CMakeFiles/nvme.dir/enumerate_pci.c.obj

@@ -19,11 +19,12 @@ namespace obos
 		VOID DriverEntryPoint(PVOID entry);
 		extern DWORD g_nextProcessId;
 		extern list_t* g_processList;
+		extern UINTPTR_T ProcEntryPointBase;
 		class Process
 		{
 		public:
 			Process();
-			
+
 			/// <summary>
 			/// Creates the process from an elf file's data.
 			/// </summary>
@@ -41,6 +42,8 @@ namespace obos
 			/// <returns>Success is zero, or 0xFFFFFFFF if there is no process.</returns>
 			DWORD TerminateProcess(DWORD exitCode);
 
+			void doContextSwitch();
+
 			Process(Process&&) = delete;
 			Process(const Process&) = delete;
 
@@ -49,15 +52,30 @@ namespace obos
 
 			~Process();
 		public:
+#if defined (__i686__)
 			memory::PageDirectory* pageDirectory = nullptr;
+#elif defined(__x86_64__)
+			memory::PageMap* level4PageMap = nullptr;
+#endif
 			DWORD pid = 0;
 			Process* parent = nullptr;
 			list_t* children = nullptr;
 			list_t* threads = nullptr;
 			list_t* abstractHandles = nullptr;
+			struct allocatedBlock
+			{
+				PBYTE start = nullptr;
+				SIZE_T size = 0;
+			};
+			// a list of "address"
+			list_t* allocatedBlocks;
 			bool isUserMode = false;
 			DWORD exitCode = 0;
+			DWORD consoleForegroundColour;
+			DWORD consoleBackgroundColour;
 			UINTPTR_T magicNumber = 0xCA44C071;
+		private:
+			void UncommitProcessMemory();
 		};
 	}
 }
