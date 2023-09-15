@@ -130,6 +130,7 @@ namespace obos
 			UINTPTR_T* pageDirectoryPtr = memory::kmap_pageTable(pageDirectory);
 			pageDirectoryPtr[0] = (UINTPTR_T)&boot_page_table1;
 			pageDirectoryPtr[0] |= 3;
+			utils::memzero(pageDirectoryPtr + 1, 511 * sizeof(UINTPTR_T));
 			level4PageMap->switchToThis();
 
 			UINTPTR_T glbTextPos = memory::g_kernelPageMap.getPageTableEntry(

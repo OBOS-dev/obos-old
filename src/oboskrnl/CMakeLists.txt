@@ -5,15 +5,6 @@
 set_source_files_properties(SOURCE "crti/src/crti.S" ASM-ATT)
 set_source_files_properties(SOURCE "crti/src/crte.S" ASM-ATT)
 
-set(oboskrnl_cxxSources "boot/kmain.cpp"            "console.cpp"                              "klog.cpp"                           "inline-asm.cpp"
-                        "klog.cpp"                  "utils/bitfields.cpp"                      "descriptors/idt/pic.cpp"            "external/list/list_iterator.c"
-                        "utils/memory.cpp"          "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.c" "multitasking/threadHandle.cpp"
-                        "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "elf/elf.cpp"
-                        "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "process/process.cpp"
-                        "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"                  "syscalls/syscalls.cpp"              "external/amalgamated-dist/Zydis.c"
-                        "descriptors/gdt/gdt.cpp"
-)
-
 # set(oboskrnl_headers "types.h"                            "boot/multiboot.h"                   "console.h"                    "klog.h"
 #                      "inline-asm.h"                       "descriptors/gdt/gdt.h"              "descriptors/idt/idt.h"        "memory_manager/physical.h"
 #                      "utils/bitfields.h"                  "descriptors/idt/pic.h"              "memory_manager/paging/init.h" "memory_manager/paging/allocate.h" 
@@ -28,7 +19,14 @@ set(oboskrnl_cxxSources "boot/kmain.cpp"            "console.cpp"               
 # file(GLOB_RECURSE oboskrnl_headers *.h)
 # file(GLOB_RECURSE oboskrnl_asmSources *.asm)
 
-set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_platformSpecific} ${oboskrnl_cxxSources})
+set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_platformSpecific} 
+        "boot/kmain.cpp"            "console.cpp"                              "klog.cpp"                           "inline-asm.cpp"
+        "klog.cpp"                  "utils/bitfields.cpp"                      "descriptors/idt/pic.cpp"            "external/list/list_iterator.c"
+        "utils/memory.cpp"          "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.c" "multitasking/threadHandle.cpp"
+        "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "elf/elf.cpp"
+        "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "process/process.cpp"
+        "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"                  "syscalls/syscalls.cpp"              "external/amalgamated-dist/Zydis.c"
+        "descriptors/gdt/gdt.cpp")
 
 add_executable(oboskrnl ${oboskrnl_files})
 target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wextra> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
@@ -41,7 +39,8 @@ target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-delete-null-pointer-checks>
                                 PRIVATE $<$<COMPILE_LANGUAGE:C>:-fno-delete-null-pointer-checks>
-                                ${TARGET_COMPILE_OPTIONS}
+                                PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${TARGET_COMPILE_OPTIONS}>
+                                PRIVATE $<$<COMPILE_LANGUAGE:C>:${TARGET_COMPILE_OPTIONS}>
 )
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}")
 target_link_options(oboskrnl 
@@ -75,10 +74,10 @@ else()
 endif()
 
 if (${OBOS_ARCHITECTURE} STREQUAL "x86_64")
-    target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:-d__x86_64__>)
+    target_compile_definitions(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:__x86_64__>)
     message ("Building for x86_64")
 elseif(${OBOS_ARCHITECTURE} STREQUAL "i686")
-    target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:-d__i686__>)
+    target_compile_definitions(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:__i686__>)
     message ("Building for i686 (x86)")
 else()
     message(FATAL_ERROR "Unknown architecture \"" ${OBOS_ARCHITECTURE} "\" make sure to set it to x86_64 to build for x86_64, or i686 for x86.")
@@ -92,6 +91,8 @@ add_custom_command(TARGET oboskrnl POST_BUILD
                    COMMAND objcopy -S isodir/obos/initrd/ps2Keyboard
                    COMMAND cp -u out/testProgram isodir/obos/initrd/testProgram
                    COMMAND objcopy -S isodir/obos/initrd/testProgram
+                   COMMAND cp -u out/ustarFilesystem isodir/obos/drivers/filesystems/ustarFilesystem
+                   COMMAND objcopy -S isodir/obos/drivers/filesystems/ustarFilesystem
                    COMMAND nm out/oboskrnl --demangle=gnu-v3 -ln | grep -w --ignore-case T > isodir/obos/oboskrnl.map
                    COMMAND cd scripts
                    COMMAND ./make_initrd.sh

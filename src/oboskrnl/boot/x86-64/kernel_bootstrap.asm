@@ -46,9 +46,9 @@ multiboot_struct:
 boot_stack_bottom:
     times 1024 db 0
 boot_stack:
-IDT:
-    .Length dw 0
-    .Base dd 0
+IDTPtr:
+    .Length: dw 0
+    .Base: dd 0
 GDT:
 .Null:
     dq 0x0000000000000000
@@ -94,28 +94,42 @@ _abort_boot:
     out  0x64, al
 
     db 0xEB, 0xFE
-
+.loop:
+    hlt
+    jmp .loop
+    iret
 _start:
     ; Disable interrupts.
     cli
-
+    
     mov esp, boot_stack
+
+    lidt [IDTPtr]
 
     mov [magic_number], eax
     mov [multiboot_struct], ebx
-
+    
     ; Check if we have cpuid.
-    pushfd
-    pop edx
-    and edx, 0x200000
-    ; Oh no!
-    jz _abort_boot
+    ; pushfd
+    ; pop edx
+    ; test edx, 0x200000
+    ; ; Oh no!
+    ; mov eax, 0x80808080
+    ; jz _abort_boot
+
+    ; Don't check if we have cpuid because ain't no one is going to run this kernel on an i386.
+    ; and if we don't check it will have the same effect, rebooting.
+
+    ; In the x86 architecture, the CPUID instruction (identified by a CPUID opcode) 
+    ; is a processor supplementary instruction (its name derived from CPU Identification) allowing software to discover details of the processor. 
+    ; It was introduced by Intel in 1993 with the launch of the Pentium and SL-enhanced 486 processors.
 
     ; Check if we're on a x86_64 processor.
     mov eax, 0x80000001
     cpuid
     ; Check bit 29 in edx
     test edx, 0x20000000
+    mov eax, 0xFFFFFFFF
     jz _abort_boot
 
     ; Horray!
@@ -155,8 +169,6 @@ _start:
     loop .loop
 
 .finish:
-
-    lidt [IDT]
 
 ;   Enable PAE.
     mov eax, (1 << 5)

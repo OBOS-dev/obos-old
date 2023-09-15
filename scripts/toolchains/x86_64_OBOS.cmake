@@ -29,10 +29,7 @@ execute_process(COMMAND x86_64-elf-g++ -print-file-name=crtbegin.o OUTPUT_VARIAB
 execute_process(COMMAND x86_64-elf-g++ -print-file-name=crtend.o OUTPUT_VARIABLE CRTEND_DIRECTORY)
 execute_process(COMMAND x86_64-elf-gcc --print-file-name=libgcc.a OUTPUT_VARIABLE LIBGCC)
 
-set(TARGET_COMPILE_OPTIONS "PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mcmodel=kernel>" 
-                           "PRIVATE $<$<COMPILE_LANGUAGE:C>:-mcmodel=kernel>"
-                           "PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mno-red-zone>"
-                           "PRIVATE $<$<COMPILE_LANGUAGE:C>:-mno-red-zone>")
+set(TARGET_COMPILE_OPTIONS -mcmodel=kernel -mno-red-zone)
 
 string(STRIP "${LIBGCC}" LIBGCC)
 string(STRIP "${CRTBEGIN_DIRECTORY}" CRTBEGIN_DIRECTORY)

@@ -59,6 +59,7 @@ namespace obos
 		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus Printf(CSTRING format, ...);
 		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus RegisterRecursiveFileIterateCallback(DEFINE_RESERVED_PARAMETERS);
 		static void interruptHandler(const obos::interrupt_frame* frame);
 
 		/*struct driverIdentification
@@ -76,7 +77,7 @@ namespace obos
 
 		struct
 		{
-			VOID(*handler)(const obos::interrupt_frame* frame);
+			VOID(*handler)();
 			driverIdentification* driver;
 		} g_registeredInterruptHandlers[16];
 
@@ -98,6 +99,7 @@ namespace obos
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(UnmapPhysicalTo));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(Printf));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(GetPhysicalAddress));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterRecursiveFileIterateCallback));
 		}
 
 		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS)
@@ -137,7 +139,7 @@ namespace obos
 			{
 				alignas(STACK_SIZE) UINTPTR_T driverId;
 				alignas(STACK_SIZE) UINTPTR_T interruptId;
-				alignas(STACK_SIZE) void(*handler)(const obos::interrupt_frame* frame);
+				alignas(STACK_SIZE) void(*handler)();
 			} attribute(aligned(8)) *pars = (_par*)parameters;
 			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
@@ -425,13 +427,29 @@ namespace obos
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 #endif
+		static exitStatus RegisterRecursiveFileIterateCallback(DEFINE_RESERVED_PARAMETERS)
+		{
+			struct _par
+			{
+				alignas(STACK_SIZE) UINTPTR_T driverId;
+				alignas(STACK_SIZE) void(*callback)(void(*appendEntry)(CSTRING,SIZE_T));
+			} *pars = (_par*)parameters;
+			if (pars->driverId > g_registeredDriversCapacity)
+				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
+			if (!g_registeredDrivers[pars->driverId])
+				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
+			if (g_registeredDrivers[pars->driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
+				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
+			g_registeredDrivers[pars->driverId]->iterateCallback = (PVOID)pars->callback;
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
 
 		static void interruptHandler(const obos::interrupt_frame* frame)
 		{
 			if (g_registeredInterruptHandlers[frame->intNumber - 32].driver)
 			{
 				g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->doContextSwitch();
-				g_registeredInterruptHandlers[frame->intNumber - 32].handler(frame);
+				g_registeredInterruptHandlers[frame->intNumber - 32].handler();
 				multitasking::g_currentThread->owner->doContextSwitch();
 			}
 		}

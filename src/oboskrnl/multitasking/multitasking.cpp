@@ -48,6 +48,7 @@ namespace obos
 		Thread* g_currentThread = nullptr;
 		bool g_initialized = false;
 		MutexHandle* g_schedulerMutex = nullptr;
+		SIZE_T g_timerTicks = 0;
 
 		bool canRanTask(Thread* thread)
 		{
@@ -113,6 +114,7 @@ namespace obos
 			static SIZE_T s_cursorRow = 0;
 			static SIZE_T s_cursorColumn = 0;
 			static bool s_cursorInitialized;
+			g_timerTicks++;
 			if (s_cursorCounter++ == CURSOR_SLEEP_TIME_2_5_MS && CURSOR_SLEEP_TIME_2_5_MS != 0)
 			{
 				if (s_cursorRow != s_terminalRow)

@@ -10,64 +10,64 @@ LOAD src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
 LOAD src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
                 0x0000000008000000                . = 0x8000000
 
-.text           0x0000000008000000      0x69b
+.text           0x0000000008000000      0x63b
  *(.multiboot)
  *(.text)
- .text          0x0000000008000000      0x497 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
+ .text          0x0000000008000000      0x438 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
                 0x00000000080000e6                Thread
                 0x00000000080001ee                _start
- *fill*         0x0000000008000497        0x9 
- .text          0x00000000080004a0      0x1fb src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
-                0x00000000080004a0                ConsoleOutputString
-                0x00000000080004ad                ExitProcess
-                0x00000000080004ba                CreateProcess
-                0x00000000080004c7                TerminateProcess
-                0x00000000080004d4                OpenCurrentProcessHandle
-                0x00000000080004e1                OpenProcessHandle
-                0x00000000080004ee                CreateThread
-                0x00000000080004fb                OpenThread
-                0x0000000008000508                PauseThread
-                0x0000000008000515                ResumeThread
-                0x0000000008000522                SetThreadPriority
-                0x000000000800052f                SetThreadStatus
-                0x000000000800053c                TerminateThread
-                0x0000000008000549                GetTid
-                0x0000000008000556                GetExitCode
-                0x0000000008000563                GetThreadPriority
-                0x0000000008000570                GetThreadStatus
-                0x000000000800057d                WaitForThreadExit
-                0x000000000800058a                ExitThread
-                0x0000000008000597                GetCurrentThreadTid
-                0x00000000080005a4                GetCurrentThreadHandle
-                0x00000000080005b1                GetCurrentThreadPriority
-                0x00000000080005be                GetCurrentThreadStatus
-                0x00000000080005cb                CloseHandle
-                0x00000000080005d8                OpenProcessParentHandle
-                0x00000000080005e5                SetConsoleColor
-                0x00000000080005f2                GetConsoleColor
-                0x00000000080005ff                ConsoleOutputCharacter
-                0x000000000800060c                ConsoleOutputCharacterAt
-                0x0000000008000619                ConsoleOutput
-                0x0000000008000626                ConsoleFillLine
-                0x0000000008000633                SetConsoleCursorPosition
-                0x0000000008000640                GetConsoleCursorPosition
-                0x000000000800064d                ConsoleSwapBuffers
-                0x000000000800065a                ClearConsole
-                0x0000000008000667                VirtualAlloc
-                0x0000000008000674                VirtualFree
-                0x0000000008000681                HasVirtualAddress
-                0x000000000800068e                MemoryProtect
+ *fill*         0x0000000008000438        0x8 
+ .text          0x0000000008000440      0x1fb src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
+                0x0000000008000440                ConsoleOutputString
+                0x000000000800044d                ExitProcess
+                0x000000000800045a                CreateProcess
+                0x0000000008000467                TerminateProcess
+                0x0000000008000474                OpenCurrentProcessHandle
+                0x0000000008000481                OpenProcessHandle
+                0x000000000800048e                CreateThread
+                0x000000000800049b                OpenThread
+                0x00000000080004a8                PauseThread
+                0x00000000080004b5                ResumeThread
+                0x00000000080004c2                SetThreadPriority
+                0x00000000080004cf                SetThreadStatus
+                0x00000000080004dc                TerminateThread
+                0x00000000080004e9                GetTid
+                0x00000000080004f6                GetExitCode
+                0x0000000008000503                GetThreadPriority
+                0x0000000008000510                GetThreadStatus
+                0x000000000800051d                WaitForThreadExit
+                0x000000000800052a                ExitThread
+                0x0000000008000537                GetCurrentThreadTid
+                0x0000000008000544                GetCurrentThreadHandle
+                0x0000000008000551                GetCurrentThreadPriority
+                0x000000000800055e                GetCurrentThreadStatus
+                0x000000000800056b                CloseHandle
+                0x0000000008000578                OpenProcessParentHandle
+                0x0000000008000585                SetConsoleColor
+                0x0000000008000592                GetConsoleColor
+                0x000000000800059f                ConsoleOutputCharacter
+                0x00000000080005ac                ConsoleOutputCharacterAt
+                0x00000000080005b9                ConsoleOutput
+                0x00000000080005c6                ConsoleFillLine
+                0x00000000080005d3                SetConsoleCursorPosition
+                0x00000000080005e0                GetConsoleCursorPosition
+                0x00000000080005ed                ConsoleSwapBuffers
+                0x00000000080005fa                ClearConsole
+                0x0000000008000607                VirtualAlloc
+                0x0000000008000614                VirtualFree
+                0x0000000008000621                HasVirtualAddress
+                0x000000000800062e                MemoryProtect
 
-.iplt           0x000000000800069b        0x0
- .iplt          0x000000000800069b        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
+.iplt           0x000000000800063b        0x0
+ .iplt          0x000000000800063b        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
 
-.rodata         0x0000000008001000       0x89
+.rodata         0x0000000008001000       0x72
  *(.rodata)
- .rodata        0x0000000008001000       0x89 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
+ .rodata        0x0000000008001000       0x72 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
 
-.rela.dyn       0x0000000008001090        0x0
- .rela.got      0x0000000008001090        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
- .rela.iplt     0x0000000008001090        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
+.rela.dyn       0x0000000008001078        0x0
+ .rela.got      0x0000000008001078        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
+ .rela.iplt     0x0000000008001078        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
 
 .data           0x0000000008002000        0x8
  *(.data)
@@ -96,9 +96,9 @@ OUTPUT(/mnt/c/Code/obos/out/testProgram elf64-x86-64)
  .debug_frame   0x0000000000000000       0xa8 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
  .debug_frame   0x00000000000000a8        0x0 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
 
-.debug_info     0x0000000000000000      0x5ab
- .debug_info    0x0000000000000000      0x52a src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
- .debug_info    0x000000000000052a       0x81 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
+.debug_info     0x0000000000000000      0x575
+ .debug_info    0x0000000000000000      0x4f4 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
+ .debug_info    0x00000000000004f4       0x81 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
 
 .debug_abbrev   0x0000000000000000      0x13f
  .debug_abbrev  0x0000000000000000      0x124 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
@@ -110,9 +110,9 @@ OUTPUT(/mnt/c/Code/obos/out/testProgram elf64-x86-64)
  .debug_aranges
                 0x0000000000000030       0x30 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
 
-.debug_line     0x0000000000000000      0x63a
- .debug_line    0x0000000000000000      0x494 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
- .debug_line    0x0000000000000494      0x1a6 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
+.debug_line     0x0000000000000000      0x61e
+ .debug_line    0x0000000000000000      0x478 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
+ .debug_line    0x0000000000000478      0x1a6 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
 
 .debug_str      0x0000000000000000        0x0
  .debug_str     0x0000000000000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj

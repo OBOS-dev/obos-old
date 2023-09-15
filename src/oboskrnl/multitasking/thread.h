@@ -104,6 +104,7 @@ namespace obos
 			process::Process* owner = nullptr;
 			PVOID tssStackBottom = nullptr; // If allocated, it will be 2 pages.
 			bool isServicingSyscall = false;
+			SIZE_T wakeUpTime = 0;
 		};
 	}
 }

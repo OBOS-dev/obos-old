@@ -16,16 +16,20 @@ SIZE_T g_archiveSize = 0;
 
 static void ReadFile(CSTRING filename, STRING output, SIZE_T count);
 static char FileExists(CSTRING filename, SIZE_T* size);
+static void IterateFiles(void(*appendCallback)(CSTRING filename, SIZE_T bufSize));
+
+#define DRIVER_ID 1
 
 int _start()
 {
-	RegisterDriver(PASS_OBOS_API_PARS 1, SERVICE_TYPE_FILESYSTEM);
+	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, SERVICE_TYPE_FILESYSTEM);
 	
 	if (GetMultibootModule(PASS_OBOS_API_PARS 3, (UINTPTR_T*)&g_archivePosition, &g_archiveSize))
 		return 1; // Shouldn't ever happen.
 
-	RegisterFileReadCallback(PASS_OBOS_API_PARS 1, ReadFile);
-	RegisterFileExistsCallback(PASS_OBOS_API_PARS 1, FileExists);
+	RegisterFileReadCallback(PASS_OBOS_API_PARS DRIVER_ID, ReadFile);
+	RegisterFileExistsCallback(PASS_OBOS_API_PARS DRIVER_ID, FileExists);
+	RegisterRecursiveFileIterateCallback(PASS_OBOS_API_PARS DRIVER_ID, IterateFiles);
 
 	return 0;
 }
@@ -121,5 +125,15 @@ char FileExists(CSTRING filename, SIZE_T* size)
 		iter += (((filesize + 511) / 512) + 1) * 512;
 	}
 	return ret;
+}
+void IterateFiles(void(*appendCallback)(CSTRING filename, SIZE_T bufSize))
+{
+	UINT8_T* iter = g_archivePosition;
 
+	while (!memcmp(iter + 257, "ustar", 6))
+	{
+		SIZE_T filesize = oct2bin(iter + 124, 11);
+		appendCallback((CSTRING)iter, strlen((CSTRING)iter));
+		iter += (((filesize + 511) / 512) + 1) * 512;
+	}
 }

@@ -278,14 +278,16 @@ namespace obos
 				utils::setBitInBitfield(flags, 63);
 			UINTPTR_T pageStructureFlags =
 				VirtualAllocFlags::GLOBAL |
-				(CPUSupportsExecuteDisable() ? VirtualAllocFlags::EXECUTE_ENABLE : 0) |
 				VirtualAllocFlags::WRITE_ENABLED |
 				1;
+			if (CPUSupportsExecuteDisable())
+				pageStructureFlags |= VirtualAllocFlags::EXECUTE_ENABLE;
 			flags &= 0x87F0000000000217;
 			if (!base)
 				return nullptr; // Not supported.
-			if (HasVirtualAddress(_base, 1) && !force)
-				return nullptr;
+			if(!force)
+				if (HasVirtualAddress(_base, 1))
+					return nullptr;
 			UINTPTR_T* pageTable = allocatePagingStructures(base, pageStructureFlags);
 			pageTable += PageMap::computeIndexAtAddress(base, 0);
 			UINTPTR_T entry = reinterpret_cast<UINTPTR_T>(physicalAddress);

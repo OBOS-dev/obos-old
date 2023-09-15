@@ -9,9 +9,8 @@
 #include <types.h>
 #include <utils/bitfields.h>
 
-#define ROUND_ADDRESS_DOWN(addr) ((UINTPTR_T)((addr >> 12) << 12))
-#define ROUND_ADDRESS_UP(addr) ((UINTPTR_T)((addr >> 12) << 12) + 4096)
-// 
+#define ROUND_ADDRESS_DOWN(addr) ((UINTPTR_T)addr & (~0xFFF))
+#define ROUND_ADDRESS_UP(addr) ((UINTPTR_T)(addr & (~0xFFF)) + 0xFFF)
 
 namespace obos
 {

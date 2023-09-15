@@ -6,7 +6,6 @@
 
 #include <syscalls/syscall_interface.h>
 
-
 static char* itoa(int value, char* result, int base) {
 	static const char* __attribute__((__section__(".data"))) digit_str = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz";
 	// check that the base if valid
@@ -32,6 +31,7 @@ static char* itoa(int value, char* result, int base) {
 	}
 	return result;
 }
+
 
 void Thread(PVOID userdata)
 {
@@ -65,7 +65,5 @@ void _start()
 
 	WaitForThreadExit(PASS_OBOS_API_PARS thr1);
 	CloseHandle(PASS_OBOS_API_PARS thr1);
-	ConsoleOutputString(PASS_OBOS_API_PARS "Exiting testProgram.\r\n");
-	SetConsoleColor(PASS_OBOS_API_PARS 0xFFFFFFFF, 0x00000000);
-	ExitProcess(PASS_OBOS_API_PARS 0);
+	ExitThread(PASS_OBOS_API_PARS 0);
 }

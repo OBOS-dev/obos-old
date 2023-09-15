@@ -43,9 +43,9 @@
 git clone https://github.com/oberrow/obos.git
 
 * Second, enter the directory that the repository was cloned into.
-* Third, run this command to configure the build to build for x86:
+* Third, run this command to configure the build to build for x86 (don't do this, it will fail):
 export OBOS_ARCHITECTURE=i686
-or this command to configure for x86_64
+or this command to configure for x86_64 (recommended)
 export OBOS_ARCHITECTURE=x86_64
 * Fourth, configure CMake with this command to build the operating system:
 

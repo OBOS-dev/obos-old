@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 enum exitStatus RegisterDriver(OBOS_API DWORD driverID, enum serviceType type);
-enum exitStatus RegisterInterruptHandler(OBOS_API DWORD driverId, BYTE interruptId, void(*handler)(const struct interrupt_frame* frame));
+enum exitStatus RegisterInterruptHandler(OBOS_API DWORD driverId, BYTE interruptId, void(*handler)());
 enum exitStatus PicSendEoi(OBOS_API BYTE irq);
 enum exitStatus DisableIRQ(OBOS_API BYTE irq);
 enum exitStatus EnableIRQ(OBOS_API BYTE irq);
@@ -43,6 +43,7 @@ enum exitStatus MapPhysicalTo(OBOS_API UINTPTR_T physicalAddress, PVOID virtualA
 enum exitStatus UnmapPhysicalTo(OBOS_API PVOID virtualAddress);
 enum exitStatus Printf(OBOS_API CSTRING format, ...);
 enum exitStatus GetPhysicalAddress(OBOS_API PVOID linearAddress, PVOID* physicalAddress);
+enum exitStatus RegisterRecursiveFileIterateCallback(OBOS_API DWORD driverId, void(*callback)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)));
 
 enum exitStatus CallSyscall(OBOS_API DWORD syscallId, ...);
 

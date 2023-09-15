@@ -294,8 +294,9 @@ namespace obos
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
 		mainThread.closeHandle();
 
-		char(*const existsCallback)(CSTRING filename, SIZE_T * size) = (char(*)(CSTRING filename, SIZE_T * size))driverAPI::g_registeredDrivers[1]->existsCallback;
-		void(*const readCallback)(CSTRING filename, STRING output, SIZE_T size) = (void(*)(CSTRING filename, STRING output, SIZE_T size))driverAPI::g_registeredDrivers[1]->readCallback;
+		char(*existsCallback)(CSTRING filename, SIZE_T * size) = (char(*)(CSTRING filename, SIZE_T * size))driverAPI::g_registeredDrivers[1]->existsCallback;
+		void(*readCallback)(CSTRING filename, STRING output, SIZE_T size) = (void(*)(CSTRING filename, STRING output, SIZE_T size))driverAPI::g_registeredDrivers[1]->readCallback;
+		void(*iterateCallback)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)) = (void(*)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)))driverAPI::g_registeredDrivers[1]->iterateCallback;
 
 		//// Set a write breakpoint for exists callback.
 		//asm volatile(".intel_syntax noprefix;" 
@@ -394,7 +395,21 @@ namespace obos
 		asm volatile ("sti" : : : "memory");
 		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(0);
 
-		asm volatile ("1: sti; hlt; jmp 1b;");
+		EnterKernelSection();
+		initrdDriver->doContextSwitch();
+		printf("Dumping filesystem root (ustar ramdisk):\n");
+		iterateCallback([](CSTRING filename, SIZE_T) {
+			printf("/%s\n", filename);
+			});
+		g_kernelProcess->doContextSwitch();
+		LeaveKernelSection();
+
+		/*multitasking::ThreadHandle idleTask;
+		idleTask.CreateThread(multitasking::Thread::priority_t::LOW, [](PVOID) { 
+			}, nullptr, 0, 0);
+		idleTask.closeHandle();*/
+		asm volatile ("1: sti; hlt; jmp 1b;"); 
+		multitasking::ExitThread(0); // We're done booting.
 	}
 }
 
@@ -405,7 +420,7 @@ extern "C"
 		obos::kpanic(nullptr, getEIP(), kpanic_format("Attempt to call a pure virtual function."));
 	}
 
-	typedef unsigned uarch_t;
+	typedef unsigned uarch_t; 
 	
 	struct atexitFuncEntry_t {
 		void (*destructorFunc) (void*);

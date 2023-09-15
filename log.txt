@@ -1,18 +1,6 @@
-Kernel panic at line 293, file /home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp, message:
-CreateProcess failed with 2.
-Stack trace:
-	2: 0xc0108470 (obos::kpanic(void*, void*, char const*, ...)+224)
-	1: 0xc0106987 (obos::kmainThr()+438)
-	0: 0x192f10 ([external code]+0)
-Disassembly of address 0xc0106977 (/home/omar/.vs/obos/src/oboskrnl/boot/kmain.cpp):
-	0xc0106977 (obos::kmainThr()+422): push [ebp-0x18]
-	0xc010697a (obos::kmainThr()+425): push 0xC01285BC
-	0xc010697f (obos::kmainThr()+430): push eax
-	0xc0106980 (obos::kmainThr()+431): push 0x00
-	0xc0106982 (obos::kmainThr()+433): call 0xC0108390
-	0xc0106987 (obos::kmainThr()+438): add esp, 0x10
-	0xc010698a (obos::kmainThr()+441): sub esp, 0x08
-	0xc010698d (obos::kmainThr()+444): push 0x06
-	0xc010698f (obos::kmainThr()+446): lea eax, [ebp-0x60]
-	0xc0106992 (obos::kmainThr()+449): push eax
-Press any key to restart...
+Dumping filesystem root (ustar ramdisk):
+/folder/
+/folder/file.txt
+/nvme
+/ps2Keyboard
+/testProgram

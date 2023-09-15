@@ -42,6 +42,7 @@ namespace obos
 			/// <returns>Success is zero, or 0xFFFFFFFF if there is no process.</returns>
 			DWORD TerminateProcess(DWORD exitCode);
 
+			// Make sure the stack is in a good place before running.
 			void doContextSwitch();
 
 			Process(Process&&) = delete;
