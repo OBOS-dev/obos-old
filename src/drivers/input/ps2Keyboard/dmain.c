@@ -21,7 +21,7 @@ typedef _Bool bool;
 #define false 0
 #define ACK 0xfa
 
-void keyboardInterrupt(const struct interrupt_frame* frame);
+void keyboardInterrupt();
 
 BYTE sendCommand(DWORD nCommands, ...);
 
@@ -181,10 +181,8 @@ int _start()
 	return 0;
 }
 
-void keyboardInterrupt(const struct interrupt_frame* frame)
+void keyboardInterrupt()
 {
-	DisableIRQ(PASS_OBOS_API_PARS 1);
-
 	BYTE scancode = inb(0x60);
 
 	bool wasReleased = (scancode & 0x80) == 0x80;
@@ -271,8 +269,6 @@ void keyboardInterrupt(const struct interrupt_frame* frame)
 	}
 
 	done:
-	EnableIRQ(PASS_OBOS_API_PARS 1);
-	PicSendEoi(PASS_OBOS_API_PARS 1);
 }
 
 BYTE sendCommand(DWORD nCommands, ...)

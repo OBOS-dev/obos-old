@@ -404,12 +404,14 @@ namespace obos
 		g_kernelProcess->doContextSwitch();
 		LeaveKernelSection();
 
-		/*multitasking::ThreadHandle idleTask;
+		multitasking::ThreadHandle idleTask;
 		idleTask.CreateThread(multitasking::Thread::priority_t::LOW, [](PVOID) { 
+			asm volatile ("1: sti; hlt; jmp 1b;");
 			}, nullptr, 0, 0);
-		idleTask.closeHandle();*/
-		asm volatile ("1: sti; hlt; jmp 1b;"); 
+		idleTask.closeHandle();
 		multitasking::ExitThread(0); // We're done booting.
+		kpanic(nullptr, nullptr, kpanic_format("kmain_thr tried to return!\n"));
+		asm volatile ("1: sti; hlt; jmp 1b;");
 	}
 }
 

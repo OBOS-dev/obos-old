@@ -24,6 +24,8 @@
 #include <klog.h>
 
 #include <multitasking/multitasking.h>
+#include <multitasking/threadHandle.h>
+#include <multitasking/thread.h>
 
 #include <process/process.h>
 
@@ -35,6 +37,8 @@
 #elif defined(__x86_64__)
 #define STACK_SIZE 8
 #endif
+
+extern "C" void callDriverIrqHandler(PBYTE newRsp, UINTPTR_T* l4PageMap, void(*irqHandler)());
 
 namespace obos
 {
@@ -448,9 +452,47 @@ namespace obos
 		{
 			if (g_registeredInterruptHandlers[frame->intNumber - 32].driver)
 			{
-				g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->doContextSwitch();
-				g_registeredInterruptHandlers[frame->intNumber - 32].handler();
-				multitasking::g_currentThread->owner->doContextSwitch();
+				struct par
+				{
+					DWORD irq;
+				} _par;
+				_par.irq = frame->intNumber - 32;
+				DisableIRQ(&_par);
+
+#ifdef __x86_64__
+				memory::PageMap* pageMap = memory::g_level4PageMap;
+				memory::g_level4PageMap = g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->level4PageMap;
+				UINTPTR_T* _pageMap = memory::g_level4PageMap->getPageMap();
+#define commitMemory , true
+#elif defined(__i686__)
+				memory::PageDirectory* pageDirectory = memory::g_pageDirectory;
+				memory::g_pageDirectory = g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->pageDirectory;
+				UINTPTR_T* _pageMap = memory::g_pageDirectory->getPageMap();
+#define commitMemory
+#endif
+
+				PBYTE newRsp = (PBYTE)memory::VirtualAlloc(nullptr, 1, memory::VirtualAllocFlags::GLOBAL | memory::VirtualAllocFlags::WRITE_ENABLED commitMemory);
+
+				cli();
+
+				EnterKernelSection();
+
+				// Sets the new stack, 
+				callDriverIrqHandler(newRsp + 4096, _pageMap, g_registeredInterruptHandlers[frame->intNumber - 32].handler);
+				
+				memory::VirtualFree(newRsp, 1);
+
+#ifdef __x86_64__
+				memory::g_level4PageMap = pageMap;
+#elif defined(__i686__)
+				memory::g_pageDirectory = pageDirectory;
+#endif
+
+#undef commitMemory
+
+				LeaveKernelSection();
+				PicSendEoi(&_par);
+				EnableIRQ(&_par);
 			}
 		}
 	}

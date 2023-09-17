@@ -15,7 +15,7 @@
           "description": "Adds the kernel's symbol file."
         },
         {
-          "text": "add-symbol-file C:/Code/obos/out/ustarFilesystem",
+          "text": "add-symbol-file C:/Code/obos/out/ps2Keyboard",
           "ignoreFailures": true
         },
         {

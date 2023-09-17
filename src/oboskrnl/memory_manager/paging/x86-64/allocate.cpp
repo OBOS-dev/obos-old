@@ -110,7 +110,7 @@ namespace obos
 			flags &= 0x8000000000000017;
 			if (!base)
 			{
-				for (base = 0x600000; HasVirtualAddress(reinterpret_cast<PCVOID>(base), nPages); base += 4096);
+				for (base = 0x600000; HasVirtualAddress(reinterpret_cast<PCVOID>(base), nPages, false); base += 4096);
 				if (!base)
 					return nullptr;
 			}
@@ -176,18 +176,19 @@ namespace obos
 			}
 			for (UINTPTR_T addr = base; addr < (base + nPages * 4096); addr += 4096)
 			{
-				UINTPTR_T* pageTable = memory::kmap_pageTable(
-					memory::g_level4PageMap->getPageTable(
-						memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 3),
-						memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 2),
-						memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 1)));
 				auto pageTableIndex = memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 0);
+				UINTPTR_T* pageTablePhys = memory::g_level4PageMap->getPageTable(
+					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 3),
+					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 2),
+					memory::PageMap::computeIndexAtAddress(addr & (~0xfff), 1));
+				UINTPTR_T* pageTable = memory::kmap_pageTable(pageTablePhys);
 				if (!utils::testBitInBitfield(pageTable[pageTableIndex], 9))
 				{
 					// Free the physical page.
 					UINTPTR_T phys = pageTable[pageTableIndex] & 0x1FFFFEFFFFF000;
 					kfree_physicalPage(reinterpret_cast<PVOID>(phys));
 				}
+				memory::kmap_pageTable(pageTablePhys);
 				pageTable[pageTableIndex] = 0;
 			}
 			return 0;

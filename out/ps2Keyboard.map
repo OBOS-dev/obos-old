@@ -10,42 +10,41 @@ LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
 LOAD src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
                 0x0000000008000000                . = 0x8000000
 
-.text           0x0000000008000000      0xa30
+.text           0x0000000008000000      0x9c0
  *(.multiboot)
  *(.text)
- .text          0x0000000008000000      0x932 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
+ .text          0x0000000008000000      0x8d0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
                 0x0000000008000060                _start
                 0x00000000080001b8                keyboardInterrupt
-                0x0000000008000766                sendCommand
-                0x00000000080008c2                outb
-                0x00000000080008df                outw
-                0x00000000080008fc                inb
-                0x0000000008000916                inw
- *fill*         0x0000000008000932        0xe 
- .text          0x0000000008000940       0xf0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
-                0x0000000008000940                RegisterDriver
-                0x000000000800094f                RegisterInterruptHandler
-                0x000000000800095e                PicSendEoi
-                0x000000000800096d                EnableIRQ
-                0x000000000800097c                DisableIRQ
-                0x000000000800098b                RegisterReadCallback
-                0x000000000800099a                PrintChar
-                0x00000000080009a9                GetMultibootModule
-                0x00000000080009b8                RegisterFileReadCallback
-                0x00000000080009c7                RegisterFileExistsCallback
-                0x00000000080009d6                MapPhysicalTo
-                0x00000000080009e5                UnmapPhysicalTo
-                0x00000000080009f4                Printf
-                0x0000000008000a03                GetPhysicalAddress
-                0x0000000008000a12                RegisterRecursiveFileIterateCallback
-                0x0000000008000a21                CallSyscall
+                0x0000000008000704                sendCommand
+                0x0000000008000860                outb
+                0x000000000800087d                outw
+                0x000000000800089a                inb
+                0x00000000080008b4                inw
+ .text          0x00000000080008d0       0xf0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+                0x00000000080008d0                RegisterDriver
+                0x00000000080008df                RegisterInterruptHandler
+                0x00000000080008ee                PicSendEoi
+                0x00000000080008fd                EnableIRQ
+                0x000000000800090c                DisableIRQ
+                0x000000000800091b                RegisterReadCallback
+                0x000000000800092a                PrintChar
+                0x0000000008000939                GetMultibootModule
+                0x0000000008000948                RegisterFileReadCallback
+                0x0000000008000957                RegisterFileExistsCallback
+                0x0000000008000966                MapPhysicalTo
+                0x0000000008000975                UnmapPhysicalTo
+                0x0000000008000984                Printf
+                0x0000000008000993                GetPhysicalAddress
+                0x00000000080009a2                RegisterRecursiveFileIterateCallback
+                0x00000000080009b1                CallSyscall
 
-.iplt           0x0000000008000a30        0x0
- .iplt          0x0000000008000a30        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
+.iplt           0x00000000080009c0        0x0
+ .iplt          0x00000000080009c0        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
 
-.rela.dyn       0x0000000008000a30        0x0
- .rela.got      0x0000000008000a30        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
- .rela.iplt     0x0000000008000a30        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
+.rela.dyn       0x00000000080009c0        0x0
+ .rela.got      0x00000000080009c0        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
+ .rela.iplt     0x00000000080009c0        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
 
 .rodata
  *(.rodata)
@@ -81,13 +80,13 @@ OUTPUT(/mnt/c/Code/obos/out/ps2Keyboard elf64-x86-64)
  .debug_frame   0x0000000000000000      0x198 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
  .debug_frame   0x0000000000000198        0x0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
-.debug_info     0x0000000000000000      0xd89
- .debug_info    0x0000000000000000      0xd06 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
- .debug_info    0x0000000000000d06       0x83 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+.debug_info     0x0000000000000000      0xc33
+ .debug_info    0x0000000000000000      0xbb0 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
+ .debug_info    0x0000000000000bb0       0x83 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
-.debug_abbrev   0x0000000000000000      0x293
- .debug_abbrev  0x0000000000000000      0x278 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
- .debug_abbrev  0x0000000000000278       0x1b src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+.debug_abbrev   0x0000000000000000      0x299
+ .debug_abbrev  0x0000000000000000      0x27e src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
+ .debug_abbrev  0x000000000000027e       0x1b src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
 .debug_aranges  0x0000000000000000       0x60
  .debug_aranges
@@ -95,9 +94,9 @@ OUTPUT(/mnt/c/Code/obos/out/ps2Keyboard elf64-x86-64)
  .debug_aranges
                 0x0000000000000030       0x30 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
-.debug_line     0x0000000000000000      0xc5b
- .debug_line    0x0000000000000000      0xb97 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
- .debug_line    0x0000000000000b97       0xc4 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+.debug_line     0x0000000000000000      0xc3f
+ .debug_line    0x0000000000000000      0xb7b src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
+ .debug_line    0x0000000000000b7b       0xc4 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
 .debug_str      0x0000000000000000        0x9
  .debug_str     0x0000000000000000        0x9 src/drivers/input/ps2Keyboard/CMakeFiles/ps2Keyboard.dir/dmain.c.obj
