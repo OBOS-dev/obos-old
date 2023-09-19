@@ -436,7 +436,7 @@ namespace obos
 			struct _par
 			{
 				alignas(STACK_SIZE) UINTPTR_T driverId;
-				alignas(STACK_SIZE) void(*callback)(void(*appendEntry)(CSTRING,SIZE_T));
+				alignas(STACK_SIZE) void(*callback)(bool(*appendEntry)(CSTRING,SIZE_T,BYTE));
 			} *pars = (_par*)parameters;
 			if (pars->driverId > g_registeredDriversCapacity)
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;

@@ -137,6 +137,7 @@ namespace obos
 		s_consoleMutex->Unlock();
 		UpdateCursorPosition();
 		LeaveKernelSection();
+		//printf("Console has a size of %dx%d, and the framebuffer has a size of %dx%d.\r\n", s_nCharsHorizontal, s_nCharsVertical, s_framebufferWidth, s_framebufferHeight);
 	}
 	void SetConsoleColor(UINT32_T foregroundColor, UINT32_T backgroundColor)
 	{

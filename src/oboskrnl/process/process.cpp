@@ -33,9 +33,11 @@ extern "C" UINTPTR_T boot_page_table1;
 namespace obos
 {
 	extern process::Process* g_kernelProcess;
+	extern char kernelStart;
 	namespace memory
 	{
 		extern UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
+		extern UINTPTR_T g_pageTableMapPageDirectory[512] alignas(4096);
 	}
 	namespace process
 	{
@@ -121,7 +123,7 @@ namespace obos
 			UINTPTR_T l3PageMap = (UINTPTR_T)memory::kalloc_physicalPage();
 			utils::memzero(memory::kmap_pageTable((PVOID)l3PageMap), 4096);
 			newPageMap = memory::kmap_pageTable(level4PageMap->getPageMap());
-			newPageMap[0] = l3PageMap | 7;
+			newPageMap[0] = l3PageMap | 7;/*
 			UINTPTR_T* l3PageMapPtr = (UINTPTR_T*)memory::kmap_pageTable((PVOID)l3PageMap);
 			UINTPTR_T* pageDirectory = (UINTPTR_T*)memory::kalloc_physicalPage();
 			memory::kmap_pageTable((PVOID)l3PageMap);
@@ -130,7 +132,13 @@ namespace obos
 			UINTPTR_T* pageDirectoryPtr = memory::kmap_pageTable(pageDirectory);
 			pageDirectoryPtr[0] = (UINTPTR_T)&boot_page_table1;
 			pageDirectoryPtr[0] |= 3;
-			utils::memzero(pageDirectoryPtr + 1, 511 * sizeof(UINTPTR_T));
+			utils::memzero(pageDirectoryPtr + 1, 511 * sizeof(UINTPTR_T));*/
+			{
+				UINTPTR_T* pmap = memory::kmap_pageTable(level4PageMap->getPageMap());
+				UINTPTR_T flags = (static_cast<UINTPTR_T>(memory::CPUSupportsExecuteDisable()) << 63) | 3;
+				reinterpret_cast<UINTPTR_T*>(pmap[0] & 0xFFFFFFFFFF000)[3]
+					= (reinterpret_cast<UINTPTR_T>(memory::g_pageTableMapPageDirectory) - reinterpret_cast<UINTPTR_T>(&kernelStart)) | flags;
+			}
 			level4PageMap->switchToThis();
 
 			UINTPTR_T glbTextPos = memory::g_kernelPageMap.getPageTableEntry(

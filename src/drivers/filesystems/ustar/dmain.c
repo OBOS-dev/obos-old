@@ -16,7 +16,7 @@ SIZE_T g_archiveSize = 0;
 
 static void ReadFile(CSTRING filename, STRING output, SIZE_T count);
 static char FileExists(CSTRING filename, SIZE_T* size);
-static void IterateFiles(void(*appendCallback)(CSTRING filename, SIZE_T bufSize));
+static void IterateFiles(BOOL(*appendCallback)(CSTRING filename, SIZE_T bufSize, BYTE attrib));
 
 #define DRIVER_ID 1
 
@@ -91,6 +91,31 @@ static void ReadFile(CSTRING filename, STRING output, SIZE_T count)
 		iter += (((filesize + 511) / 512) + 1) * 512;
 	}
 }
+
+BYTE MakeFileAttribFromType(char type)
+{
+	BYTE ret = FILE_EXISTS_READ_ONLY;
+	switch (type)
+	{
+	case '1':
+		ret |= FILE_EXISTS_HARDLINK;
+		break;
+	case '2':
+		ret |= FILE_EXISTS_SYMLINK;
+		break;
+	case '5':
+		ret |= FILE_EXISTS_DIRECTORY;
+		break;
+	case 0:
+	case '0':
+		ret |= FILE_EXISTS_FILE;
+		break;
+	default:
+		break;
+	}
+	return ret;
+}
+
 char FileExists(CSTRING filename, SIZE_T* size)
 {
 	UINT8_T* iter = g_archivePosition;
@@ -104,36 +129,22 @@ char FileExists(CSTRING filename, SIZE_T* size)
 		{
 			*size = filesize;
 			BYTE type = *(iter + 156);
-			ret = FILE_EXISTS_READ_ONLY;
-			switch (type)
-			{
-			case '4':
-			case '3':
-				ret |= FILE_EXISTS_DEVICE;
-				break;
-			case '1':
-				ret |= FILE_EXISTS_HARDLINK;
-				break;
-			case '2':
-				ret |= FILE_EXISTS_SYMLINK;
-				break;
-			default:
-				break;
-			}
+			ret = (char)MakeFileAttribFromType(type);
 			break;
 		}
 		iter += (((filesize + 511) / 512) + 1) * 512;
 	}
 	return ret;
 }
-void IterateFiles(void(*appendCallback)(CSTRING filename, SIZE_T bufSize))
+void IterateFiles(BOOL(*appendCallback)(CSTRING filename, SIZE_T bufSize, BYTE attrib))
 {
 	UINT8_T* iter = g_archivePosition;
 
 	while (!memcmp(iter + 257, "ustar", 6))
 	{
 		SIZE_T filesize = oct2bin(iter + 124, 11);
-		appendCallback((CSTRING)iter, strlen((CSTRING)iter));
+		if (!appendCallback((CSTRING)iter, strlen((CSTRING)iter), MakeFileAttribFromType(*(iter + 156))))
+			return;
 		iter += (((filesize + 511) / 512) + 1) * 512;
 	}
 }

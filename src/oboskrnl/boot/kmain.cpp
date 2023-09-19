@@ -199,7 +199,7 @@ namespace obos
 
 #if defined(__x86_64__)
 		s_framebuffer = (UINT32_T*)0xFFFFFFFF80600000;
-		framebuffer_limit = 0xFFFFFFFF80600000 + g_multibootInfo->framebuffer_height * g_multibootInfo->framebuffer_width * 4;
+		framebuffer_limit = 0xFFFFFFFF80600000 + (static_cast<UINTPTR_T>(g_multibootInfo->framebuffer_height) * g_multibootInfo->framebuffer_width * 4);
 #elif defined(__i686__)
 		s_framebuffer = (UINT32_T*)0xFFCFF000;
 		framebuffer_limit = 0xFFFFF000;
@@ -378,7 +378,6 @@ namespace obos
 		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
 		
 		SetConsoleColor(0x003399FF, 0x00000000);
-		ConsoleOutputString("\n");
 		ConsoleOutput(ascii_art, ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start);
 		SetConsoleColor(0xFFFFFFFF, 0x00000000);
 

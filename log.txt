@@ -1,6 +1,7 @@
 Dumping filesystem root (ustar ramdisk):
 /folder/
 /folder/file.txt
+/folder/subDirectory/
 /nvme
 /ps2Keyboard
 /testProgram

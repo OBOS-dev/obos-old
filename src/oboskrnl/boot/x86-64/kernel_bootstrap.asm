@@ -97,7 +97,6 @@ _abort_boot:
 .loop:
     hlt
     jmp .loop
-    iret
 _start:
     ; Disable interrupts.
     cli
@@ -171,7 +170,8 @@ _start:
 .finish:
 
 ;   Enable PAE.
-    mov eax, (1 << 5)
+    mov eax, cr4
+    or eax, (1 << 5)
     mov cr4, eax
 
 ;   Load the level 4 page map.
@@ -181,8 +181,6 @@ _start:
 ;   Enter long mode.
     mov ecx, 0xC0000080
     rdmsr
-    ; Shouldn't be needed, but just in case
-    mov ecx, 0xC0000080
     or eax, (1 << 8) | (1 << 10)
     wrmsr
 

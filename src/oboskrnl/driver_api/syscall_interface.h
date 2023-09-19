@@ -43,7 +43,7 @@ enum exitStatus MapPhysicalTo(OBOS_API UINTPTR_T physicalAddress, PVOID virtualA
 enum exitStatus UnmapPhysicalTo(OBOS_API PVOID virtualAddress);
 enum exitStatus Printf(OBOS_API CSTRING format, ...);
 enum exitStatus GetPhysicalAddress(OBOS_API PVOID linearAddress, PVOID* physicalAddress);
-enum exitStatus RegisterRecursiveFileIterateCallback(OBOS_API DWORD driverId, void(*callback)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)));
+enum exitStatus RegisterRecursiveFileIterateCallback(OBOS_API DWORD driverId, void(*callback)(BOOL(*appendEntry)(CSTRING filename, SIZE_T bufSize, BYTE attrib)));
 
 enum exitStatus CallSyscall(OBOS_API DWORD syscallId, ...);
 

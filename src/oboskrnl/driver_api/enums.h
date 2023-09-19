@@ -42,7 +42,7 @@ namespace obos
 			SERVICE_TYPE_KERNEL_EXTENSION,
 			// Ex: A serial driver, a network card driver.
 			SERVICE_TYPE_COMMUNICATION,
-			// Ex: A virtual serial driver (see com0com on windows to understand this).
+			// Ex: A virtual serial driver (see com0com for context).
 			SERVICE_TYPE_VIRTUAL_COMMUNICATION,
 			// Not a service, instead it indicates the service type with the biggest value.
 			SERVICE_TYPE_MAX_VALUE = SERVICE_TYPE_VIRTUAL_COMMUNICATION
@@ -84,8 +84,8 @@ namespace obos
 			FILE_EXISTS_DIRECTORY = 4,
 			// If this is set, the file links to another file.
 			FILE_EXISTS_HARDLINK = 8,
-			// If this is set, the file refers to a device.
-			FILE_EXISTS_DEVICE = 16
+			// If this is set, this is a file, not a directory.
+			FILE_EXISTS_FILE = 16,
 		};
 
 		enum allocFlags

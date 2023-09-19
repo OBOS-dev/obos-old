@@ -17,6 +17,7 @@ extern UINTPTR_T boot_page_level4_map;
 
 namespace obos
 {
+	extern char kernelStart;
 	namespace memory
 	{
 		extern UINTPTR_T* kmap_pageTable(PVOID physicalAddress);
@@ -82,11 +83,17 @@ namespace obos
 		PageMap* g_level4PageMap;
 		PageMap g_kernelPageMap;
 		UINTPTR_T* g_zeroPage = nullptr;
+		
+		extern UINTPTR_T g_pageTableMapPageDirectory[512] alignas(4096);
 
 		void InitializePaging()
 		{
 			g_level4PageMap = &g_kernelPageMap;
 			new (g_level4PageMap) PageMap{ &boot_page_level4_map };
+			UINTPTR_T* pmap = g_level4PageMap->getPageMap();
+			UINTPTR_T flags = (static_cast<UINTPTR_T>(memory::CPUSupportsExecuteDisable()) << 63) | 3;
+			reinterpret_cast<UINTPTR_T*>(pmap[0] & 0xFFFFFFFFFF000)[3]
+				= (reinterpret_cast<UINTPTR_T>(memory::g_pageTableMapPageDirectory) - reinterpret_cast<UINTPTR_T>(&kernelStart)) | flags;
 		}
 	}
 }
