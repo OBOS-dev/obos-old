@@ -1,7 +1,26 @@
-Dumping filesystem root (ustar ramdisk):
-/folder/
-/folder/file.txt
-/folder/subDirectory/
-/nvme
-/ps2Keyboard
-/testProgram
+Page fault in kernel-mode at 0xffffffff801b5539 (tid 0, pid 0) while trying to read a non-present page.
+The address of that page is 0x000000002a4d4831. Error code: 0. Page table entry: 0x0000000000000000.
+Dumping registers: 
+	RDI: 0x0000000000000080, RSI: 0x0000000000000000, RBP: 0xffffff00801b5509
+	RSP: 0xffffffff801b54b8, RBX: 0x0000000000004fa8, RDX: 0x0000000000000080
+	RCX: 0x0000000000000020, RAX: 0x000000002a4d4831, RIP: 0xffffffff801b5539
+	 R8: 0x0000000000000004,  R9: 0x0000000000000000, R10: 0x0000000000000000
+	R11: 0x0000000000000000, R12: 0x0000000000000000, R13: 0x0000000000000000
+	R14: 0x0000000000000000, R15: 0x0000000000000000, RFL: 0x0000000000000a12
+	 SS: 0x0000000000000010,  DS: 0x0000000000000010,  CS: 0x0000000000000008
+Stack trace:
+	2: 0xffffffff8010f6cb (obos::kpanic(void*, void*, char const*, ...)+247)
+	1: 0xffffffff8010a876 (obos::pageFault(obos::interrupt_frame const*)+1880)
+	0: 0xffffffff8010925e (isr_common_stub.finished+0)
+Disassembly of address 0xffffffff801b5539 (Unknown file.):
+	0xffffffff801b5539 ([external code]+0): and eax, [rax]
+	0xffffffff801b553b ([external code]+0): add [rax], al
+	0xffffffff801b553d ([external code]+0): add [rax], al
+	0xffffffff801b553f ([external code]+0): add [rax], al
+	0xffffffff801b5541 ([external code]+0): mov [0x00FFFFFFFF80113C], al
+	0xffffffff801b554a ([external code]+0): add [rax], al
+	0xffffffff801b554c ([external code]+0): add [rax], al
+	0xffffffff801b554e ([external code]+0): add [rax], al
+	0xffffffff801b5550 ([external code]+0): add [rax], al
+	0xffffffff801b5552 ([external code]+0): add [rax], al
+Press any key to restart...

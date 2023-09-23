@@ -65,6 +65,7 @@ GDTPointer:
 global boot_page_level4_map
 global boot_page_level3_map
 global boot_page_table1
+global idleTask
 
 section .bootstrap_stack nobits
 _ZN4obos12stack_bottomE:
@@ -241,3 +242,7 @@ wait1:
 
     ; Shouldn't get hit. Only here for completeness.
     ret
+idleTask:
+    sti
+    hlt 
+    jmp idleTask

@@ -11,6 +11,8 @@
 
 #include <memory_manager/paging/allocate.h>
 
+#define RFLAGS_IF 0x200
+
 namespace obos
 {
 	namespace multitasking
@@ -98,7 +100,7 @@ namespace obos
 			frame.rip = (UINTPTR_T)entry;
 			frame.rdi = (UINTPTR_T)userData;
 			frame.rbp = 0;
-			frame.rflags |= (1 << 9) | getEflags();
+			frame.rflags |= RFLAGS_IF;
 #endif
 			// If our owner wasn't set before, then we'll use from the current thread's owner.
 			if(!owner)

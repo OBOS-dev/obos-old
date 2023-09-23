@@ -7,13 +7,19 @@
 add_executable (ahci "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.h" 
 "dmain.c" "enumerate_pci.c" "enumerate_pci.h" "ahciStructures.h")
 
-target_compile_options(ahci PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror> PRIVATE $<$<COMPILE_LANGUAGE:C>:-std=gnu17>)
+target_compile_options(ahci
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> 
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror> 
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-std=gnu17>
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-mno-red-zone>
+)
 
 target_link_options(ahci
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/ahci.map"
     PUBLIC "-ffreestanding"
     PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/src/drivers/storage/ahci/linker.ld"
-    PUBLIC "-nostdlib")
+    PUBLIC "-nostdlib"
+)
 
 set_target_properties(ahci PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 target_compile_definitions(ahci PUBLIC OBOS=1)

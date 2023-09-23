@@ -6,7 +6,12 @@
 
 add_executable (ps2Keyboard "dmain.c" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.h")
 
-target_compile_options(ps2Keyboard PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror> PRIVATE $<$<COMPILE_LANGUAGE:C>:-std=gnu17>)
+target_compile_options(ps2Keyboard 
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> 
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror> 
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-std=gnu17>
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-mno-red-zone>
+)
 
 target_link_options(ps2Keyboard
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/ps2Keyboard.map"

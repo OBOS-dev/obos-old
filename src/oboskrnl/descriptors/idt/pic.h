@@ -23,33 +23,34 @@ namespace obos
 
 		void setPorts(UINT16_T outputPortCommand, UINT16_T outputPortData);
 
-		void sendCommandByte(UINT8_T byte);
-		void sendCommandWord(UINT16_T word);
-		void sendDataByte(UINT8_T byte);
-		void sendDataWord(UINT16_T word);
+		Pic& sendCommandByte(UINT8_T byte);
+		Pic& sendCommandWord(UINT16_T word);
+		Pic& sendDataByte(UINT8_T byte);
+		Pic& sendDataWord(UINT16_T word);
 
 		UINT8_T recvCommandByte();
 		UINT16_T recvCommandWord();
 		UINT8_T recvDataByte();
 		UINT16_T recvDataWord();
 		
-		void sendEOI();
+		Pic& sendEOI();
 		
 		// Maps the interrupts 0-7 on the pic to [startInterrupt]-[startInterrupt + 7] on the cpu. Make sure these all have an entry in the idt, or you'll have a bad time.
-		void remap(BYTE startInterrupt, BYTE cascadeIdentity);
+		Pic& remap(BYTE startInterrupt, BYTE cascadeIdentity);
 
-		void enableIrq (BYTE interrupt);
-		void disableIrq(BYTE interrupt);
+		Pic& enableIrq (BYTE interrupt);
+		Pic& disableIrq(BYTE interrupt);
 
-		void disable();
+		Pic& disable();
 
 		bool issuedInterrupt(UINT8_T interrupt);
+		
+		static inline constexpr UINT8_T s_picEOI = 0x20;
 	private:
 		UINT16_T m_outputPortCommand = 0;
 		UINT16_T m_outputPortData = 0;
 		bool m_setPorts = false;
 
-		static inline constexpr UINT8_T s_picEOI = 0x20;
 	};
 	void SendEOI(BYTE irqNumber);
 }

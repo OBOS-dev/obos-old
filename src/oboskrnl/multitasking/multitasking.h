@@ -24,6 +24,13 @@ namespace obos
 		extern Thread* g_currentThread;
 		extern bool g_initialized;
 		extern MutexHandle* g_schedulerMutex;
+		extern SIZE_T g_timerTicks;
+		// 1000 hz, 1 ms. (1/1000 * 1000)
+		constexpr UINT16_T g_schedulerFrequency = 1000;
+
+		void SetPITFrequency(UINT16_T freq);
+		// A call to SetPITFrequency will enable the PIT once again.
+		void DisablePIT();
 
 		void InitializeMultitasking();
 	}

@@ -60,6 +60,12 @@ namespace obos
 			mutex->Unlock();
 		}
 
+		bool MutexHandle::IsLocked()
+		{
+			Mutex* mutex = (Mutex*)m_value;
+			return mutex->m_locked;
+		}
+
 		MutexHandle::~MutexHandle()
 		{
 			closeHandle();

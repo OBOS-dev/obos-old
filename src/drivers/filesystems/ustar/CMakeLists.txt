@@ -6,7 +6,11 @@
 
 add_executable (ustarFilesystem "dmain.c" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.h")
 
-target_compile_options(ustarFilesystem PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror> PRIVATE $<$<COMPILE_LANGUAGE:C>:-std=gnu17>)
+target_compile_options(ustarFilesystem 
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> 
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror> 
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-std=gnu17> 
+    PRIVATE $<$<COMPILE_LANGUAGE:C>:-mno-red-zone>)
 
 target_link_options(ustarFilesystem
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/ustarFilesystem.map"

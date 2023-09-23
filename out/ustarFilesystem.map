@@ -10,37 +10,37 @@ LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
                 0x0000000008000000                . = 0x8000000
 
-.text           0x0000000008000000      0x640
+.text           0x0000000008000000      0x650
  *(.multiboot)
  *(.text)
- .text          0x0000000008000000      0x541 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .text          0x0000000008000000      0x551 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
                 0x0000000008000000                _start
                 0x000000000800010f                oct2bin
-                0x0000000008000156                memcmp
-                0x00000000080001e5                strlen
-                0x0000000008000214                strcmp
-                0x000000000800036a                MakeFileAttribFromType
- *fill*         0x0000000008000541        0xf 
- .text          0x0000000008000550       0xf0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
-                0x0000000008000550                RegisterDriver
-                0x000000000800055f                RegisterInterruptHandler
-                0x000000000800056e                PicSendEoi
-                0x000000000800057d                EnableIRQ
-                0x000000000800058c                DisableIRQ
-                0x000000000800059b                RegisterReadCallback
-                0x00000000080005aa                PrintChar
-                0x00000000080005b9                GetMultibootModule
-                0x00000000080005c8                RegisterFileReadCallback
-                0x00000000080005d7                RegisterFileExistsCallback
-                0x00000000080005e6                MapPhysicalTo
-                0x00000000080005f5                UnmapPhysicalTo
-                0x0000000008000604                Printf
-                0x0000000008000613                GetPhysicalAddress
-                0x0000000008000622                RegisterRecursiveFileIterateCallback
-                0x0000000008000631                CallSyscall
+                0x000000000800015a                memcmp
+                0x00000000080001ed                strlen
+                0x0000000008000220                strcmp
+                0x0000000008000376                MakeFileAttribFromType
+ *fill*         0x0000000008000551        0xf 
+ .text          0x0000000008000560       0xf0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+                0x0000000008000560                RegisterDriver
+                0x000000000800056f                RegisterInterruptHandler
+                0x000000000800057e                PicSendEoi
+                0x000000000800058d                EnableIRQ
+                0x000000000800059c                DisableIRQ
+                0x00000000080005ab                RegisterReadCallback
+                0x00000000080005ba                PrintChar
+                0x00000000080005c9                GetMultibootModule
+                0x00000000080005d8                RegisterFileReadCallback
+                0x00000000080005e7                RegisterFileExistsCallback
+                0x00000000080005f6                MapPhysicalTo
+                0x0000000008000605                UnmapPhysicalTo
+                0x0000000008000614                Printf
+                0x0000000008000623                GetPhysicalAddress
+                0x0000000008000632                RegisterRecursiveFileIterateCallback
+                0x0000000008000641                CallSyscall
 
-.iplt           0x0000000008000640        0x0
- .iplt          0x0000000008000640        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.iplt           0x0000000008000650        0x0
+ .iplt          0x0000000008000650        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 
 .rodata         0x0000000008001000        0x6
  *(.rodata)
@@ -54,18 +54,18 @@ LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/obosk
  *(.data)
  .data          0x0000000008002000        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 
-.eh_frame       0x0000000008001008      0x1ac
- .eh_frame      0x0000000008001008      0x1ac src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
-                                        0x1c8 (size before relaxing)
+.eh_frame       0x0000000008001008      0x1b4
+ .eh_frame      0x0000000008001008      0x1b4 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                                        0x1d8 (size before relaxing)
 
-.got            0x00000000080011b8        0x0
- .got           0x00000000080011b8        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.got            0x00000000080011c0        0x0
+ .got           0x00000000080011c0        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 
-.got.plt        0x00000000080011b8        0x0
- .got.plt       0x00000000080011b8        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.got.plt        0x00000000080011c0        0x0
+ .got.plt       0x00000000080011c0        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 
-.igot.plt       0x00000000080011b8        0x0
- .igot.plt      0x00000000080011b8        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.igot.plt       0x00000000080011c0        0x0
+ .igot.plt      0x00000000080011c0        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 
 .bss            0x0000000008002000       0x10
  *(COMMON)
@@ -75,13 +75,13 @@ LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/obosk
                 0x0000000008002008                g_archiveSize
 OUTPUT(/mnt/c/Code/obos/out/ustarFilesystem elf64-x86-64)
 
-.debug_frame    0x0000000000000000      0x1d8
- .debug_frame   0x0000000000000000      0x1d8 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
- .debug_frame   0x00000000000001d8        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+.debug_frame    0x0000000000000000      0x220
+ .debug_frame   0x0000000000000000      0x220 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_frame   0x0000000000000220        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
-.debug_info     0x0000000000000000      0xb55
- .debug_info    0x0000000000000000      0xad2 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
- .debug_info    0x0000000000000ad2       0x83 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+.debug_info     0x0000000000000000      0xb63
+ .debug_info    0x0000000000000000      0xae0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_info    0x0000000000000ae0       0x83 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
 .debug_abbrev   0x0000000000000000      0x1b4
  .debug_abbrev  0x0000000000000000      0x199 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj

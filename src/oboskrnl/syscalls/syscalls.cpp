@@ -29,19 +29,32 @@ extern int do_nothing();
 #define STACK_SIZE 4
 #endif
 
+namespace obos
+{
+	extern char kernelStart;
+}
+
 static bool checkUserPtr(PCVOID ptr, bool isAllocCall = false)
 {
 	UINTPTR_T iPtr = reinterpret_cast<UINTPTR_T>(ptr);
+	
+	if (iPtr >= obos::process::ProcEntryPointBase && iPtr < (obos::process::ProcEntryPointBase + 0x1000))
+		return false;
+
+#ifndef __x86_64__
+#ifdef __i686__
 	if (iPtr < 0x401000)
 		return false;
 	if (iPtr >= 0xC0000000 && iPtr < 0xE0000000)
 		return false;
 	if (iPtr >= 0xFFCFF000)
 		return false;
-#ifndef __x86_64__
+#endif
 	if (!obos::memory::HasVirtualAddress(ptr, 1))
 		return isAllocCall;
 #else
+	if (iPtr >= (UINTPTR_T)&obos::kernelStart)
+		return false;
 	if (!obos::memory::HasVirtualAddress(ptr, 1, false))
 		return isAllocCall;
 #endif
@@ -134,8 +147,7 @@ namespace obos
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(GetCurrentThreadStatus);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(CloseHandle);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(OpenProcessParentHandle);
-			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(SetConsoleColor);
-			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::GetConsoleColor);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::SetConsoleColor);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::GetConsoleColor);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::ConsoleOutputCharacter);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::ConsoleOutputCharacterAt);

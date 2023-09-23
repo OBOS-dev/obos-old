@@ -9,7 +9,7 @@ ENTRY(_start)
 SECTIONS
 {
 	/*. = 3584M;*/
-	. = 128M;
+	. = 0x1000;
 
 	.text BLOCK(4K) : ALIGN(4K)
 	{

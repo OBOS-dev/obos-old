@@ -99,7 +99,7 @@ namespace obos
 {
 	namespace elfLoader
 	{
-		static DWORD load(PBYTE startAddress, SIZE_T, UINTPTR_T& baseAddress)
+		static DWORD load(PBYTE startAddress, SIZE_T, UINTPTR_T& baseAddress, bool lazyLoad)
 		{
 			baseAddress = 0;
 			Elf64_Ehdr* elfHeader = (Elf64_Ehdr*)startAddress;
@@ -113,26 +113,29 @@ namespace obos
 					allocFlags |= memory::VirtualAllocFlags::EXECUTE_ENABLE;
 				if (programHeader->p_flags & PF_W)
 					allocFlags |= memory::VirtualAllocFlags::WRITE_ENABLED;
-				if (programHeader->p_vaddr > 0xFFFFFFFF80000000 || programHeader->p_vaddr < 0x1000000)
+				if (programHeader->p_vaddr > 0xFFFFFFFF80000000 || !programHeader->p_vaddr)
 					return BASE_ADDRESS_USED;
-				DWORD nPages = programHeader->p_memsz >> 12;
-				if ((programHeader->p_memsz % 4096) != 0)
-					nPages++;
-				PBYTE addr = (PBYTE)memory::VirtualAlloc((PVOID)programHeader->p_vaddr, nPages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
-				if (programHeader->p_filesz)
+				if(!lazyLoad)
 				{
-					UINTPTR_T offset = programHeader->p_vaddr - (UINTPTR_T)addr;
-					addr += offset;
-					utils::memcpy(addr, startAddress + programHeader->p_offset, programHeader->p_filesz);
+					DWORD nPages = programHeader->p_memsz >> 12;
+					if ((programHeader->p_memsz % 4096) != 0)
+						nPages++;
+					PBYTE addr = (PBYTE)memory::VirtualAlloc((PVOID)programHeader->p_vaddr, nPages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
+					if (programHeader->p_filesz)
+					{
+						UINTPTR_T offset = programHeader->p_vaddr - (UINTPTR_T)addr;
+						addr += offset;
+						utils::memcpy(addr, startAddress + programHeader->p_offset, programHeader->p_filesz);
+					}
+					memory::MemoryProtect(addr, nPages, allocFlags);
 				}
-				memory::MemoryProtect(addr, nPages, allocFlags);
-				if (baseAddress > programHeader->p_vaddr)
+				if (baseAddress > programHeader->p_vaddr || elfHeader->e_phnum == 1)
 					baseAddress = programHeader->p_vaddr;
 			}
 			return SUCCESS;
 		}
-
-		DWORD LoadElfFile(PBYTE startAddress, SIZE_T size, UINTPTR_T& entry, UINTPTR_T& baseAddress)
+		
+		DWORD LoadElfFile(PBYTE startAddress, SIZE_T size, UINTPTR_T& entry, UINTPTR_T& baseAddress, bool lazyLoad)
 		{
 			if (size <= sizeof(Elf64_Ehdr))
 				return INCORRECT_FILE;
@@ -147,7 +150,7 @@ namespace obos
 			if (elfHeader->e_common.e_ident[EI_CLASS] != ELFCLASS64 || elfHeader->e_common.e_ident[EI_DATA] != ELFDATA2LSB)
 				return NOT_x86_64;
 			entry = elfHeader->e_entry;
-			return load(startAddress, size, baseAddress);
+			return load(startAddress, size, baseAddress, lazyLoad);
 		}
 	}
 }

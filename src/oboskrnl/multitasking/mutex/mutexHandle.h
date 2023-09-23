@@ -27,6 +27,7 @@ namespace obos
 
 			bool Lock(bool waitIfLocked = true);
 			void Unlock();
+			bool IsLocked();
 
 			~MutexHandle();
 		};

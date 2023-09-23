@@ -28,17 +28,17 @@ namespace obos
 			enum class priority_t
 			{
 				// An idle thread.
-				// This thread gets 2.5 ms.
+				// This thread gets 1 ms.
 				IDLE = 1,
 				// A low-priority thread.
-				// This thread gets 5 ms.
+				// This thread gets 2 ms.
 				LOW = 2,
 				// A thread of normal priority.
-				// This thread gets 10 ms.
+				// This thread gets 4 ms.
 				NORMAL = 4,
 				// A high-priority thread.
-				// This thread gets 20 ms.
-				HIGH = 8
+				// This thread gets 6 ms.
+				HIGH = 6
 			};
 			enum class status_t
 			{

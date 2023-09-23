@@ -35,33 +35,37 @@ namespace obos
 		m_setPorts = true;
 	}
 
-	void Pic::sendCommandByte(UINT8_T byte)
+	Pic& Pic::sendCommandByte(UINT8_T byte)
 	{
 		if (!m_setPorts)
-			return;
+			return *this;
 		outb(m_outputPortCommand, byte);
 		io_wait();
+		return *this;
 	}
-	void Pic::sendCommandWord(UINT16_T word)
+	Pic& Pic::sendCommandWord(UINT16_T word)
 	{
 		if (!m_setPorts)
-			return;
+			return *this;
 		outw(m_outputPortCommand, word);
 		io_wait();
+		return *this;
 	}
-	void Pic::sendDataByte(UINT8_T byte)
+	Pic& Pic::sendDataByte(UINT8_T byte)
 	{
 		if (!m_setPorts)
-			return;
+			return *this;
 		outb(m_outputPortData, byte);
 		io_wait();
+		return *this;
 	}
-	void Pic::sendDataWord(UINT16_T word)
+	Pic& Pic::sendDataWord(UINT16_T word)
 	{
 		if (!m_setPorts)
-			return;
+			return *this;
 		outw(m_outputPortData, word);
 		io_wait();
+		return *this;
 	}
 
 	UINT8_T Pic::recvCommandByte()
@@ -89,12 +93,13 @@ namespace obos
 		return inw(m_outputPortData);
 	}
 
-	void Pic::sendEOI()
+	Pic& Pic::sendEOI()
 	{
 		sendCommandByte(s_picEOI);
+		return *this;
 	}
 
-	void Pic::remap(BYTE startInterrupt, BYTE cascadeIdentity)
+	Pic& Pic::remap(BYTE startInterrupt, BYTE cascadeIdentity)
 	{
 		sendCommandByte(ICW1_INIT | ICW1_ICW4);
 		// Legends say the pic was still waiting for the initialization words to this day...
@@ -104,28 +109,32 @@ namespace obos
 		sendDataByte(startInterrupt);
 		sendDataByte(cascadeIdentity);
 		sendDataByte(ICW4_8086);
+		return *this;
 	}
 
-	void Pic::enableIrq(BYTE interrupt)
+	Pic& Pic::enableIrq(BYTE interrupt)
 	{
 		if (interrupt > 7)
 			interrupt -= 8;
 		utils::RawBitfield bitfield = recvDataByte();
 		utils::clearBitInBitfield(bitfield, interrupt);
 		sendDataByte(bitfield);
+		return *this;
 	}
-	void Pic::disableIrq(BYTE interrupt)
+	Pic& Pic::disableIrq(BYTE interrupt)
 	{
 		if (interrupt > 7)
 			interrupt -= 8;
 		utils::RawBitfield bitfield = recvDataByte();
 		utils::setBitInBitfield(bitfield, interrupt);
 		sendDataByte(bitfield);
+		return *this;
 	}
 
-	void Pic::disable()
+	Pic& Pic::disable()
 	{
 		sendDataByte(0xFF);
+		return *this;
 	}
 
 	bool Pic::issuedInterrupt(UINT8_T interrupt)

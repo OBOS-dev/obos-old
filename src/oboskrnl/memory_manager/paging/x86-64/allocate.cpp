@@ -110,7 +110,13 @@ namespace obos
 			flags &= 0x8000000000000017;
 			if (!base)
 			{
-				for (base = 0x600000; HasVirtualAddress(reinterpret_cast<PCVOID>(base), nPages, false); base += 4096);
+				base = 0x1000;
+				while (1)
+				{
+					for (; HasVirtualAddress(reinterpret_cast<PCVOID>(base), 1, false); base += 4096);
+					if (!HasVirtualAddress(reinterpret_cast<PCVOID>(base), nPages, false))
+						break;
+				}
 				if (!base)
 					return nullptr;
 			}

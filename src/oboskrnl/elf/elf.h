@@ -17,7 +17,8 @@ namespace obos
 		constexpr DWORD NOT_x86 = 2;
 		constexpr DWORD NOT_x86_64 = 2;
 		constexpr DWORD BASE_ADDRESS_USED = 3;
-		DWORD LoadElfFile(PBYTE startAddress, SIZE_T size, UINTPTR_T& entry, UINTPTR_T& baseAddress);
+		DWORD CheckElfFile(PBYTE startAddress, SIZE_T size);
+		DWORD LoadElfFile(PBYTE startAddress, SIZE_T size, UINTPTR_T& entry, UINTPTR_T& baseAddress, bool lazyLoad = false);
 		//void addr2Line(PVOID addr, STRING& filename, STRING& functionName, SIZE_T& funcOffset, SIZE_T& lineNum);
 	}
 }

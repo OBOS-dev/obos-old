@@ -39,6 +39,8 @@ target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-delete-null-pointer-checks>
                                 PRIVATE $<$<COMPILE_LANGUAGE:C>:-fno-delete-null-pointer-checks>
+                                # PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Og>
+                                PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-mgeneral-regs-only>
                                 PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${TARGET_COMPILE_OPTIONS}>
                                 PRIVATE $<$<COMPILE_LANGUAGE:C>:${TARGET_COMPILE_OPTIONS}>
 )
@@ -57,7 +59,7 @@ target_link_libraries(oboskrnl PUBLIC ${LIBGCC})
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 
-target_compile_definitions(oboskrnl PUBLIC CURSOR_SLEEP_TIME_2_5_MS=${CURSOR_SLEEP_TIME_2_5_MS}
+target_compile_definitions(oboskrnl PUBLIC CURSOR_SLEEP_TIME_MS=${CURSOR_SLEEP_TIME_MS}
                                     PUBLIC CONSOLE_NEWLINE_SEQUENCE=\"${CONSOLE_NEWLINE_SEQUENCE}\" 
                                     PUBLIC OBOS_ARCHITECTURE=${OBOS_ARCHITECTURE} 
                                     PUBLIC ZYAN_NO_LIBC=1)

@@ -55,6 +55,7 @@ extern "C" UINTPTR_T* boot_page_directory1;
 extern "C" void _init();
 extern "C" char _glb_text_start;
 extern "C" char _glb_text_end;
+extern "C" void idleTask();
 extern bool inKernelSection;
 
 namespace obos
@@ -77,6 +78,49 @@ namespace obos
 	extern void pageFault(const interrupt_frame* frame);
 	extern void debugExceptionHandler(const interrupt_frame* frame);
 	extern void defaultExceptionHandler(const interrupt_frame* frame);
+
+	static void cursorUpdate(PVOID)
+	{
+		extern DWORD s_terminalColumn;
+		extern DWORD s_terminalRow;
+		static bool s_isCursorOn = false;
+		static SIZE_T s_cursorRow = 0;
+		static SIZE_T s_cursorColumn = 0;
+		static bool s_cursorInitialized;
+		EnterKernelSection();
+		multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread* _this, PVOID)->bool
+			{
+				return multitasking::g_timerTicks >= _this->wakeUpTime;
+			};
+		LeaveKernelSection();
+		while(1)
+		{
+			multitasking::g_currentThread->wakeUpTime = multitasking::g_timerTicks + CURSOR_SLEEP_TIME_MS;
+			multitasking::g_currentThread->status |= (utils::RawBitfield)multitasking::Thread::status_t::BLOCKED;
+			_int(0x30);
+			if (s_cursorRow != s_terminalRow)
+			{
+				if (s_cursorInitialized)
+					ConsoleOutputCharacter(' ', s_cursorColumn, s_cursorRow);
+				s_cursorRow = s_terminalRow;
+			}
+			s_cursorInitialized = true;
+			if (s_cursorColumn != s_terminalColumn)
+			{
+				if (s_cursorColumn > s_terminalColumn)
+					ConsoleOutputCharacter(' ', s_cursorColumn + 1, s_cursorRow);
+				s_cursorColumn = s_terminalColumn;
+			}
+			if (s_isCursorOn && s_cursorRow == s_terminalRow)
+			{
+				ConsoleOutputCharacter('_', s_cursorColumn++, s_cursorRow);
+				s_cursorColumn--;
+			}
+			else
+				ConsoleOutputCharacter(' ', s_cursorColumn, s_cursorRow);
+			s_isCursorOn = !s_isCursorOn;
+		}
+	}
 
 	// Initial boot sequence. Initializes all platform-specific things, and sets up multitasking, and jumps to kmainThr.
 	void kmain(::multiboot_info_t* header, DWORD magic)
@@ -296,7 +340,7 @@ namespace obos
 
 		char(*existsCallback)(CSTRING filename, SIZE_T * size) = (char(*)(CSTRING filename, SIZE_T * size))driverAPI::g_registeredDrivers[1]->existsCallback;
 		void(*readCallback)(CSTRING filename, STRING output, SIZE_T size) = (void(*)(CSTRING filename, STRING output, SIZE_T size))driverAPI::g_registeredDrivers[1]->readCallback;
-		void(*iterateCallback)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)) = (void(*)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)))driverAPI::g_registeredDrivers[1]->iterateCallback;
+		//void(*iterateCallback)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)) = (void(*)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)))driverAPI::g_registeredDrivers[1]->iterateCallback;
 
 		//// Set a write breakpoint for exists callback.
 		//asm volatile(".intel_syntax noprefix;" 
@@ -311,18 +355,22 @@ namespace obos
 		//	);
 
 		SIZE_T filesize = 0;
+		EnterKernelSection();
 		initrdDriver->doContextSwitch();
 		char existsData = existsCallback("nvme", &filesize);
 		g_kernelProcess->doContextSwitch();
+		LeaveKernelSection();
 		if (!existsData)
 			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/nvme doesn't exist."));
 		PBYTE filedata = new BYTE[filesize];
+		EnterKernelSection();
 		initrdDriver->doContextSwitch();
 		readCallback("nvme", (STRING)filedata, filesize);
 		g_kernelProcess->doContextSwitch();
+		LeaveKernelSection();
 
 		process::Process* nvmeDriver = new process::Process{};
-		nvmeDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
+		ret = nvmeDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
 		delete[] filedata;
 		if (ret)
 			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
@@ -346,7 +394,7 @@ namespace obos
 		LeaveKernelSection();
 
 		process::Process* keyboardDriver = new process::Process{};
-		keyboardDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
+		ret = keyboardDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
 		delete[] filedata;
 		if (ret)
 			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
@@ -370,11 +418,11 @@ namespace obos
 		LeaveKernelSection();
 
 		process::Process* testProgram = new process::Process{};
-		testProgram->CreateProcess(filedata, filesize, nullptr);
+		ret = testProgram->CreateProcess(filedata, filesize, nullptr);
 		delete[] filedata;
 		if (ret)
 			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
-		
+
 		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
 		
 		SetConsoleColor(0x003399FF, 0x00000000);
@@ -384,33 +432,42 @@ namespace obos
 		// Uncomment this line to kpanic.
 		//*((PBYTE)0x486594834) = 'L';
 
-		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendEOI();
-		Pic(Pic::PIC2_CMD, Pic::PIC2_DATA).sendEOI();
-
-		extern int countCalled;
+		/*extern int countCalled;
 
 		countCalled = 0;
 		inKernelSection = false;
 		asm volatile ("sti" : : : "memory");
-		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(0);
+		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendDataByte(0).sendEOI();
+		Pic(Pic::PIC2_CMD, Pic::PIC2_DATA).sendDataByte(0).sendEOI();*/
 
-		EnterKernelSection();
+		/*EnterKernelSection();
 		initrdDriver->doContextSwitch();
 		printf("Dumping filesystem root (ustar ramdisk):\n");
 		iterateCallback([](CSTRING filename, SIZE_T) {
 			printf("/%s\n", filename);
 			});
 		g_kernelProcess->doContextSwitch();
-		LeaveKernelSection();
+		LeaveKernelSection();*/
 
-		multitasking::ThreadHandle idleTask;
-		idleTask.CreateThread(multitasking::Thread::priority_t::LOW, [](PVOID) { 
-			asm volatile ("1: sti; hlt; jmp 1b;");
-			}, nullptr, 0, 0);
-		idleTask.closeHandle();
-		multitasking::ExitThread(0); // We're done booting.
-		kpanic(nullptr, nullptr, kpanic_format("kmain_thr tried to return!\n"));
-		asm volatile ("1: sti; hlt; jmp 1b;");
+		EnterKernelSection();
+		multitasking::ThreadHandle thread;
+		thread.CreateThread(multitasking::Thread::priority_t::HIGH, cursorUpdate, nullptr, 0, 0);
+		thread.closeHandle();
+		thread.OpenThread(multitasking::g_currentThread);
+		thread.SetThreadPriority(multitasking::Thread::priority_t::IDLE);
+		thread.closeHandle();
+
+		if(!multitasking::g_schedulerMutex->IsLocked())
+			outb(Pic::PIC1_CMD, Pic::s_picEOI);
+		outb(Pic::PIC2_CMD, Pic::s_picEOI);
+
+		LeaveKernelSection();
+		
+		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendDataByte(0);
+		Pic(Pic::PIC2_CMD, Pic::PIC2_DATA).sendDataByte(0);
+		// We're done booting.
+		idleTask();
+		RestartComputer();
 	}
 }
 

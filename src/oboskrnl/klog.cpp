@@ -247,7 +247,11 @@ namespace obos
 					itoa_unsigned(va_arg(list, UINTPTR_T), str, 16);
 					printChar('0', printCharUserdata);
 					printChar('x', printCharUserdata);
-					for (int i = 0; str[i]; i++)
+					SIZE_T size = 0;
+					for (; str[size]; size++);
+					for (SIZE_T i = 0; i < (16 - size); i++)
+						printChar('0', printCharUserdata);
+					for (SIZE_T i = 0; i < size; i++)
 						printChar(str[i], printCharUserdata);
 					break;
 				}
@@ -319,6 +323,7 @@ namespace obos
 		extern UINT32_T* s_backbuffer;
 		if (s_framebuffer && s_backbuffer)
 		{
+			//constexpr DWORD kpanicBackgroundColour = 0x0079d8;
 			constexpr DWORD kpanicBackgroundColour = 0xFFCB0035;
 			SetConsoleColor(0xFFFFFFFF, kpanicBackgroundColour);
 
@@ -375,6 +380,11 @@ namespace obos
 		va_end(list);
 	}
 
+#ifdef __x86_64__
+#	define checkAllocSize(v) , v
+#else
+#	define checkAllocSize(v) 
+#endif
 	void printStackTrace(PVOID first, CSTRING prefix)
 	{
 		stack_frame* current = (stack_frame*)first;
@@ -384,13 +394,13 @@ namespace obos
 			current = reinterpret_cast<stack_frame*>(getEBP());
 			getFromEbp = true;
 		}
-		if (first && !memory::HasVirtualAddress(first, 1))
+		if (first && !memory::HasVirtualAddress(first, 1 checkAllocSize(false)))
 		{
 			current = reinterpret_cast<stack_frame*>(getEBP());
 			getFromEbp = true;
 		}
 		int nStackFrames = 0;
-		for (; current->down && memory::HasVirtualAddress(current->down, 1) && current->down != current; nStackFrames++, current = current->down);
+		for (; current->down && memory::HasVirtualAddress(current->down, 1 checkAllocSize(false)) && current->down != current; nStackFrames++, current = current->down);
 		if (getFromEbp)
 			current = reinterpret_cast<stack_frame*>(getEBP());
 		else
@@ -407,7 +417,7 @@ namespace obos
 	}
 	void disassemble(PVOID _eip, CSTRING prefix)
 	{
-		if (!memory::HasVirtualAddress(_eip, 1))
+		if (!memory::HasVirtualAddress(_eip, 1 checkAllocSize(false)))
 		{
 			printf_noFlush("%p: Invalid eip. Aborting...\r\n", _eip);
 			return;
@@ -455,6 +465,8 @@ namespace obos
 			eip += instruction.info.length;
 			i++;
 		}
+
+#undef checkAllocSize
 	}
 
 	constexpr SIZE_T npos = 0xFFFFFFFF;

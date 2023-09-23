@@ -7,7 +7,7 @@
 #ifndef __OBOS_INLINE_ASM_H
 #define __OBOS_INLINE_ASM_H
 
-#include "types.h"
+#include <types.h>
 
 #define nop() asm volatile ("nop")
 

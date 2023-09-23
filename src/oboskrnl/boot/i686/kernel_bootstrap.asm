@@ -124,3 +124,8 @@ wait1:
 
     ; Shouldn't get hit. Only here for completeness.
     ret
+idleTask:
+[global idleTask]
+    sti
+    hlt 
+    jmp idleTask
