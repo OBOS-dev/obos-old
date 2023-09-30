@@ -6,11 +6,6 @@
 
 #include <utils/bitfields.h>
 
-static UINT32_T makeBitmask(UINT8_T base)
-{
-	return 1 << base;
-}
-
 namespace obos
 {
 	namespace utils
@@ -22,25 +17,25 @@ namespace obos
 			m_bitfield = 0;
 		}
 
-		void BitfieldBase::setBit(UINT32_T bitmask)
+		void BitfieldBase::setBit(UINTPTR_T bitmask)
 		{
 			m_bitfield |= bitmask;
 		}
-		void BitfieldBase::clearBit(UINT32_T bitmask)
+		void BitfieldBase::clearBit(UINTPTR_T bitmask)
 		{
 			m_bitfield &= ~(bitmask);
 		}
-		bool BitfieldBase::getBit(UINT32_T bitmask) const
+		bool BitfieldBase::getBit(UINTPTR_T bitmask) const
 		{
 			return (m_bitfield & bitmask) == bitmask;
 		}
 
-		bool BitfieldBase::operator[](UINT32_T bitmask) const
+		bool BitfieldBase::operator[](UINTPTR_T bitmask) const
 		{
 			return getBit(bitmask);
 		}
 
-		BitfieldBase::operator UINT32_T()
+		BitfieldBase::operator UINTPTR_T()
 		{
 			return m_bitfield;
 		}
@@ -60,19 +55,19 @@ namespace obos
 		{
 			if (bit > 31)
 				return;
-			BitfieldBase::setBit(makeBitmask(bit));
+			BitfieldBase::setBit(BITFIELD_FROM_BIT(bit));
 		}
 		void Bitfield::clearBit(UINT8_T bit)
 		{
 			if (bit > 31)
 				return;
-			BitfieldBase::clearBit(makeBitmask(bit));
+			BitfieldBase::clearBit(BITFIELD_FROM_BIT(bit));
 		}
 		bool Bitfield::getBit(UINT8_T bit) const
 		{
 			if (bit > 31)
-				return BitfieldBase::getBit(makeBitmask(31));
-			return BitfieldBase::getBit(makeBitmask(bit));
+				return BitfieldBase::getBit(BITFIELD_FROM_BIT(31));
+			return BitfieldBase::getBit(BITFIELD_FROM_BIT(bit));
 		}
 
 		bool Bitfield::operator[](UINT8_T bit) const
@@ -92,33 +87,29 @@ namespace obos
 		{
 		}
 
-		IntegerBitfield::IntegerBitfield(UINT32_T bitfield)
+		IntegerBitfield::IntegerBitfield(UINTPTR_T bitfield)
 		{
 			m_bitfield = bitfield;
 		}
 
-		void IntegerBitfield::setBitfield(UINT32_T newBitfield)
+		void IntegerBitfield::setBitfield(UINTPTR_T newBitfield)
 		{
 			m_bitfield = newBitfield;
 		}
 		
-		// Bare functions. Use if polymorphism isn't working correctly.
-
 		void setBitInBitfield(UINT32_T& bitfield, UINT8_T bit)
 		{
 			bitfield |= (1 << bit);
 		}
 		void clearBitInBitfield(UINT32_T& bitfield, UINT8_T bit)
 		{
-			bitfield &= ~(1 << bit);
+			bitfield &= ~(static_cast<UINT32_T>(1) << bit);
 		}
 		bool testBitInBitfield(const UINT32_T bitfield, UINT8_T bit)
 		{
 			if (!bitfield)
 				return false;
-			if (bit == 0)
-				return (bool)(bitfield & 1);
-			UINT32_T val = bitfield >> bit;
+			UINTPTR_T val = bitfield >> bit;
 			return val & 0b1;
 		}
 

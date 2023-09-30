@@ -8,6 +8,8 @@
 
 #include <types.h>
 
+#define BITFIELD_FROM_BIT(x) (1 << x)
+
 namespace obos
 {
 	namespace utils
@@ -29,16 +31,16 @@ namespace obos
 		public:
 			BitfieldBase();
 
-			virtual void setBit(UINT32_T bitmask);
-			virtual void clearBit(UINT32_T bitmask);
-			virtual bool getBit(UINT32_T bitmask) const;
+			virtual void setBit(UINTPTR_T bitmask);
+			virtual void clearBit(UINTPTR_T bitmask);
+			virtual bool getBit(UINTPTR_T bitmask) const;
 
-			virtual bool operator[](UINT32_T bitmask) const;
+			virtual bool operator[](UINTPTR_T bitmask) const;
 
-			virtual explicit operator UINT32_T();
+			virtual explicit operator UINTPTR_T();
 			virtual operator bool();
 		protected:
-			UINT32_T m_bitfield;
+			UINTPTR_T m_bitfield;
 		};
 		class Bitfield : public BitfieldBase
 		{
@@ -57,9 +59,9 @@ namespace obos
 		{
 		public:
 			IntegerBitfield();
-			IntegerBitfield(UINT32_T bitfield);
+			IntegerBitfield(UINTPTR_T bitfield);
 
-			void setBitfield(UINT32_T newBitfield);
+			void setBitfield(UINTPTR_T newBitfield);
 		};
 	
 		using BitfieldBitmask = BitfieldBase;

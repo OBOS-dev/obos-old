@@ -162,11 +162,6 @@ namespace obos
 	}
 	void defaultExceptionHandler(const interrupt_frame* frame)
 	{
-		if (frame->errorCode == 1 && utils::testBitInBitfield(frame->rflags, 8))
-		{
-			utils::clearBitInBitfield(const_cast<interrupt_frame*>(frame)->rflags, 8);
-			return;
-		}
 		DWORD pid = 0xFFFFFFFF;
 		if (multitasking::g_initialized)
 		{

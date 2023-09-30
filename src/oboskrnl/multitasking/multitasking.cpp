@@ -31,11 +31,15 @@ asm volatile("mov %0, %%rax" :\
 	: "memory");
 #endif
 
+extern "C" char __etext;
+extern "C" void attribute(noreturn) callSwitchToTaskImpl(PBYTE stack, PVOID pageMap, void(*switchToTaskImpl)(obos::multitasking::Thread* newThread), obos::multitasking::Thread* funcPar);
+
 namespace obos
 {
 	extern void kmainThr();
 	extern char thrstack_top;
 	extern char stack_top;
+	extern char stack_bottom;
 	extern void SetTSSStack(PVOID);
 	namespace multitasking
 	{
@@ -46,7 +50,7 @@ namespace obos
 		Thread* g_currentThread = nullptr;
 		bool g_initialized = false;
 		MutexHandle* g_schedulerMutex = nullptr;
-		SIZE_T g_timerTicks = 0;
+		SIZE_T g_timerTicks = 1;
 
 		bool canRanTask(Thread* thread)
 		{
@@ -57,46 +61,19 @@ namespace obos
 		extern void switchToTaskAsm();
 		extern void switchToUserModeTask();
 
-		void switchToTask(Thread* newThread)
+		static void switchToTaskImpl(Thread* newThread)
 		{
-			static Thread* s_newThread;
-			s_newThread = newThread;
-			if(g_currentThread)
-#if defined(__i686__)
-				if (s_newThread->owner->pageDirectory != memory::g_pageDirectory)
-				{
-					asm volatile("mov %0, %%esp;"
-								 "mov %0, %%ebp" :
-												 : "r"(&stack_top)
-												 : "memory");
-					// No more parameters past this point.
-					s_newThread->owner->pageDirectory->switchToThis();
-				}
-#elif defined(__x86_64__)
-				if (s_newThread->owner->level4PageMap != memory::g_level4PageMap)
-				{
-					asm volatile("mov %0, %%rsp;"
-								 "mov %0, %%rbp" :
-												 : "r"(&stack_top)
-												 : "memory");
-					s_newThread->owner->doContextSwitch();
-				}
-#endif
-				g_currentThread = s_newThread;
-			/*if (g_currentThread->tid == 0)
+			g_currentThread = newThread;
+			if (g_currentThread->tid == 0)
 			{
 				if (g_currentThread->frame.intNumber != 0x30)
 					SendEOI(g_currentThread->frame.intNumber - 32);
 				g_schedulerMutex->Unlock();
 				setFrameAddress(&g_currentThread->frame);
 				switchToTaskAsm();
-			}*/
+			}
 			if (!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall || isInKernelCode(g_currentThread->frame))
 			{
-				// If we're servicing a syscall, we need to set esp0 in the tss.
-				if(g_currentThread->isServicingSyscall || isInKernelCode(g_currentThread->frame))
-					SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
-				
 				if (g_currentThread->frame.intNumber != 0x30)
 					SendEOI(g_currentThread->frame.intNumber - 32);
 				g_schedulerMutex->Unlock();
@@ -109,13 +86,40 @@ namespace obos
 			g_schedulerMutex->Unlock();
 			setFrameAddress(&g_currentThread->frame);
 			switchToUserModeTask();
+			kpanic(nullptr, nullptr, kpanic_format("Could not switch to task with pid %x, tid %x."), g_currentThread->owner->pid, g_currentThread->tid);
+		}
+
+		void switchToTask(Thread* newThread)
+		{
+			alignas(4096) static BYTE stack[4096];
+			UINTPTR_T* pageMap = nullptr;
+#if defined(__x86_64__)
+			if (newThread->owner)
+			{
+				memory::g_level4PageMap = newThread->owner->level4PageMap;
+				pageMap = newThread->owner->level4PageMap->getPageMap();
+			}
+			else
+				pageMap = memory::g_kernelPageMap.getPageMap();
+#elif defined(__i686__)
+			if(newThread->owner)
+			{
+				memory::g_pageDirectory = newThread->owner->pageDirectory;
+				pageMap = newThread->owner->pageDirectory->getPageDirectory();
+			}
+			else
+				pageMap = memory::g_pageDirectory->getPageDirectory();
+#endif
+			callSwitchToTaskImpl(stack + 4096, pageMap, switchToTaskImpl, newThread);
+			kpanic(nullptr, nullptr, kpanic_format("Could not switch to task with pid %x, tid %x."), g_currentThread->owner->pid, g_currentThread->tid);
 		}
 
 #pragma GCC push_options
-#pragma GCC optimize ("O3")
+#pragma GCC optimize("O3")
 		void findNewTask(const interrupt_frame* frame)
 		{
-			g_timerTicks++;
+			if (frame->intNumber != 0x30)
+				g_timerTicks++;
 			if (!g_initialized)
 			{
 				if (frame->intNumber != 0x30)
@@ -125,82 +129,69 @@ namespace obos
 			if (!g_schedulerMutex->Lock(false))
 				return;
 			if (g_currentThread)
+			{
 				g_currentThread->frame = *frame;
+				g_currentThread->lastTimeRan = g_timerTicks - 1;
+			}
 			else
 			{
 				if (frame->intNumber != 0x30)
 					SendEOI(frame->intNumber - 32);
 				return;
 			}
-			
-			// Tf all threads were ran, then clear the amount of iterations.
+			if (g_threads->len == 1)
+				return;
 
 			EnterKernelSection();
 		findNew:
 
-			volatile Thread* currentThread = nullptr;
-			for (int i = 0; i < 4 && !currentThread; i++)
-			{
-				for (list_node_t* node = g_threadPriorityList[i]->head; node != nullptr; node = node->next)
-				{
-					currentThread = (Thread*)node->val;
-					if (currentThread->status != (INT)Thread::status_t::RUNNING)
-					{
-						currentThread = nullptr;
-						continue;
-					}
-					break;
-				}
-			}
-			if(currentThread)
-			{
-				if (currentThread->iterations >= (UINT32_T)currentThread->priority)
-				{
-					for (list_node_t* node = g_threads->head; node != nullptr; node = node->next)
-					{
-						currentThread = (Thread*)node->val;
-						currentThread->iterations = 0;
-					}
-				}
-			}
+			Thread* threadToRun = nullptr;
+			Thread* currentThread = nullptr;
 
-			volatile list_node_t* currentNode = nullptr;
+			bool foundTask = false;
 
+			// Find the thread that's starving in a queue and run it.
+			
 			// Find a new task.
-			for (int i = 3; i > -1 && !currentNode; i--)
+			for (int i = 3; i != -1 && !foundTask; i--)
 			{
+				SIZE_T lowestTimeRan = 0;
 				for (list_node_t* node = g_threadPriorityList[i]->head; node != nullptr; node = node->next)
 				{
 					currentThread = (Thread*)node->val;
-					if (utils::testBitInBitfield(currentThread->status, 2))
+					if (currentThread->status & (DWORD)Thread::status_t::BLOCKED)
 					{
 						if (currentThread->isBlockedCallback)
 							if (currentThread->isBlockedCallback(const_cast<Thread*>(currentThread), currentThread->isBlockedUserdata))
-								utils::clearBitInBitfield(const_cast<Thread*>(currentThread)->status, 2);
+								const_cast<Thread*>(currentThread)->status &= (~(DWORD)Thread::status_t::BLOCKED);
 							else {}
 						else
-							currentThread->status = (UINT32_T)Thread::status_t::DEAD;
+							currentThread->status = (DWORD)Thread::status_t::DEAD;
 					}
-					if (canRanTask(const_cast<Thread*>(currentThread)))
+					if (currentThread->status == (DWORD)Thread::status_t::RUNNING)
 					{
-						currentNode = node;
-						currentThread->iterations++;
-						break;
+						if (lowestTimeRan < currentThread->lastTimeRan)
+						{
+							lowestTimeRan = currentThread->lastTimeRan;
+							threadToRun = currentThread;
+						}
 					}
 				}
+				foundTask = threadToRun != nullptr;
 			}
-			if (!currentNode && (utils::testBitInBitfield(g_currentThread->status, 2) || utils::testBitInBitfield(g_currentThread->status, 3) || utils::testBitInBitfield(g_currentThread->status, 0)))
+			if (!threadToRun)
 				goto findNew;
 
 			LeaveKernelSection();
-			if (currentThread == g_currentThread)
+			
+			if (threadToRun == g_currentThread)
 			{
 				if (frame->intNumber != 0x30)
 					SendEOI(frame->intNumber - 32);
 				g_schedulerMutex->Unlock();
 				return;
 			}
-			switchToTask(const_cast<Thread*>(currentThread));
+			switchToTask(const_cast<Thread*>(threadToRun));
 		}
 #pragma GCC pop_options
 

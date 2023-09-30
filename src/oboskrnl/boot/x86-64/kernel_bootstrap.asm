@@ -243,6 +243,10 @@ wait1:
     ; Shouldn't get hit. Only here for completeness.
     ret
 idleTask:
+    mov al, 0x20
+    out 0x20, al
+    out 0xA0, al
+.loop:
     sti
     hlt 
-    jmp idleTask
+    jmp .loop

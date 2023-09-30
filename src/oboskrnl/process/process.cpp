@@ -29,7 +29,6 @@
 extern "C" UINTPTR_T boot_page_directory1;
 extern "C" UINTPTR_T boot_page_level4_map;
 extern "C" UINTPTR_T boot_page_table1;
-extern "C" void jmpProcess(PVOID par1, VOID(*entry)(PVOID entry));
 
 namespace obos
 {
@@ -67,43 +66,22 @@ namespace obos
 			if (ret != 0)
 			{
 				printf("\r\nDriver with pid %d failed to initialize with exit code %d.\r\n", multitasking::g_currentThread->owner->pid, ret);
-				// In case the driver disabled interrupts and they didn't get disabled;
+				// In case the driver disabled interrupts and they didn't get enabled.
 				asm volatile("sti" : : : "memory");
 				multitasking::g_currentThread->owner->TerminateProcess(ret);
 			}
-			EnterKernelSection();
 			auto currentThread = multitasking::GetCurrentThreadHandle();
 			currentThread->SetThreadPriority(multitasking::Thread::priority_t::IDLE);
 			currentThread->closeHandle();
 			delete currentThread;
-			multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread*, PVOID)->bool { return false; };
-			multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;
-			LeaveKernelSection();
-			// In case the driver disabled interrupts and they didn't get disabled;
+			// In case the driver disabled interrupts and they didn't get enabled.
 			asm volatile("sti" : : : "memory");
-			_int(0x30);
-		}
-
-		static void CreateProcessLoad(PVOID udata)
-		{
-			UINTPTR_T* threadParameters = (UINTPTR_T*)udata;
-			PBYTE file = (PBYTE)threadParameters[0];
-			SIZE_T fileSize = threadParameters[1];
-			attribute(noreturn) VOID(*entryPoint)(PVOID entry) = (VOID(*)(PVOID))threadParameters[2];
-			Process* _this = (Process*)threadParameters[3];
-			UINTPTR_T entry = 0;
-			UINTPTR_T base = 0;
-			elfLoader::LoadElfFile(file, fileSize, entry, base);
-			delete[] file;
-			delete[] threadParameters;
-			asm volatile("cli");
-			_this->isUserMode = (threadParameters[2] == ProcEntryPointBase);
-			if (!_this->isUserMode)
+			// Do this if someone thinks they're funny and unpauses the thread
+			while(1)
 			{
-				asm volatile("sti");
-				entryPoint((PVOID)entry);
+				multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::PAUSED;
+				_int(0x30);
 			}
-			jmpProcess((PVOID)entry, entryPoint);
 		}
 
 		DWORD Process::CreateProcess(PBYTE file, SIZE_T size, PVOID _mainThread, bool isDriver)
@@ -190,34 +168,23 @@ namespace obos
 			UINTPTR_T entry = 0;
 			UINTPTR_T base = 0;
 
-			// Lazy load the program to make sure it's valid.
-			DWORD loaderRet = elfLoader::LoadElfFile(file, size, entry, base, true);
+			DWORD loaderRet = elfLoader::LoadElfFile(file, size, entry, base);
 			if (loaderRet)
 			{
+				UncommitProcessMemory();
 				multitasking::g_currentThread->owner = oldThreadOwner;
 				multitasking::g_currentThread->owner->doContextSwitch();
 				LeaveKernelSection();
 				return loaderRet;
 			}
 
-			//isUserMode = !isDriver;
-
-			UINTPTR_T* threadParameters = new UINTPTR_T[4] {};
-
-			PBYTE newFile = new BYTE[size + 1];
-			utils::memcpy(newFile, file, size);
-			newFile[size] = 0;
-
-			threadParameters[0] = (UINTPTR_T)newFile;
-			threadParameters[1] = (UINTPTR_T)size;
-			threadParameters[2] = !isDriver ? ProcEntryPointBase : (UINTPTR_T)DriverEntryPoint;
-			threadParameters[3] = (UINTPTR_T)this;
+			isUserMode = !isDriver;
 
 			multitasking::Thread* mainThread = new multitasking::Thread{};
 			
 			DWORD ret = mainThread->CreateThread(multitasking::Thread::priority_t::NORMAL,
-				CreateProcessLoad,
-				(PVOID)threadParameters,
+				!isDriver ? (VOID(*)(PVOID))ProcEntryPointBase : DriverEntryPoint,
+				(PVOID)entry,
 				(DWORD)multitasking::Thread::status_t::PAUSED,
 				0);
 			if (ret)
@@ -239,12 +206,12 @@ namespace obos
 				multitasking::ThreadHandle* mainThreadHandle = (multitasking::ThreadHandle*)_mainThread;
 				mainThreadHandle->OpenThread(mainThread);
 			}
-
-			list_rpush(g_processList, list_node_new(this));
-
+			
 			multitasking::g_currentThread->owner = oldThreadOwner;
 			// Switch back the parent's page directory.
 			multitasking::g_currentThread->owner->doContextSwitch();
+
+			list_rpush(g_processList, list_node_new(this));
 
 			LeaveKernelSection();
 

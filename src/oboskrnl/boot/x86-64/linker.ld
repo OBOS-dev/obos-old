@@ -38,6 +38,7 @@ SECTIONS
         *(.glb.text)
         _glb_text_end = .;
     }
+    __etext = .;
 
     .rodata ALIGN (4K) : AT (ADDR (.rodata) - 0xFFFFFFFF80000000)
     {

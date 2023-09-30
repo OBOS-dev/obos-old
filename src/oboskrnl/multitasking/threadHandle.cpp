@@ -259,14 +259,15 @@ namespace obos
 			if (m_thread == g_currentThread)
 				return false;
 			EnterKernelSection();
+			volatile UINTPTR_T udata[2] = {};
 			if (!newStatus)
 			{
 				multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread*, PVOID userdata)->bool {
 					UINTPTR_T* udata = (UINTPTR_T*)userdata;
 					return ((multitasking::Thread*)(udata[0]))->status != udata[1];
 					};
-				UINTPTR_T udata[2] = { (UINTPTR_T)m_thread, m_thread->status };
-				multitasking::g_currentThread->isBlockedUserdata = udata;
+				udata[0] = (UINTPTR_T)m_thread;
+				udata[1] = (UINTPTR_T)m_thread->status;
 			}
 			else
 			{
@@ -275,9 +276,10 @@ namespace obos
 					multitasking::Thread* thread = (multitasking::Thread*)(udata[0]);
 					return thread->status == udata[1];
 					};
-				volatile UINTPTR_T udata[2] = { (UINTPTR_T)m_thread, newStatus };
-				multitasking::g_currentThread->isBlockedUserdata = (PVOID)udata;
+				udata[0] = (UINTPTR_T)m_thread; 
+				udata[1] = (UINTPTR_T)newStatus;
 			}
+			multitasking::g_currentThread->isBlockedUserdata = (PVOID)udata;
 			multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;
 			LeaveKernelSection();
 			_int(0x30);

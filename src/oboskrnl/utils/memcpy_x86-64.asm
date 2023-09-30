@@ -19,7 +19,7 @@
 [global _ZN4obos5utils8dwMemcpyEPjPKjy]
 
 ; PVOID obos::utils::memset(PVOID block, UINT32_T ch, SIZE_T size)
-[global _ZN4obos5utils6memsetEPvjj]
+[global _ZN4obos5utils6memsetEPvjy]
 
 ; SIZE_T obos::utils::strlen(CSTRING str);
 [global _ZN4obos5utils6strlenEPKc]
@@ -76,7 +76,7 @@ _ZN4obos5utils7memzeroEPvy:
 	loop .loop
 
 	mov rax, rdi
-	sub rdi, rdx
+	sub rax, rsi
 
 .finish:
 	leave
@@ -135,7 +135,7 @@ _ZN4obos5utils8dwMemcpyEPjPKjy:
 	leave
 	ret
 memset:
-_ZN4obos5utils6memsetEPvjj:
+_ZN4obos5utils6memsetEPvjy:
 	push rbp
 	mov rbp, rsp
 
@@ -147,11 +147,11 @@ _ZN4obos5utils6memsetEPvjj:
 .loop:
 	mov byte [rdi], sil
 
-	inc edi
+	inc rdi
 	loop .loop
 
 	mov rax, rdi
-	sub rdi, rdx
+	sub rax, rdx
 
 .finish:
 	leave

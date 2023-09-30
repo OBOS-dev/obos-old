@@ -28,17 +28,17 @@ namespace obos
 			enum class priority_t
 			{
 				// An idle thread.
-				// This thread gets 1 ms.
-				IDLE = 1,
-				// A low-priority thread.
 				// This thread gets 2 ms.
-				LOW = 2,
+				IDLE = 2,
+				// A low-priority thread.
+				// This thread gets 3 ms.
+				LOW = 3,
 				// A thread of normal priority.
 				// This thread gets 4 ms.
 				NORMAL = 4,
 				// A high-priority thread.
-				// This thread gets 6 ms.
-				HIGH = 6
+				// This thread gets 8 ms.
+				HIGH = 8
 			};
 			enum class status_t
 			{
@@ -49,7 +49,9 @@ namespace obos
 			};
 			using Tid = DWORD;
 		public:
-			Thread() = default;
+			Thread() {
+				nop();
+			};
 			Thread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages);
 
 			DWORD CreateThread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages);
@@ -105,6 +107,7 @@ namespace obos
 			PVOID tssStackBottom = nullptr; // If allocated, it will be 2 pages.
 			bool isServicingSyscall = false;
 			SIZE_T wakeUpTime = 0;
+			SIZE_T lastTimeRan = 0;
 		};
 	}
 }

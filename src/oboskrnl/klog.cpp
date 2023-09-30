@@ -305,8 +305,10 @@ namespace obos
 
 	static void irq1(const interrupt_frame*)
 	{
+		//extern void poop();
 		extern void RestartComputer();
 		printf("Restarting the computer...\r\n");
+		//poop();
 		RestartComputer();
 	}
 	void kpanic(PVOID printStackTracePar, PVOID eip, CSTRING format, ...)

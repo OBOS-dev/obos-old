@@ -61,11 +61,15 @@ extern "C"
 
 [[nodiscard]] PVOID operator new(size_t count) noexcept
 {
-	return kcalloc(count, sizeof(char));
+#ifndef OBOS_RELEASE
+	return obos::utils::memzero(kmalloc(count), count);
+#else
+	return kmalloc(count);
+#endif
 }
 [[nodiscard]] PVOID operator new[](size_t count) noexcept
 {
-	return kcalloc(count, sizeof(char));
+	return operator new(count);
 }
 VOID operator delete(PVOID block) noexcept
 {

@@ -19,13 +19,17 @@
           "ignoreFailures": true
         },
         {
+          "text": "add-symbol-file C:/Code/obos/out/ustarFilesystem",
+          "ignoreFailures": true
+        },
+        {
           "text": "target remote :1234",
           "description": "Connects to qemu's gdb stub."
         }
       ],
       "externalConsole": false,
       "remoteMachineName": "2081433904;127.0.0.1 (username=omar, port=2222, authentication=Password)",
-      "remotePrelaunchWait": "100",
+      "remotePrelaunchWait": "1",
       "miDebuggerPath": "gdb",
       "setupCommands": [
         {

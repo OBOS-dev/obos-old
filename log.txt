@@ -1,26 +1,30 @@
-Page fault in kernel-mode at 0xffffffff801b5539 (tid 0, pid 0) while trying to read a non-present page.
-The address of that page is 0x000000002a4d4831. Error code: 0. Page table entry: 0x0000000000000000.
-Dumping registers: 
-	RDI: 0x0000000000000080, RSI: 0x0000000000000000, RBP: 0xffffff00801b5509
-	RSP: 0xffffffff801b54b8, RBX: 0x0000000000004fa8, RDX: 0x0000000000000080
-	RCX: 0x0000000000000020, RAX: 0x000000002a4d4831, RIP: 0xffffffff801b5539
-	 R8: 0x0000000000000004,  R9: 0x0000000000000000, R10: 0x0000000000000000
+Unhandled exception 6 at 0x0000000000000003 (tid 0, pid 0). Error code: 0. Dumping registers: 
+	RDI: 0xfffffffff0000288, RSI: 0xfffffffff0007050, RBP: 0x0000000000000020
+	RSP: 0xffffffff801bb7c8, RBX: 0xfffffffff0006e38, RDX: 0x0000000000000001
+	RCX: 0x0000000000008000, RAX: 0x0000000000000000, RIP: 0x0000000000000003
+	 R8: 0x0000000000000100,  R9: 0x0000000000000002, R10: 0x0000000000000000
 	R11: 0x0000000000000000, R12: 0x0000000000000000, R13: 0x0000000000000000
-	R14: 0x0000000000000000, R15: 0x0000000000000000, RFL: 0x0000000000000a12
-	 SS: 0x0000000000000010,  DS: 0x0000000000000010,  CS: 0x0000000000000008
+	R14: 0x0000000000000000, R15: 0x0000000000000008, RFL: 0xffffffff801bb6e8
+	 SS: 0x0000000000000000,  DS: 0x0000000000000010,  CS: 0x0000000000000008
 Stack trace:
-	2: 0xffffffff8010f6cb (obos::kpanic(void*, void*, char const*, ...)+247)
-	1: 0xffffffff8010a876 (obos::pageFault(obos::interrupt_frame const*)+1880)
-	0: 0xffffffff8010925e (isr_common_stub.finished+0)
-Disassembly of address 0xffffffff801b5539 (Unknown file.):
-	0xffffffff801b5539 ([external code]+0): and eax, [rax]
-	0xffffffff801b553b ([external code]+0): add [rax], al
-	0xffffffff801b553d ([external code]+0): add [rax], al
-	0xffffffff801b553f ([external code]+0): add [rax], al
-	0xffffffff801b5541 ([external code]+0): mov [0x00FFFFFFFF80113C], al
-	0xffffffff801b554a ([external code]+0): add [rax], al
-	0xffffffff801b554c ([external code]+0): add [rax], al
-	0xffffffff801b554e ([external code]+0): add [rax], al
-	0xffffffff801b5550 ([external code]+0): add [rax], al
-	0xffffffff801b5552 ([external code]+0): add [rax], al
+	2: 0xffffffff8010f53c (obos::kpanic(void*, void*, char const*, ...)+247)
+	1: 0xffffffff8010ae68 (obos::defaultExceptionHandler(obos::interrupt_frame const*)+644)
+	0: 0xffffffff8010926e (isr_common_stub.finished+0)
+0x0000000000000003: Invalid eip. Aborting...
 Press any key to restart...
+Restarting the computer...
+Unhandled exception 6 at 0x0000000000000003 (tid 0, pid 0). Error code: 0. Dumping registers: 
+	RDI: 0xfffffffff0000288, RSI: 0xfffffffff0007050, RBP: 0x0000000000000020
+	RSP: 0xffffffff801bb7c8, RBX: 0xfffffffff0006e38, RDX: 0x0000000000000001
+	RCX: 0x0000000000008000, RAX: 0x0000000000000000, RIP: 0x0000000000000003
+	 R8: 0x0000000000000100,  R9: 0x0000000000000002, R10: 0x0000000000000000
+	R11: 0x0000000000000000, R12: 0x0000000000000000, R13: 0x0000000000000000
+	R14: 0x0000000000000000, R15: 0x0000000000000008, RFL: 0xffffffff801bb6e8
+	 SS: 0x0000000000000000,  DS: 0x0000000000000010,  CS: 0x0000000000000008
+Stack trace:
+	2: 0xffffffff8010f53c (obos::kpanic(void*, void*, char const*, ...)+247)
+	1: 0xffffffff8010ae68 (obos::defaultExceptionHandler(obos::interrupt_frame const*)+644)
+	0: 0xffffffff8010926e (isr_common_stub.finished+0)
+0x0000000000000003: Invalid eip. Aborting...
+Press any key to restart...
+Restarting the computer...

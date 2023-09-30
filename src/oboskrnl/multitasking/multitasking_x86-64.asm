@@ -8,6 +8,7 @@ segment .text
 
 global _ZN4obos12multitasking15switchToTaskAsmEv
 global _ZN4obos12multitasking20switchToUserModeTaskEv
+global callSwitchToTaskImpl
 
 _ZN4obos12multitasking15switchToTaskAsmEv:
 	cli
@@ -88,3 +89,17 @@ _ZN4obos12multitasking20switchToUserModeTaskEv:
 	mov rax, [rax+128]
 
 	iretq
+callSwitchToTaskImpl:
+	push rbp
+	mov rbp, rsp
+
+	mov rsp, rdi
+	mov cr3, rsi
+
+	mov rdi, rcx
+	call rdx
+
+.failed:
+	cli
+	hlt
+	jmp .failed

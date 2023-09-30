@@ -87,12 +87,10 @@ namespace obos
 		static SIZE_T s_cursorRow = 0;
 		static SIZE_T s_cursorColumn = 0;
 		static bool s_cursorInitialized;
-		EnterKernelSection();
 		multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread* _this, PVOID)->bool
 			{
 				return multitasking::g_timerTicks >= _this->wakeUpTime;
 			};
-		LeaveKernelSection();
 		while(1)
 		{
 			multitasking::g_currentThread->wakeUpTime = multitasking::g_timerTicks + CURSOR_SLEEP_TIME_MS;
@@ -219,7 +217,15 @@ namespace obos
 		obos::InitializeIdt();
 
 		RegisterInterruptHandler(14, pageFault);
-		
+#if defined(__x86_64__)
+		RegisterInterruptHandler(1, debugExceptionHandler);
+		for (BYTE i = 0; i < 32; i++)
+			RegisterInterruptHandler((i == 14 || i == 1) ? 0 : i, defaultExceptionHandler);
+#else
+		for (BYTE i = 0; i < 32; i++)
+			RegisterInterruptHandler(i == 14 ? 0 : i, defaultExceptionHandler);
+#endif
+
 		memory::InitializePaging();
 
 		memory::InitializePhysicalMemoryManager();
@@ -268,14 +274,6 @@ namespace obos
 			RegisterInterruptHandler(i, [](const obos::interrupt_frame* frame) {
 				SendEOI(frame->intNumber - 32);
 				});
-#if defined(__x86_64__)
-		RegisterInterruptHandler(1, debugExceptionHandler);
-		for (BYTE i = 0; i < 32; i++)
-			RegisterInterruptHandler((i == 14 || i == 1) ? 0 : i, defaultExceptionHandler);
-#else
-		for (BYTE i = 0; i < 32; i++)
-			RegisterInterruptHandler(i == 14 ? 0 : i, defaultExceptionHandler);
-#endif
 		LeaveKernelSection();
 
 		multitasking::InitializeMultitasking();
@@ -335,7 +333,7 @@ namespace obos
 				(PVOID)&mainThread, true);
 		if (ret)
 			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
-		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::BLOCKED);
+		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::PAUSED);
 		mainThread.closeHandle();
 
 		char(*existsCallback)(CSTRING filename, SIZE_T * size) = (char(*)(CSTRING filename, SIZE_T * size))driverAPI::g_registeredDrivers[1]->existsCallback;
@@ -355,28 +353,29 @@ namespace obos
 		//	);
 
 		SIZE_T filesize = 0;
-		EnterKernelSection();
+		char existsData = 0;
+		/*EnterKernelSection();
 		initrdDriver->doContextSwitch();
 		char existsData = existsCallback("nvme", &filesize);
 		g_kernelProcess->doContextSwitch();
 		LeaveKernelSection();
 		if (!existsData)
-			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/nvme doesn't exist."));
-		PBYTE filedata = new BYTE[filesize];
-		EnterKernelSection();
-		initrdDriver->doContextSwitch();
-		readCallback("nvme", (STRING)filedata, filesize);
-		g_kernelProcess->doContextSwitch();
-		LeaveKernelSection();
+			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/nvme doesn't exist."));*/
+		PBYTE filedata = nullptr; /* new BYTE[filesize];*/
+		//EnterKernelSection();
+		//initrdDriver->doContextSwitch();
+		//readCallback("nvme", (STRING)filedata, filesize);
+		//g_kernelProcess->doContextSwitch();
+		//LeaveKernelSection();
 
-		process::Process* nvmeDriver = new process::Process{};
-		ret = nvmeDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
-		delete[] filedata;
-		if (ret)
-			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
-		//mainThread.WaitForThreadStatusChange(0);
-		// We don't need the handle anymore.
-		mainThread.closeHandle();
+		//process::Process* nvmeDriver = new process::Process{};
+		//ret = nvmeDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
+		//delete[] filedata;
+		//if (ret)
+		//	kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
+		////mainThread.WaitForThreadStatusChange(0);
+		//// We don't need the handle anymore.
+		//mainThread.closeHandle();`
 
 		filesize = 0;
 		EnterKernelSection();
@@ -432,39 +431,14 @@ namespace obos
 		// Uncomment this line to kpanic.
 		//*((PBYTE)0x486594834) = 'L';
 
-		/*extern int countCalled;
+		multitasking::ThreadHandle cursorThread, thread;
+		cursorThread.CreateThread(multitasking::Thread::priority_t::HIGH, cursorUpdate, nullptr, 0, 2);
+		cursorThread.closeHandle();
 
-		countCalled = 0;
-		inKernelSection = false;
-		asm volatile ("sti" : : : "memory");
-		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendDataByte(0).sendEOI();
-		Pic(Pic::PIC2_CMD, Pic::PIC2_DATA).sendDataByte(0).sendEOI();*/
-
-		/*EnterKernelSection();
-		initrdDriver->doContextSwitch();
-		printf("Dumping filesystem root (ustar ramdisk):\n");
-		iterateCallback([](CSTRING filename, SIZE_T) {
-			printf("/%s\n", filename);
-			});
-		g_kernelProcess->doContextSwitch();
-		LeaveKernelSection();*/
-
-		EnterKernelSection();
-		multitasking::ThreadHandle thread;
-		thread.CreateThread(multitasking::Thread::priority_t::HIGH, cursorUpdate, nullptr, 0, 0);
-		thread.closeHandle();
 		thread.OpenThread(multitasking::g_currentThread);
 		thread.SetThreadPriority(multitasking::Thread::priority_t::IDLE);
 		thread.closeHandle();
 
-		if(!multitasking::g_schedulerMutex->IsLocked())
-			outb(Pic::PIC1_CMD, Pic::s_picEOI);
-		outb(Pic::PIC2_CMD, Pic::s_picEOI);
-
-		LeaveKernelSection();
-		
-		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendDataByte(0);
-		Pic(Pic::PIC2_CMD, Pic::PIC2_DATA).sendDataByte(0);
 		// We're done booting.
 		idleTask();
 		RestartComputer();

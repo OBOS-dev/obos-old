@@ -9,7 +9,7 @@
 
 #include <types.h>
 
-#define nop() asm volatile ("nop")
+#define nop() asm volatile ("nop" : : : "memory")
 
 void outb(UINT16_T port, UINT8_T val);
 void outw(UINT16_T port, UINT16_T val);

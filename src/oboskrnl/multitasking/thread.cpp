@@ -63,6 +63,8 @@ namespace obos
 			if (!stackSizePages)
 				stackSizePages = 2;
 
+			lastTimeRan = g_timerTicks;
+
 			// Setting up the registers is platform specific.
 
 #if defined(__i686__)
@@ -100,13 +102,12 @@ namespace obos
 			frame.rip = (UINTPTR_T)entry;
 			frame.rdi = (UINTPTR_T)userData;
 			frame.rbp = 0;
-			frame.rflags |= RFLAGS_IF;
+			frame.rflags.setBit(x86_64_flags::RFLAGS_INTERRUPT_ENABLE);
 #endif
 			// If our owner wasn't set before, then we'll use from the current thread's owner.
 			if(!owner)
 				owner = g_currentThread->owner;
 			list_rpush(g_currentThread->owner->threads, list_node_new(this));
-
 
 			list_rpush(g_threads, list_node_new(this));
 			list_rpush(priorityList, list_node_new(this));

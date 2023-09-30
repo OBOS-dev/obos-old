@@ -19,6 +19,7 @@ namespace obos
 			
 			void Lock(bool waitIfLocked = true);
 			void Unlock();
+			bool IsLocked() { return m_locked; }
 
 			~Mutex();
 			friend bool MutexLockCallback(Thread* _this, PVOID _mutex);

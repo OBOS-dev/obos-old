@@ -450,15 +450,10 @@ namespace obos
 
 		static void interruptHandler(const obos::interrupt_frame* frame)
 		{
+			if (!(Pic((frame->intNumber - 32) < 8 ? Pic::PIC1_CMD : Pic::PIC2_CMD, (frame->intNumber - 32) < 8 ? Pic::PIC1_DATA : Pic::PIC2_DATA).issuedInterrupt(frame->intNumber - 32)))
+				return;
 			if (g_registeredInterruptHandlers[frame->intNumber - 32].driver)
 			{
-				struct par
-				{
-					DWORD irq;
-				} _par;
-				_par.irq = frame->intNumber - 32;
-				DisableIRQ(&_par);
-
 #ifdef __x86_64__
 				memory::PageMap* pageMap = memory::g_level4PageMap;
 				memory::g_level4PageMap = g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->level4PageMap;
@@ -470,7 +465,6 @@ namespace obos
 				UINTPTR_T* _pageMap = memory::g_pageDirectory->getPageMap();
 #define commitMemory
 #endif
-
 				PBYTE newRsp = (PBYTE)memory::VirtualAlloc(nullptr, 1, memory::VirtualAllocFlags::GLOBAL | memory::VirtualAllocFlags::WRITE_ENABLED commitMemory);
 
 				cli();
@@ -491,8 +485,7 @@ namespace obos
 #undef commitMemory
 
 				LeaveKernelSection();
-				PicSendEoi(&_par);
-				EnableIRQ(&_par);
+				obos::SendEOI(frame->intNumber - 32);
 			}
 		}
 	}

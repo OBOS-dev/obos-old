@@ -22,7 +22,7 @@ set_source_files_properties(SOURCE "crti/src/crte.S" ASM-ATT)
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_platformSpecific} 
         "boot/kmain.cpp"            "console.cpp"                              "klog.cpp"                           "inline-asm.cpp"
         "klog.cpp"                  "utils/bitfields.cpp"                      "descriptors/idt/pic.cpp"            "external/list/list_iterator.c"
-        "utils/memory.cpp"          "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.c" "multitasking/threadHandle.cpp"
+        "utils/memory.cpp"          "memory_manager/paging/liballoc_hooks.cpp" "memory_manager/liballoc/liballoc.cpp" "multitasking/threadHandle.cpp"
         "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "elf/elf.cpp"
         "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "process/process.cpp"
         "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"                  "syscalls/syscalls.cpp"              "external/amalgamated-dist/Zydis.c"
