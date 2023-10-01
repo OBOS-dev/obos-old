@@ -10,6 +10,7 @@
 
 #include <types.h>
 #include <console.h>
+#include <error.h>
 
 #include <multitasking/multitasking.h>
 #include <multitasking/thread.h>
@@ -62,11 +63,15 @@ static bool checkUserPtr(PCVOID ptr, bool isAllocCall = false)
 }
 static bool checkUserHandle(HANDLE handle)
 {
-	return (handle >= 0xC0000000 && handle < 0xE0000000) 
-#ifndef __x86_64__
-		&& (obos::memory::HasVirtualAddress(reinterpret_cast<PVOID>(handle), 1));
-#else
-		&& (obos::memory::HasVirtualAddress(reinterpret_cast<PVOID>(handle), 1, false));
+	obos::Handle* _handle = (obos::Handle*)handle;
+#ifdef __x86_64
+	if (!obos::memory::HasVirtualAddress(_handle, 1, false))
+		return false;
+	return handle >= 0xfffffffff0000000 && _handle->magicNumber == OBOS_HANDLE_MAGIC_NUMBER;
+#elif defined(__i686__)
+	if(!obos::memory::HasVirtualAddress(_handle, 1))
+		return false;
+	return (handle >= 0xC0000000 && handle < 0xE0000000) && _handle->magicNumber == OBOS_HANDLE_MAGIC_NUMBER;
 #endif
 }
 
@@ -94,13 +99,13 @@ namespace obos
 		static DWORD WaitForThreadExit(DEFINE_RESERVED_PARAMETERS);
 		static void ExitThread(DEFINE_RESERVED_PARAMETERS);
 		// Returns the tid of the current thread.
-		static DWORD GetCurrentThreadTid(DEFINE_RESERVED_PARAMETERS);
+		static DWORD GetCurrentThreadTid();
 		// Returns a new handle of the current thread.
-		static HANDLE GetCurrentThreadHandle(DEFINE_RESERVED_PARAMETERS);
+		static HANDLE GetCurrentThreadHandle();
 		// Returns the priority of the current thread.
-		static multitasking::Thread::priority_t GetCurrentThreadPriority(DEFINE_RESERVED_PARAMETERS);
+		static multitasking::Thread::priority_t GetCurrentThreadPriority();
 		// Returns the status of the current thread (most likely THREAD_RUNNING).
-		static DWORD GetCurrentThreadStatus(DEFINE_RESERVED_PARAMETERS);
+		static DWORD GetCurrentThreadStatus();
 		static DWORD CloseHandle(DEFINE_RESERVED_PARAMETERS);
 		static DWORD OpenProcessParentHandle(DEFINE_RESERVED_PARAMETERS);
 		static DWORD SetConsoleColor(DEFINE_RESERVED_PARAMETERS);
@@ -111,12 +116,14 @@ namespace obos
 		static DWORD ConsoleFillLine(DEFINE_RESERVED_PARAMETERS);
 		static DWORD SetConsoleCursorPosition(DEFINE_RESERVED_PARAMETERS);
 		static DWORD GetConsoleCursorPosition(DEFINE_RESERVED_PARAMETERS);
-		static DWORD ConsoleSwapBuffers(DEFINE_RESERVED_PARAMETERS);
-		static DWORD ClearConsole(DEFINE_RESERVED_PARAMETERS);
+		static DWORD ConsoleSwapBuffers();
+		static DWORD ClearConsole();
 		static PVOID VirtualAlloc(DEFINE_RESERVED_PARAMETERS);
 		static DWORD VirtualFree(DEFINE_RESERVED_PARAMETERS);
 		static BOOL HasVirtualAddress(DEFINE_RESERVED_PARAMETERS);
 		static DWORD MemoryProtect(DEFINE_RESERVED_PARAMETERS);
+		static DWORD GetLastError();
+		static DWORD SetLastError(DEFINE_RESERVED_PARAMETERS);
 
 		UINTPTR_T g_syscallTable[512];
 		void RegisterSyscalls()
@@ -161,6 +168,8 @@ namespace obos
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::VirtualFree);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::HasVirtualAddress);
 			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::MemoryProtect);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::GetLastError);
+			g_syscallTable[nextSyscall++] = GET_FUNC_ADDR(process::SetLastError);
 #if defined(__i686__)
 			utils::dwMemset(g_syscallTable + nextSyscall, (DWORD)do_nothing, sizeof(g_syscallTable) / sizeof(g_syscallTable[0]));
 #elif defined(__x86_64__)
@@ -510,64 +519,76 @@ namespace obos
 		}
 		static DWORD WaitForThreadExit(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) HANDLE thrHandle;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			if (!checkUserHandle(par->thrHandle))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			if (*reinterpret_cast<HANDLE*>(par->thrHandle) == reinterpret_cast<HANDLE>(multitasking::g_currentThread))
-				return 1; // Cannot wait for the current thread to die.
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			} // Cannot wait for the current thread to die.
 			Handle* handle = reinterpret_cast<Handle*>(par->thrHandle);
 			if (handle->getType() != Handle::handleType::thread)
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			multitasking::ThreadHandle* threadHandle = static_cast<multitasking::ThreadHandle*>(handle);
-			if (!threadHandle->WaitForThreadExit())
-				return 2;
-			return 0;
+			return threadHandle->WaitForThreadExit();
 		}
 		static void ExitThread(DEFINE_RESERVED_PARAMETERS)
 		{
 			if (!checkUserPtr(parameters = parameters))
-				multitasking::ExitThread(0xFFFFF000);
+				multitasking::ExitThread(0);
 			struct _par
 			{
 				alignas(STACK_SIZE) DWORD exitCode;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			multitasking::ExitThread(par->exitCode);
 		}
-		static DWORD GetCurrentThreadTid(DEFINE_RESERVED_PARAMETERS)
+		static DWORD GetCurrentThreadTid()
 		{
-			(parameters = parameters);
 			return multitasking::GetCurrentThreadTid();
 		}
-		static HANDLE GetCurrentThreadHandle(DEFINE_RESERVED_PARAMETERS)
+		static HANDLE GetCurrentThreadHandle()
 		{
-			(parameters = parameters);
 			return reinterpret_cast<HANDLE>(multitasking::GetCurrentThreadHandle());
 		}
-		static multitasking::Thread::priority_t GetCurrentThreadPriority(DEFINE_RESERVED_PARAMETERS)
+		static multitasking::Thread::priority_t GetCurrentThreadPriority()
 		{
-			(parameters = parameters);
 			return multitasking::GetCurrentThreadPriority();
 		}
-		static DWORD GetCurrentThreadStatus(DEFINE_RESERVED_PARAMETERS)
+		static DWORD GetCurrentThreadStatus()
 		{
-			(parameters = parameters);
 			return multitasking::GetCurrentThreadStatus();
 		}
 		static DWORD CloseHandle(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) HANDLE handle;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			if (!checkUserHandle(par->handle))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			Handle* _handle = reinterpret_cast<Handle*>(par->handle);
 			_handle->closeHandle();
 			delete _handle;
@@ -575,145 +596,197 @@ namespace obos
 		}
 		static DWORD OpenProcessParentHandle(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) HANDLE procHandle;
 				alignas(STACK_SIZE) HANDLE* parentHandle;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			if (!checkUserHandle(par->procHandle))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			if (!checkUserPtr(par->parentHandle))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			Process* proc = reinterpret_cast<Process*>(par->procHandle);
 			if (proc->pid >= g_nextProcessId)
-				return 0xFFFFF000; // That isn't a process.
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER; // That isn't a process.
+			}
 			if (proc->magicNumber != 0xCA44C071)
-				return 0xFFFFF000; // This isn't a process.
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER; // This isn't a process.
+			}
 			if (!proc->parent)
-				return 0xFFFFF000; // It is extremely unlikely the kernel calls this.
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER; // It is extremely unlikely the kernel calls this.
+			}
 			*par->parentHandle = reinterpret_cast<HANDLE>(proc->parent);
 			return 0;
 		}
 		static DWORD SetConsoleColor(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) DWORD fgColour;
 				alignas(STACK_SIZE) DWORD bgColour;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			obos::SetConsoleColor(par->fgColour, par->bgColour);
 			return 0;
 		}
 		static DWORD GetConsoleColor(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) DWORD* fgColour;
 				alignas(STACK_SIZE) DWORD* bgColour;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			if (!checkUserPtr(par->fgColour))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			if (!checkUserPtr(par->bgColour))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			obos::GetConsoleColor(*par->fgColour, *par->bgColour);
 			return 0;
 		}
 		static DWORD ConsoleOutputCharacter(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) CHAR ch;
 				alignas(STACK_SIZE) bool swapBuffers;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			obos::ConsoleOutputCharacter(par->ch, par->swapBuffers);
 			return 0;
 		}
 		static DWORD ConsoleOutputCharacterAt(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) CHAR ch;
 				alignas(STACK_SIZE) DWORD x, y;
 				alignas(STACK_SIZE) bool swapBuffers;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			obos::ConsoleOutputCharacter(par->ch, par->x, par->y, par->swapBuffers);
 			return 0;
 		}
 		static DWORD ConsoleOutput(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) CSTRING out;
 				alignas(STACK_SIZE) SIZE_T size;
 				alignas(STACK_SIZE) bool swapBuffers;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			if (!checkUserPtr(par->out))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			obos::ConsoleOutput(par->out, par->size, par->swapBuffers);
 			return 0;
 		}
 		static DWORD ConsoleFillLine(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) CHAR ch;
 				alignas(STACK_SIZE) bool swapBuffers;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			obos::ConsoleFillLine(par->ch, par->swapBuffers);
 			return 0;
 		}
 		static DWORD SetConsoleCursorPosition(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) DWORD x, y;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			obos::SetTerminalCursorPosition(par->x, par->y);
 			return 0;
 		}
 		static DWORD GetConsoleCursorPosition(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) DWORD *x, *y;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			obos::GetTerminalCursorPosition(*par->x, *par->y);
 			return 0;
 		}
-		static DWORD ConsoleSwapBuffers(DEFINE_RESERVED_PARAMETERS)
+		static DWORD ConsoleSwapBuffers()
 		{
-			(parameters = parameters);
 			obos::swapBuffers();
 			return 0;
 		}
-		static DWORD ClearConsole(DEFINE_RESERVED_PARAMETERS)
+		static DWORD ClearConsole()
 		{
-			(parameters = parameters);
 			obos::ClearConsole();
 			return 0;
 		}
 		static PVOID VirtualAlloc(DEFINE_RESERVED_PARAMETERS)
 		{
 			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return nullptr;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) PVOID _base;
@@ -721,26 +794,38 @@ namespace obos
 				alignas(STACK_SIZE) utils::RawBitfield flags;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->_base, true) && par->_base != nullptr)
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return nullptr;
+			}
 			return memory::VirtualAlloc(par->_base, par->nPages, par->flags | memory::VirtualAllocFlags::GLOBAL);
 		}
 		static DWORD VirtualFree(DEFINE_RESERVED_PARAMETERS)
 		{
 			if (!checkUserPtr(parameters))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) PVOID _base;
 				alignas(STACK_SIZE) SIZE_T nPages;
 			} *par = reinterpret_cast<_par*>(parameters = parameters);
 			if (!checkUserPtr(par->_base))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			return memory::VirtualFree(par->_base, par->nPages);
 		}
 		static BOOL HasVirtualAddress(DEFINE_RESERVED_PARAMETERS)
 		{
 			if (!checkUserPtr(parameters))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			};
 			struct _par
 			{
 				alignas(STACK_SIZE) PCVOID _base;
@@ -752,17 +837,41 @@ namespace obos
 		}
 		static DWORD MemoryProtect(DEFINE_RESERVED_PARAMETERS)
 		{
-			if (!checkUserPtr(parameters = parameters))
-				return 0xFFFFF000;
+			if (!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			struct _par
 			{
 				alignas(STACK_SIZE) PVOID _base;
 				alignas(STACK_SIZE) SIZE_T nPages; 
 				alignas(STACK_SIZE) utils::RawBitfield flags;
-			} *par = reinterpret_cast<_par*>(parameters = parameters);
+			} *par = reinterpret_cast<_par*>(parameters);
 			if (!checkUserPtr(par->_base))
-				return 0xFFFFF000;
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
 			return memory::MemoryProtect(par->_base, par->nPages, par->flags | memory::VirtualAllocFlags::GLOBAL);
+		}
+		DWORD GetLastError()
+		{
+			return obos::GetLastError();
+		}
+		DWORD SetLastError(DEFINE_RESERVED_PARAMETERS)
+		{
+			if(!checkUserPtr(parameters))
+			{
+				obos::SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
+			}
+			struct _par
+			{
+				alignas(STACK_SIZE) DWORD newErrorCode;
+			} *par = reinterpret_cast<_par*>(parameters);
+			obos::SetLastError(par->newErrorCode);
+			return 0;
 		}
 	}
 }

@@ -8,6 +8,8 @@
 
 #include <types.h>
 
+#define OBOS_HANDLE_MAGIC_NUMBER 0x4031AA2F
+
 namespace obos
 {
 	class Handle
@@ -33,6 +35,8 @@ namespace obos
 		SIZE_T& getReferences() { return m_origin->m_references; }
 		
 		virtual ~Handle() {}
+
+		DWORD magicNumber = OBOS_HANDLE_MAGIC_NUMBER;
 	protected:
 		void* m_value = nullptr;
 		Handle* m_origin = nullptr;

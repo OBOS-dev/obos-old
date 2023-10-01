@@ -58,6 +58,10 @@ extern "C" char _glb_text_end;
 extern "C" void idleTask();
 extern bool inKernelSection;
 
+#ifdef __i686__
+#error i686 (x86) will no longer be supported :(
+#endif
+
 namespace obos
 {
 	namespace memory
@@ -285,7 +289,6 @@ namespace obos
 	{ 
 		multitasking::g_initialized = true;
 
-		//_init();
 		g_kernelProcess = new process::Process{};
 
 #if defined(__i686__)
@@ -354,28 +357,8 @@ namespace obos
 
 		SIZE_T filesize = 0;
 		char existsData = 0;
-		/*EnterKernelSection();
-		initrdDriver->doContextSwitch();
-		char existsData = existsCallback("nvme", &filesize);
-		g_kernelProcess->doContextSwitch();
-		LeaveKernelSection();
-		if (!existsData)
-			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/nvme doesn't exist."));*/
-		PBYTE filedata = nullptr; /* new BYTE[filesize];*/
-		//EnterKernelSection();
-		//initrdDriver->doContextSwitch();
-		//readCallback("nvme", (STRING)filedata, filesize);
-		//g_kernelProcess->doContextSwitch();
-		//LeaveKernelSection();
 
-		//process::Process* nvmeDriver = new process::Process{};
-		//ret = nvmeDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
-		//delete[] filedata;
-		//if (ret)
-		//	kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
-		////mainThread.WaitForThreadStatusChange(0);
-		//// We don't need the handle anymore.
-		//mainThread.closeHandle();`
+		PBYTE filedata = nullptr;
 
 		filesize = 0;
 		EnterKernelSection();

@@ -15,11 +15,14 @@
 
 #include <inline-asm.h>
 #include <types.h>
+#include <error.h>
 
 #include <process/process.h>
 
 #include <utils/bitfields.h>
 #include <external/list/list.h>
+
+extern "C" [[noreturn]] void callExitThreadImpl(PBYTE rsp, DWORD par1, VOID(*func)(DWORD exitCode));
 
 namespace obos
 {
@@ -42,8 +45,10 @@ namespace obos
 		bool ThreadHandle::OpenThread(Thread::Tid tid)
 		{
 			if (m_thread)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
-			EnterKernelSection();
+			}
 			list_iterator_t* iter = list_iterator_new(g_threads, LIST_HEAD);
 			list_node_t* node = list_iterator_next(iter);
 			for (; node != nullptr; node = list_iterator_next(iter))
@@ -51,62 +56,82 @@ namespace obos
 					break;
 			if (!node)
 			{
-				LeaveKernelSection();
+				SetLastError(OBOS_ERROR_NO_SUCH_OBJECT);
 				return false;
 			}
 			bool ret = OpenThread((Thread*)node->val);
-			LeaveKernelSection();
 			return ret;
 		}
 		bool ThreadHandle::OpenThread(Thread* thread)
 		{
 			if (m_thread)
+			{
+				SetLastError(OBOS_ERROR_HANDLE_ALREADY_OPENED);
 				return false;
+			}
 			if (thread->status == (UINT32_T)status_t::DEAD)
+			{
+				SetLastError(OBOS_ERROR_THREAD_DIED);
 				return false;
-			EnterKernelSection();
+			}
 			m_value = m_thread = thread;
 			m_references = 1;
 			m_origin = this;
 			thread->nHandles++;
-			LeaveKernelSection();
 			return true;
 		}
-		void ThreadHandle::PauseThread(bool force)
+		bool ThreadHandle::PauseThread(bool force)
 		{
 			if (!m_thread)
-				return;
-			if (m_thread->tid == (DWORD)-1)
-				return;
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return false;
+			}
 			if (m_thread->status == (UINT32_T)status_t::DEAD)
-				return;
+			{
+				SetLastError(OBOS_ERROR_THREAD_DIED);
+				return false;
+			}
 			// Pausing the current thread isn't a good idea...
 			if (m_thread == g_currentThread && !force)
-				return;
+			{
+				SetLastError(OBOS_ERROR_ACCESS_DENIED);
+				return false;
+			}
 			m_thread->status |= (UINT32_T)status_t::PAUSED;
 			if (m_thread == g_currentThread)
 				_int(0x30);
+			return true;
 		}
-		void ThreadHandle::ResumeThread()
+		bool ThreadHandle::ResumeThread()
 		{
 			if (!m_thread)
-				return;
-			if (m_thread->tid == (DWORD)-1)
-				return;
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return false;
+			}
 			if (m_thread->status == (UINT32_T)status_t::DEAD)
-				return;
+			{
+				SetLastError(OBOS_ERROR_THREAD_DIED);
+				return false;
+			}
 			m_thread->status &= ~((UINT32_T)status_t::PAUSED);
+			return true;
 		}
-		void ThreadHandle::SetThreadPriority(Thread::priority_t newPriority)
+		bool ThreadHandle::SetThreadPriority(Thread::priority_t newPriority)
 		{
 			if (!m_thread)
-				return;
-			if (m_thread->tid == (DWORD)-1)
-				return;
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return false;
+			}
 			if (m_thread->status == (UINT32_T)status_t::DEAD)
-				return;
+			{
+				SetLastError(OBOS_ERROR_THREAD_DIED);
+				return false;
+			}
 			if (m_thread->priority == newPriority)
-				return;
+				return true;
 			EnterKernelSection();
 			list_t* priorityList = nullptr;
 			list_t* oldPriorityList = nullptr;
@@ -126,8 +151,9 @@ namespace obos
 				priorityList = g_threadPriorityList[3];
 				break;
 			default:
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				LeaveKernelSection();
-				return;
+				return false;
 			}
 			switch (m_thread->priority)
 			{
@@ -144,8 +170,9 @@ namespace obos
 				oldPriorityList = g_threadPriorityList[3];
 				break;
 			default:
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				LeaveKernelSection();
-				return;
+				return false;
 			}
 
 			m_thread->priority = newPriority;
@@ -153,43 +180,57 @@ namespace obos
 			list_remove(oldPriorityList, list_find(oldPriorityList, m_value));
 			list_rpush(priorityList, list_node_new(m_value));
 			LeaveKernelSection();
+			return true;
 		}
-		void ThreadHandle::SetThreadStatus(utils::RawBitfield newStatus)
+		bool ThreadHandle::SetThreadStatus(utils::RawBitfield newStatus)
 		{
 			if (!m_thread)
-				return;
-			if (m_thread->tid == (DWORD)-1)
-				return;
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return false;
+			}
 			// Don't kill threads this way please.
 			if (m_thread->status == (UINT32_T)status_t::DEAD || newStatus == (UINT32_T)status_t::DEAD || utils::testBitInBitfield(newStatus, 2))
-				return;
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return false;
+			}
 			if (newStatus == m_thread->status)
-				return;
+				return true;
 			newStatus &= ~((UINT32_T)status_t::DEAD);
 			m_thread->status = newStatus;
 			if (m_thread == g_currentThread)
 				_int(0x30);
+			return true;
 		}
 
-		void ThreadHandle::TerminateThread(DWORD exitCode)
+		bool ThreadHandle::TerminateThread(DWORD exitCode)
 		{
 			if (!m_thread)
-				return;
-			if (m_thread->tid == (DWORD)-1)
-				return;
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return false;
+			}
 			if (m_thread->status == (UINT32_T)status_t::DEAD)
-				return;
+			{
+				SetLastError(OBOS_ERROR_THREAD_DIED);
+				return false;
+			}
 			if (m_thread == g_currentThread)
-				return;
+			{
+				SetLastError(OBOS_ERROR_ACCESS_DENIED);
+				return false; // Use ExitThread
+			}
 			// Kill the thread.
-			EnterKernelSection();
 			m_thread->status = (UINT32_T)status_t::DEAD;
 			m_thread->exitCode = exitCode;
 			list_remove(m_thread->owner->threads, list_find(m_thread->owner->threads, m_thread));
 			if (m_thread->owner->threads->len == 0)
 				m_thread->owner->TerminateProcess(exitCode);
 			memory::VirtualFree(m_thread->stackBottom, m_thread->stackSizePages);
-			LeaveKernelSection();
+			if(m_thread->tssStackBottom)
+				memory::VirtualFree(m_thread->tssStackBottom, 2);
+			return true;
 		}
 
 		Thread::Tid ThreadHandle::GetTid()
@@ -213,31 +254,37 @@ namespace obos
 		Thread::priority_t ThreadHandle::GetThreadPriority()
 		{
 			if (!m_thread)
-				return (Thread::priority_t)0;
-			if (m_thread->tid == (DWORD)-1)
-				return (Thread::priority_t)0;
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return Thread::priority_t::INVALID_PRIORITY;
+			}
 			return m_thread->priority;
 		}
 
 		utils::RawBitfield ThreadHandle::GetThreadStatus()
 		{
 			if (!m_thread)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return 0;
-			if (m_thread->tid == (DWORD)-1)
-				return 0;
+			}
 			return m_thread->status;
 		}
 
 		bool ThreadHandle::WaitForThreadExit()
 		{
 			if (!m_thread)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
-			if (m_thread->tid == (DWORD)-1)
-				return false;
+			}
 			if (m_thread->status == (UINT32_T)status_t::DEAD)
 				return true; // The thread already exited...
 			if (m_thread == g_currentThread)
+			{
+				SetLastError(OBOS_ERROR_ACCESS_DENIED);
 				return false;
+			}
 			multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread*, PVOID userdata)->bool {
 				multitasking::Thread* thread = (multitasking::Thread*)userdata;
 				return utils::testBitInBitfield(thread->status, 0);
@@ -251,13 +298,17 @@ namespace obos
 		bool ThreadHandle::WaitForThreadStatusChange(utils::RawBitfield newStatus)
 		{
 			if (!m_thread)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
-			if (m_thread->tid == (DWORD)-1)
-				return false;
+			}
 			if (m_thread->status == (UINT32_T)status_t::DEAD || m_thread->status == newStatus)
 				return true;
 			if (m_thread == g_currentThread)
+			{
+				SetLastError(OBOS_ERROR_ACCESS_DENIED);
 				return false;
+			}
 			EnterKernelSection();
 			volatile UINTPTR_T udata[2] = {};
 			if (!newStatus)
@@ -289,7 +340,10 @@ namespace obos
 		Handle* ThreadHandle::duplicate()
 		{
 			if (!m_value)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return nullptr;
+			}
 			EnterKernelSection();
 			ThreadHandle* newHandle = (ThreadHandle*)kcalloc(1, sizeof(ThreadHandle));
 			newHandle->m_origin = newHandle;
@@ -341,17 +395,24 @@ namespace obos
 			return m_origin->getReferences();
 		}
 
+		void ExitThreadImpl(DWORD exitCode)
+		{
+			if(g_currentThread->stackBottom)
+				memory::VirtualFree(g_currentThread->stackBottom, g_currentThread->stackSizePages);
+			if(g_currentThread->tssStackBottom)
+				memory::VirtualFree(g_currentThread->tssStackBottom, 2);
+			g_currentThread->exitCode = exitCode;
+			g_currentThread->status = (UINT32_T)Thread::status_t::DEAD;
+			list_remove(g_currentThread->owner->threads, list_find(g_currentThread->owner->threads, g_currentThread));
+			if (g_currentThread->owner->threads->len == 0)
+				g_currentThread->owner->TerminateProcess(exitCode, false);
+			_int(0x30);
+		}
+
 		void ExitThread(DWORD exitCode)
 		{
-			EnterKernelSection();
-			ThreadHandle handle;
-			handle.OpenThread(g_currentThread);
-			handle.m_thread->exitCode = exitCode;
-			handle.m_thread->status = (UINT32_T)ThreadHandle::status_t::DEAD;
-			list_remove(g_currentThread->owner->threads, list_find(g_currentThread->owner->threads, g_currentThread));
-			handle.closeHandle();
-			LeaveKernelSection();
-			_int(0x30);
+			static BYTE tempStack[8192];
+			callExitThreadImpl(tempStack + sizeof(tempStack), exitCode, ExitThreadImpl);
 		}
 		DWORD GetCurrentThreadTid()
 		{

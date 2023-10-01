@@ -7,6 +7,8 @@
 #include <types.h>
 #include <inline-asm.h>
 #include <klog.h>
+#include <error.h>
+
 #include <new>
 
 #include <memory_manager/liballoc/liballoc.h>
@@ -234,14 +236,20 @@ extern "C" {
 	{
 		allocate_mutex();
 		if (!ptr)
+		{
+			obos::SetLastError(obos::OBOS_ERROR_INVALID_PARAMETER);
 			return nullptr;
+		}
 
 		SIZE_T oldSize = 0;
 		
 		memBlock* block = (memBlock*)ptr;
 		block--;
 		if (block->magic != MEMBLOCK_MAGIC)
+		{
+			obos::SetLastError(obos::OBOS_ERROR_INVALID_PARAMETER);
 			return nullptr;
+		}
 		oldSize = block->size;
 
 		PVOID newBlock = kcalloc(newSize, 1);
@@ -257,7 +265,10 @@ extern "C" {
 		memBlock* block = (memBlock*)ptr;
 		block--;
 		if (block->magic != MEMBLOCK_MAGIC)
+		{
+			obos::SetLastError(obos::OBOS_ERROR_INVALID_PARAMETER);
 			return;
+		}
 
 		pageBlock* currentPageBlock = (pageBlock*)block->pageBlock;
 

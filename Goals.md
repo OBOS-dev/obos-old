@@ -1,11 +1,12 @@
 # Goals
 
 - [x] Memory manager
-- [x] Processes (with bugs)
+- [x] Processes
+- [ ] A terminal
 - [ ] Modules
 - [ ] VFS
 - [ ] A FAT filesystem driver
-- [ ] AHCI, IDE, NVME
+- [ ] AHCI, NVME
 - [ ] A Ext2/3/4 filesystem driver
 - [x] An initrd driver
 - [ ] An ISO9660 driver.

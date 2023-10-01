@@ -10,6 +10,7 @@
 #include <memory_manager/physical.h>
 
 #include <types.h>
+#include <error.h>
 
 #include <utils/memory.h>
 
@@ -118,10 +119,16 @@ namespace obos
 						break;
 				}
 				if (!base)
+				{
+					SetLastError(OBOS_ERROR_NO_MEMORY);
 					return nullptr;
+				}
 			}
 			if (HasVirtualAddress(reinterpret_cast<PCVOID>(base), nPages))
+			{
+				SetLastError(OBOS_ERROR_BASE_ADDRESS_USED);
 				return nullptr;
+			}
 			for (UINTPTR_T addr = base; addr < (base + nPages * 4096); addr += 4096)
 			{
 				UINTPTR_T entry = 0;
@@ -167,9 +174,15 @@ namespace obos
 		{
 			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base);
 			if ((base + nPages * 4096) < base)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 1; // If the amount of pages overflows the address, return 1.
-			if (!HasVirtualAddress(_base, nPages, true) || !base)
+			}
+			if (!HasVirtualAddress(_base, nPages, false) || !base)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 1;
+			}
 			if (multitasking::g_initialized && multitasking::g_currentThread->owner && multitasking::g_currentThread->owner->pid != 0 && base < 0xFFFFFFFF80000000)
 			{
 				process::Process::allocatedBlock block;
@@ -177,8 +190,11 @@ namespace obos
 				block.size = nPages;
 				process::Process* currentProcess = multitasking::g_currentThread->owner;
 				list_node_t* currentNode = list_find(currentProcess->allocatedBlocks, &block);
-				delete (process::Process::allocatedBlock*)currentNode->val;
-				list_remove(currentProcess->allocatedBlocks, currentNode);
+				if (currentNode)
+				{
+					delete (process::Process::allocatedBlock*)currentNode->val;
+					list_remove(currentProcess->allocatedBlocks, currentNode);
+				}
 			}
 			for (UINTPTR_T addr = base; addr < (base + nPages * 4096); addr += 4096)
 			{
@@ -203,7 +219,10 @@ namespace obos
 		{
 			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base) & (~0xFFF);
 			if ((base + nPages * 4096) < base)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
+			}
 			for (UINTPTR_T addr = base; addr < (base + nPages * 4096); addr += 4096)
 			{
 				if (!g_level4PageMap->getLevel3PageMapAddress(PageMap::computeIndexAtAddress(addr, 3)))
@@ -237,9 +256,15 @@ namespace obos
 		{
 			UINTPTR_T base = reinterpret_cast<UINTPTR_T>(_base) & (~0xFFF);
 			if ((base + nPages * 4096) < base)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 1; // If the amount of pages overflows the address, return 1.
+			}
 			if (!HasVirtualAddress(_base, nPages, checkAllocationSize) || !base)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 1;
+			}
 			if (utils::testBitInBitfield(flags, 63) || !CPUSupportsExecuteDisable())
 				utils::clearBitInBitfield(flags, 63);
 			else
@@ -291,10 +316,18 @@ namespace obos
 				pageStructureFlags |= VirtualAllocFlags::EXECUTE_ENABLE;
 			flags &= 0x87F0000000000217;
 			if (!base)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return nullptr; // Not supported.
+			}
 			if(!force)
+			{
 				if (HasVirtualAddress(_base, 1))
+				{
+					SetLastError(OBOS_ERROR_BASE_ADDRESS_USED);
 					return nullptr;
+				}
+			}
 			UINTPTR_T* pageTable = allocatePagingStructures(base, pageStructureFlags);
 			pageTable += PageMap::computeIndexAtAddress(base, 0);
 			UINTPTR_T entry = reinterpret_cast<UINTPTR_T>(physicalAddress);

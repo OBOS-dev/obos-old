@@ -4,6 +4,9 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
+#include <types.h>
+#include <error.h>
+
 #include <multitasking/mutex/mutexHandle.h>
 #include <multitasking/mutex/mutex.h>
 
@@ -46,18 +49,23 @@ namespace obos
 		bool MutexHandle::Lock(bool waitIfLocked)
 		{
 			if (!m_value)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
+			}
 			Mutex* mutex = (Mutex*)m_value;
-			mutex->Lock(waitIfLocked);
-			return mutex->m_locked;
+			return mutex->Lock(waitIfLocked);
 			
 		}
-		void MutexHandle::Unlock()
+		bool MutexHandle::Unlock()
 		{
 			if (!m_value)
-				return;
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return false;
+			}
 			Mutex* mutex = (Mutex*)m_value;
-			mutex->Unlock();
+			return mutex->Unlock();
 		}
 
 		bool MutexHandle::IsLocked()

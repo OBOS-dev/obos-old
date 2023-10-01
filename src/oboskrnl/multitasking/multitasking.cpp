@@ -52,6 +52,8 @@ namespace obos
 		MutexHandle* g_schedulerMutex = nullptr;
 		SIZE_T g_timerTicks = 1;
 
+		UINT16_T g_schedulerFrequency = 1000;
+
 		bool canRanTask(Thread* thread)
 		{
 			return  thread->iterations < (UINT32_T)thread->priority &&
@@ -143,6 +145,7 @@ namespace obos
 				return;
 
 			EnterKernelSection();
+			Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).disableIrq(0);
 		findNew:
 
 			Thread* threadToRun = nullptr;
@@ -183,7 +186,8 @@ namespace obos
 				goto findNew;
 
 			LeaveKernelSection();
-			
+			Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(0);
+
 			if (threadToRun == g_currentThread)
 			{
 				if (frame->intNumber != 0x30)

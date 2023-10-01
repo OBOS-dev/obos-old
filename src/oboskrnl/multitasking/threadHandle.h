@@ -52,26 +52,26 @@ namespace obos
 			/// Pauses the thread.
 			/// </summary>
 			/// <param name="force">- Whether to pause the thread even it is the current thread.</param>
-			void PauseThread(bool force = false);
+			bool PauseThread(bool force = false);
 			/// <summary>
 			/// Resumes the thread.
 			/// </summary>
-			void ResumeThread();
+			bool ResumeThread();
 			/// <summary>
 			/// Sets the thread's priority.
 			/// </summary>
 			/// <param name="newPriority">- The new priority.</param>
-			void SetThreadPriority(Thread::priority_t newPriority);
+			bool SetThreadPriority(Thread::priority_t newPriority);
 			/// <summary>
 			/// Set's the thread's status. This cannot be THREAD_DEAD or THREAD_BLOCKED.
 			/// </summary>
 			/// <param name="newStatus">- The new status.</param>
-			void SetThreadStatus(utils::RawBitfield newStatus);
+			bool SetThreadStatus(utils::RawBitfield newStatus);
 			/// <summary>
 			/// Terminates the thread. This cannot be used on the current thread.
 			/// </summary>
 			/// <param name="exitCode">- The exit code.</param>
-			void TerminateThread(DWORD exitCode);
+			bool TerminateThread(DWORD exitCode);
 			
 			/// <summary>
 			/// Gets the thread tid.
@@ -86,7 +86,7 @@ namespace obos
 			/// <summary>
 			/// Gets the thread's priority.
 			/// </summary>
-			/// <returns>The thread's priority, or, on failure, zero.</returns>
+			/// <returns>The thread's priority, or, on failure, INVALID_PRIORITY.</returns>
 			Thread::priority_t GetThreadPriority();
 			/// <summary>
 			/// Gets the thread's status.

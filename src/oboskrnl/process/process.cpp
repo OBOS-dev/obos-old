@@ -1,7 +1,7 @@
 /*
-	process.h
+	oboskrnl/process/process.h
 
-	Copyright (c) 2023 oboskrnl/process/process.h
+	Copyright (c) 2023 Omar Berrow
 */
 
 #include <process/process.h>
@@ -20,6 +20,7 @@
 #include <inline-asm.h>
 #include <handle.h>
 #include <types.h>
+#include <error.h>
 #include <klog.h>
 
 #include <utils/memory.h>
@@ -88,10 +89,16 @@ namespace obos
 		{
 #if defined(__i686__)
 			if (pageDirectory)
-				return (DWORD)-1;
+			{
+				SetLastError(OBOS_ERROR_NO_SUCH_OBJECT);
+				return OBOS_ERROR_NO_SUCH_OBJECT;
+			}
 #elif defined(__x86_64__)
 			if (level4PageMap)
-				return (DWORD)-1;
+			{
+				SetLastError(OBOS_ERROR_NO_SUCH_OBJECT);
+				return OBOS_ERROR_NO_SUCH_OBJECT;
+			}
 #endif
 			if (!g_processList)
 				g_processList = list_new();
@@ -192,7 +199,7 @@ namespace obos
 				multitasking::g_currentThread->owner = oldThreadOwner;
 				multitasking::g_currentThread->owner->doContextSwitch();
 				LeaveKernelSection();
-				return 3 + ret;
+				return ret;
 			}
 
 			mainThread->owner = this;
@@ -217,19 +224,25 @@ namespace obos
 
 			mainThread->status &= ~((DWORD)multitasking::Thread::status_t::PAUSED);
 
-			return 0;
+			return OBOS_ERROR_NO_ERROR;
 		}
 		/*static BYTE s_temporaryStack[8192] attribute(aligned(4096));
 		static multitasking::MutexHandle* s_temporaryStackMutex = nullptr;*/
 		static DWORD s_exitCode = 0;
-		DWORD Process::TerminateProcess(DWORD exitCode)
+		DWORD Process::TerminateProcess(DWORD exitCode, bool canExitThread)
 		{
 #if defined(__i686__)
 			if (!pageDirectory)
-				return (DWORD)-1;
+			{
+				SetLastError(OBOS_ERROR_NO_SUCH_OBJECT);
+				return OBOS_ERROR_NO_SUCH_OBJECT;
+			}
 #elif defined(__x86_64__)
 			if (!level4PageMap)
-				return (DWORD)-1;
+			{
+				SetLastError(OBOS_ERROR_NO_SUCH_OBJECT);
+				return OBOS_ERROR_NO_SUCH_OBJECT;
+			}
 #endif
 			EnterKernelSection();
 			doContextSwitch();
@@ -277,12 +290,12 @@ namespace obos
 #endif
 			LeaveKernelSection();
 			this->exitCode = s_exitCode;
-			if (this == multitasking::g_currentThread->owner)
+			if (this == multitasking::g_currentThread->owner && canExitThread)
 			{
 				//s_temporaryStackMutex->Unlock();
 				multitasking::ExitThread(s_exitCode);
 			}
-			return 0;
+			return OBOS_ERROR_NO_ERROR;
 		}
 
 		void Process::doContextSwitch()

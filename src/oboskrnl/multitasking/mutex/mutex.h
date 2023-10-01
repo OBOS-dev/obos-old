@@ -17,8 +17,8 @@ namespace obos
 		public:
 			Mutex() = default;
 			
-			void Lock(bool waitIfLocked = true);
-			void Unlock();
+			bool Lock(bool waitIfLocked = true);
+			bool Unlock();
 			bool IsLocked() { return m_locked; }
 
 			~Mutex();

@@ -14,6 +14,8 @@
 
 #include <boot/multiboot.h>
 
+#include <error.h>
+
 namespace obos
 {
 	extern multiboot_info_t* g_multibootInfo;
@@ -39,10 +41,10 @@ namespace obos
 				if ((programHeader->p_memsz % 4096) != 0)
 					nPages++;
 				if (programHeader->p_vaddr >= 0xC0000000 && programHeader->p_vaddr < 0xE0000000)
-					return BASE_ADDRESS_USED;
+					return OBOS_ERROR_BASE_ADDRESS_USED;
 				PBYTE dest = (PBYTE)memory::VirtualAlloc((PVOID)programHeader->p_vaddr, nPages, memory::VirtualAllocFlags::WRITE_ENABLED);
 				if (!dest)
-					return BASE_ADDRESS_USED;
+					return OBOS_ERROR_BASE_ADDRESS_USED;
 				const PBYTE src = startAddress + programHeader->p_offset;
 				utils::dwMemset((DWORD*)dest, 0, (nPages << 12) >> 2);
 				if (programHeader->p_filesz)
@@ -55,22 +57,22 @@ namespace obos
 				if (baseAddress > programHeader->p_vaddr)
 					baseAddress = programHeader->p_vaddr;
 			}
-			return SUCCESS;
+			return OBOS_ERROR_NO_ERROR;
 		}
 		DWORD LoadElfFile(PBYTE startAddress, SIZE_T size, UINTPTR_T& entry, UINTPTR_T& baseAddress)
 		{
 			if (size <= sizeof(Elf32_Ehdr))
-				return INCORRECT_FILE;
+				return OBOS_ERROR_ELF_INCORRECT_FILE;
 			Elf32_Ehdr* elfHeader = (Elf32_Ehdr*)startAddress;
 			if (elfHeader->e_common.e_ident[EI_MAG0] != ELFMAG0 ||
 				elfHeader->e_common.e_ident[EI_MAG1] != ELFMAG1 ||
 				elfHeader->e_common.e_ident[EI_MAG2] != ELFMAG2 ||
 				elfHeader->e_common.e_ident[EI_MAG3] != ELFMAG3)
-				return INCORRECT_FILE;
+				return OBOS_ERROR_ELF_INCORRECT_FILE;
 			if (elfHeader->e_common.e_version == EV_NONE)
-				return INCORRECT_FILE;
+				return OBOS_ERROR_ELF_INCORRECT_FILE;
 			if(elfHeader->e_common.e_ident[EI_CLASS] != ELFCLASS32 || elfHeader->e_common.e_ident[EI_DATA] != ELFDATA2LSB)
-				return NOT_x86;
+				return OBOS_ERROR_ELF_INCORRECT_ARCHITECTURE;
 			entry = elfHeader->e_entry;
 			return load(startAddress, size, baseAddress);
 		}
@@ -90,6 +92,7 @@ namespace obos
 #include <elf/elfStructures.h>
 
 #include <types.h>
+#include <error.h>
 
 #include <memory_manager/paging/allocate.h>
 
@@ -114,7 +117,7 @@ namespace obos
 				if (programHeader->p_flags & PF_W)
 					allocFlags |= memory::VirtualAllocFlags::WRITE_ENABLED;
 				if (programHeader->p_vaddr > 0xFFFFFFFF80000000 || !programHeader->p_vaddr)
-					return BASE_ADDRESS_USED;
+					return OBOS_ERROR_BASE_ADDRESS_USED;
 				if(!lazyLoad)
 				{
 					DWORD nPages = programHeader->p_memsz >> 12;
@@ -132,23 +135,23 @@ namespace obos
 				if (baseAddress > programHeader->p_vaddr || elfHeader->e_phnum == 1)
 					baseAddress = programHeader->p_vaddr;
 			}
-			return SUCCESS;
+			return OBOS_ERROR_NO_ERROR;
 		}
 		
 		DWORD LoadElfFile(PBYTE startAddress, SIZE_T size, UINTPTR_T& entry, UINTPTR_T& baseAddress, bool lazyLoad)
 		{
 			if (size <= sizeof(Elf64_Ehdr))
-				return INCORRECT_FILE;
+				return OBOS_ERROR_ELF_INCORRECT_FILE;
 			Elf64_Ehdr* elfHeader = (Elf64_Ehdr*)startAddress;
 			if (elfHeader->e_common.e_ident[EI_MAG0] != ELFMAG0 ||
 				elfHeader->e_common.e_ident[EI_MAG1] != ELFMAG1 ||
 				elfHeader->e_common.e_ident[EI_MAG2] != ELFMAG2 ||
 				elfHeader->e_common.e_ident[EI_MAG3] != ELFMAG3)
-				return INCORRECT_FILE;
+				return OBOS_ERROR_ELF_INCORRECT_FILE;
 			if (elfHeader->e_common.e_version != EV_CURRENT)
-				return INCORRECT_FILE;
+				return OBOS_ERROR_ELF_INCORRECT_FILE;
 			if (elfHeader->e_common.e_ident[EI_CLASS] != ELFCLASS64 || elfHeader->e_common.e_ident[EI_DATA] != ELFDATA2LSB)
-				return NOT_x86_64;
+				return OBOS_ERROR_ELF_INCORRECT_ARCHITECTURE;
 			entry = elfHeader->e_entry;
 			return load(startAddress, size, baseAddress, lazyLoad);
 		}

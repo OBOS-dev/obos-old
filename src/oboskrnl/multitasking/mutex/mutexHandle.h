@@ -26,7 +26,7 @@ namespace obos
 			int closeHandle() override;
 
 			bool Lock(bool waitIfLocked = true);
-			void Unlock();
+			bool Unlock();
 			bool IsLocked();
 
 			~MutexHandle();

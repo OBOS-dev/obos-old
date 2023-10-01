@@ -8,6 +8,7 @@
 #include <multitasking/multitasking.h>
 
 #include <inline-asm.h>
+#include <error.h>
 
 #include <memory_manager/paging/allocate.h>
 
@@ -44,7 +45,8 @@ namespace obos
 				priorityList = g_threadPriorityList[3];
 				break;
 			default:
-				return 1;
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return OBOS_ERROR_INVALID_PARAMETER;
 				break;
 			}
 
@@ -70,7 +72,7 @@ namespace obos
 #if defined(__i686__)
 			UINT32_T* stack = (UINT32_T*)memory::VirtualAlloc(nullptr, stackSizePages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
 			if (!stack)
-				return 2;
+				return OBOS_ERROR_NO_MEMORY;
 			stackBottom = stack;
 			this->stackSizePages = stackSizePages;
 			stack += stackSizePages * 1024;
@@ -86,7 +88,10 @@ namespace obos
 #elif defined(__x86_64__)
 			UINTPTR_T* stack = (UINTPTR_T*)memory::VirtualAlloc(nullptr, stackSizePages, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL, true);
 			if (!stack)
-				return 2;
+			{
+				SetLastError(OBOS_ERROR_NO_MEMORY);
+				return OBOS_ERROR_NO_MEMORY;
+			}
 			stackBottom = stack;
 			this->stackSizePages = stackSizePages;
 			stack += stackSizePages * 512;
@@ -95,8 +100,6 @@ namespace obos
 			stack -= 1;
 			*stack = (UINTPTR_T)entry;
 			PBYTE temp = (PBYTE)stackBottom;
-			for (SIZE_T i = 0; i < stackSizePages - 1; i++, temp += 4096)
-				*temp = 0;
 
 			frame.rsp = (UINTPTR_T)stack;
 			frame.rip = (UINTPTR_T)entry;
@@ -122,7 +125,7 @@ namespace obos
 					tssStackBottom = memory::VirtualAlloc(nullptr, 2, memory::VirtualAllocFlags::WRITE_ENABLED | memory::VirtualAllocFlags::GLOBAL);
 #endif
 			LeaveKernelSection();
-			return 0;
+			return OBOS_ERROR_NO_ERROR;
 		}
 	}
 }

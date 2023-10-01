@@ -68,6 +68,8 @@ extern "C" {
 	DWORD VirtualFree(OBOS_API PVOID base, SIZE_T nPages);
 	BOOL HasVirtualAddress(OBOS_API PCVOID base, SIZE_T nPages);
 	DWORD MemoryProtect(OBOS_API PVOID base, SIZE_T nPages, DWORD flags);
+	DWORD GetLastError();
+	DWORD SetLastError(DWORD newLastError);
 
 #ifdef __cplusplus
 }

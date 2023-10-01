@@ -6,10 +6,10 @@
 
 #include <types.h>
 #include <inline-asm.h>
+#include <error.h>
 
 #include <vfs/mount.h>
 #include <vfs/node.h>
-#include <vfs/error.h>
 
 #include <driver_api/enums.h>
 #include <driver_api/syscalls.h>
@@ -99,16 +99,25 @@ namespace obos
 			for (mountNode* current = mountedDrives.head; current != nullptr; )
 			{
 				if (current->userMountPoint == mountPoint)
-					return OBOS_VFS_ALREADY_EXISTS;
+					return OBOS_ERROR_ALREADY_EXISTS;
 
 				current = (mountNode*)current->next;
 			}
 			if (g_mountedInitRD && flags.isInitRD)
-				return OBOS_VFS_ALREADY_EXISTS;
+			{
+				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
+				return OBOS_ERROR_ALREADY_EXISTS;
+			}
 			if (driverAPI::g_registeredDriversCapacity > filesystemDriverId)
-				return OBOS_VFS_DRIVER_NOT_LOADED;
+			{
+				SetLastError(OBOS_ERROR_DRIVER_NOT_LOADED);
+				return OBOS_ERROR_DRIVER_NOT_LOADED;
+			}
 			if (driverAPI::g_registeredDrivers[filesystemDriverId]->service_type != driverAPI::serviceType::SERVICE_TYPE_FILESYSTEM)
-				return OBOS_VFS_NOT_A_FILESYSTEM_DRIVER;
+			{
+				SetLastError(OBOS_ERROR_NOT_A_FILESYSTEM_DRIVER);
+				return OBOS_ERROR_NOT_A_FILESYSTEM_DRIVER;
+			}
 			mountNode* newNode = new mountNode{};
 			newNode->userMountPoint = mountPoint;
 			newNode->flags = flags;
@@ -175,12 +184,11 @@ namespace obos
 					delete node->prev;
 				}
 				delete newNode;
-				return OBOS_VFS_FILESYSTEM_ERROR;
+				SetLastError(OBOS_ERROR_FILESYSTEM_ERROR);
+				return OBOS_ERROR_FILESYSTEM_ERROR;
 			}
 
-
-
-			return OBOS_VFS_NO_ERROR;
+			return OBOS_ERROR_NO_ERROR;
 		}
 
 		DWORD UnmountDrive(UINT16_T mountPoint)
@@ -194,7 +202,10 @@ namespace obos
 				current = (mountNode*)current->next;
 			}
 			if (!current)
-				return OBOS_VFS_NOT_FOUND;
+			{
+				SetLastError(OBOS_ERROR_MOUNTPOINT_NOT_FOUND);
+				return OBOS_ERROR_MOUNTPOINT_NOT_FOUND;
+			}
 			// TODO: Close all file handles.
 			mountNode* previous = (mountNode*)current->prev;
 			mountNode* next = (mountNode*)current->next;
@@ -215,7 +226,8 @@ namespace obos
 				delete node->prev;
 			}
 			delete current;
-			return OBOS_VFS_NO_ERROR;
+
+			return OBOS_ERROR_NO_ERROR;
 		}
 
 	}

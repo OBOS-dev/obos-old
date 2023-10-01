@@ -58,3 +58,5 @@ SYSCALL_DEFINE VirtualAlloc, current_syscall
 SYSCALL_DEFINE VirtualFree, current_syscall
 SYSCALL_DEFINE HasVirtualAddress, current_syscall
 SYSCALL_DEFINE MemoryProtect, current_syscall
+SYSCALL_DEFINE GetLastError, current_syscall
+SYSCALL_DEFINE SetLastError, current_syscall

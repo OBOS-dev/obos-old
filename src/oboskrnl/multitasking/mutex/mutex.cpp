@@ -4,10 +4,11 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
-#include <multitasking/mutex/mutex.h>
-#include <multitasking/multitasking.h>
-
 #include <inline-asm.h>
+#include <error.h>
+
+#include <multitasking/multitasking.h>
+#include <multitasking/mutex/mutex.h>
 
 namespace obos
 {
@@ -19,12 +20,20 @@ namespace obos
 			return !mutex->m_locked || mutex->m_resume;
 		}
 
-		void Mutex::Lock(bool waitIfLocked)
+		bool Mutex::Lock(bool waitIfLocked)
 		{
-			if ((m_locked && !waitIfLocked) || !g_initialized)
-				return;
+			if (!g_initialized)
+				return true;
+			if (m_locked && !waitIfLocked)
+			{
+				SetLastError(OBOS_ERROR_AVOIDED_DEADLOCK);
+				return false;
+			}
 			if (m_locked && m_lockOwner == g_currentThread->tid)
-				return;
+			{
+				SetLastError(OBOS_ERROR_AVOIDED_DEADLOCK);
+				return true;
+			}
 			if (m_locked)
 			{
 				EnterKernelSection();
@@ -36,14 +45,18 @@ namespace obos
 			}
 			m_locked = true;
 			m_lockOwner = g_currentThread->tid;
+			return true;
 		}
-		void Mutex::Unlock()
+		bool Mutex::Unlock()
 		{
+			DWORD lastError = GetLastError();
+			SetLastError(OBOS_ERROR_ACCESS_DENIED);
 			if(g_currentThread)
 				if (g_currentThread->tid != m_lockOwner || !g_initialized)
-					return;
+					return false;
 			m_lockOwner = (DWORD)-1;
 			m_locked = false;
+			SetLastError(lastError);
 		}
 		Mutex::~Mutex()
 		{
