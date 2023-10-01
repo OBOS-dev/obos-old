@@ -22,15 +22,12 @@ static void IterateFiles(BOOL(*appendCallback)(CSTRING filename, SIZE_T bufSize,
 
 int _start()
 {
-	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, SERVICE_TYPE_FILESYSTEM);
+	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, OBOS_SERVICE_TYPE_INITRD_FILESYSTEM);
 	
 	if (GetMultibootModule(PASS_OBOS_API_PARS 3, (UINTPTR_T*)&g_archivePosition, &g_archiveSize))
 		return 1; // Shouldn't ever happen.
 
-	RegisterFileReadCallback(PASS_OBOS_API_PARS DRIVER_ID, ReadFile);
-	RegisterFileExistsCallback(PASS_OBOS_API_PARS DRIVER_ID, FileExists);
-	RegisterRecursiveFileIterateCallback(PASS_OBOS_API_PARS DRIVER_ID, IterateFiles);
-
+	
 	return 0;
 }
 

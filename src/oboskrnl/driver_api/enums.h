@@ -23,29 +23,30 @@ namespace obos
 		DEFINE_ENUM serviceType
 		{
 			// Ex: A driver that hasn't been registered yet.
-			SERVICE_TYPE_INVALID = -1,
+			OBOS_SERVICE_TYPE_INVALID = -1,
 			// Ex: fat driver, ext2 driver.
-			SERVICE_TYPE_FILESYSTEM,
+			OBOS_SERVICE_TYPE_FILESYSTEM,
+			// The ustarFilesystem driver.
+			OBOS_SERVICE_TYPE_INITRD_FILESYSTEM,
 			// Ex: SATA driver.
-			SERVICE_TYPE_STORAGE_DEVICE,
-			// Ex: iso mounter.
-			SERVICE_TYPE_VIRTUAL_STORAGE_DEVICE,
+			OBOS_SERVICE_TYPE_STORAGE_DEVICE,
+			OBOS_SERVICE_TYPE_VIRTUAL_STORAGE_DEVICE,
 			// Ex: PS/2 Keyboard driver, PS/2 Mouse driver.
-			SERVICE_TYPE_USER_INPUT_DEVICE,
+			OBOS_SERVICE_TYPE_USER_INPUT_DEVICE,
 			// Ex: On-screen keyboard.
-			SERVICE_TYPE_VIRTUAL_USER_INPUT_DEVICE,
+			OBOS_SERVICE_TYPE_VIRTUAL_USER_INPUT_DEVICE,
 			// Ex: GPU driver, VGA driver.
-			SERVICE_TYPE_GRAPHICS_DEVICE,
+			OBOS_SERVICE_TYPE_GRAPHICS_DEVICE,
 			// Ex: A background process that shuts down the computer when the cpu temperature is too high.
-			SERVICE_TYPE_MONITOR,
+			OBOS_SERVICE_TYPE_MONITOR,
 			// Ex: A driver that allows pe files to be run.
-			SERVICE_TYPE_KERNEL_EXTENSION,
+			OBOS_SERVICE_TYPE_KERNEL_EXTENSION,
 			// Ex: A serial driver, a network card driver.
-			SERVICE_TYPE_COMMUNICATION,
+			OBOS_SERVICE_TYPE_COMMUNICATION,
 			// Ex: A virtual serial driver (see com0com for context).
-			SERVICE_TYPE_VIRTUAL_COMMUNICATION,
+			OBOS_SERVICE_TYPE_VIRTUAL_COMMUNICATION,
 			// Not a service, instead it indicates the service type with the biggest value.
-			SERVICE_TYPE_MAX_VALUE = SERVICE_TYPE_VIRTUAL_COMMUNICATION
+			OBOS_SERVICE_TYPE_MAX_VALUE = OBOS_SERVICE_TYPE_VIRTUAL_COMMUNICATION
 		};
 		DEFINE_ENUM exitStatus
 		{
@@ -57,21 +58,6 @@ namespace obos
 			EXIT_STATUS_INVALID_PARAMETER,
 			EXIT_STATUS_ADDRESS_NOT_AVAILABLE,
 			EXIT_STATUS_NOT_IMPLEMENTED
-		};
-
-		struct interrupt_frame
-		{
-			// +0		
-			UINT32_T ds;
-			//		  +4,  +8,  +12, +16, +20, +24, +28, +32
-			UINT32_T edi, esi, ebp, esp, ebx, edx, ecx, eax;
-			// +36
-			UINT8_T intNumber;
-			// +40 (Padding)
-			UINT32_T errorCode;
-			//		 +44,+48,    +52,	   +56,+60
-			UINT32_T eip, cs, eflags, useresp, ss;
-			// +64 (End)
 		};
 
 		enum fileExistsReturn
@@ -86,6 +72,28 @@ namespace obos
 			FILE_EXISTS_HARDLINK = 8,
 			// If this is set, this is a file, not a directory.
 			FILE_EXISTS_FILE = 16,
+		};
+
+		DEFINE_ENUM driver_commands
+		{
+			// Common Commands
+			OBOS_SERVICE_GET_SERVICE_TYPE,
+			// OBOS_SERVICE_TYPE_FILESYSTEM
+			OBOS_SERVICE_QUERY_FILE_DATA,
+			OBOS_SERVICE_MAKE_FILE_ITERATOR,
+			OBOS_SERVICE_NEXT_FILE,
+			// OBOS_SERVICE_TYPE_INITRD_FILESYSTEM <- OBOS_SERVICE_TYPE_FILESYSTEM
+			OBOS_SERVICE_READ_FILE,
+			// OBOS_SERVICE_TYPE_STORAGE_DEVICE, SERVICE_TYPE_VIRTUAL_STORAGE_DEVICE
+			OBOS_SERVICE_READ_LBA,
+			OBOS_SERVICE_WRITE_LBA,
+			// OBOS_SERVICE_TYPE_USER_INPUT_DEVICE, SERVICE_TYPE_VIRTUAL_USER_INPUT_DEVICE
+			OBOS_SERVICE_READ_CHARACTER,
+			// TODO: SERVICE_TYPE_GRAPHICS_DEVICE, SERVICE_TYPE_MONITOR, SERVICE_TYPE_KERNEL_EXTENSION
+			// OBOS_SERVICE_TYPE_COMMUNICATION, OBOS_SERVICE_TYPE_VIRTUAL_COMMUNICATION
+			OBOS_SERVICE_CONFIGURE_COMMUNICATION,
+			OBOS_SERVICE_RECV_BYTE_FROM_DEVICE,
+			OBOS_SERVICE_SEND_BYTE_TO_DEVICE,
 		};
 
 		enum allocFlags

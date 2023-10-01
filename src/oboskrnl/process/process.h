@@ -68,7 +68,7 @@ namespace obos
 				PBYTE start = nullptr;
 				SIZE_T size = 0;
 			};
-			// a list of "address"
+			// a list of "allocatedBlock"
 			list_t* allocatedBlocks;
 			bool isUserMode = false;
 			DWORD exitCode = 0;

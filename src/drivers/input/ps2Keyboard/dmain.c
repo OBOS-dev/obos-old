@@ -142,20 +142,9 @@ struct
 	bool isShiftPressed : 1;
 } __attribute__((packed)) flags = {0,0,0,0};
 
-
-static void readCallback(STRING outputBuffer, SIZE_T size)
-{
-	for (SIZE_T i = 0; i < size && i < 8192; i++)
-	{
-		if (!g_keyBuffer[i])
-			continue;
-		outputBuffer[i] = g_keyBuffer[i];
-	}
-}
-
 int _start()
 {
-	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, SERVICE_TYPE_USER_INPUT_DEVICE);
+	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, OBOS_SERVICE_TYPE_USER_INPUT_DEVICE);
 
 	cli();
 	DisableIRQ(PASS_OBOS_API_PARS 1);
@@ -172,8 +161,6 @@ int _start()
 	sendCommand(1, 0xED | 0b111);
 	
 	RegisterInterruptHandler(PASS_OBOS_API_PARS DRIVER_ID, 0x21, keyboardInterrupt);
-
-	RegisterReadCallback(PASS_OBOS_API_PARS DRIVER_ID, readCallback);
 
 	EnableIRQ(PASS_OBOS_API_PARS 1);
 	sti();

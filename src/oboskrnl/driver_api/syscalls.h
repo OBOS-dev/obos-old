@@ -20,9 +20,6 @@ namespace obos
 			DWORD driverId = 0;
 			process::Process* process;
 			serviceType service_type = serviceType::SERVICE_TYPE_INVALID;
-			PVOID readCallback = nullptr;
-			PVOID existsCallback = nullptr;
-			PVOID iterateCallback = nullptr;
 		};
 		extern driverIdentification** g_registeredDrivers;
 		extern SIZE_T g_registeredDriversCapacity;

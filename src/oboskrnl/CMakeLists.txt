@@ -2,23 +2,6 @@
 #
 # Copyright (c) 2023 Omar Berrow
 
-set_source_files_properties(SOURCE "crti/src/crti.S" ASM-ATT)
-set_source_files_properties(SOURCE "crti/src/crte.S" ASM-ATT)
-
-# set(oboskrnl_headers "types.h"                            "boot/multiboot.h"                   "console.h"                    "klog.h"
-#                      "inline-asm.h"                       "descriptors/gdt/gdt.h"              "descriptors/idt/idt.h"        "memory_manager/physical.h"
-#                      "utils/bitfields.h"                  "descriptors/idt/pic.h"              "memory_manager/paging/init.h" "memory_manager/paging/allocate.h" 
-#                      "utils/memory.h"                     "memory_manager/liballoc/liballoc.h" "utils/list.h"                 "external/list/list.h"
-#                      "multitasking/threadHandle.h"        "multitasking/multitasking.h"        "multitasking/mutex/mutex.h"   "multitasking/mutex/mutexHandle.h"
-#                      "new"                                "elf/elf.h"                          "elf/elfStructures.h"          "driver_api/interrupts.h"
-#                      "utils/hashTable.h"                  "process/process.h"                  "syscalls/syscalls.h"          "external/amalgamated-dist/Zydis.h"
-#                      "boot/boot.h"
-# )
-
-# file(GLOB_RECURSE oboskrnl_cxxSources *.cpp *.c)
-# file(GLOB_RECURSE oboskrnl_headers *.h)
-# file(GLOB_RECURSE oboskrnl_asmSources *.asm)
-
 set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_platformSpecific} 
         "boot/kmain.cpp"            "console.cpp"                              "klog.cpp"                           "inline-asm.cpp"
         "klog.cpp"                  "utils/bitfields.cpp"                      "descriptors/idt/pic.cpp"            "external/list/list_iterator.c"
@@ -26,7 +9,7 @@ set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_platformSpecific}
         "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "elf/elf.cpp"
         "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "process/process.cpp"
         "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"                  "syscalls/syscalls.cpp"              "external/amalgamated-dist/Zydis.c"
-        "descriptors/gdt/gdt.cpp" "vfs/mount.cpp" "error.cpp")
+        "descriptors/gdt/gdt.cpp" "error.cpp")
 
 add_executable(oboskrnl ${oboskrnl_files})
 target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wextra> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>

@@ -339,77 +339,7 @@ namespace obos
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::PAUSED);
 		mainThread.closeHandle();
 
-		char(*existsCallback)(CSTRING filename, SIZE_T * size) = (char(*)(CSTRING filename, SIZE_T * size))driverAPI::g_registeredDrivers[1]->existsCallback;
-		void(*readCallback)(CSTRING filename, STRING output, SIZE_T size) = (void(*)(CSTRING filename, STRING output, SIZE_T size))driverAPI::g_registeredDrivers[1]->readCallback;
-		//void(*iterateCallback)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)) = (void(*)(void(*appendEntry)(CSTRING filename, SIZE_T bufSize)))driverAPI::g_registeredDrivers[1]->iterateCallback;
 
-		//// Set a write breakpoint for exists callback.
-		//asm volatile(".intel_syntax noprefix;" 
-		//			 "mov dr0, %0;"
-		//			 "mov rax, dr7;"
-		//			 "or rax, 0x10002;"
-		//			 "mov dr7, rax;"
-		//			 ".att_syntax"
-		//	:
-		//	: "r"(existsCallback)
-		//	: "memory"
-		//	);
-
-		SIZE_T filesize = 0;
-		char existsData = 0;
-
-		PBYTE filedata = nullptr;
-
-		filesize = 0;
-		EnterKernelSection();
-		initrdDriver->doContextSwitch();
-		existsData = existsCallback("ps2Keyboard", &filesize);
-		g_kernelProcess->doContextSwitch();
-		LeaveKernelSection();
-		if (!existsData)
-			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/ps2Keyboard doesn't exist."));
-		filedata = new BYTE[filesize];
-		EnterKernelSection();
-		initrdDriver->doContextSwitch();
-		readCallback("ps2Keyboard", (STRING)filedata, filesize);
-		g_kernelProcess->doContextSwitch();
-		LeaveKernelSection();
-
-		process::Process* keyboardDriver = new process::Process{};
-		ret = keyboardDriver->CreateProcess(filedata, filesize, (PVOID)&mainThread, true);
-		delete[] filedata;
-		if (ret)
-			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
-		//mainThread.WaitForThreadStatusChange(0);
-		// We don't need the handle anymore.
-		mainThread.closeHandle();
-		
-		filesize = 0;
-		EnterKernelSection();
-		initrdDriver->doContextSwitch();
-		existsData = existsCallback("testProgram", &filesize);
-		g_kernelProcess->doContextSwitch();
-		LeaveKernelSection();
-		if (!existsData)
-			kpanic(nullptr, getEIP(), kpanic_format("/obos/initrd/testProgram doesn't exist."));
-		filedata = new BYTE[filesize];
-		EnterKernelSection();
-		initrdDriver->doContextSwitch();
-		readCallback("testProgram", (STRING)filedata, filesize);
-		g_kernelProcess->doContextSwitch();
-		LeaveKernelSection();
-
-		process::Process* testProgram = new process::Process{};
-		ret = testProgram->CreateProcess(filedata, filesize, nullptr);
-		delete[] filedata;
-		if (ret)
-			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
-
-		char* ascii_art = (STRING)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start;
-		
-		SetConsoleColor(0x003399FF, 0x00000000);
-		ConsoleOutput(ascii_art, ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start);
-		SetConsoleColor(0xFFFFFFFF, 0x00000000);
 
 		// Uncomment this line to kpanic.
 		//*((PBYTE)0x486594834) = 'L';

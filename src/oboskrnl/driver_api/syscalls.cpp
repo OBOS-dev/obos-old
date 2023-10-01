@@ -54,16 +54,12 @@ namespace obos
 		static exitStatus PicSendEoi(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus EnableIRQ(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus DisableIRQ(DEFINE_RESERVED_PARAMETERS);
-		static exitStatus RegisterReadCallback(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus PrintChar(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus GetMultibootModule(DEFINE_RESERVED_PARAMETERS);
-		static exitStatus RegisterFileReadCallback(DEFINE_RESERVED_PARAMETERS);
-		static exitStatus RegisterFileExistsCallback(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus Printf(CSTRING format, ...);
 		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS);
-		static exitStatus RegisterRecursiveFileIterateCallback(DEFINE_RESERVED_PARAMETERS);
 		static void interruptHandler(const obos::interrupt_frame* frame);
 
 		/*struct driverIdentification
@@ -129,8 +125,6 @@ namespace obos
 					(BYTE)pars->driverID,
 					multitasking::g_currentThread->owner,
 					pars->type,
-					nullptr,
-					nullptr
 				};
 				g_registeredDrivers[pars->driverID] = identity;
 				return exitStatus::EXIT_STATUS_SUCCESS;
@@ -320,38 +314,6 @@ namespace obos
 			*pars->size = mod->mod_end - mod->mod_start;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
-		static exitStatus RegisterFileReadCallback(DEFINE_RESERVED_PARAMETERS)
-		{
-			struct _par
-			{
-				alignas(STACK_SIZE) UINTPTR_T driverId;
-				alignas(STACK_SIZE) void(*callback)(CSTRING filename, STRING outputBuffer, SIZE_T sizeBuffer);
-			} *pars = (_par*)parameters;
-			if (pars->driverId > g_registeredDriversCapacity)
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (!g_registeredDrivers[pars->driverId])
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (g_registeredDrivers[pars->driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
-				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			g_registeredDrivers[pars->driverId]->readCallback = (PVOID)pars->callback;
-			return exitStatus::EXIT_STATUS_SUCCESS;
-		}
-		static exitStatus RegisterFileExistsCallback(DEFINE_RESERVED_PARAMETERS)
-		{
-			struct _par
-			{
-				alignas(STACK_SIZE) UINTPTR_T driverId;
-				alignas(STACK_SIZE) void(*callback)(CSTRING filename, SIZE_T* size);
-			} *pars = (_par*)parameters;
-			if (pars->driverId > g_registeredDriversCapacity)
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (!g_registeredDrivers[pars->driverId])
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (g_registeredDrivers[pars->driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
-				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			g_registeredDrivers[pars->driverId]->existsCallback = (PVOID)pars->callback;
-			return exitStatus::EXIT_STATUS_SUCCESS;
-		}
 		static exitStatus MapPhysicalTo(DEFINE_RESERVED_PARAMETERS)
 		{
 			struct _par
@@ -431,22 +393,6 @@ namespace obos
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 #endif
-		static exitStatus RegisterRecursiveFileIterateCallback(DEFINE_RESERVED_PARAMETERS)
-		{
-			struct _par
-			{
-				alignas(STACK_SIZE) UINTPTR_T driverId;
-				alignas(STACK_SIZE) void(*callback)(bool(*appendEntry)(CSTRING,SIZE_T,BYTE));
-			} *pars = (_par*)parameters;
-			if (pars->driverId > g_registeredDriversCapacity)
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (!g_registeredDrivers[pars->driverId])
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (g_registeredDrivers[pars->driverId]->service_type != serviceType::SERVICE_TYPE_FILESYSTEM)
-				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			g_registeredDrivers[pars->driverId]->iterateCallback = (PVOID)pars->callback;
-			return exitStatus::EXIT_STATUS_SUCCESS;
-		}
 
 		static void interruptHandler(const obos::interrupt_frame* frame)
 		{

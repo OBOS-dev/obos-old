@@ -16,7 +16,6 @@ target_compile_options(ps2Keyboard
 target_link_options(ps2Keyboard
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/ps2Keyboard.map"
     PUBLIC "-ffreestanding"
-    PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/src/drivers/storage/nvme/linker.ld"
     PUBLIC "-nostdlib")
 
 set_target_properties(ps2Keyboard PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")

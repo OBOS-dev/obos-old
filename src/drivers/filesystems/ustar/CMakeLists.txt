@@ -15,7 +15,6 @@ target_compile_options(ustarFilesystem
 target_link_options(ustarFilesystem
     PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/ustarFilesystem.map"
     PUBLIC "-ffreestanding"
-    PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/src/drivers/storage/nvme/linker.ld"
     PUBLIC "-nostdlib")
 
 set_target_properties(ustarFilesystem PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
