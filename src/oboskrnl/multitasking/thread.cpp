@@ -99,8 +99,7 @@ namespace obos
 			*stack = (UINTPTR_T)nullptr;
 			stack -= 1;
 			*stack = (UINTPTR_T)entry;
-			PBYTE temp = (PBYTE)stackBottom;
-
+			
 			frame.rsp = (UINTPTR_T)stack;
 			frame.rip = (UINTPTR_T)entry;
 			frame.rdi = (UINTPTR_T)userData;

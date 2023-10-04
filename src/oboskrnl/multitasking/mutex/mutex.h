@@ -16,6 +16,9 @@ namespace obos
 		{
 		public:
 			Mutex() = default;
+			Mutex(bool avoidDeadLocks)
+				: m_avoidDeadlocks{ avoidDeadLocks }
+			{}
 			
 			bool Lock(bool waitIfLocked = true);
 			bool Unlock();
@@ -28,6 +31,7 @@ namespace obos
 		private:
 			bool m_locked = false;
 			bool m_resume = false;
+			bool m_avoidDeadlocks = false;
 			Thread::Tid m_lockOwner = ((DWORD)-1);
 		};
 	}

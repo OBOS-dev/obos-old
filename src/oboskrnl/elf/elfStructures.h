@@ -144,5 +144,19 @@ namespace obos
 			Elf64_Qword p_memsz;
 			Elf64_Qword p_align;
 		};
+
+		struct Elf64_Shdr
+		{
+			Elf64_Word 	sh_name;
+			Elf64_Word 	sh_type;
+			Elf64_Qword sh_flags;
+			Elf64_Addr 	sh_addr;
+			Elf64_Off 	sh_offset;
+			Elf64_Qword sh_size;
+			Elf64_Word 	sh_link;
+			Elf64_Word 	sh_info;
+			Elf64_Qword sh_addralign;
+			Elf64_Qword sh_entsize;
+		};
 	}
 }

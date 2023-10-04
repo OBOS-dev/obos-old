@@ -40,6 +40,8 @@
 
 extern "C" void callDriverIrqHandler(PBYTE newRsp, UINTPTR_T* l4PageMap, void(*irqHandler)());
 
+#define CURRENT_DRIVER_IDENTITY reinterpret_cast<obos::driverAPI::driverIdentification*>(obos::multitasking::g_currentThread->owner->driverIdentity)
+
 namespace obos
 {
 	namespace memory
@@ -49,7 +51,7 @@ namespace obos
 	extern char kernelStart;
 	namespace driverAPI
 	{
-		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus RegisterDriver();
 		static exitStatus RegisterInterruptHandler(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus PicSendEoi(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus EnableIRQ(DEFINE_RESERVED_PARAMETERS);
@@ -65,7 +67,7 @@ namespace obos
 		/*struct driverIdentification
 		{
 			DWORD driverId = 0;
-			serviceType m_service = serviceType::SERVICE_TYPE_INVALID;
+			serviceType m_service = serviceType::OBOS_SERVICE_TYPE_INVALID;
 			static UINT32_T hash(driverIdentification* key)
 			{
 				return key->driverId;
@@ -90,67 +92,35 @@ namespace obos
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(PicSendEoi));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(EnableIRQ));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(DisableIRQ));
-			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterReadCallback));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(PrintChar));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(GetMultibootModule));
-			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterFileReadCallback));
-			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterFileExistsCallback));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(MapPhysicalTo));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(UnmapPhysicalTo));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(Printf));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(GetPhysicalAddress));
-			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(RegisterRecursiveFileIterateCallback));
 		}
 
-		static exitStatus RegisterDriver(DEFINE_RESERVED_PARAMETERS)
+		static exitStatus RegisterDriver()
 		{
-			struct _par
-			{
-				alignas(STACK_SIZE) UINTPTR_T driverID;
-				alignas(STACK_SIZE) serviceType type;
-			} *pars = (_par*)parameters;
-			if(!g_registeredDrivers[pars->driverID])
-			{
-				if (pars->driverID > g_registeredDriversCapacity)
-				{
-					// g_registeredDriversCapacity + g_registeredDriversCapacity / 4 should be the same as g_registeredDriversCapacity * 1.25f, but truncated.
-					g_registeredDriversCapacity += g_registeredDriversCapacity / 4;
-					g_registeredDrivers = (driverIdentification**)krealloc(g_registeredDrivers, g_registeredDriversCapacity);
-				}
-				if (pars->type == serviceType::SERVICE_TYPE_INVALID)
-					return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
-				if (pars->type > serviceType::SERVICE_TYPE_MAX_VALUE)
-					return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
-				driverIdentification* identity = new driverIdentification {
-					(BYTE)pars->driverID,
-					multitasking::g_currentThread->owner,
-					pars->type,
-				};
-				g_registeredDrivers[pars->driverID] = identity;
-				return exitStatus::EXIT_STATUS_SUCCESS;
-			}
-			return exitStatus::EXIT_STATUS_ALREADY_REGISTERED;
+			return exitStatus::EXIT_STATUS_NOT_IMPLEMENTED;
 		}
 		static exitStatus RegisterInterruptHandler(DEFINE_RESERVED_PARAMETERS)
 		{
 			struct _par
 			{
-				alignas(STACK_SIZE) UINTPTR_T driverId;
 				alignas(STACK_SIZE) UINTPTR_T interruptId;
 				alignas(STACK_SIZE) void(*handler)();
 			} attribute(aligned(8)) *pars = (_par*)parameters;
-			if (pars->driverId > g_registeredDriversCapacity)
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (!g_registeredDrivers[pars->driverId])
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
 			if (pars->interruptId < 0x21)
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
-			serviceType type = g_registeredDrivers[pars->driverId]->service_type;
+			if (!multitasking::g_currentThread->owner->driverIdentity)
+				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
+			serviceType type = CURRENT_DRIVER_IDENTITY->service_type;
 			switch (type)
 			{
-			case serviceType::SERVICE_TYPE_INVALID:
+			case serviceType::OBOS_SERVICE_TYPE_INVALID:
 				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			case serviceType::SERVICE_TYPE_STORAGE_DEVICE:
+			case serviceType::OBOS_SERVICE_TYPE_STORAGE_DEVICE:
 			{
 				BYTE allowedInterrupts[] = {
 					0x20 + 6,
@@ -166,7 +136,7 @@ namespace obos
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
-			case serviceType::SERVICE_TYPE_USER_INPUT_DEVICE:
+			case serviceType::OBOS_SERVICE_TYPE_USER_INPUT_DEVICE:
 			{
 				BYTE allowedInterrupts[] = {
 					0x20 + 1,
@@ -181,7 +151,7 @@ namespace obos
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
-			case serviceType::SERVICE_TYPE_GRAPHICS_DEVICE:
+			case serviceType::OBOS_SERVICE_TYPE_GRAPHICS_DEVICE:
 			{
 				BYTE allowedInterrupts[] = {
 					0x20 + 9,
@@ -194,7 +164,7 @@ namespace obos
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
-			case serviceType::SERVICE_TYPE_MONITOR:
+			case serviceType::OBOS_SERVICE_TYPE_MONITOR:
 			{
 				BYTE allowedInterrupts[] = {
 					0x20 + 8,
@@ -205,11 +175,11 @@ namespace obos
 					return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
 				break;
 			}
-			case serviceType::SERVICE_TYPE_KERNEL_EXTENSION:
+			case serviceType::OBOS_SERVICE_TYPE_KERNEL_EXTENSION:
 				if(pars->interruptId >= 0x21 && pars->interruptId < 0x30)
 					break;
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED; // No.
-			case serviceType::SERVICE_TYPE_COMMUNICATION:
+			case serviceType::OBOS_SERVICE_TYPE_COMMUNICATION:
 			{
 				BYTE allowedInterrupts[] = {
 					0x20 + 3,
@@ -227,17 +197,17 @@ namespace obos
 				break;
 			}
 
-			case serviceType::SERVICE_TYPE_FILESYSTEM:
-			case serviceType::SERVICE_TYPE_VIRTUAL_STORAGE_DEVICE:
-			case serviceType::SERVICE_TYPE_VIRTUAL_USER_INPUT_DEVICE:
-			case serviceType::SERVICE_TYPE_VIRTUAL_COMMUNICATION:
+			case serviceType::OBOS_SERVICE_TYPE_FILESYSTEM:
+			case serviceType::OBOS_SERVICE_TYPE_VIRTUAL_STORAGE_DEVICE:
+			case serviceType::OBOS_SERVICE_TYPE_VIRTUAL_USER_INPUT_DEVICE:
+			case serviceType::OBOS_SERVICE_TYPE_VIRTUAL_COMMUNICATION:
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
 			default:
 				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
 			}
 			obos::RegisterInterruptHandler(pars->interruptId, interruptHandler);
 			g_registeredInterruptHandlers[pars->interruptId - 0x20].handler = pars->handler;
-			g_registeredInterruptHandlers[pars->interruptId - 0x20].driver = g_registeredDrivers[pars->driverId];
+			g_registeredInterruptHandlers[pars->interruptId - 0x20].driver = CURRENT_DRIVER_IDENTITY;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 		static exitStatus PicSendEoi(DEFINE_RESERVED_PARAMETERS)
@@ -271,22 +241,6 @@ namespace obos
 				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
 			Pic pic{ (pars->irq > 7) ? Pic::PIC2_CMD : Pic::PIC1_CMD, (pars->irq > 7) ? Pic::PIC2_DATA : Pic::PIC2_DATA };
 			pic.enableIrq(pars->irq);
-			return exitStatus::EXIT_STATUS_SUCCESS;
-		}
-		static exitStatus RegisterReadCallback(DEFINE_RESERVED_PARAMETERS)
-		{
-			struct _par
-			{
-				alignas(STACK_SIZE) UINTPTR_T driverId;
-				alignas(STACK_SIZE) void(*callback)(STRING outputBuffer, SIZE_T sizeBuffer);
-			} *pars = (_par*)parameters;
-			if (pars->driverId > g_registeredDriversCapacity)
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (!g_registeredDrivers[pars->driverId])
-				return exitStatus::EXIT_STATUS_NO_SUCH_DRIVER;
-			if (g_registeredDrivers[pars->driverId]->service_type != serviceType::SERVICE_TYPE_USER_INPUT_DEVICE)
-				return exitStatus::EXIT_STATUS_ACCESS_DENIED;
-			g_registeredDrivers[pars->driverId]->readCallback = (PVOID)pars->callback;
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 		static exitStatus PrintChar(DEFINE_RESERVED_PARAMETERS) 
@@ -408,7 +362,7 @@ namespace obos
 #elif defined(__i686__)
 				memory::PageDirectory* pageDirectory = memory::g_pageDirectory;
 				memory::g_pageDirectory = g_registeredInterruptHandlers[frame->intNumber - 32].driver->process->pageDirectory;
-				UINTPTR_T* _pageMap = memory::g_pageDirectory->getPageMap();
+				UINTPTR_T* _pageMap = memory::g_pageDirectory->getPageDirectory();
 #define commitMemory
 #endif
 				PBYTE newRsp = (PBYTE)memory::VirtualAlloc(nullptr, 1, memory::VirtualAllocFlags::GLOBAL | memory::VirtualAllocFlags::WRITE_ENABLED commitMemory);

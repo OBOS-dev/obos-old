@@ -22,5 +22,6 @@ namespace obos
 		/// <param name="lazyLoad">Whether to allocate and copy any of the program header data.</param>
 		/// <returns>An error code.</returns>
 		DWORD LoadElfFile(PBYTE startAddress, SIZE_T size, UINTPTR_T& entry, UINTPTR_T& baseAddress, bool lazyLoad = false);
+		DWORD CheckElfFile(PBYTE startAddress, SIZE_T size, bool setLastError = false);
 	}
 }

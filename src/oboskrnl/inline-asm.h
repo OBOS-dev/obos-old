@@ -22,6 +22,8 @@ PVOID getEIP();
 void cli();
 void sti();
 void hlt();
+// Does a full halt of the cpu, (label: cli; hlt; jmp label)
+[[noreturn]] void haltCPU();
 
 void _int(BYTE interrupt);
 

@@ -151,12 +151,10 @@ namespace obos
 			Thread* threadToRun = nullptr;
 			Thread* currentThread = nullptr;
 
-			bool foundTask = false;
-
 			// Find the thread that's starving in a queue and run it.
 			
 			// Find a new task.
-			for (int i = 3; i != -1 && !foundTask; i--)
+			for (int i = 3; i != -1; i--)
 			{
 				SIZE_T lowestTimeRan = 0;
 				for (list_node_t* node = g_threadPriorityList[i]->head; node != nullptr; node = node->next)
@@ -180,7 +178,6 @@ namespace obos
 						}
 					}
 				}
-				foundTask = threadToRun != nullptr;
 			}
 			if (!threadToRun)
 				goto findNew;

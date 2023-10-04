@@ -9,13 +9,14 @@
 #include <types.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-	PVOID kmalloc(SIZE_T amount);
-	PVOID kcalloc(SIZE_T nobj, SIZE_T szObj);
-	PVOID krealloc(PVOID ptr, SIZE_T newSize);
-	void kfree(PVOID ptr);
+PVOID kmalloc(SIZE_T amount);
+PVOID kcalloc(SIZE_T nobj, SIZE_T szObj);
+PVOID krealloc(PVOID ptr, SIZE_T newSize);
+void kfree(PVOID ptr);
 
 #ifdef __cplusplus
 }

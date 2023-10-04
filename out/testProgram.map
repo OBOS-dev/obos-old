@@ -10,14 +10,14 @@ LOAD src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
 LOAD src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
                 0x0000000000001000                . = 0x1000
 
-.text           0x0000000000001000      0x83b
+.text           0x0000000000001000      0x855
  *(.multiboot)
  *(.text)
  .text          0x0000000000001000      0x638 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
                 0x000000000000115c                Thread
                 0x00000000000013dd                _start
  *fill*         0x0000000000001638        0x8 
- .text          0x0000000000001640      0x1fb src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
+ .text          0x0000000000001640      0x215 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
                 0x0000000000001640                ConsoleOutputString
                 0x000000000000164d                ExitProcess
                 0x000000000000165a                CreateProcess
@@ -57,9 +57,11 @@ LOAD src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_int
                 0x0000000000001814                VirtualFree
                 0x0000000000001821                HasVirtualAddress
                 0x000000000000182e                MemoryProtect
+                0x000000000000183b                GetLastError
+                0x0000000000001848                SetLastError
 
-.iplt           0x000000000000183b        0x0
- .iplt          0x000000000000183b        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
+.iplt           0x0000000000001855        0x0
+ .iplt          0x0000000000001855        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
 
 .rodata         0x0000000000002000       0x55
  *(.rodata)
@@ -110,9 +112,9 @@ OUTPUT(/mnt/c/Code/obos/out/testProgram elf64-x86-64)
  .debug_aranges
                 0x0000000000000030       0x30 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
 
-.debug_line     0x0000000000000000      0x75e
+.debug_line     0x0000000000000000      0x76e
  .debug_line    0x0000000000000000      0x5b8 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj
- .debug_line    0x00000000000005b8      0x1a6 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
+ .debug_line    0x00000000000005b8      0x1b6 src/testProgram/CMakeFiles/testProgram.dir/__/oboskrnl/syscalls/syscall_interface.asm.obj
 
 .debug_str      0x0000000000000000        0x0
  .debug_str     0x0000000000000000        0x0 src/testProgram/CMakeFiles/testProgram.dir/main.c.obj

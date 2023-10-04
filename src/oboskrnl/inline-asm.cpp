@@ -55,10 +55,6 @@ void sti()
         return;
     asm volatile("sti");
 }
-void hlt()
-{
-    asm volatile("hlt");
-}
 
 #define DEFINE_INT_CASE(intn) case intn: asm volatile("int $" #intn); break;
 

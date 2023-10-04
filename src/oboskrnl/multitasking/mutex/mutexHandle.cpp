@@ -20,11 +20,12 @@ namespace obos
 	{
 		MutexHandle::MutexHandle()
 		{
-			m_value = new Mutex();
-			m_origin = this;
-			m_references = 1;
-			if (process::g_nextProcessId)
-				list_rpush(g_currentThread->owner->abstractHandles, list_node_new(this));
+			init();
+		}
+
+		MutexHandle::MutexHandle(bool avoidDeadLocks)
+		{
+			init(avoidDeadLocks);
 		}
 
 		Handle* MutexHandle::duplicate()
@@ -74,9 +75,23 @@ namespace obos
 			return mutex->m_locked;
 		}
 
+		DWORD MutexHandle::GetLockOwnerTid()
+		{
+			Mutex* mutex = (Mutex*)m_value;
+			return mutex->m_lockOwner;
+		}
+
 		MutexHandle::~MutexHandle()
 		{
 			closeHandle();
+		}
+		void MutexHandle::init(bool avoidDeadLocks)
+		{
+			m_value = new Mutex(avoidDeadLocks);
+			m_origin = this;
+			m_references = 1;
+			if (process::g_nextProcessId)
+				list_rpush(g_currentThread->owner->abstractHandles, list_node_new(this));
 		}
 	}
 }

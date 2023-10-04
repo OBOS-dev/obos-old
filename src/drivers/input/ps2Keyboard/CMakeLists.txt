@@ -14,7 +14,6 @@ target_compile_options(ps2Keyboard
 )
 
 target_link_options(ps2Keyboard
-    PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/ps2Keyboard.map"
     PUBLIC "-ffreestanding"
     PUBLIC "-nostdlib")
 

@@ -65,6 +65,8 @@ pageBlock* allocateNewPageBlock(SIZE_T nPages)
 {
 	nPages += (MIN_PAGES_ALLOCATED - (nPages % MIN_PAGES_ALLOCATED));
 	pageBlock* blk = (pageBlock*)obos::memory::VirtualAlloc((PVOID)(liballoc_base + totalPagesAllocated * 4096), nPages, AllocFlags::WRITE_ENABLED);
+	if(!blk)
+		obos::kpanic(nullptr, nullptr, kpanic_format("Could not allocate a pageBlock at %p."));
 	totalPagesAllocated += nPages;
 #ifndef __x86_64__
 	obos::utils::memzero(blk, nPages * 4096);
@@ -123,7 +125,7 @@ struct safe_lock
 	}
 	void Unlock()
 	{
-		if (m_mutex)
+		if (m_mutex && m_mutex->IsLocked())
 			m_mutex->Unlock();
 	}
 	~safe_lock()
@@ -134,7 +136,7 @@ private:
 	obos::multitasking::Mutex* m_mutex = nullptr;
 };
 
-#define makeSafeLock(vName) safe_lock vName{ s_allocatorMutex }; if(inKernelSection) vName .Lock();
+#define makeSafeLock(vName) safe_lock vName{ s_allocatorMutex }; if(!inKernelSection) vName .Lock();
 static obos::multitasking::Mutex mutex;
 
 void allocate_mutex()
@@ -167,10 +169,7 @@ extern "C" {
 		{
 			currentPageBlock = allocateNewPageBlock(amount / 4096);
 			if (!currentPageBlock)
-			{
-				obos::kpanic(nullptr, nullptr, kpanic_format("Could not allocate a pageBlock at %p."));
 				return nullptr;
-			}
 			goto foundPageBlock;
 		}
 

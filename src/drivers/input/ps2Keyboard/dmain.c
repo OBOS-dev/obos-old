@@ -158,9 +158,9 @@ int _start()
 	// Enable scanning.
 	sendCommand(1, 0xF4);
 
-	sendCommand(1, 0xED | 0b111);
+	sendCommand(2, 0xED, 0b111);
 	
-	RegisterInterruptHandler(PASS_OBOS_API_PARS DRIVER_ID, 0x21, keyboardInterrupt);
+	RegisterInterruptHandler(PASS_OBOS_API_PARS 0x21, keyboardInterrupt);
 
 	EnableIRQ(PASS_OBOS_API_PARS 1);
 	sti();

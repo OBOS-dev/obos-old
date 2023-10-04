@@ -6,6 +6,8 @@ global _Z6getEIPv
 global getEBP
 global _ZN4obos6memory19GetPageFaultAddressEv
 global _ZN4obos6memory8tlbFlushEy
+global _Z3hltv
+global _Z7haltCPUv
 
 _Z9getEflagsv:
 	push rbp
@@ -27,4 +29,12 @@ _ZN4obos6memory19GetPageFaultAddressEv:
 	ret
 _ZN4obos6memory8tlbFlushEy:
 	invlpg [rdi]
+	ret
+_Z7haltCPUv:
+	cli
+	hlt
+	jmp _Z7haltCPUv
+	ret
+_Z3hltv:
+	hlt
 	ret

@@ -30,6 +30,7 @@
 
 #include <driver_api/interrupts.h>
 #include <driver_api/syscalls.h>
+#include <driver_api/load/module.h>
 
 #include <process/process.h>
 
@@ -168,16 +169,6 @@ namespace obos
 		g_multibootInfo->framebuffer_type = header->framebuffer_type;
 		utils::memcpy(&g_multibootInfo->framebuffer_palette_addr, &header->framebuffer_palette_addr, 6);
 
-		/*{
-			obos::multiboot_module_t* modules = (obos::multiboot_module_t*)g_multibootInfo->mods_addr;
-			::multiboot_module_t* modules32 = (::multiboot_module_t*)g_multibootInfo->mods_addr;
-			for (SIZE_T i = 0; i < g_multibootInfo->mods_count; i++)
-			{
-				modules[i].cmdline = modules32[i].cmdline + reinterpret_cast<UINTPTR_T>(&kernelStart);
-				modules[i].mod_start += modules32[i].mod_start + reinterpret_cast<UINTPTR_T>(&kernelStart);
-				modules[i].mod_end += modules32[i].mod_end + reinterpret_cast<UINTPTR_T>(&kernelStart);
-			}
-		}*/
 #elif defined(__i686__)
 		memory::g_pageDirectory = &g_pageDirectory;
 #endif
@@ -259,10 +250,10 @@ namespace obos
 		framebuffer_limit = 0xFFFFF000;
 #endif
 
-		for (UINTPTR_T physAddress = g_multibootInfo->framebuffer_addr, virtAddress = (UINTPTR_T)s_framebuffer;
+		for (UINTPTR_T physicalAddress = g_multibootInfo->framebuffer_addr, virtAddress = (UINTPTR_T)s_framebuffer;
 			virtAddress < framebuffer_limit;
-			virtAddress += 4096, physAddress += 4096)
-			memory::kmap_physical((PVOID)virtAddress, memory::VirtualAllocFlags::WRITE_ENABLED, (PVOID)physAddress);
+			virtAddress += 4096, physicalAddress += 4096)
+			memory::kmap_physical((PVOID)virtAddress, memory::VirtualAllocFlags::WRITE_ENABLED, (PVOID)physicalAddress);
 
 		// Initialize the console.
 		InitializeConsole(0xFFFFFFFF, 0x00000000);
@@ -325,32 +316,21 @@ namespace obos
 				*ptr = *it;
 			memory::MemoryProtect(ptr, 1, memory::VirtualAllocFlags::GLOBAL);
 		}
-
+		
 		multitasking::ThreadHandle mainThread;
+		
+		/*driverAPI::driverIdentification* initrdDriver = */
+		driverAPI::LoadModule((PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
+			((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start, &mainThread);
 
-		process::Process* initrdDriver = new process::Process{};
-		auto ret = 
-			initrdDriver->CreateProcess(
-				(PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
-				((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
-				(PVOID)&mainThread, true);
-		if (ret)
-			kpanic(nullptr, getEIP(), kpanic_format("CreateProcess failed with %d."), ret);
 		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::PAUSED);
-		mainThread.closeHandle();
 
-
-
-		// Uncomment this line to kpanic.
-		//*((PBYTE)0x486594834) = 'L';
-
-		multitasking::ThreadHandle cursorThread, thread;
-		cursorThread.CreateThread(multitasking::Thread::priority_t::HIGH, cursorUpdate, nullptr, 0, 2);
-		cursorThread.closeHandle();
-
-		thread.OpenThread(multitasking::g_currentThread);
-		thread.SetThreadPriority(multitasking::Thread::priority_t::IDLE);
-		thread.closeHandle();
+		multitasking::ThreadHandle handle;
+		handle.CreateThread(multitasking::Thread::priority_t::HIGH, cursorUpdate, nullptr, 0, 0);
+		handle.closeHandle();
+		handle.OpenThread(multitasking::g_currentThread);
+		handle.SetThreadPriority(multitasking::Thread::priority_t::LOW);
+		handle.closeHandle();
 
 		// We're done booting.
 		idleTask();

@@ -8,111 +8,402 @@ Linker script and memory map
 
 LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
 LOAD src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
-                0x0000000008000000                . = 0x8000000
+                [!provide]                        PROVIDE (__executable_start = SEGMENT_START ("text-segment", 0x400000))
+                0x00000000004000b0                . = (SEGMENT_START ("text-segment", 0x400000) + SIZEOF_HEADERS)
 
-.text           0x0000000008000000      0x650
- *(.multiboot)
- *(.text)
- .text          0x0000000008000000      0x551 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
-                0x0000000008000000                _start
-                0x000000000800010f                oct2bin
-                0x000000000800015a                memcmp
-                0x00000000080001ed                strlen
-                0x0000000008000220                strcmp
-                0x0000000008000376                MakeFileAttribFromType
- *fill*         0x0000000008000551        0xf 
- .text          0x0000000008000560       0xf0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
-                0x0000000008000560                RegisterDriver
-                0x000000000800056f                RegisterInterruptHandler
-                0x000000000800057e                PicSendEoi
-                0x000000000800058d                EnableIRQ
-                0x000000000800059c                DisableIRQ
-                0x00000000080005ab                RegisterReadCallback
-                0x00000000080005ba                PrintChar
-                0x00000000080005c9                GetMultibootModule
-                0x00000000080005d8                RegisterFileReadCallback
-                0x00000000080005e7                RegisterFileExistsCallback
-                0x00000000080005f6                MapPhysicalTo
-                0x0000000008000605                UnmapPhysicalTo
-                0x0000000008000614                Printf
-                0x0000000008000623                GetPhysicalAddress
-                0x0000000008000632                RegisterRecursiveFileIterateCallback
-                0x0000000008000641                CallSyscall
+.interp
+ *(.interp)
 
-.iplt           0x0000000008000650        0x0
- .iplt          0x0000000008000650        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.note.gnu.build-id
+ *(.note.gnu.build-id)
 
-.rodata         0x0000000008001000        0x6
- *(.rodata)
- .rodata        0x0000000008001000        0x6 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.hash
+ *(.hash)
 
-.rela.dyn       0x0000000008001008        0x0
- .rela.got      0x0000000008001008        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
- .rela.iplt     0x0000000008001008        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.gnu.hash
+ *(.gnu.hash)
 
-.data           0x0000000008002000        0x0
- *(.data)
- .data          0x0000000008002000        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.dynsym
+ *(.dynsym)
 
-.eh_frame       0x0000000008001008      0x1b4
- .eh_frame      0x0000000008001008      0x1b4 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.dynstr
+ *(.dynstr)
+
+.gnu.version
+ *(.gnu.version)
+
+.gnu.version_d
+ *(.gnu.version_d)
+
+.gnu.version_r
+ *(.gnu.version_r)
+
+.rela.dyn       0x00000000004000b0        0x0
+ *(.rela.init)
+ *(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
+ *(.rela.fini)
+ *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
+ *(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
+ *(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
+ *(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
+ *(.rela.ctors)
+ *(.rela.dtors)
+ *(.rela.got)
+ .rela.got      0x00000000004000b0        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
+ *(.rela.ldata .rela.ldata.* .rela.gnu.linkonce.l.*)
+ *(.rela.lbss .rela.lbss.* .rela.gnu.linkonce.lb.*)
+ *(.rela.lrodata .rela.lrodata.* .rela.gnu.linkonce.lr.*)
+ *(.rela.ifunc)
+
+.rela.plt       0x00000000004000b0        0x0
+ *(.rela.plt)
+                [!provide]                        PROVIDE (__rela_iplt_start = .)
+ *(.rela.iplt)
+ .rela.iplt     0x00000000004000b0        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                [!provide]                        PROVIDE (__rela_iplt_end = .)
+
+.relr.dyn
+ *(.relr.dyn)
+
+.init
+ *(SORT_NONE(.init))
+
+.plt            0x00000000004000b0        0x0
+ *(.plt)
+ *(.iplt)
+ .iplt          0x00000000004000b0        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.plt.got
+ *(.plt.got)
+
+.plt.sec
+ *(.plt.sec)
+
+.text           0x00000000004000b0      0x554
+ *(.text.unlikely .text.*_unlikely .text.unlikely.*)
+ *(.text.exit .text.exit.*)
+ *(.text.startup .text.startup.*)
+ *(.text.hot .text.hot.*)
+ *(SORT_BY_NAME(.text.sorted.*))
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ .text          0x00000000004000b0      0x491 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                0x00000000004000b0                _start
+                0x00000000004000ff                oct2bin
+                0x000000000040014a                memcmp
+                0x00000000004001dd                strlen
+                0x0000000000400210                strcmp
+                0x0000000000400281                ReadFile
+                0x0000000000400366                MakeFileAttribFromType
+                0x00000000004003c3                FileExists
+                0x0000000000400486                IterateFiles
+ *fill*         0x0000000000400541        0xf 
+ .text          0x0000000000400550       0xb4 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+                0x0000000000400550                RegisterDriver
+                0x000000000040055f                RegisterInterruptHandler
+                0x000000000040056e                PicSendEoi
+                0x000000000040057d                EnableIRQ
+                0x000000000040058c                DisableIRQ
+                0x000000000040059b                PrintChar
+                0x00000000004005aa                GetMultibootModule
+                0x00000000004005b9                MapPhysicalTo
+                0x00000000004005c8                UnmapPhysicalTo
+                0x00000000004005d7                Printf
+                0x00000000004005e6                GetPhysicalAddress
+                0x00000000004005f5                CallSyscall
+ *(.gnu.warning)
+
+.fini
+ *(SORT_NONE(.fini))
+                [!provide]                        PROVIDE (__etext = .)
+                [!provide]                        PROVIDE (_etext = .)
+                [!provide]                        PROVIDE (etext = .)
+
+.rodata         0x0000000000400604        0x6
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata        0x0000000000400604        0x6 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.rodata1
+ *(.rodata1)
+
+.eh_frame_hdr
+ *(.eh_frame_hdr)
+ *(.eh_frame_entry .eh_frame_entry.*)
+
+.eh_frame
+ *(.eh_frame)
+ *(.eh_frame.*)
+
+.sframe
+ *(.sframe)
+ *(.sframe.*)
+
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
+
+.gnu_extab
+ *(.gnu_extab*)
+
+.exception_ranges
+ *(.exception_ranges*)
+                0x000000000040160a                . = DATA_SEGMENT_ALIGN (CONSTANT (MAXPAGESIZE), CONSTANT (COMMONPAGESIZE))
+
+.eh_frame       0x0000000000401610      0x1b4
+ *(.eh_frame)
+ .eh_frame      0x0000000000401610      0x1b4 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
                                         0x1d8 (size before relaxing)
+ *(.eh_frame.*)
 
-.got            0x00000000080011c0        0x0
- .got           0x00000000080011c0        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.sframe
+ *(.sframe)
+ *(.sframe.*)
 
-.got.plt        0x00000000080011c0        0x0
- .got.plt       0x00000000080011c0        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.gnu_extab
+ *(.gnu_extab)
 
-.igot.plt       0x00000000080011c0        0x0
- .igot.plt      0x00000000080011c0        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+.gcc_except_table
+ *(.gcc_except_table .gcc_except_table.*)
 
-.bss            0x0000000008002000       0x10
+.exception_ranges
+ *(.exception_ranges*)
+
+.tdata          0x00000000004017c4        0x0
+                [!provide]                        PROVIDE (__tdata_start = .)
+ *(.tdata .tdata.* .gnu.linkonce.td.*)
+
+.tbss
+ *(.tbss .tbss.* .gnu.linkonce.tb.*)
+ *(.tcommon)
+
+.preinit_array  0x00000000004017c4        0x0
+                [!provide]                        PROVIDE (__preinit_array_start = .)
+ *(.preinit_array)
+                [!provide]                        PROVIDE (__preinit_array_end = .)
+
+.init_array     0x00000000004017c4        0x0
+                [!provide]                        PROVIDE (__init_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.init_array.*) SORT_BY_INIT_PRIORITY(.ctors.*))
+ *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
+                [!provide]                        PROVIDE (__init_array_end = .)
+
+.fini_array     0x00000000004017c4        0x0
+                [!provide]                        PROVIDE (__fini_array_start = .)
+ *(SORT_BY_INIT_PRIORITY(.fini_array.*) SORT_BY_INIT_PRIORITY(.dtors.*))
+ *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
+                [!provide]                        PROVIDE (__fini_array_end = .)
+
+.ctors
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+ *(SORT_BY_NAME(.ctors.*))
+ *(.ctors)
+
+.dtors
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ *(SORT_BY_NAME(.dtors.*))
+ *(.dtors)
+
+.jcr
+ *(.jcr)
+
+.data.rel.ro
+ *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
+ *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*)
+
+.dynamic
+ *(.dynamic)
+
+.got            0x00000000004017c8        0x0
+ *(.got)
+ .got           0x00000000004017c8        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ *(.igot)
+                0x00000000004017c8                . = DATA_SEGMENT_RELRO_END (., (SIZEOF (.got.plt) >= 0x18)?0x18:0x0)
+
+.got.plt        0x00000000004017c8        0x0
+ *(.got.plt)
+ .got.plt       0x00000000004017c8        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ *(.igot.plt)
+ .igot.plt      0x00000000004017c8        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.data           0x00000000004017c4        0x0
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x00000000004017c4        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.obosDriverHeader
+                0x00000000004017e0       0x38
+ .obosDriverHeader
+                0x00000000004017e0       0x38 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                0x00000000004017e0                g_driverHeader
+
+.data1
+ *(.data1)
+                0x0000000000401818                _edata = .
+                [!provide]                        PROVIDE (edata = .)
+                0x0000000000401818                . = .
+                0x0000000000401818                __bss_start = .
+
+.bss            0x0000000000401818       0x10
+ *(.dynbss)
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ .bss           0x0000000000401818       0x10 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                0x0000000000401818                g_archivePosition
+                0x0000000000401820                g_archiveSize
  *(COMMON)
- *(.bss)
- .bss           0x0000000008002000       0x10 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
-                0x0000000008002000                g_archivePosition
-                0x0000000008002008                g_archiveSize
-OUTPUT(/mnt/c/Code/obos/out/ustarFilesystem elf64-x86-64)
+                0x0000000000401828                . = ALIGN ((. != 0x0)?0x8:0x1)
 
-.debug_frame    0x0000000000000000      0x220
- .debug_frame   0x0000000000000000      0x220 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
- .debug_frame   0x0000000000000220        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+.lbss
+ *(.dynlbss)
+ *(.lbss .lbss.* .gnu.linkonce.lb.*)
+ *(LARGE_COMMON)
+                0x0000000000401828                . = ALIGN (0x8)
+                0x0000000000401828                . = SEGMENT_START ("ldata-segment", .)
 
-.debug_info     0x0000000000000000      0xb63
- .debug_info    0x0000000000000000      0xae0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
- .debug_info    0x0000000000000ae0       0x83 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+.lrodata
+ *(.lrodata .lrodata.* .gnu.linkonce.lr.*)
 
-.debug_abbrev   0x0000000000000000      0x1b4
- .debug_abbrev  0x0000000000000000      0x199 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
- .debug_abbrev  0x0000000000000199       0x1b src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+.ldata          0x0000000000403828        0x0
+ *(.ldata .ldata.* .gnu.linkonce.l.*)
+                0x0000000000403828                . = ALIGN ((. != 0x0)?0x8:0x1)
+                0x0000000000403828                . = ALIGN (0x8)
+                0x0000000000401828                _end = .
+                [!provide]                        PROVIDE (end = .)
+                0x0000000000403828                . = DATA_SEGMENT_END (.)
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.stab.excl
+ *(.stab.excl)
+
+.stab.exclstr
+ *(.stab.exclstr)
+
+.stab.index
+ *(.stab.index)
+
+.stab.indexstr
+ *(.stab.indexstr)
+
+.comment        0x0000000000000000       0x12
+ *(.comment)
+ .comment       0x0000000000000000       0x12 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+                                         0x13 (size before relaxing)
+
+.gnu.build.attributes
+ *(.gnu.build.attributes .gnu.build.attributes.*)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
 
 .debug_aranges  0x0000000000000000       0x60
+ *(.debug_aranges)
  .debug_aranges
                 0x0000000000000000       0x30 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
  .debug_aranges
                 0x0000000000000030       0x30 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
-.debug_rnglists
-                0x0000000000000000       0x98
- .debug_rnglists
-                0x0000000000000000       0x98 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
-
-.debug_line     0x0000000000000000      0xa25
- .debug_line    0x0000000000000000      0x961 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
- .debug_line    0x0000000000000961       0xc4 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
-
-.debug_str      0x0000000000000000       0x12
- .debug_str     0x0000000000000000       0x12 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
-
-.comment        0x0000000000000000       0x12
- .comment       0x0000000000000000       0x12 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
-                                         0x13 (size before relaxing)
-
 .debug_pubnames
                 0x0000000000000000        0x0
+ *(.debug_pubnames)
  .debug_pubnames
                 0x0000000000000000        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
 
+.debug_info     0x0000000000000000      0xb66
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x0000000000000000      0xae3 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_info    0x0000000000000ae3       0x83 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_abbrev   0x0000000000000000      0x1b6
+ *(.debug_abbrev)
+ .debug_abbrev  0x0000000000000000      0x19b src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_abbrev  0x000000000000019b       0x1b src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_line     0x0000000000000000      0x9d9
+ *(.debug_line .debug_line.* .debug_line_end)
+ .debug_line    0x0000000000000000      0x929 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_line    0x0000000000000929       0xb0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_frame    0x0000000000000000      0x220
+ *(.debug_frame)
+ .debug_frame   0x0000000000000000      0x220 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+ .debug_frame   0x0000000000000220        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_str      0x0000000000000000       0x12
+ *(.debug_str)
+ .debug_str     0x0000000000000000       0x12 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
 .debug_loc      0x0000000000000000        0x0
+ *(.debug_loc)
  .debug_loc     0x0000000000000000        0x0 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/__/__/__/oboskrnl/driver_api/syscall_interface.asm.obj
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges
+ *(.debug_ranges)
+
+.debug_addr
+ *(.debug_addr)
+
+.debug_line_str
+ *(.debug_line_str)
+
+.debug_loclists
+ *(.debug_loclists)
+
+.debug_macro
+ *(.debug_macro)
+
+.debug_names
+ *(.debug_names)
+
+.debug_rnglists
+                0x0000000000000000       0x98
+ *(.debug_rnglists)
+ .debug_rnglists
+                0x0000000000000000       0x98 src/drivers/filesystems/ustar/CMakeFiles/ustarFilesystem.dir/dmain.c.obj
+
+.debug_str_offsets
+ *(.debug_str_offsets)
+
+.debug_sup
+ *(.debug_sup)
+
+.gnu.attributes
+ *(.gnu.attributes)
+
+/DISCARD/
+ *(.note.GNU-stack)
+ *(.gnu_debuglink)
+ *(.gnu.lto_*)
+OUTPUT(/mnt/c/Code/obos/out/ustarFilesystem elf64-x86-64)

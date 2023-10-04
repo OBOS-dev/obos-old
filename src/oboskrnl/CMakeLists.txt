@@ -9,7 +9,7 @@ set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_platformSpecific}
         "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "elf/elf.cpp"
         "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "process/process.cpp"
         "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"                  "syscalls/syscalls.cpp"              "external/amalgamated-dist/Zydis.c"
-        "descriptors/gdt/gdt.cpp" "error.cpp")
+        "descriptors/gdt/gdt.cpp" "error.cpp" "driver_api/driver_interface.cpp" "driver_api/load/module.cpp")
 
 add_executable(oboskrnl ${oboskrnl_files})
 target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wextra> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
@@ -34,7 +34,6 @@ target_link_options(oboskrnl
 #    PUBLIC "${CRTBEGIN_DIRECTORY}"
 #    PUBLIC "${CRTEND_DIRECTORY}"
 #    PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl/crti/src/crtn.S"
-    PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/oboskrnl.map"
     PUBLIC "-ffreestanding"
     PUBLIC "-mcmodel=kernel"
     PUBLIC "-nostdlib")
@@ -70,8 +69,6 @@ endif()
 
 add_custom_command(TARGET oboskrnl POST_BUILD
                    COMMAND echo "Generating the iso..."
-                   COMMAND cp -u out/nvme isodir/obos/initrd/nvme
-                   COMMAND objcopy -S isodir/obos/initrd/nvme
                    COMMAND cp -u out/ps2Keyboard isodir/obos/initrd/ps2Keyboard
                    COMMAND objcopy -S isodir/obos/initrd/ps2Keyboard
                    COMMAND cp -u out/testProgram isodir/obos/initrd/testProgram

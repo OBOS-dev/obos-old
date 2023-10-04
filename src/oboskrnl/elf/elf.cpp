@@ -117,7 +117,10 @@ namespace obos
 				if (programHeader->p_flags & PF_W)
 					allocFlags |= memory::VirtualAllocFlags::WRITE_ENABLED;
 				if (programHeader->p_vaddr > 0xFFFFFFFF80000000 || !programHeader->p_vaddr)
+				{
+					SetLastError(OBOS_ERROR_BASE_ADDRESS_USED);
 					return OBOS_ERROR_BASE_ADDRESS_USED;
+				}
 				if(!lazyLoad)
 				{
 					DWORD nPages = programHeader->p_memsz >> 12;
@@ -130,7 +133,7 @@ namespace obos
 						addr += offset;
 						utils::memcpy(addr, startAddress + programHeader->p_offset, programHeader->p_filesz);
 					}
-					memory::MemoryProtect(addr, nPages, allocFlags);
+					memory::MemoryProtect(addr, nPages, allocFlags, false);
 				}
 				if (baseAddress > programHeader->p_vaddr || elfHeader->e_phnum == 1)
 					baseAddress = programHeader->p_vaddr;
@@ -140,20 +143,43 @@ namespace obos
 		
 		DWORD LoadElfFile(PBYTE startAddress, SIZE_T size, UINTPTR_T& entry, UINTPTR_T& baseAddress, bool lazyLoad)
 		{
+			if (DWORD err = CheckElfFile(startAddress, size, true); err != 0)
+				return err;
+			Elf64_Ehdr* elfHeader = (Elf64_Ehdr*)startAddress;
+			entry = elfHeader->e_entry;
+			return load(startAddress, size, baseAddress, lazyLoad);
+		}
+		DWORD CheckElfFile(PBYTE startAddress, SIZE_T size, bool setLastError)
+		{
 			if (size <= sizeof(Elf64_Ehdr))
+			{
+				if (setLastError)
+					SetLastError(OBOS_ERROR_ELF_INCORRECT_FILE);
 				return OBOS_ERROR_ELF_INCORRECT_FILE;
+			}
 			Elf64_Ehdr* elfHeader = (Elf64_Ehdr*)startAddress;
 			if (elfHeader->e_common.e_ident[EI_MAG0] != ELFMAG0 ||
 				elfHeader->e_common.e_ident[EI_MAG1] != ELFMAG1 ||
 				elfHeader->e_common.e_ident[EI_MAG2] != ELFMAG2 ||
 				elfHeader->e_common.e_ident[EI_MAG3] != ELFMAG3)
+			{
+				if (setLastError)
+					SetLastError(OBOS_ERROR_ELF_INCORRECT_FILE);
 				return OBOS_ERROR_ELF_INCORRECT_FILE;
+			}
 			if (elfHeader->e_common.e_version != EV_CURRENT)
+			{
+				if (setLastError)
+					SetLastError(OBOS_ERROR_ELF_INCORRECT_FILE);
 				return OBOS_ERROR_ELF_INCORRECT_FILE;
+			}
 			if (elfHeader->e_common.e_ident[EI_CLASS] != ELFCLASS64 || elfHeader->e_common.e_ident[EI_DATA] != ELFDATA2LSB)
+			{
+				if (setLastError)
+					SetLastError(OBOS_ERROR_ELF_INCORRECT_ARCHITECTURE);
 				return OBOS_ERROR_ELF_INCORRECT_ARCHITECTURE;
-			entry = elfHeader->e_entry;
-			return load(startAddress, size, baseAddress, lazyLoad);
+			}
+			return 0;
 		}
 	}
 }

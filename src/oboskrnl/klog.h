@@ -21,7 +21,7 @@ namespace obos
 	void printf_noFlush(CSTRING format, ...);
 	void vprintf(CSTRING format, va_list list);
 
-	void kpanic(PVOID printStackTracePar, PVOID eip, CSTRING format, ...);
+	[[noreturn]] void kpanic(PVOID printStackTracePar, PVOID eip, CSTRING format, ...);
 
 	struct stack_frame
 	{

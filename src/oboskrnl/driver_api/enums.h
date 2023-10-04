@@ -12,6 +12,9 @@
 #define DEFINE_ENUM enum
 #endif
 
+#define OBOS_DRIVER_HEADER_SECTION ".obosDriverHeader"
+#define OBOS_DRIVER_HEADER_MAGIC 0x5902E288
+
 #ifdef __cplusplus
 
 namespace obos
@@ -103,6 +106,33 @@ namespace obos
 			ALLOC_FLAGS_CACHE_DISABLE = 16
 		};
 
+		struct bitfield128
+		{
+			UINT64_T bytes0_7;
+			UINT64_T bytes7_15;
+		};
+		struct driverHeader
+		{
+			DWORD magicNumber;
+			DWORD driverId;
+			enum serviceType service_type;
+			/// <summary>
+			/// This field and all related fields only matter if the driver type is a device.
+			/// Bit 0: This device can be identified using pci.
+			/// </summary>
+			DWORD infoFields;
+			struct __driverInfoPciInfo
+			{
+				DWORD classCode;
+				/// <summary>
+				/// If a bit is set, the bit number will be the value.
+				/// <para></para>
+				/// This bitfield can have more than bit set (for multiple values).
+				/// </summary>
+				struct bitfield128 subclass;
+				struct bitfield128 progIf;
+			} pciInfo;
+		};
 
 #ifdef __cplusplus
 	}

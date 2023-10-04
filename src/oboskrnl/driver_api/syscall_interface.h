@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 enum exitStatus RegisterDriver(OBOS_API DWORD driverID, enum serviceType type);
-enum exitStatus RegisterInterruptHandler(OBOS_API DWORD driverId, BYTE interruptId, void(*handler)());
+enum exitStatus RegisterInterruptHandler(OBOS_API BYTE interruptId, void(*handler)());
 enum exitStatus PicSendEoi(OBOS_API BYTE irq);
 enum exitStatus DisableIRQ(OBOS_API BYTE irq);
 enum exitStatus EnableIRQ(OBOS_API BYTE irq);

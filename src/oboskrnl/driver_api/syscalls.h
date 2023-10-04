@@ -19,7 +19,8 @@ namespace obos
 		{
 			DWORD driverId = 0;
 			process::Process* process;
-			serviceType service_type = serviceType::SERVICE_TYPE_INVALID;
+			serviceType service_type = serviceType::OBOS_SERVICE_TYPE_INVALID;
+			list_t* driverConnections;
 		};
 		extern driverIdentification** g_registeredDrivers;
 		extern SIZE_T g_registeredDriversCapacity;

@@ -311,7 +311,7 @@ namespace obos
 		//poop();
 		RestartComputer();
 	}
-	void kpanic(PVOID printStackTracePar, PVOID eip, CSTRING format, ...)
+	[[noreturn]] void kpanic(PVOID printStackTracePar, PVOID eip, CSTRING format, ...)
 	{
 		asm volatile("cli");
 		EnterKernelSection();
@@ -371,8 +371,7 @@ namespace obos
 		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(1);
 		RegisterInterruptHandler(33, irq1);
 
-		asm volatile("sti;"
-			".byte 0xEB, 0xFD");
+		haltCPU();
 	}
 
 	void printf_noFlush(CSTRING format, ...)

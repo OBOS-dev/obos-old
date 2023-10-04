@@ -29,7 +29,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_AVOIDED_DEADLOCK);
 				return false;
 			}
-			if (m_locked && m_lockOwner == g_currentThread->tid)
+			if ((m_locked && m_lockOwner == g_currentThread->tid) && m_avoidDeadlocks)
 			{
 				SetLastError(OBOS_ERROR_AVOIDED_DEADLOCK);
 				return true;
@@ -49,14 +49,22 @@ namespace obos
 		}
 		bool Mutex::Unlock()
 		{
-			DWORD lastError = GetLastError();
-			SetLastError(OBOS_ERROR_ACCESS_DENIED);
+			if (m_lockOwner == (DWORD)(-1))
+			{
+				SetLastError(OBOS_ERROR_MUTEX_NOT_LOCKED);
+				return false;
+			}
 			if(g_currentThread)
+			{
 				if (g_currentThread->tid != m_lockOwner || !g_initialized)
+				{
+					SetLastError(OBOS_ERROR_ACCESS_DENIED);
 					return false;
+				}
+			}
 			m_lockOwner = (DWORD)-1;
 			m_locked = false;
-			SetLastError(lastError);
+			return true;
 		}
 		Mutex::~Mutex()
 		{

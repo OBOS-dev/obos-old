@@ -32,6 +32,11 @@ namespace obos
 		virtual Handle* duplicate() = 0;
 		virtual int closeHandle() = 0;
 
+		virtual PVOID GetUnderlyingObject()
+		{
+			return m_value;
+		}
+
 		SIZE_T& getReferences() { return m_origin->m_references; }
 		
 		virtual ~Handle() {}

@@ -14,32 +14,35 @@
 UINT8_T* g_archivePosition = NULL;
 SIZE_T g_archiveSize = 0;
 
-static void ReadFile(CSTRING filename, STRING output, SIZE_T count);
-static char FileExists(CSTRING filename, SIZE_T* size);
-static void IterateFiles(BOOL(*appendCallback)(CSTRING filename, SIZE_T bufSize, BYTE attrib));
+void ReadFile(CSTRING filename, STRING output, SIZE_T count);
+char FileExists(CSTRING filename, SIZE_T* size);
+void IterateFiles(BOOL(*appendCallback)(CSTRING filename, SIZE_T bufSize, BYTE attrib));
 
 #define DRIVER_ID 1
 
+struct driverHeader __attribute__((section(OBOS_DRIVER_HEADER_SECTION))) g_driverHeader = {
+	.magicNumber = OBOS_DRIVER_HEADER_MAGIC,
+	.driverId = DRIVER_ID,
+	.service_type = OBOS_SERVICE_TYPE_FILESYSTEM,
+};
+
 int _start()
 {
-	RegisterDriver(PASS_OBOS_API_PARS DRIVER_ID, OBOS_SERVICE_TYPE_INITRD_FILESYSTEM);
-	
 	if (GetMultibootModule(PASS_OBOS_API_PARS 3, (UINTPTR_T*)&g_archivePosition, &g_archiveSize))
 		return 1; // Shouldn't ever happen.
-
 	
 	return 0;
 }
 
 int oct2bin(unsigned char* str, int size) {
-    int n = 0;
-    unsigned char* c = str;
-    while (size-- > 0) {
-        n *= 8;
-        n += *c - '0';
-        c++;
-    }
-    return n;
+	int n = 0;
+	unsigned char* c = str;
+	while (size-- > 0) {
+		n *= 8;
+		n += *c - '0';
+		c++;
+	}
+	return n;
 }
 
 INT memcmp(PCVOID block1, PCVOID block2, SIZE_T size)
@@ -68,7 +71,7 @@ INT strcmp(CSTRING str1, CSTRING str2)
 	return memcmp(str1, str2, strlen(str1));
 }
 
-static void ReadFile(CSTRING filename, STRING output, SIZE_T count)
+void ReadFile(CSTRING filename, STRING output, SIZE_T count)
 {
 	UINT8_T* iter = g_archivePosition;
 

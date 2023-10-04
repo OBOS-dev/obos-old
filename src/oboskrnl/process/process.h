@@ -60,6 +60,7 @@ namespace obos
 #endif
 			DWORD pid = 0;
 			Process* parent = nullptr;
+			PVOID driverIdentity = nullptr;
 			list_t* children = nullptr;
 			list_t* threads = nullptr;
 			list_t* abstractHandles = nullptr;

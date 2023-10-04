@@ -13,7 +13,6 @@ target_compile_options(ustarFilesystem
     PRIVATE $<$<COMPILE_LANGUAGE:C>:-mno-red-zone>)
 
 target_link_options(ustarFilesystem
-    PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/ustarFilesystem.map"
     PUBLIC "-ffreestanding"
     PUBLIC "-nostdlib")
 
