@@ -19,7 +19,7 @@
 &nbsp;&nbsp;&nbsp;filepath - STRING<br>
 &nbsp;&nbsp;&nbsp;driveId - UINT64\_T<br>
 &nbsp;&nbsp;&nbsp;partitionId - UINT8\_T<br>
-- Returns the file size in sectors, the LBA offset of the file, and `enum fileExistsReturn`
+- Returns the file size in bytes, the LBA offset of the file, and `enum fileExistsReturn`
 - Can only be accessed by the kernel.
 #### OBOS\_SERVICE\_MAKE\_FILE\_ITERATOR
 - Creates a file iterator.

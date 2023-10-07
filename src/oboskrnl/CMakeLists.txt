@@ -44,7 +44,8 @@ target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 target_compile_definitions(oboskrnl PUBLIC CURSOR_SLEEP_TIME_MS=${CURSOR_SLEEP_TIME_MS}
                                     PUBLIC CONSOLE_NEWLINE_SEQUENCE=\"${CONSOLE_NEWLINE_SEQUENCE}\" 
                                     PUBLIC OBOS_ARCHITECTURE=${OBOS_ARCHITECTURE} 
-                                    PUBLIC ZYAN_NO_LIBC=1)
+                                    PUBLIC ZYAN_NO_LIBC=1
+                                    PUBLIC OBOS_KERNEL_BUILD=1)
 
 message("Using linker script at " "${CMAKE_SOURCE_DIR}/${LINKER_SCRIPT}")
 message("crtbegin.o is at ${CRTBEGIN_DIRECTORY}")
@@ -59,6 +60,7 @@ endif()
 
 if (${OBOS_ARCHITECTURE} STREQUAL "x86_64")
     target_compile_definitions(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:__x86_64__>)
+    target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:-g -F dwarf>)
     message ("Building for x86_64")
 elseif(${OBOS_ARCHITECTURE} STREQUAL "i686")
     target_compile_definitions(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:__i686__>)

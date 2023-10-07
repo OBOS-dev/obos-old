@@ -1,0 +1,18 @@
+Page fault in kernel-mode at 0x0000000000000005 (tid 0, pid 0) while trying to read a non-present page.
+The address of that page is 0x00000000f0000460. Error code: 0. Page table entry: 0x0000000000000000.
+Dumping registers: 
+	RDI: 0xfffffffff0001058, RSI: 0x000000000000002e, RBP: 0xffffffff801bf82c
+	RSP: 0xffffffff801bf798, RBX: 0x0000000000000004, RDX: 0x0000000000000000
+	RCX: 0x0000000000000004, RAX: 0x00000000f0000460, RIP: 0x0000000000000005
+	 R8: 0x0000000000000001,  R9: 0x0000000000000000, R10: 0x0000000000000000
+	R11: 0x0000000000000000, R12: 0x0000000000000000, R13: 0x0000000000000000
+	R14: 0x0000000000000000, R15: 0x0000000000000000, RFL: 0x0000000000200296
+	 SS: 0x0000000000000010,  DS: 0x0000000000000010,  CS: 0x0000000000000008
+Stack trace:
+	4: 0xffffffff8013057a (obos::driverAPI::DriverConnectionHandle::SendDataImpl(obos::driverAPI::connection_buffer&, unsigned char*, unsigned long long, bool)+100)
+	3: 0xffffffff801309b8 (obos::driverAPI::DriverClientConnectionHandle::SendData(unsigned char*, unsigned long long, bool)+68)
+	2: 0xffffffff8010d410 (obos::kmainThr()+522)
+	1: 0x2d3c280800000065 ([external code]+0)
+	0: 0x0000000000000000 ([external code]+0)
+0x0000000000000005: Invalid eip. Aborting...
+Press any key to restart...

@@ -69,6 +69,7 @@ namespace obos
 			driverIdentification* identification = new driverIdentification{};
 			identification->driverId = header->driverId;
 			identification->service_type = header->service_type;
+			identification->driverConnections = list_new();
 
 			EnterKernelSection();
 
@@ -88,8 +89,8 @@ namespace obos
 				g_registeredDrivers = (driverIdentification**)krealloc(g_registeredDrivers, g_registeredDriversCapacity);
 			}
 
-			g_registeredDrivers[identification->driverId] = identification;
-
+			driverProc->driverIdentity = g_registeredDrivers[identification->driverId] = identification;
+			
 			mainThread.ResumeThread();
 
 			if (_mainThreadHandle)

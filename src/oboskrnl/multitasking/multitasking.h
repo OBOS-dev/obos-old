@@ -9,7 +9,6 @@
 #include <utils/list.h>
 
 #include <multitasking/thread.h>
-#include <multitasking/mutex/mutexHandle.h>
 
 namespace obos
 {
@@ -23,12 +22,11 @@ namespace obos
 		extern list_t* g_threadPriorityList[4];
 		extern Thread* g_currentThread;
 		extern bool g_initialized;
-		extern MutexHandle* g_schedulerMutex;
 		extern SIZE_T g_timerTicks;
 
-		extern UINT16_T g_schedulerFrequency;
+		extern UINT32_T g_schedulerFrequency;
 
-		void SetPITFrequency(UINT16_T freq);
+		void SetPITFrequency(UINT32_T freq);
 		// A call to SetPITFrequency will enable the PIT once again.
 		void DisablePIT();
 

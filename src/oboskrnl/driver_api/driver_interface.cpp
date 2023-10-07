@@ -68,13 +68,14 @@ namespace obos
 
 			if (!conn_buffer.buffer)
 			{
-				conn_buffer.buffer = (PBYTE)kcalloc(size, sizeof(BYTE));
-				if (!m_outputBuffer.buffer)
+				conn_buffer.bufferPosition = conn_buffer.buffer = (PBYTE)kcalloc(size, sizeof(BYTE));
+				if (!conn_buffer.buffer)
 					return false;
 			}
 			else
 			{
 				conn_buffer.buffer = (PBYTE)krealloc(conn_buffer.buffer, conn_buffer.szBuffer + size);
+				conn_buffer.bufferPosition = conn_buffer.buffer + conn_buffer.szBuffer;
 				if (!conn_buffer.buffer)
 					return false;
 			}
@@ -102,7 +103,17 @@ namespace obos
 				return false;
 			}
 
-			utils::memcpy(data, conn_buffer.buffer, size);
+			if(data)
+				utils::memcpy(data, conn_buffer.buffer, size);
+
+			if ((conn_buffer.szBuffer - size) == 0)
+			{
+				conn_buffer.bufferPosition = nullptr;
+				conn_buffer.szBuffer = 0;
+				kfree(conn_buffer.buffer);
+				conn_buffer.buffer = nullptr;
+				return true;
+			}
 
 			if (!peek)
 			{
@@ -165,16 +176,19 @@ namespace obos
 		static bool ListenBlockCallback(multitasking::Thread* _this, PVOID userdata)
 		{
 			UINTPTR_T* _ret = reinterpret_cast<UINTPTR_T*>(userdata);
-			driverIdentification* driverIdentity = (driverIdentification*)multitasking::g_currentThread->owner->driverIdentity;
+			driverIdentification* driverIdentity = (driverIdentification*)_this->owner->driverIdentity;
 			if (!driverIdentity)
 			{
 				_this->lastError = OBOS_ERROR_PREMATURE_PROCESS_EXIT;
 				return true; // Resume the thread.
 			}
-			if (driverIdentity->driverConnections->len != _ret[1])
+			if (driverIdentity->driverConnections->len > _ret[1])
 			{
 				DriverConnectionHandle** ret = (DriverConnectionHandle**)_ret[0];
-				*ret = (DriverConnectionHandle*)list_at(driverIdentity->driverConnections, _ret[1]);
+				list_node_t* node = list_at(driverIdentity->driverConnections, _ret[1]);
+				if (!node)
+					return false;
+				*ret = (DriverConnectionHandle*)(node->val);
 				return true;
 			}
 			return false;
@@ -182,13 +196,14 @@ namespace obos
 
 		DriverConnectionHandle* Listen()
 		{
-			if (multitasking::g_currentThread->owner->driverIdentity)
+			if (!multitasking::g_currentThread->owner->driverIdentity)
 			{
 				SetLastError(OBOS_ERROR_NOT_A_DRIVER);
 				return nullptr;
 			}
+			driverIdentification* driverIdentity = (driverIdentification*)multitasking::g_currentThread->owner->driverIdentity;
 			DriverConnectionHandle* ret = nullptr;
-			UINTPTR_T _ret[2] = { (UINTPTR_T)&ret, 0 };
+			UINTPTR_T _ret[2] = { (UINTPTR_T)&ret, driverIdentity->driverConnections->len };
 			multitasking::g_currentThread->isBlockedCallback = ListenBlockCallback;
 			multitasking::g_currentThread->isBlockedUserdata = _ret;
 			multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;

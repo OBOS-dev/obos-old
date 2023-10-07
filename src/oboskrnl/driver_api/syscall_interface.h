@@ -12,6 +12,13 @@
 
 #ifdef __cplusplus
 extern "C" {
+#define OBOS_SET_DEFAULT_PARAMETER(v) = v
+#define OBOS_EXIT_STATUS obos::driverAPI::exitStatus
+#define OBOS_ENUM obos::driverAPI::
+#else
+#define SET_DEFAULT_PARAMETER(v) = v
+#define OBOS_EXIT_STATUS enum exitStatus
+#define OBOS_ENUM enum
 #endif
 
 #ifdef __x86_64__
@@ -22,19 +29,22 @@ extern "C" {
 #define PASS_OBOS_API_PARS
 #endif
 
-enum exitStatus RegisterDriver(OBOS_API DWORD driverID, enum serviceType type);
-enum exitStatus RegisterInterruptHandler(OBOS_API BYTE interruptId, void(*handler)());
-enum exitStatus PicSendEoi(OBOS_API BYTE irq);
-enum exitStatus DisableIRQ(OBOS_API BYTE irq);
-enum exitStatus EnableIRQ(OBOS_API BYTE irq);
-enum exitStatus PrintChar(OBOS_API CHAR ch, BOOL flush);
-enum exitStatus GetMultibootModule(OBOS_API DWORD moduleIndex, UINTPTR_T* moduleStart, SIZE_T* size);
-enum exitStatus MapPhysicalTo(OBOS_API UINTPTR_T physicalAddress, PVOID virtualAddress, UINT32_T flags);
-enum exitStatus UnmapPhysicalTo(OBOS_API PVOID virtualAddress);
-enum exitStatus Printf(OBOS_API CSTRING format, ...);
-enum exitStatus GetPhysicalAddress(OBOS_API PVOID linearAddress, PVOID* physicalAddress);
+OBOS_EXIT_STATUS RegisterInterruptHandler(OBOS_API BYTE interruptId, void(*handler)());
+OBOS_EXIT_STATUS PicSendEoi(OBOS_API BYTE irq);
+OBOS_EXIT_STATUS DisableIRQ(OBOS_API BYTE irq);
+OBOS_EXIT_STATUS EnableIRQ(OBOS_API BYTE irq);
+OBOS_EXIT_STATUS PrintChar(OBOS_API CHAR ch, BOOL flush);
+OBOS_EXIT_STATUS GetMultibootModule(OBOS_API DWORD moduleIndex, UINTPTR_T* moduleStart, SIZE_T* size);
+OBOS_EXIT_STATUS MapPhysicalTo(OBOS_API UINTPTR_T physicalAddress, PVOID virtualAddress, UINTPTR_T flags);
+OBOS_EXIT_STATUS UnmapPhysicalTo(OBOS_API PVOID virtualAddress);
+OBOS_EXIT_STATUS Printf(OBOS_API CSTRING format, ...);
+OBOS_EXIT_STATUS GetPhysicalAddress(OBOS_API PVOID linearAddress, PVOID* physicalAddress);
+OBOS_EXIT_STATUS ListenForConnections(OBOS_API HANDLE* newHandle);
+OBOS_EXIT_STATUS ConnectionSendData(OBOS_API HANDLE handle, PVOID data, SIZE_T size, BOOL failIfMutexLocked OBOS_SET_DEFAULT_PARAMETER(true));
+OBOS_EXIT_STATUS ConnectionRecvData(OBOS_API HANDLE handle, PVOID data, SIZE_T size, BOOL peek OBOS_SET_DEFAULT_PARAMETER(false), BOOL failIfMutexLocked OBOS_SET_DEFAULT_PARAMETER(true));
+OBOS_EXIT_STATUS ConnectionClose(OBOS_API HANDLE handle);
 
-enum exitStatus CallSyscall(OBOS_API DWORD syscallId, ...);
+OBOS_EXIT_STATUS CallSyscall(OBOS_API DWORD syscallId, ...);
 
 #ifdef __cplusplus
 }

@@ -19,9 +19,8 @@
 	ret
 %endmacro
 
-%assign current_syscall 0
+%assign current_syscall 1
 
-SYSCALL_DEFINE RegisterDriver, current_syscall
 SYSCALL_DEFINE RegisterInterruptHandler, current_syscall
 SYSCALL_DEFINE PicSendEoi, current_syscall
 SYSCALL_DEFINE EnableIRQ, current_syscall
@@ -32,6 +31,10 @@ SYSCALL_DEFINE MapPhysicalTo, current_syscall
 SYSCALL_DEFINE UnmapPhysicalTo, current_syscall
 SYSCALL_DEFINE Printf, current_syscall
 SYSCALL_DEFINE GetPhysicalAddress, current_syscall
+SYSCALL_DEFINE ListenForConnections, current_syscall
+SYSCALL_DEFINE ConnectionSendData, current_syscall
+SYSCALL_DEFINE ConnectionRecvData, current_syscall
+SYSCALL_DEFINE ConnectionClose, current_syscall
 
 ; All syscalls must be before this.
 

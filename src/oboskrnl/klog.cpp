@@ -368,10 +368,11 @@ namespace obos
 		}
 		
 		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendEOI();
-		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(1);
+		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendDataByte(BITFIELD_FROM_BIT(1));
 		RegisterInterruptHandler(33, irq1);
+		asm volatile("sti");
 
-		haltCPU();
+		while(1);
 	}
 
 	void printf_noFlush(CSTRING format, ...)

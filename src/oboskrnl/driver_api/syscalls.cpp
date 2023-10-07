@@ -4,6 +4,7 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
+#include <driver_api/driver_interface.h>
 #include <driver_api/syscalls.h>
 #include <driver_api/interrupts.h>
 #include <driver_api/enums.h>
@@ -16,12 +17,11 @@
 #include <descriptors/idt/pic.h>
 
 #include <console.h>
+#include <klog.h>
 
 #include <boot/boot.h>
 
 #include <utils/memory.h>
-
-#include <klog.h>
 
 #include <multitasking/multitasking.h>
 #include <multitasking/threadHandle.h>
@@ -62,6 +62,11 @@ namespace obos
 		static exitStatus UnmapPhysicalTo(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus Printf(CSTRING format, ...);
 		static exitStatus GetPhysicalAddress(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus ListenForConnections(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus ConnectionSendData(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus ConnectionRecvData(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus ConnectionClose(DEFINE_RESERVED_PARAMETERS);
+		
 		static void interruptHandler(const obos::interrupt_frame* frame);
 
 		/*struct driverIdentification
@@ -98,6 +103,10 @@ namespace obos
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(UnmapPhysicalTo));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(Printf));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(GetPhysicalAddress));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(ListenForConnections));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(ConnectionSendData));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(ConnectionRecvData));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(ConnectionClose));
 		}
 
 		static exitStatus RegisterDriver()
@@ -347,6 +356,54 @@ namespace obos
 			return exitStatus::EXIT_STATUS_SUCCESS;
 		}
 #endif
+		static exitStatus ListenForConnections(DEFINE_RESERVED_PARAMETERS)
+		{
+			struct _par
+			{
+				HANDLE* newHandle;
+			} *pars = (_par*)parameters;
+			*pars->newHandle = reinterpret_cast<HANDLE>(Listen());
+			return *pars->newHandle ? exitStatus::EXIT_STATUS_SUCCESS : exitStatus::EXIT_STATUS_CHECK_LAST_ERROR;
+		}
+		static exitStatus ConnectionSendData(DEFINE_RESERVED_PARAMETERS)
+		{
+			struct _par
+			{
+				DriverConnectionHandle* handle;
+				PBYTE data;
+				SIZE_T size;
+				BOOL failIfMutexLocked;
+			} *pars = (_par*)parameters;
+			if (GET_FUNC_ADDR(pars->handle->GetDriverIdentification()) < 0xfffffffff0000000)
+				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
+			return pars->handle->SendData(pars->data, pars->size, pars->failIfMutexLocked) ? exitStatus::EXIT_STATUS_SUCCESS : exitStatus::EXIT_STATUS_CHECK_LAST_ERROR;
+		}
+		static exitStatus ConnectionRecvData(DEFINE_RESERVED_PARAMETERS)
+		{
+			struct _par
+			{
+				DriverConnectionHandle* handle;
+				PBYTE data;
+				SIZE_T size;
+				BOOL peek;
+				BOOL failIfMutexLocked;
+			} *pars = (_par*)parameters;
+			if (GET_FUNC_ADDR(pars->handle->GetDriverIdentification()) < 0xfffffffff0000000)
+				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
+			return pars->handle->RecvData(pars->data, pars->size, pars->peek, pars->failIfMutexLocked) ? exitStatus::EXIT_STATUS_SUCCESS : exitStatus::EXIT_STATUS_CHECK_LAST_ERROR;
+		}
+		static exitStatus ConnectionClose(DEFINE_RESERVED_PARAMETERS)
+		{
+			struct _par
+			{
+				DriverConnectionHandle* handle;
+			} *pars = (_par*)parameters;
+			if (GET_FUNC_ADDR(pars->handle->GetDriverIdentification()) < 0xfffffffff0000000)
+				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
+			bool ret = pars->handle->CloseConnection();
+			delete pars->handle;
+			return ret ? exitStatus::EXIT_STATUS_SUCCESS : exitStatus::EXIT_STATUS_CHECK_LAST_ERROR;
+		}
 
 		static void interruptHandler(const obos::interrupt_frame* frame)
 		{

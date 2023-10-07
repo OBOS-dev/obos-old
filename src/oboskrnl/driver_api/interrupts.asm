@@ -24,7 +24,7 @@ isr80:
 %define accumulator eax
 %define int_ret iret
 %define	ptr_sz 4
-%endif __i686__
+%endif
 %ifdef __x86_64__
 %define accumulator rax
 %define int_ret iretq

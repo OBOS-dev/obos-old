@@ -28,6 +28,7 @@
 #include <multitasking/multitasking.h>
 #include <multitasking/threadHandle.h>
 
+#include <driver_api/driver_interface.h>
 #include <driver_api/interrupts.h>
 #include <driver_api/syscalls.h>
 #include <driver_api/load/module.h>
@@ -56,7 +57,7 @@ extern "C" UINTPTR_T* boot_page_directory1;
 extern "C" void _init();
 extern "C" char _glb_text_start;
 extern "C" char _glb_text_end;
-extern "C" void idleTask();
+extern "C" void idleTask(PVOID);
 extern bool inKernelSection;
 
 #ifdef __i686__
@@ -92,15 +93,9 @@ namespace obos
 		static SIZE_T s_cursorRow = 0;
 		static SIZE_T s_cursorColumn = 0;
 		static bool s_cursorInitialized;
-		multitasking::g_currentThread->isBlockedCallback = [](multitasking::Thread* _this, PVOID)->bool
-			{
-				return multitasking::g_timerTicks >= _this->wakeUpTime;
-			};
 		while(1)
 		{
-			multitasking::g_currentThread->wakeUpTime = multitasking::g_timerTicks + CURSOR_SLEEP_TIME_MS;
-			multitasking::g_currentThread->status |= (utils::RawBitfield)multitasking::Thread::status_t::BLOCKED;
-			_int(0x30);
+			multitasking::Sleep(CURSOR_SLEEP_TIME_MS);
 			if (s_cursorRow != s_terminalRow)
 			{
 				if (s_cursorInitialized)
@@ -255,9 +250,6 @@ namespace obos
 			virtAddress += 4096, physicalAddress += 4096)
 			memory::kmap_physical((PVOID)virtAddress, memory::VirtualAllocFlags::WRITE_ENABLED, (PVOID)physicalAddress);
 
-		// Initialize the console.
-		InitializeConsole(0xFFFFFFFF, 0x00000000);
-
 		obos::Pic currentPic{ obos::Pic::PIC1_CMD, obos::Pic::PIC1_DATA };
 		// Interrupt 32-40 (0x20-0x27)
 		currentPic.remap(0x20, 4);
@@ -273,7 +265,7 @@ namespace obos
 
 		multitasking::InitializeMultitasking();
 		// Oh no!
-		kpanic(nullptr, getEIP(), kpanic_format("obos::kmain tried to return!"));
+		kpanic(nullptr, nullptr, kpanic_format("obos::kmain tried to return!"));
 	}
 	process::Process* g_kernelProcess = nullptr;
 	void kmainThr()
@@ -316,24 +308,40 @@ namespace obos
 				*ptr = *it;
 			memory::MemoryProtect(ptr, 1, memory::VirtualAllocFlags::GLOBAL);
 		}
+
+		// Initialize the console.
+		InitializeConsole(0xFFFFFFFF, 0x00000000);
 		
 		multitasking::ThreadHandle mainThread;
 		
-		/*driverAPI::driverIdentification* initrdDriver = */
-		driverAPI::LoadModule((PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
-			((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start, &mainThread);
+		driverAPI::driverIdentification* initrdDriver = 
+			driverAPI::LoadModule((PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
+				((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start, &mainThread);
 
-		mainThread.WaitForThreadStatusChange((DWORD)multitasking::Thread::status_t::RUNNING | (DWORD)multitasking::Thread::status_t::PAUSED);
+		obos::driverAPI::driver_commands request = obos::driverAPI::driver_commands::OBOS_SERVICE_QUERY_FILE_DATA;
+		driverAPI::DriverClientConnectionHandle driverCon;
+		driverCon.OpenConnection(initrdDriver->driverId);
+		driverCon.SendData((PBYTE)&request, sizeof(request));
+		BYTE filepath[] = { "folder/file.txt" };
+		SIZE_T filepathSize = sizeof(filepath);
+		SIZE_T nul = 0;
+		driverCon.SendData((PBYTE)&filepathSize, sizeof(filepathSize));
+		driverCon.SendData(filepath, filepathSize);
+		driverCon.SendData((PBYTE)&nul, 8);
+		driverCon.SendData((PBYTE)&nul, 1);
+		UINT64_T response[3] = {};
+		for(; !driverCon.RecvData((PBYTE)&response, sizeof(response)););
+		printf("For file \"%s\", the driver returned file size %p and file attributes %p.", filepath, response[0], response[2]);
 
 		multitasking::ThreadHandle handle;
-		handle.CreateThread(multitasking::Thread::priority_t::HIGH, cursorUpdate, nullptr, 0, 0);
+		handle.CreateThread(multitasking::Thread::priority_t::IDLE, idleTask, nullptr, 0, 0);
 		handle.closeHandle();
 		handle.OpenThread(multitasking::g_currentThread);
-		handle.SetThreadPriority(multitasking::Thread::priority_t::LOW);
+		handle.SetThreadPriority(multitasking::Thread::priority_t::HIGH);
 		handle.closeHandle();
 
-		// We're done booting.
-		idleTask();
+		cursorUpdate(nullptr);
+
 		RestartComputer();
 	}
 }

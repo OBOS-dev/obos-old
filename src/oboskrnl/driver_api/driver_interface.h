@@ -38,6 +38,8 @@ namespace obos
 			bool CloseConnection(bool setLastError = true);
 			~DriverConnectionHandle();
 			
+			driverIdentification* GetDriverIdentification() { return m_driverIdentity; }
+
 			friend class DriverClientConnectionHandle;
 			friend DriverConnectionHandle* Listen();
 		private:

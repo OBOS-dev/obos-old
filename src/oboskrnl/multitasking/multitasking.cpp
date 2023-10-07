@@ -6,7 +6,6 @@
 
 #include <multitasking/multitasking.h>
 #include <multitasking/thread.h>
-#include <multitasking/mutex/mutexHandle.h>
 
 #include <utils/memory.h>
 
@@ -33,6 +32,8 @@ asm volatile("mov %0, %%rax" :\
 
 extern "C" char __etext;
 extern "C" void attribute(noreturn) callSwitchToTaskImpl(PBYTE stack, PVOID pageMap, void(*switchToTaskImpl)(obos::multitasking::Thread* newThread), obos::multitasking::Thread* funcPar);
+extern "C" bool callBlockCallback(PBYTE stack, PVOID pageMap, bool(*callback)(obos::multitasking::Thread*, PVOID), obos::multitasking::Thread* funcPar1, PVOID funcPar2);
+extern "C" void idleTask(PVOID);
 
 namespace obos
 {
@@ -49,10 +50,24 @@ namespace obos
 		};
 		Thread* g_currentThread = nullptr;
 		bool g_initialized = false;
-		MutexHandle* g_schedulerMutex = nullptr;
+		struct lock
+		{
+			bool locked;
+			bool Lock(bool)
+			{
+				if (locked)
+					return false;
+				locked = true;
+				return true;
+			}
+			void Unlock()
+			{
+				locked = false;
+			}
+		} g_schedulerMutex;
 		SIZE_T g_timerTicks = 1;
 
-		UINT16_T g_schedulerFrequency = 1000;
+		UINT32_T g_schedulerFrequency = 1000;
 
 		bool canRanTask(Thread* thread)
 		{
@@ -70,7 +85,7 @@ namespace obos
 			{
 				if (g_currentThread->frame.intNumber != 0x30)
 					SendEOI(g_currentThread->frame.intNumber - 32);
-				g_schedulerMutex->Unlock();
+				g_schedulerMutex.Unlock();
 				setFrameAddress(&g_currentThread->frame);
 				switchToTaskAsm();
 			}
@@ -78,17 +93,17 @@ namespace obos
 			{
 				if (g_currentThread->frame.intNumber != 0x30)
 					SendEOI(g_currentThread->frame.intNumber - 32);
-				g_schedulerMutex->Unlock();
+				g_schedulerMutex.Unlock();
 				setFrameAddress(&g_currentThread->frame);
 				switchToTaskAsm();
 			}
 			SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
 			if (g_currentThread->frame.intNumber != 0x30)
 				SendEOI(g_currentThread->frame.intNumber - 32);
-			g_schedulerMutex->Unlock();
+			g_schedulerMutex.Unlock();
 			setFrameAddress(&g_currentThread->frame);
 			switchToUserModeTask();
-			kpanic(nullptr, nullptr, kpanic_format("Could not switch to task with pid %x, tid %x."), g_currentThread->owner->pid, g_currentThread->tid);
+			kpanic(nullptr, nullptr, kpanic_format("Could not switch to task with pid %p, tid %p."), g_currentThread->owner->pid, g_currentThread->tid);
 		}
 
 		void switchToTask(Thread* newThread)
@@ -113,11 +128,13 @@ namespace obos
 				pageMap = memory::g_pageDirectory->getPageDirectory();
 #endif
 			callSwitchToTaskImpl(stack + 4096, pageMap, switchToTaskImpl, newThread);
-			kpanic(nullptr, nullptr, kpanic_format("Could not switch to task with pid %x, tid %x."), g_currentThread->owner->pid, g_currentThread->tid);
+			kpanic(nullptr, nullptr, kpanic_format("Could not switch to task with pid %p, tid %p."), g_currentThread->owner->pid, g_currentThread->tid);
 		}
 
+		static BYTE block_callback_stack[8192];
+
 #pragma GCC push_options
-#pragma GCC optimize("O3")
+#pragma GCC optimize("O0")
 		void findNewTask(const interrupt_frame* frame)
 		{
 			if (frame->intNumber != 0x30)
@@ -128,21 +145,32 @@ namespace obos
 					SendEOI(frame->intNumber - 32);
 				return;
 			}
-			if (!g_schedulerMutex->Lock(false))
-				return;
-			if (g_currentThread)
-			{
-				g_currentThread->frame = *frame;
-				g_currentThread->lastTimeRan = g_timerTicks - 1;
-			}
-			else
+			if (!g_schedulerMutex.Lock(false))
 			{
 				if (frame->intNumber != 0x30)
 					SendEOI(frame->intNumber - 32);
 				return;
 			}
-			if (g_threads->len == 1)
+			if (g_currentThread)
+			{
+				g_currentThread->frame = *frame;
+				if(frame->intNumber != 0x30)
+					g_currentThread->lastTimeRan = g_timerTicks - 1;
+			}
+			else
+			{
+				if (frame->intNumber != 0x30)
+					SendEOI(frame->intNumber - 32);
+				g_schedulerMutex.Unlock();
 				return;
+			}
+			if (g_threads->len == 1)
+			{
+				if (frame->intNumber != 0x30)
+					SendEOI(frame->intNumber - 32);
+				g_schedulerMutex.Unlock();
+				return;
+			}
 
 			EnterKernelSection();
 			Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).disableIrq(0);
@@ -152,32 +180,63 @@ namespace obos
 			Thread* currentThread = nullptr;
 
 			// Find the thread that's starving in a queue and run it.
-			
+			bool foundTask = false;
+
 			// Find a new task.
-			for (int i = 3; i != -1; i--)
+			for (int i = 3; i != -1 && !foundTask; i--)
 			{
 				SIZE_T lowestTimeRan = 0;
-				for (list_node_t* node = g_threadPriorityList[i]->head; node != nullptr; node = node->next)
+				for (list_node_t* node = g_threadPriorityList[i]->tail; node != nullptr; )
 				{
 					currentThread = (Thread*)node->val;
 					if (currentThread->status & (DWORD)Thread::status_t::BLOCKED)
 					{
 						if (currentThread->isBlockedCallback)
-							if (currentThread->isBlockedCallback(const_cast<Thread*>(currentThread), currentThread->isBlockedUserdata))
-								const_cast<Thread*>(currentThread)->status &= (~(DWORD)Thread::status_t::BLOCKED);
-							else {}
+						{
+							UINTPTR_T* pageMap = nullptr;
+#if defined(__x86_64__)
+							auto oldPageMap = memory::g_level4PageMap;
+							if (currentThread->owner)
+							{
+								memory::g_level4PageMap = currentThread->owner->level4PageMap;
+								pageMap = currentThread->owner->level4PageMap->getPageMap();
+							}
+							else
+								pageMap = memory::g_kernelPageMap.getPageMap();
+#elif defined(__i686__)
+							auto oldPageMap = memory::g_pageDirectory;
+							if (currentThread->owner)
+							{
+								memory::g_pageDirectory = currentThread->owner->pageDirectory;
+								pageMap = currentThread->owner->pageDirectory->getPageDirectory();
+							}
+							else
+								pageMap = memory::g_pageDirectory->getPageDirectory();
+#endif
+
+							if (callBlockCallback(block_callback_stack + sizeof(block_callback_stack), pageMap, currentThread->isBlockedCallback, currentThread, currentThread->isBlockedUserdata))
+								currentThread->status &= (~(DWORD)Thread::status_t::BLOCKED);
+
+#if defined(__x86_64__)
+							memory::g_level4PageMap = oldPageMap;
+#elif defined(__i686__)
+							memory::g_pageDirectory = oldPageMap;
+#endif
+						}
 						else
 							currentThread->status = (DWORD)Thread::status_t::DEAD;
 					}
 					if (currentThread->status == (DWORD)Thread::status_t::RUNNING)
 					{
-						if (lowestTimeRan < currentThread->lastTimeRan)
+						if (lowestTimeRan > currentThread->lastTimeRan || !lowestTimeRan)
 						{
 							lowestTimeRan = currentThread->lastTimeRan;
 							threadToRun = currentThread;
 						}
 					}
+					node = node->prev;
 				}
+				foundTask = threadToRun != nullptr;
 			}
 			if (!threadToRun)
 				goto findNew;
@@ -189,14 +248,15 @@ namespace obos
 			{
 				if (frame->intNumber != 0x30)
 					SendEOI(frame->intNumber - 32);
-				g_schedulerMutex->Unlock();
+				g_schedulerMutex.Unlock();
 				return;
 			}
-			switchToTask(const_cast<Thread*>(threadToRun));
+			switchToTask(const_cast<Thread*>(threadToRun));	
+			kpanic(nullptr, nullptr, kpanic_format("Could not switch to task with pid %p, tid %p."), threadToRun->owner->pid, threadToRun->tid);
 		}
 #pragma GCC pop_options
 
-		void SetPITFrequency(UINT16_T freq)
+		void SetPITFrequency(UINT32_T freq)
 		{
 			UINT32_T divisor = 1193182 / freq;
 
@@ -242,8 +302,6 @@ namespace obos
 			kmainThread->lastError = 0;
 			list_lpush(g_threads			  , list_node_new(kmainThread));
 			list_lpush(g_threadPriorityList[2], list_node_new(kmainThread));
-
-			g_schedulerMutex = new MutexHandle{};
 
 			SetPITFrequency(g_schedulerFrequency);
 			

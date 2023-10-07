@@ -27,7 +27,7 @@ namespace obos
 		UINT32_T m_resv1;
 	};
 
-	struct x86_64_flags : public utils::BitfieldBitmask
+	struct x86_64_flags
 	{
 		enum
 		{
@@ -48,13 +48,30 @@ namespace obos
 			RFLAGS_VINTERRUPT_PENDING = BITFIELD_FROM_BIT(20),
 			RFLAGS_CPUID = BITFIELD_FROM_BIT(21),
 		};
-		operator UINTPTR_T() { return m_bitfield; }
+		explicit operator UINTPTR_T() { return m_bitfield; }
 		x86_64_flags() = default;
 		x86_64_flags(UINTPTR_T flags)
-			:utils::BitfieldBitmask{}
 		{
 			m_bitfield = flags;
 		}
+		void setBit(UINTPTR_T bitmask)
+		{
+			m_bitfield |= bitmask;
+		}
+		void clearBit(UINTPTR_T bitmask)
+		{
+			m_bitfield &= (~bitmask);
+		}
+		bool getBit(UINTPTR_T bitmask) const
+		{
+			return m_bitfield & bitmask;
+		}
+
+		bool operator[](UINTPTR_T bitmask) const
+		{
+			return getBit(bitmask);
+		}
+		UINTPTR_T m_bitfield;
 	};
 
 	struct interrupt_frame

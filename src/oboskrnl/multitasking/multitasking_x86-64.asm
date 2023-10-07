@@ -9,6 +9,7 @@ segment .text
 global _ZN4obos12multitasking15switchToTaskAsmEv
 global _ZN4obos12multitasking20switchToUserModeTaskEv
 global callSwitchToTaskImpl
+global callBlockCallback
 global callExitThreadImpl
 
 _ZN4obos12multitasking15switchToTaskAsmEv:
@@ -104,6 +105,25 @@ callSwitchToTaskImpl:
 	cli
 	hlt
 	jmp .failed
+callBlockCallback:
+	push rbp
+	mov rbp, rsp
+
+	mov r12, rsp
+	mov r13, cr3
+
+	mov rsp, rdi
+	mov cr3, rsi
+
+	mov rdi, rcx
+	mov rsi, r8
+	call rdx
+
+	mov rsp, r12
+	mov cr3, r13
+
+	leave
+	ret
 callExitThreadImpl:
 	push rbp
 	mov rbp, rsp

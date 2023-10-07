@@ -157,6 +157,12 @@ extern "C" {
 		allocate_mutex();
 		makeSafeLock(lock);
 		
+		if (!amount)
+		{
+			obos::SetLastError(obos::OBOS_ERROR_INVALID_PARAMETER);
+			return nullptr;
+		}
+
 		amount += (sizeof(UINTPTR_T) - (amount % sizeof(UINTPTR_T)));
 
 		pageBlock* currentPageBlock = nullptr;

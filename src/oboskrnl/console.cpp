@@ -127,9 +127,9 @@ namespace obos
 		utils::dwMemset(s_backbuffer, backgroundColor, s_framebufferWidth * s_framebufferHeight);
 #elif defined(__x86_64__)
 		/*s_backbuffer = (UINT32_T*)memory::VirtualAlloc(
-			(PVOID)0xFFFFFFFF80900000,
+			(PVOID)0xFFFFFFFF80a00000,
 			(s_framebufferWidth * s_framebufferHeight * sizeof(DWORD)) >> 12,
-			memory::VirtualAllocFlags::WRITE_ENABLED, true);*/
+			memory::VirtualAllocFlags::WRITE_ENABLED, false);*/
 #endif
 		font = (PBYTE)(((multiboot_module_t*)g_multibootInfo->mods_addr)->mod_start);
 		SetConsoleColor(foregroundColor, backgroundColor);
@@ -326,21 +326,20 @@ namespace obos
 	}
 	void ClearConsole()
 	{
-		EnterKernelSection();
+		DWORD foreground = 0;
+		DWORD background = 0;
+		GetConsoleColor(foreground, background);
 		s_consoleMutex->Lock();
-		utils::dwMemset(s_backbuffer, 0, s_framebufferWidth * s_framebufferHeight);
-		utils::dwMemset(s_framebuffer, 0, s_framebufferWidth * s_framebufferHeight);
+		if(s_framebuffer != s_backbuffer)
+			utils::dwMemset(s_backbuffer, background, s_framebufferWidth * s_framebufferHeight);
+		utils::dwMemset(s_framebuffer, background, s_framebufferWidth * s_framebufferHeight);
 		s_consoleMutex->Unlock();
-		LeaveKernelSection();
 	}
 	// Swap the backbuffer with the viewport.
 	void swapBuffers()
 	{
-		EnterKernelSection();
 		s_consoleMutex->Lock();
 		__Impl_swapBuffers();
 		s_consoleMutex->Unlock();
-		LeaveKernelSection();
-		//utils::memzero(s_backbuffer, s_framebufferWidth * s_framebufferHeight);
 	}
 }

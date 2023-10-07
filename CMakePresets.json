@@ -21,46 +21,26 @@
           "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
         }
       }
-    },
-    {
-      "name": "x86-debug",
-      "displayName": "x86 OBOS",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "OUTPUT_DIR": "/mnt/c/Code/obos/out/",
-        "CURSOR_SLEEP_TIME_MS": "150",
-        "CONSOLE_NEWLINE_SEQUENCE": "LF",
-        "OBOS_ARCHITECTURE": "i686",
-        "CMAKE_TOOLCHAIN_FILE": "/mnt/c/Code/obos/scripts/toolchains/i686_OBOS.cmake"
-      },
-      "vendor": {
-        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
-        }
-      }
-    },
-    {
-      "name": "macos-debug",
-      "displayName": "macOS Debug",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/out/build/${presetName}",
-      "installDir": "${sourceDir}/out/install/${presetName}",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      },
-      "condition": {
-        "type": "equals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Darwin"
-      },
-      "vendor": {
-        "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
-          "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
-        }
-      }
     }
+    //{
+    //  "name": "x86-debug",
+    //  "displayName": "x86 OBOS",
+    //  "generator": "Ninja",
+    //  "binaryDir": "${sourceDir}/out/build/${presetName}",
+    //  "installDir": "${sourceDir}/out/install/${presetName}",
+    //  "cacheVariables": {
+    //    "CMAKE_BUILD_TYPE": "Debug",
+    //    "OUTPUT_DIR": "/mnt/c/Code/obos/out/",
+    //    "CURSOR_SLEEP_TIME_MS": "150",
+    //    "CONSOLE_NEWLINE_SEQUENCE": "LF",
+    //    "OBOS_ARCHITECTURE": "i686",
+    //    "CMAKE_TOOLCHAIN_FILE": "/mnt/c/Code/obos/scripts/toolchains/i686_OBOS.cmake"
+    //  },
+    //  "vendor": {
+    //    "microsoft.com/VisualStudioRemoteSettings/CMake/1.0": {
+    //      "sourceDir": "$env{HOME}/.vs/$ms{projectDirName}"
+    //    }
+    //  }
+    //},
   ]
 }

@@ -1,0 +1,47 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "cppdbg",
+      "name": "oboskrnl-qemu", // a friendly name for the debug configuration 
+      "project": "CMakeLists.txt",
+      "projectTarget": "oboskrnl",
+      "program": "C:/Users/omark/Documents/obos/out/oboskrnl",
+      "MIMode": "gdb",
+      "customLaunchSetupCommands": [
+        {
+          "text": "add-symbol-file C:/Code/obos/out/oboskrnl",
+          "description": "Adds the kernel's symbol file."
+        },
+        {
+          "text": "add-symbol-file C:/Code/obos/out/testProgram",
+          "ignoreFailures": true
+        },
+        {
+          "text": "add-symbol-file C:/Code/obos/out/ustarFilesystem",
+          "ignoreFailures": true
+        },
+        {
+          "text": "target remote :1234",
+          "description": "Connects to qemu's gdb stub."
+        }
+      ],
+      "externalConsole": false,
+      "remoteMachineName": "2081433904;127.0.0.1 (username=omar, port=2222, authentication=Password)",
+      "remotePrelaunchWait": "1",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "text": "set disassembly-flavor intel",
+          "description": "Makes gdb disassemble in intel syntax instead of AT&T syntax.",
+          "ignoreFailures": true
+        }
+      ],
+      "pipeTransport": { "disable": true },
+      "showDisplayString": true,
+      "targetArchitecture": "x86_64",
+      "miDebuggerServerAddress": ":1234"
+    }
+  ]
+}

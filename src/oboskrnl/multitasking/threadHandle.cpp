@@ -309,7 +309,6 @@ namespace obos
 				SetLastError(OBOS_ERROR_ACCESS_DENIED);
 				return false;
 			}
-			EnterKernelSection();
 			volatile UINTPTR_T udata[2] = {};
 			if (!newStatus)
 			{
@@ -332,7 +331,6 @@ namespace obos
 			}
 			multitasking::g_currentThread->isBlockedUserdata = (PVOID)udata;
 			multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;
-			LeaveKernelSection();
 			_int(0x30);
 			return true;
 		}
@@ -344,15 +342,8 @@ namespace obos
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return nullptr;
 			}
-			EnterKernelSection();
-			ThreadHandle* newHandle = (ThreadHandle*)kcalloc(1, sizeof(ThreadHandle));
-			newHandle->m_origin = newHandle;
-			newHandle->m_references++;
-			newHandle->m_value = m_value;
-			newHandle->m_thread = m_thread;
-			m_thread->nHandles++;
-			m_references++;
-			LeaveKernelSection();
+			ThreadHandle* newHandle = new ThreadHandle;
+			newHandle->OpenThread(m_thread);
 			return newHandle;
 		}
 		int ThreadHandle::closeHandle()
@@ -427,6 +418,20 @@ namespace obos
 		utils::RawBitfield GetCurrentThreadStatus()
 		{
 			return g_currentThread->status;
+		}
+		SIZE_T MillisecondsToTicks(SIZE_T milliseconds)
+		{
+			return milliseconds;
+		}
+		void Sleep(SIZE_T milliseconds)
+		{
+			g_currentThread->isBlockedCallback = [](multitasking::Thread* _this, PVOID)->bool
+				{
+					return multitasking::g_timerTicks >= _this->wakeUpTime;
+				};
+			multitasking::g_currentThread->wakeUpTime = multitasking::g_timerTicks + MillisecondsToTicks(milliseconds);
+			multitasking::g_currentThread->status |= (utils::RawBitfield)multitasking::Thread::status_t::BLOCKED;
+			_int(0x30);
 		}
 		ThreadHandle* GetCurrentThreadHandle()
 		{

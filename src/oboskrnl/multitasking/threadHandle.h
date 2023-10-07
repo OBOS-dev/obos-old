@@ -158,5 +158,10 @@ namespace obos
 		/// </summary>
 		/// <returns>A bitfield representing the status.</returns>
 		utils::RawBitfield GetCurrentThreadStatus();
+		/// <summary>
+		/// Sleeps for the specified time period.
+		/// </summary>
+		/// <param name="milliseconds">The amount of milliseconds to sleep for.</param>
+		void Sleep(SIZE_T milliseconds);
 	}
 }

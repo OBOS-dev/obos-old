@@ -60,11 +60,13 @@ namespace obos
 			EXIT_STATUS_NO_SUCH_DRIVER,
 			EXIT_STATUS_INVALID_PARAMETER,
 			EXIT_STATUS_ADDRESS_NOT_AVAILABLE,
-			EXIT_STATUS_NOT_IMPLEMENTED
+			EXIT_STATUS_NOT_IMPLEMENTED,
+			EXIT_STATUS_CHECK_LAST_ERROR,
 		};
 
-		enum fileExistsReturn
+		DEFINE_ENUM fileExistsReturn
 		{
+			FILE_DOESNT_EXIST,
 			// If this is set, the file cannot be written to.
 			FILE_EXISTS_READ_ONLY = 1,
 			// If this is set, the file links to another file.
@@ -79,6 +81,7 @@ namespace obos
 
 		DEFINE_ENUM driver_commands
 		{
+			OBOS_SERVICE_INVALID_SERVICE_COMMAND = -1,
 			// Common Commands
 			OBOS_SERVICE_GET_SERVICE_TYPE,
 			// OBOS_SERVICE_TYPE_FILESYSTEM

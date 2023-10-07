@@ -47,6 +47,7 @@ namespace obos
 		UINTPTR_T ProcEntryPointBase = 0;
 
 		Process::Process()
+			:consoleForegroundColour{ 0xffffffff }
 		{}
 
 		VOID attribute(section(".glb.text")) ProcEntryPoint(PVOID entry)
@@ -71,10 +72,12 @@ namespace obos
 				asm volatile("sti" : : : "memory");
 				multitasking::g_currentThread->owner->TerminateProcess(ret);
 			}
+			EnterKernelSection();
 			auto currentThread = multitasking::GetCurrentThreadHandle();
 			currentThread->SetThreadPriority(multitasking::Thread::priority_t::IDLE);
 			currentThread->closeHandle();
 			delete currentThread;
+			LeaveKernelSection();
 			// In case the driver disabled interrupts and they didn't get enabled.
 			asm volatile("sti" : : : "memory");
 			// Do this if someone thinks they're funny and unpauses the thread
