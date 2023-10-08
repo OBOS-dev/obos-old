@@ -29,20 +29,21 @@ namespace obos
 			{
 				INVALID_PRIORITY,
 				// An idle thread.
-				IDLE = 2,
+				IDLE = 1,
 				// A low-priority thread.
-				LOW = 3,
+				LOW = 2,
 				// A thread of normal priority.
 				NORMAL = 4,
 				// A high-priority thread.
 				HIGH = 8
 			};
-			enum class status_t
+			enum status_t
 			{
 				DEAD = 1,
 				RUNNING = 2,
 				BLOCKED = 4,
-				PAUSED = 8
+				PAUSED = 8,
+				CLEAR_ITERATIONS = 16,
 			};
 			using Tid = DWORD;
 		public:
@@ -53,45 +54,17 @@ namespace obos
 
 			DWORD CreateThread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages);
 
-			//void SetThreadPriority(priority_t newPriority)
-			//{
-			//	priority = newPriority;
-			//}
-			//void SetThreadStatus(utils::RawBitfield newStatus)
-			//{
-			//	status = newStatus;
-			//}
-			//priority_t GetThreadPriority()
-			//{
-			//	return priority;
-			//}
-			//utils::RawBitfield GetThreadStatus()
-			//{
-			//	return status;
-			//}
-			//Tid GetTid()
-			//{
-			//	return tid;
-			//}
-			//DWORD GetExitCode()
-			//{
-			//	return exitCode;
-			//}
-
 			virtual ~Thread()
 			{
 				if (status != (UINT32_T)status_t::DEAD && tid != ((DWORD)-1))
 					kpanic(nullptr, getEIP(), kpanic_format("A thread object was destroyed without the thread being dead."));
 			}
 
-			/*friend void InitializeMultitasking();
-			friend void findNewTask(const interrupt_frame* frame);
-			friend class ThreadHandle;*/
 		public:
 			Tid tid = -1;
 			DWORD exitCode = 0;
 			DWORD lastError = 0;
-			priority_t priority = priority_t::IDLE;
+			priority_t priority = priority_t::INVALID_PRIORITY;
 			utils::RawBitfield status = 0;
 			bool(*isBlockedCallback)(Thread* _this, PVOID userData) = nullptr;
 			PVOID isBlockedUserdata = nullptr;

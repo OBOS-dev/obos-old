@@ -101,7 +101,7 @@ namespace obos
 				memory::PageMap::computeIndexAtAddress(location, 0));
 		if (!inRange(location, s_backbuffer, s_backbuffer + 1024 * 768))
 			kpanic((PVOID)frame->rbp, (PVOID)frame->rip,
-					"Page fault in %s-mode at %p (tid %d, pid %d) while trying to %s a %s page.\r\nThe address of that page is %p. Error code: %d. Page table entry: %p.\r\nDumping registers: \r\n"
+					"Page fault in %s-mode at %p (pid %d, tid %d) while trying to %s a %s page.\r\nThe address of that page is %p. Error code: %d. Page table entry: %p.\r\nDumping registers: \r\n"
 				"\tRDI: %p, RSI: %p, RBP: %p\r\n"
 				"\tRSP: %p, RBX: %p, RDX: %p\r\n"
 				"\tRCX: %p, RAX: %p, RIP: %p\r\n"
@@ -109,7 +109,7 @@ namespace obos
 				"\tR11: %p, R12: %p, R13: %p\r\n"
 				"\tR14: %p, R15: %p, RFL: %p\r\n"
 				"\t SS: %p,  DS: %p,  CS: %p\r\n",
-				privilegeLevel, frame->rip, multitasking::GetCurrentThreadTid(), pid, action, isPresent, location,
+				privilegeLevel, frame->rip, pid, multitasking::GetCurrentThreadTid(), action, isPresent, location,
 				frame->errorCode, // Some bits are not translated by the handler.
 				entry,
 				frame->rdi, frame->rsi, frame->rbp, frame->rsp, frame->rbx,
@@ -135,7 +135,7 @@ namespace obos
 		getDebugRegister(dr3,dr3);
 		getDebugRegister(dr6,dr6);
 		getDebugRegister(dr7,dr7);
-		printf("Debug exception at %p (tid %d, pid %d). Error code: %d. Dumping registers: \r\n"
+		printf("Debug exception at %p (pid %d, tid %d). Error code: %d. Dumping registers: \r\n"
 			"\tRDI: %p, RSI: %p, RBP: %p\r\n"
 			"\tRSP: %p, RBX: %p, RDX: %p\r\n"
 			"\tRCX: %p, RAX: %p, RIP: %p\r\n"
@@ -146,7 +146,7 @@ namespace obos
 			"\tDR0: %p, \tDR1: %p, \tDR2: %p\r\n"
 			"\tDR3: %p, \tDR6: %p, \tDR7: %p\r\n",
 			frame->rip,
-			multitasking::GetCurrentThreadTid(), pid,
+			pid, multitasking::GetCurrentThreadTid(),
 			frame->errorCode,
 			frame->rdi, frame->rsi, frame->rbp, frame->rsp, frame->rbx,
 			frame->rdx, frame->rcx, frame->rax, frame->rip,
@@ -171,7 +171,7 @@ namespace obos
 				pid = multitasking::g_currentThread->owner->pid;
 		}
 		kpanic((PVOID)frame->rbp, (PVOID)frame->rip,
-				"Unhandled exception %d at %p (tid %d, pid %d). Error code: %d. Dumping registers: \r\n"
+				"Unhandled exception %d at %p (pid %d, tid %d). Error code: %d. Dumping registers: \r\n"
 			"\tRDI: %p, RSI: %p, RBP: %p\r\n"
 			"\tRSP: %p, RBX: %p, RDX: %p\r\n"
 			"\tRCX: %p, RAX: %p, RIP: %p\r\n"
@@ -181,7 +181,7 @@ namespace obos
 			"\t SS: %p,  DS: %p,  CS: %p\r\n",
 			frame->intNumber,
 			frame->rip,
-			multitasking::GetCurrentThreadTid(), pid,
+			pid, multitasking::GetCurrentThreadTid(),
 			frame->errorCode,
 			frame->rdi, frame->rsi, frame->rbp, frame->rsp, frame->rbx,
 			frame->rdx, frame->rcx, frame->rax, frame->rip,

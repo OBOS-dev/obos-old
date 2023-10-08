@@ -327,11 +327,7 @@ namespace obos
     
     void EnterKernelSection()
     {
-      /*  if (multitasking::g_initialized)
-        {
-            multitasking::DisablePIT();
-            Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).disableIrq(0);
-        }*/
+        Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).disableIrq(0);
         asm volatile("cli");
         inKernelSection = true;
         countCalled++;
@@ -344,11 +340,7 @@ namespace obos
             return;
         inKernelSection = false;
         asm volatile("sti");
-       /* if(multitasking::g_initialized)
-        {
-            Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(0);
-            multitasking::SetPITFrequency(multitasking::g_schedulerFrequency);
-        }*/
+        Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).enableIrq(0);
     }
     void EnterSyscall()
     {

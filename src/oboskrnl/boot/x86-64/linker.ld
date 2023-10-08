@@ -20,15 +20,7 @@ SECTIONS
         *(.multiboot.text)
     }
 
-/*	. += 0x2FC000;
-
-    .glb.text ALIGN (4K) : AT (0x20F000) {
-        *(.glb.text)
-    }
-
-    . += 0xBFD03000;*/
     . += 0xFFFFFFFF80000000;
-
 
     .text ALIGN (4K) : AT (ADDR (.text) - 0xFFFFFFFF80000000)
     {
@@ -37,6 +29,9 @@ SECTIONS
         _glb_text_start = .;
         *(.glb.text)
         _glb_text_end = .;
+        _scheduler_text_start = .;
+        *(.scheduler_text)
+        _scheduler_text_end = .;
     }
     __etext = .;
 

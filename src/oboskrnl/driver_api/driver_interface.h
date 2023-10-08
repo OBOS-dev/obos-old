@@ -33,7 +33,7 @@ namespace obos
 		public:
 
 			bool SendData(PBYTE buffer, SIZE_T size, bool failIfConnectionMutexLocked = true);
-			bool RecvData(PBYTE data, SIZE_T size, bool peek = false, bool failIfConnectionMutexLocked = true);
+			bool RecvData(PBYTE data, SIZE_T size, bool waitForData = true, bool peek = false, bool failIfConnectionMutexLocked = true);
 
 			bool CloseConnection(bool setLastError = true);
 			~DriverConnectionHandle();
@@ -45,7 +45,7 @@ namespace obos
 		private:
 			DriverConnectionHandle() = default;
 			bool SendDataImpl(connection_buffer& conn_buffer, PBYTE buffer, SIZE_T size, bool failIfConnectionMutexLocked);
-			bool RecvDataImpl(connection_buffer& conn_buffer, PBYTE data, SIZE_T size, bool peek, bool failIfConnectionMutexLocked);
+			bool RecvDataImpl(connection_buffer& conn_buffer, PBYTE data, SIZE_T size, bool waitForData, bool peek, bool failIfConnectionMutexLocked);
 			driverIdentification* m_driverIdentity = nullptr;
 			connection_buffer m_inputBuffer;
 			connection_buffer m_outputBuffer;
@@ -56,16 +56,17 @@ namespace obos
 		public:
 			DriverClientConnectionHandle() = default;
 			
-			bool OpenConnection(DWORD driverId);
+			bool OpenConnection(DWORD driverId, DWORD connectionTimeoutMilliseconds = 5000);
 			bool CloseConnection(bool setLastError = true);
 
 			bool SendData(PBYTE buffer, SIZE_T size, bool failIfConnectionMutexLocked = true);
-			bool RecvData(PBYTE data, SIZE_T size, bool peek = false, bool failIfConnectionMutexLocked = true);
+			bool RecvData(PBYTE data, SIZE_T size, bool waitForData = true, bool peek = false, bool failIfConnectionMutexLocked = true);
 
 			virtual ~DriverClientConnectionHandle();
 		private:
 			DriverConnectionHandle* m_driverConnection = nullptr;
 		};
+
 		DriverConnectionHandle* Listen();
 	}
 }

@@ -58,7 +58,10 @@ namespace obos
 		OBOS_ERROR_PREMATURE_PROCESS_EXIT,
 		// 0x15
 		OBOS_ERROR_MUTEX_NOT_LOCKED,
+		// 0x16
+		OBOS_ERROR_TIMEOUT,
 		
+		// The highest error the system will return.
 		OBOS_HIGHEST_ERROR,
 	};
 #ifdef OBOS_KERNEL_BUILD

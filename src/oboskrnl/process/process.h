@@ -51,7 +51,7 @@ namespace obos
 			Process& operator=(const Process&) = delete;
 			Process& operator=(Process&&) = delete;
 
-			~Process();
+			~Process() {}
 		public:
 #if defined (__i686__)
 			memory::PageDirectory* pageDirectory = nullptr;

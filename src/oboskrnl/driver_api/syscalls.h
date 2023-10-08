@@ -21,6 +21,7 @@ namespace obos
 			process::Process* process;
 			serviceType service_type = serviceType::OBOS_SERVICE_TYPE_INVALID;
 			list_t* driverConnections;
+			bool isListeningForConnection : 1;
 		};
 		extern driverIdentification** g_registeredDrivers;
 		extern SIZE_T g_registeredDriversCapacity;

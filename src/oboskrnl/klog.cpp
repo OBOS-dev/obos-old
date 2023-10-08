@@ -368,7 +368,7 @@ namespace obos
 		}
 		
 		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendEOI();
-		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendDataByte(BITFIELD_FROM_BIT(1));
+		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).sendDataByte(~BITFIELD_FROM_BIT(1));
 		RegisterInterruptHandler(33, irq1);
 		asm volatile("sti");
 
@@ -545,8 +545,8 @@ namespace obos
 	void addr2func(PVOID addr, STRING& str, SIZE_T& functionAddress)
 	{
 		UINTPTR_T address = GET_FUNC_ADDR(addr);
-		CSTRING startAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[4].mod_start);
-		CSTRING endAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[4].mod_end);
+		CSTRING startAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[3].mod_start);
+		CSTRING endAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[3].mod_end);
 		for (CSTRING iter = startAddress;
 			iter < endAddress;
 			iter += countTo(iter, '\n') + 1)
@@ -575,8 +575,8 @@ namespace obos
 	void addr2file(PVOID addr, STRING& str)
 	{
 		UINTPTR_T address = GET_FUNC_ADDR(addr);
-		CSTRING startAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[4].mod_start);
-		CSTRING endAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[4].mod_end);
+		CSTRING startAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[3].mod_start);
+		CSTRING endAddress = reinterpret_cast<CSTRING>(reinterpret_cast<multiboot_module_t*>(g_multibootInfo->mods_addr)[3].mod_end);
 		for (CSTRING iter = startAddress;
 			iter < endAddress;
 			iter += countTo(iter, '\n') + 1)

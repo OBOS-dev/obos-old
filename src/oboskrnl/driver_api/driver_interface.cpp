@@ -15,6 +15,7 @@
 
 #include <multitasking/multitasking.h>
 #include <multitasking/thread.h>
+#include <multitasking/threadHandle.h>
 
 namespace obos
 {
@@ -24,9 +25,9 @@ namespace obos
 		{
 			return SendDataImpl(m_outputBuffer, buffer, size, failIfConnectionMutexLocked);
 		}
-		bool DriverConnectionHandle::RecvData(PBYTE buffer, SIZE_T size, bool peek, bool failIfConnectionMutexLocked)
+		bool DriverConnectionHandle::RecvData(PBYTE buffer, SIZE_T size, bool waitForData, bool peek, bool failIfConnectionMutexLocked)
 		{
-			return RecvDataImpl(m_inputBuffer, buffer, size, peek, failIfConnectionMutexLocked);
+			return RecvDataImpl(m_inputBuffer, buffer, size, waitForData, peek, failIfConnectionMutexLocked);
 		}
 
 		bool DriverConnectionHandle::CloseConnection(bool setLastError)
@@ -86,22 +87,39 @@ namespace obos
 			return true;
 		}
 
-		bool DriverConnectionHandle::RecvDataImpl(connection_buffer& conn_buffer, PBYTE data, SIZE_T size, bool peek, bool failIfConnectionMutexLocked)
+		bool RecvDataCallback(multitasking::Thread*, PVOID _udata)
+		{
+			UINTPTR_T* userData = (UINTPTR_T*)_udata;
+			connection_buffer* _this = (connection_buffer*)userData[0];
+			SIZE_T size = userData[1];
+			return _this->szBuffer >= size;
+		}
+
+		bool DriverConnectionHandle::RecvDataImpl(connection_buffer& conn_buffer, PBYTE data, SIZE_T size, bool waitForData, bool peek, bool failIfConnectionMutexLocked)
 		{
 			if (!m_driverIdentity)
 			{
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
 			}
-			multitasking::safe_lock lock{ &conn_buffer.mutex };
-			if (!lock.Lock(failIfConnectionMutexLocked))
-				return false;
 
 			if (size > conn_buffer.szBuffer)
 			{
-				SetLastError(OBOS_ERROR_BUFFER_TOO_SMALL);
-				return false;
+				if(!waitForData)
+				{
+					SetLastError(OBOS_ERROR_BUFFER_TOO_SMALL);
+					return false;
+				}
+				UINTPTR_T udata[2] = { (UINTPTR_T)&conn_buffer, size };
+				multitasking::g_currentThread->isBlockedCallback = RecvDataCallback;
+				multitasking::g_currentThread->isBlockedUserdata = udata;
+				multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;
+				_int(0x30);
 			}
+
+			multitasking::safe_lock lock{ &conn_buffer.mutex };
+			if (!lock.Lock(failIfConnectionMutexLocked))
+				return false;
 
 			if(data)
 				utils::memcpy(data, conn_buffer.buffer, size);
@@ -120,17 +138,22 @@ namespace obos
 				PBYTE newBuffer = (PBYTE)kcalloc(conn_buffer.szBuffer - size, sizeof(BYTE));
 				if (!newBuffer)
 					return false;
-				utils::memcpy(newBuffer, conn_buffer.buffer + size, size);
+				utils::memcpy(newBuffer, conn_buffer.buffer + size, conn_buffer.szBuffer - size);
+				kfree(conn_buffer.buffer);
 				conn_buffer.bufferPosition = newBuffer + (conn_buffer.szBuffer - size);
 				conn_buffer.szBuffer -= size;
 				conn_buffer.buffer = newBuffer;
-				kfree(conn_buffer.buffer);
 			}
 
 			return true;
 		}
 		
-		bool DriverClientConnectionHandle::OpenConnection(DWORD driverId)
+		bool OpenConnectionCallback(multitasking::Thread* _this, PVOID userData)
+		{
+			driverIdentification* identity = (driverIdentification*)userData;
+			return identity->isListeningForConnection || (multitasking::g_timerTicks >= _this->wakeUpTime);
+		}
+		bool DriverClientConnectionHandle::OpenConnection(DWORD driverId, DWORD connectionTimeoutMilliseconds)
 		{
 			if (g_registeredDriversCapacity < driverId)
 			{
@@ -142,6 +165,19 @@ namespace obos
 			{
 				SetLastError(OBOS_ERROR_NO_SUCH_OBJECT);
 				return false;
+			}
+			if(!identity->isListeningForConnection)
+			{
+				multitasking::g_currentThread->isBlockedCallback = OpenConnectionCallback;
+				multitasking::g_currentThread->isBlockedUserdata = identity;
+				multitasking::g_currentThread->wakeUpTime = multitasking::g_timerTicks + multitasking::MillisecondsToTicks(connectionTimeoutMilliseconds);
+				multitasking::g_currentThread->status |= multitasking::Thread::status_t::BLOCKED;
+				_int(0x30);
+				if (!identity->isListeningForConnection)
+				{
+					SetLastError(OBOS_ERROR_TIMEOUT);
+					return false;
+				}
 			}
 			m_driverConnection = new DriverConnectionHandle{};
 			m_driverConnection->m_driverIdentity = identity;
@@ -163,9 +199,9 @@ namespace obos
 		{
 			return m_driverConnection->SendDataImpl(m_driverConnection->m_inputBuffer, buffer, size, failIfConnectionMutexLocked);
 		}
-		bool DriverClientConnectionHandle::RecvData(PBYTE data, SIZE_T size, bool peek, bool failIfConnectionMutexLocked)
+		bool DriverClientConnectionHandle::RecvData(PBYTE data, SIZE_T size, bool waitForData, bool peek, bool failIfConnectionMutexLocked)
 		{
-			return m_driverConnection->RecvDataImpl(m_driverConnection->m_outputBuffer, data, size, peek, failIfConnectionMutexLocked);
+			return m_driverConnection->RecvDataImpl(m_driverConnection->m_outputBuffer, data, size, waitForData, peek, failIfConnectionMutexLocked);
 		}
 
 		DriverClientConnectionHandle::~DriverClientConnectionHandle()
@@ -186,7 +222,7 @@ namespace obos
 			{
 				DriverConnectionHandle** ret = (DriverConnectionHandle**)_ret[0];
 				list_node_t* node = list_at(driverIdentity->driverConnections, _ret[1]);
-				if (!node)
+				if (!node || !ret)
 					return false;
 				*ret = (DriverConnectionHandle*)(node->val);
 				return true;
@@ -204,6 +240,7 @@ namespace obos
 			driverIdentification* driverIdentity = (driverIdentification*)multitasking::g_currentThread->owner->driverIdentity;
 			DriverConnectionHandle* ret = nullptr;
 			UINTPTR_T _ret[2] = { (UINTPTR_T)&ret, driverIdentity->driverConnections->len };
+			driverIdentity->isListeningForConnection = true;
 			multitasking::g_currentThread->isBlockedCallback = ListenBlockCallback;
 			multitasking::g_currentThread->isBlockedUserdata = _ret;
 			multitasking::g_currentThread->status |= (DWORD)multitasking::Thread::status_t::BLOCKED;

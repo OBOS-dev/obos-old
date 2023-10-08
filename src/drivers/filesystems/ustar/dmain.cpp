@@ -32,7 +32,7 @@ void ConnectionHandler(PVOID _handle);
 
 extern "C" int _start()
 {
-	if (GetMultibootModule(PASS_OBOS_API_PARS 3, (UINTPTR_T*)&g_archivePosition, &g_archiveSize) != obos::driverAPI::exitStatus::EXIT_STATUS_SUCCESS)
+	if (GetMultibootModule(PASS_OBOS_API_PARS 2, (UINTPTR_T*)&g_archivePosition, &g_archiveSize) != obos::driverAPI::exitStatus::EXIT_STATUS_SUCCESS)
 		return 1; // Shouldn't ever happen.
 	
 	HANDLE connection = 0;

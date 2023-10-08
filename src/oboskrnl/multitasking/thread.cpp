@@ -20,7 +20,7 @@ namespace obos
 	{
 		//extern void ThreadEntryPoint();
 
-		UINT32_T g_nextThreadTid = 1;
+		UINT32_T g_nextThreadTid = 0;
 		Thread::Thread(priority_t threadPriority, VOID(*entry)(PVOID userData), PVOID userData, utils::RawBitfield threadStatus, SIZE_T stackSizePages)
 		{
 			CreateThread(threadPriority, entry, userData, threadStatus, stackSizePages);

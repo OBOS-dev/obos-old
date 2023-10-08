@@ -54,7 +54,7 @@
 #define inRange(val, rStart, rEnd) (((UINTPTR_T)(val)) >= ((UINTPTR_T)(rStart)) && ((UINTPTR_T)(val)) < ((UINTPTR_T)(rEnd)))
 
 extern "C" UINTPTR_T* boot_page_directory1;
-extern "C" void _init();
+extern "C" void _start(PVOID);
 extern "C" char _glb_text_start;
 extern "C" char _glb_text_end;
 extern "C" void idleTask(PVOID);
@@ -267,6 +267,7 @@ namespace obos
 		// Oh no!
 		kpanic(nullptr, nullptr, kpanic_format("obos::kmain tried to return!"));
 	}
+
 	process::Process* g_kernelProcess = nullptr;
 	void kmainThr()
 	{ 
@@ -313,10 +314,10 @@ namespace obos
 		InitializeConsole(0xFFFFFFFF, 0x00000000);
 		
 		multitasking::ThreadHandle mainThread;
-		
+
 		driverAPI::driverIdentification* initrdDriver = 
-			driverAPI::LoadModule((PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start,
-				((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[2].mod_start, &mainThread);
+			driverAPI::LoadModule((PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start,
+				((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start, &mainThread);
 
 		obos::driverAPI::driver_commands request = obos::driverAPI::driver_commands::OBOS_SERVICE_QUERY_FILE_DATA;
 		driverAPI::DriverClientConnectionHandle driverCon;
@@ -330,16 +331,14 @@ namespace obos
 		driverCon.SendData((PBYTE)&nul, 8);
 		driverCon.SendData((PBYTE)&nul, 1);
 		UINT64_T response[3] = {};
-		for(; !driverCon.RecvData((PBYTE)&response, sizeof(response)););
+		driverCon.RecvData((PBYTE)&response, sizeof(response));
 		printf("For file \"%s\", the driver returned file size %p and file attributes %p.", filepath, response[0], response[2]);
 
 		multitasking::ThreadHandle handle;
-		handle.CreateThread(multitasking::Thread::priority_t::IDLE, idleTask, nullptr, 0, 0);
-		handle.closeHandle();
 		handle.OpenThread(multitasking::g_currentThread);
 		handle.SetThreadPriority(multitasking::Thread::priority_t::HIGH);
 		handle.closeHandle();
-
+			
 		cursorUpdate(nullptr);
 
 		RestartComputer();

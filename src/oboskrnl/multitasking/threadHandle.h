@@ -163,5 +163,11 @@ namespace obos
 		/// </summary>
 		/// <param name="milliseconds">The amount of milliseconds to sleep for.</param>
 		void Sleep(SIZE_T milliseconds);
+		/// <summary>
+		/// Converts milliseconds to ticker ticks.
+		/// </summary>
+		/// <param name="milliseconds">The number to convert</param>
+		/// <returns>The converted number.</returns>
+		SIZE_T MillisecondsToTicks(SIZE_T milliseconds);
 	}
 }

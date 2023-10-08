@@ -385,12 +385,13 @@ namespace obos
 				DriverConnectionHandle* handle;
 				PBYTE data;
 				SIZE_T size;
+				BOOL waitForData;
 				BOOL peek;
 				BOOL failIfMutexLocked;
 			} *pars = (_par*)parameters;
 			if (GET_FUNC_ADDR(pars->handle->GetDriverIdentification()) < 0xfffffffff0000000)
 				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
-			return pars->handle->RecvData(pars->data, pars->size, pars->peek, pars->failIfMutexLocked) ? exitStatus::EXIT_STATUS_SUCCESS : exitStatus::EXIT_STATUS_CHECK_LAST_ERROR;
+			return pars->handle->RecvData(pars->data, pars->size, pars->waitForData, pars->peek, pars->failIfMutexLocked) ? exitStatus::EXIT_STATUS_SUCCESS : exitStatus::EXIT_STATUS_CHECK_LAST_ERROR;
 		}
 		static exitStatus ConnectionClose(DEFINE_RESERVED_PARAMETERS)
 		{

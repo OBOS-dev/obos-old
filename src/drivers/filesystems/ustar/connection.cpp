@@ -28,10 +28,7 @@ void ConnectionHandler(PVOID _handle)
 		driverAPI::driver_commands command = driverAPI::driver_commands::OBOS_SERVICE_INVALID_SERVICE_COMMAND;
 		status = ConnectionRecvData(PASS_OBOS_API_PARS handle, &command, sizeof(command));
 		if (GetLastError() == OBOS_ERROR_BUFFER_TOO_SMALL)
-		{
-			asm volatile("int $0x30; hlt");
 			continue;
-		}
 		if (status != driverAPI::exitStatus::EXIT_STATUS_SUCCESS)
 		{
 			ConnectionClose(PASS_OBOS_API_PARS handle);
@@ -59,7 +56,6 @@ void ConnectionHandler(PVOID _handle)
 				status = ConnectionRecvData(PASS_OBOS_API_PARS handle, &filepathSize, sizeof(filepathSize));
 				if (GetLastError() == OBOS_ERROR_BUFFER_TOO_SMALL)
 				{
-					asm volatile("int $0x30; hlt");
 					continue;
 				}
 				if (status != driverAPI::exitStatus::EXIT_STATUS_SUCCESS)
@@ -88,7 +84,6 @@ void ConnectionHandler(PVOID _handle)
 				status = ConnectionRecvData(PASS_OBOS_API_PARS handle, buffer, filepathSize);
 				if (GetLastError() == OBOS_ERROR_BUFFER_TOO_SMALL)
 				{
-					asm volatile("int $0x30; hlt");
 					continue;
 				}
 				if (status != driverAPI::exitStatus::EXIT_STATUS_SUCCESS)
@@ -105,7 +100,6 @@ void ConnectionHandler(PVOID _handle)
 				status = ConnectionRecvData(PASS_OBOS_API_PARS handle, nullptr, sizeof(UINT64_T) + sizeof(BYTE));
 				if (GetLastError() == OBOS_ERROR_BUFFER_TOO_SMALL)
 				{
-					asm volatile("int $0x30; hlt");
 					continue;
 				}
 				if (status != driverAPI::exitStatus::EXIT_STATUS_SUCCESS)

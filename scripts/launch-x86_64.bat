@@ -9,6 +9,9 @@ qemu-system-x86_64 -cdrom out/obos.iso ^
 -serial tcp:0.0.0.0:1534,server,nowait ^
 -monitor stdio ^
 -debugcon file:log.txt ^
+-D qemu_log.txt ^
+-d int ^
+-M q35,smm=off ^
 -cpu qemu64,+nx
 @rem -D qemu_log.txt ^
 @rem -d int ^

@@ -115,6 +115,7 @@ struct safe_lock
 			m_mutex->Lock(waitIfLocked);
 			return m_mutex->IsLocked();
 		}
+		obos::EnterKernelSection();
 		return false;
 	}
 	bool IsLocked()
@@ -127,6 +128,7 @@ struct safe_lock
 	{
 		if (m_mutex && m_mutex->IsLocked())
 			m_mutex->Unlock();
+		obos::LeaveKernelSection();
 	}
 	~safe_lock()
 	{

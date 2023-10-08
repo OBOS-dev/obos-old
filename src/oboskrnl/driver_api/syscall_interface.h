@@ -41,7 +41,7 @@ OBOS_EXIT_STATUS Printf(OBOS_API CSTRING format, ...);
 OBOS_EXIT_STATUS GetPhysicalAddress(OBOS_API PVOID linearAddress, PVOID* physicalAddress);
 OBOS_EXIT_STATUS ListenForConnections(OBOS_API HANDLE* newHandle);
 OBOS_EXIT_STATUS ConnectionSendData(OBOS_API HANDLE handle, PVOID data, SIZE_T size, BOOL failIfMutexLocked OBOS_SET_DEFAULT_PARAMETER(true));
-OBOS_EXIT_STATUS ConnectionRecvData(OBOS_API HANDLE handle, PVOID data, SIZE_T size, BOOL peek OBOS_SET_DEFAULT_PARAMETER(false), BOOL failIfMutexLocked OBOS_SET_DEFAULT_PARAMETER(true));
+OBOS_EXIT_STATUS ConnectionRecvData(OBOS_API HANDLE handle, PVOID data, SIZE_T size, BOOL waitForData OBOS_SET_DEFAULT_PARAMETER(true), BOOL peek OBOS_SET_DEFAULT_PARAMETER(false), BOOL failIfMutexLocked OBOS_SET_DEFAULT_PARAMETER(true));
 OBOS_EXIT_STATUS ConnectionClose(OBOS_API HANDLE handle);
 
 OBOS_EXIT_STATUS CallSyscall(OBOS_API DWORD syscallId, ...);
