@@ -1,1 +1,0 @@
-If you see this message, you have succedded in reading a file from the initrd with the new driver interface, also you're a gigachad.

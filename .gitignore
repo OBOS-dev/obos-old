@@ -1,8 +1,0 @@
-# Ignore all visual studio files.
-.vs/*
-!.vs/launch.vs.json
-out/Ubuntu/*
-CMakePresets.json
-out/build/*
-/qemu_log.txt
-/log.txt
