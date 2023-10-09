@@ -1,1 +1,0 @@
-For file "folder/file.txt", the driver returned file size 0x0000000000000000 and file attributes 0x0000000000000010.

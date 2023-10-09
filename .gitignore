@@ -6,3 +6,4 @@ CMakePresets.json
 out/build/*
 qemu_log.txt
 log.txt
+/log.txt
