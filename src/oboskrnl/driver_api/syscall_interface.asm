@@ -35,6 +35,8 @@ SYSCALL_DEFINE ListenForConnections, current_syscall
 SYSCALL_DEFINE ConnectionSendData, current_syscall
 SYSCALL_DEFINE ConnectionRecvData, current_syscall
 SYSCALL_DEFINE ConnectionClose, current_syscall
+SYSCALL_DEFINE HeapAllocate, current_syscall
+SYSCALL_DEFINE HeapFree, current_syscall
 
 ; All syscalls must be before this.
 

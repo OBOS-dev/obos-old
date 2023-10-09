@@ -16,8 +16,6 @@
 UINT8_T* g_archivePosition = NULL;
 SIZE_T g_archiveSize = 0;
 
-void ReadFile(CSTRING filename, STRING output, SIZE_T count);
-obos::driverAPI::fileExistsReturn FileExists(CSTRING filename, SIZE_T* size);
 void IterateFiles(BOOL(*appendCallback)(CSTRING filename, SIZE_T bufSize, BYTE attrib));
 
 #define DRIVER_ID 1
@@ -26,6 +24,8 @@ obos::driverAPI::driverHeader __attribute__((section(OBOS_DRIVER_HEADER_SECTION)
 	.magicNumber = OBOS_DRIVER_HEADER_MAGIC,
 	.driverId = DRIVER_ID,
 	.service_type = obos::driverAPI::serviceType::OBOS_SERVICE_TYPE_FILESYSTEM,
+	.infoFields = 0,
+	.pciInfo = {}
 };
 
 void ConnectionHandler(PVOID _handle);
@@ -151,7 +151,7 @@ obos::driverAPI::fileExistsReturn FileExists(CSTRING filename, SIZE_T* size)
 	}
 	return ret;
 }
-void IterateFiles(BOOL(*appendCallback)(CSTRING filename, SIZE_T bufSize, BYTE attrib))
+void IterateFiles(BOOL(*)(CSTRING filename, SIZE_T bufSize, BYTE attrib))
 {
 	UINT8_T* iter = g_archivePosition;
 

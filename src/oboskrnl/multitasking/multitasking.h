@@ -30,6 +30,8 @@ namespace obos
 		// A call to SetPITFrequency will enable the PIT once again.
 		void DisablePIT();
 
+		bool IsInScheduler();
+
 		void InitializeMultitasking();
 	}
 }

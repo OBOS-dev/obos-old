@@ -40,8 +40,6 @@
 - Parameters:<br>
 &nbsp;&nbsp;&nbsp;sizeFilepath - SIZE\_T<br>
 &nbsp;&nbsp;&nbsp;filepath - STRING<br>
-&nbsp;&nbsp;&nbsp;driveId - UINT64\_T<br>
-&nbsp;&nbsp;&nbsp;partitionId - UINT8\_T<br>
 - Returns the size of the data read, and the file data.
 - Can only be accessed by the kernel.
 ### OBOS\_SERVICE\_TYPE\_STORAGE\_DEVICE, SERVICE\_TYPE\_VIRTUAL\_STORAGE\_DEVICE

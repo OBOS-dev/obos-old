@@ -204,6 +204,8 @@ list_at(list_t *self, int index) {
 
 void
 list_remove(list_t *self, list_node_t *node) {
+  if (!node || !self)
+      return;
   node->prev
     ? (node->prev->next = node->next)
     : (self->head = node->next);

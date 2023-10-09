@@ -319,20 +319,24 @@ namespace obos
 			driverAPI::LoadModule((PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start,
 				((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start, &mainThread);
 
-		obos::driverAPI::driver_commands request = obos::driverAPI::driver_commands::OBOS_SERVICE_QUERY_FILE_DATA;
+		obos::driverAPI::driver_commands request = obos::driverAPI::driver_commands::OBOS_SERVICE_READ_FILE;
 		driverAPI::DriverClientConnectionHandle driverCon;
 		driverCon.OpenConnection(initrdDriver->driverId);
 		driverCon.SendData((PBYTE)&request, sizeof(request));
-		BYTE filepath[] = { "folder/file.txt" };
+		BYTE filepath[] = { "testProgram" };
 		SIZE_T filepathSize = sizeof(filepath);
-		SIZE_T nul = 0;
+		//SIZE_T nul = 0;
 		driverCon.SendData((PBYTE)&filepathSize, sizeof(filepathSize));
 		driverCon.SendData(filepath, filepathSize);
-		driverCon.SendData((PBYTE)&nul, 8);
-		driverCon.SendData((PBYTE)&nul, 1);
-		UINT64_T response[3] = {};
-		driverCon.RecvData((PBYTE)&response, sizeof(response));
-		printf("For file \"%s\", the driver returned file size %p and file attributes %p.", filepath, response[0], response[2]);
+		SIZE_T filesize = 0;
+		driverCon.RecvData((PBYTE)&filesize, sizeof(filesize));
+		PBYTE contents = new BYTE[filesize + 1];
+		driverCon.RecvData(contents, filesize);
+
+		process::Process* proc = new process::Process;
+		proc->CreateProcess(contents, filesize, nullptr);
+		
+		delete[] contents;
 
 		multitasking::ThreadHandle handle;
 		handle.OpenThread(multitasking::g_currentThread);

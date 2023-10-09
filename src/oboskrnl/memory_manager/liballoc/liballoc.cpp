@@ -75,8 +75,6 @@ pageBlock* allocateNewPageBlock(SIZE_T nPages)
 		pageBlockHead = blk;
 	else
 		pageBlockHead->next = blk;
-	if (pageBlockTail)
-		pageBlockTail->prev = blk;
 	blk->prev = pageBlockTail;
 	blk->magic = PAGEBLOCK_MAGIC;
 	blk->nPagesAllocated = nPages;
@@ -187,7 +185,9 @@ extern "C" {
 			// We need to look for pageBlock structures.
 			do
 			{
-				if ((current->nBytesUsed - current->nPagesAllocated * 4096) >= amountNeeded)
+				//if (((current->nPagesAllocated * 4096) - current->nBytesUsed) >= amountNeeded)
+				if ((GET_FUNC_ADDR(current->lastBlock->allocAddr) + current->lastBlock->size + sizeof(memBlock) + amountNeeded) <
+					(GET_FUNC_ADDR(current) + current->nPagesAllocated * 4096))
 				{
 					currentPageBlock = current;
 					break;

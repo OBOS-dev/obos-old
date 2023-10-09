@@ -102,6 +102,8 @@ namespace obos
 			}
 			if (!g_currentThread->owner->isUserMode || g_currentThread->isServicingSyscall || isInKernelCode(g_currentThread->frame))
 			{
+				if (g_currentThread->owner->isUserMode)
+					SetTSSStack(reinterpret_cast<PBYTE>(g_currentThread->tssStackBottom) + 8192);
 				if (g_currentThread->frame.intNumber != 0x30)
 					SendEOI(g_currentThread->frame.intNumber - 32);
 				g_schedulerMutex.Unlock();
@@ -362,6 +364,11 @@ namespace obos
 		{
 			// Disable channel 0 of the PIT.
 			outb(0x43, 0b00000000);
+		}
+
+		bool IsInScheduler()
+		{
+			return g_schedulerMutex.locked;
 		}
 
 		void InitializeMultitasking()

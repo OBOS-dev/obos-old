@@ -43,6 +43,8 @@ OBOS_EXIT_STATUS ListenForConnections(OBOS_API HANDLE* newHandle);
 OBOS_EXIT_STATUS ConnectionSendData(OBOS_API HANDLE handle, PVOID data, SIZE_T size, BOOL failIfMutexLocked OBOS_SET_DEFAULT_PARAMETER(true));
 OBOS_EXIT_STATUS ConnectionRecvData(OBOS_API HANDLE handle, PVOID data, SIZE_T size, BOOL waitForData OBOS_SET_DEFAULT_PARAMETER(true), BOOL peek OBOS_SET_DEFAULT_PARAMETER(false), BOOL failIfMutexLocked OBOS_SET_DEFAULT_PARAMETER(true));
 OBOS_EXIT_STATUS ConnectionClose(OBOS_API HANDLE handle);
+OBOS_EXIT_STATUS HeapAllocate(OBOS_API PVOID* ret, SIZE_T size);
+OBOS_EXIT_STATUS HeapFree(OBOS_API PVOID block);
 
 OBOS_EXIT_STATUS CallSyscall(OBOS_API DWORD syscallId, ...);
 

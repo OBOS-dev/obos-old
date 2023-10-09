@@ -350,12 +350,13 @@ namespace obos
 		{
 			if (!m_thread)
 				return m_origin->getReferences();
-			if (!(--m_thread->nHandles) && m_thread->status == (UINT32_T)status_t::DEAD && !(--m_origin->getReferences()))
+			if (!(--m_thread->nHandles) && m_thread->status == status_t::DEAD)
 			{
 				// We can free the thread's information.
+				
+				delete m_thread;
 
-				EnterKernelSection();
-				list_t* priorityList = nullptr;
+				/*list_t* priorityList = nullptr;
 
 				switch (m_thread->priority)
 				{
@@ -376,10 +377,7 @@ namespace obos
 					return 0;
 				}
 				list_remove(priorityList, list_find(priorityList, m_value));
-				list_remove(g_threads, list_find(g_threads, m_value));
-
-				delete m_thread;
-				LeaveKernelSection();
+				list_remove(g_threads, list_find(g_threads, m_value));*/
 			}
 			m_thread = nullptr;
 			m_value = nullptr;
@@ -395,8 +393,30 @@ namespace obos
 			g_currentThread->exitCode = exitCode;
 			g_currentThread->status = (UINT32_T)Thread::status_t::DEAD;
 			list_remove(g_currentThread->owner->threads, list_find(g_currentThread->owner->threads, g_currentThread));
+			list_remove(g_threads, list_find(g_threads, g_currentThread));
+			list_t* priorityList = nullptr;
+			switch (g_currentThread->priority)
+			{
+			case obos::multitasking::Thread::priority_t::IDLE:
+				priorityList = g_threadPriorityList[0];
+				break;
+			case obos::multitasking::Thread::priority_t::LOW:
+				priorityList = g_threadPriorityList[1];
+				break;
+			case obos::multitasking::Thread::priority_t::NORMAL:
+				priorityList = g_threadPriorityList[2];
+				break;
+			case obos::multitasking::Thread::priority_t::HIGH:
+				priorityList = g_threadPriorityList[3];
+				break;
+			default:
+				break;
+			}
+			list_remove(priorityList, list_find(priorityList, g_currentThread));
+
 			if (g_currentThread->owner->threads->len == 0)
 				g_currentThread->owner->TerminateProcess(exitCode, false);
+			//delete g_currentThread;
 			_int(0x30);
 		}
 

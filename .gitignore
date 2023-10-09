@@ -4,6 +4,5 @@
 out/Ubuntu/*
 CMakePresets.json
 out/build/*
-qemu_log.txt
-log.txt
+/qemu_log.txt
 /log.txt

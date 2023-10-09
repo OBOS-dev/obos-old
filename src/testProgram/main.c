@@ -58,8 +58,11 @@ void Thread(PVOID userdata)
 		ConsoleOutputString(PASS_OBOS_API_PARS str);
 		ConsoleOutputString(PASS_OBOS_API_PARS "\r\n");
 	}
-	ConsoleSwapBuffers();
-	ExitThread(PASS_OBOS_API_PARS tid);
+	itoa(tid, str, 10);
+	ConsoleOutputString(PASS_OBOS_API_PARS "Exiting thread ");
+	ConsoleOutputString(PASS_OBOS_API_PARS str);
+	ConsoleOutputString(PASS_OBOS_API_PARS ".\n");
+	ExitThread(PASS_OBOS_API_PARS 0);
 }
 
 DWORD _start()
@@ -72,7 +75,7 @@ DWORD _start()
 	{
 		if (thr1)
 			CloseHandle(PASS_OBOS_API_PARS thr1);
-		return status;
+		return GetLastError();
 	}
 	DWORD tid = GetCurrentThreadTid();
 
@@ -84,6 +87,9 @@ DWORD _start()
 
 	WaitForThreadExit(PASS_OBOS_API_PARS thr1);
 	CloseHandle(PASS_OBOS_API_PARS thr1);
+	ConsoleOutputString(PASS_OBOS_API_PARS "Exiting thread ");
+	ConsoleOutputString(PASS_OBOS_API_PARS str);
+	ConsoleOutputString(PASS_OBOS_API_PARS ".\n");
 	ExitThread(PASS_OBOS_API_PARS 0);
 	return 0;
 }

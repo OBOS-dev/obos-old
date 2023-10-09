@@ -66,6 +66,8 @@ namespace obos
 		static exitStatus ConnectionSendData(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus ConnectionRecvData(DEFINE_RESERVED_PARAMETERS);
 		static exitStatus ConnectionClose(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus HeapAllocate(DEFINE_RESERVED_PARAMETERS);
+		static exitStatus HeapFree(DEFINE_RESERVED_PARAMETERS);
 		
 		static void interruptHandler(const obos::interrupt_frame* frame);
 
@@ -107,6 +109,8 @@ namespace obos
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(ConnectionSendData));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(ConnectionRecvData));
 			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(ConnectionClose));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(HeapAllocate));
+			RegisterSyscallHandler(currentSyscall++, GET_FUNC_ADDR(HeapFree));
 		}
 
 		static exitStatus RegisterDriver()
@@ -405,7 +409,30 @@ namespace obos
 			delete pars->handle;
 			return ret ? exitStatus::EXIT_STATUS_SUCCESS : exitStatus::EXIT_STATUS_CHECK_LAST_ERROR;
 		}
-
+		static exitStatus HeapAllocate(DEFINE_RESERVED_PARAMETERS)
+		{
+			struct _par
+			{
+				PVOID* ret;
+				SIZE_T size;
+			} *pars = (_par*)parameters;
+			if(!pars->size)
+				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
+			*pars->ret = new BYTE[pars->size];
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+		static exitStatus HeapFree(DEFINE_RESERVED_PARAMETERS)
+		{
+			struct _par
+			{
+				PBYTE block;
+			} *pars = (_par*)parameters;
+			if (pars->block < (PVOID)0xfffffffff0000000)
+				return exitStatus::EXIT_STATUS_INVALID_PARAMETER;
+			delete[] pars->block;
+			return exitStatus::EXIT_STATUS_SUCCESS;
+		}
+			
 		static void interruptHandler(const obos::interrupt_frame* frame)
 		{
 			if (!(Pic((frame->intNumber - 32) < 8 ? Pic::PIC1_CMD : Pic::PIC2_CMD, (frame->intNumber - 32) < 8 ? Pic::PIC1_DATA : Pic::PIC2_DATA).issuedInterrupt(frame->intNumber - 32)))

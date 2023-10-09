@@ -9,7 +9,6 @@ add_executable (testProgram "main.c" "${CMAKE_SOURCE_DIR}/src/oboskrnl/syscalls/
 target_compile_options(testProgram PRIVATE $<$<COMPILE_LANGUAGE:C>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:C>:-Werror>)
 
 target_link_options(testProgram
-    PUBLIC "-Xlinker" PUBLIC "-Map" PUBLIC "${OUTPUT_DIR}/testProgram.map"
     PUBLIC "-ffreestanding"
     PUBLIC "-mcmodel=large"
     PUBLIC "-T" PUBLIC "${CMAKE_SOURCE_DIR}/src/testProgram/linker.ld"
