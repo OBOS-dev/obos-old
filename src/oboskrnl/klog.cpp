@@ -315,6 +315,7 @@ namespace obos
 	{
 		asm volatile("cli");
 		EnterKernelSection();
+		Pic(Pic::PIC1_CMD, Pic::PIC1_DATA).disable();
 
 		extern SIZE_T s_framebufferWidth;
 		extern SIZE_T s_framebufferHeight;
@@ -610,7 +611,7 @@ namespace obos
 		next = seed;
 	}
 
-	static inline UINT64_T rdtsc()
+	inline UINT64_T rdtsc()
 	{
 		UINT64_T ret;
 		asm volatile ("rdtsc" : "=A"(ret));

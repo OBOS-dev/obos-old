@@ -1,5 +1,5 @@
 /*
-	kmain.cpp
+	oboskrnl/kmain.cpp
 
 	Copyright (c) 2023 Omar Berrow
 */
@@ -59,6 +59,7 @@ extern "C" char _glb_text_start;
 extern "C" char _glb_text_end;
 extern "C" void idleTask(PVOID);
 extern bool inKernelSection;
+void InitializeStackCanary();
 
 #ifdef __i686__
 #error i686 (x86) will no longer be supported :(
@@ -220,6 +221,8 @@ namespace obos
 
 		memory::InitializePhysicalMemoryManager();
 
+		//InitializeStackCanary();
+
 #ifdef __x86_64__
 		memory::g_zeroPage = reinterpret_cast<UINTPTR_T*>(memory::kalloc_physicalPage());
 		utils::dwMemset((DWORD*)memory::kmap_pageTable(memory::g_zeroPage), 0, 4096 / 4);
@@ -286,8 +289,10 @@ namespace obos
 		g_kernelProcess->children = list_new();
 
 		list_rpush(g_kernelProcess->threads, list_node_new(multitasking::g_currentThread));
+		list_rpush(g_kernelProcess->threads, list_node_new(multitasking::g_threads->head->next->val));
 
 		multitasking::g_currentThread->owner = g_kernelProcess;
+		((multitasking::Thread*)multitasking::g_threads->head->next->val)->owner = g_kernelProcess;
 
 		driverAPI::ResetSyscallHandlers();
 
@@ -313,37 +318,46 @@ namespace obos
 		// Initialize the console.
 		InitializeConsole(0xFFFFFFFF, 0x00000000);
 		
-		multitasking::ThreadHandle mainThread;
-
 		driverAPI::driverIdentification* initrdDriver = 
 			driverAPI::LoadModule((PBYTE)((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start,
-				((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start, &mainThread);
+				((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_end - ((multiboot_module_t*)g_multibootInfo->mods_addr)[1].mod_start, nullptr);
 
-		obos::driverAPI::driver_commands request = obos::driverAPI::driver_commands::OBOS_SERVICE_READ_FILE;
+		obos::driverAPI::driver_commands request = driverAPI::driver_commands::OBOS_SERVICE_READ_FILE;
 		driverAPI::DriverClientConnectionHandle driverCon;
 		driverCon.OpenConnection(initrdDriver->driverId);
 		driverCon.SendData((PBYTE)&request, sizeof(request));
-		BYTE filepath[] = { "testProgram" };
-		SIZE_T filepathSize = sizeof(filepath);
-		//SIZE_T nul = 0;
-		driverCon.SendData((PBYTE)&filepathSize, sizeof(filepathSize));
-		driverCon.SendData(filepath, filepathSize);
+		BYTE filepath[] = { "ps2Keyboard" };
+		SIZE_T size = sizeof(filepath) - 1;
+		driverCon.SendData((PBYTE)&size, sizeof(size));
+		driverCon.SendData(filepath, size);
+
 		SIZE_T filesize = 0;
 		driverCon.RecvData((PBYTE)&filesize, sizeof(filesize));
-		PBYTE contents = new BYTE[filesize + 1];
-		driverCon.RecvData(contents, filesize);
-
-		process::Process* proc = new process::Process;
-		proc->CreateProcess(contents, filesize, nullptr);
+		PBYTE fileContents = new BYTE[filesize];
+		driverCon.RecvData(fileContents, filesize);
 		
-		delete[] contents;
+		driverCon.CloseConnection();
 
 		multitasking::ThreadHandle handle;
-		handle.OpenThread(multitasking::g_currentThread);
-		handle.SetThreadPriority(multitasking::Thread::priority_t::HIGH);
+		handle.CreateThread(multitasking::Thread::priority_t::HIGH, cursorUpdate, nullptr, 0, 0);
 		handle.closeHandle();
-			
-		cursorUpdate(nullptr);
+
+		driverAPI::driverIdentification* ps2KeyboardDriver = driverAPI::LoadModule(fileContents, filesize, nullptr);
+		
+		driverCon.OpenConnection(ps2KeyboardDriver->driverId);
+
+		request = driverAPI::driver_commands::OBOS_SERVICE_READ_CHARACTER;
+		BYTE ch = 0;
+		while (1)
+		{
+			driverCon.SendData((PBYTE)&request, sizeof(request));
+			driverCon.RecvData(&ch, sizeof(ch));
+
+			if (ch)
+				ConsoleOutputCharacter(ch);
+		}
+
+		driverCon.CloseConnection();
 
 		RestartComputer();
 	}

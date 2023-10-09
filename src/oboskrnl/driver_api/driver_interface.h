@@ -31,7 +31,6 @@ namespace obos
 		class DriverConnectionHandle final
 		{
 		public:
-
 			bool SendData(PBYTE buffer, SIZE_T size, bool failIfConnectionMutexLocked = true);
 			bool RecvData(PBYTE data, SIZE_T size, bool waitForData = true, bool peek = false, bool failIfConnectionMutexLocked = true);
 
@@ -47,10 +46,10 @@ namespace obos
 			bool SendDataImpl(connection_buffer& conn_buffer, PBYTE buffer, SIZE_T size, bool failIfConnectionMutexLocked);
 			bool RecvDataImpl(connection_buffer& conn_buffer, PBYTE data, SIZE_T size, bool waitForData, bool peek, bool failIfConnectionMutexLocked);
 			driverIdentification* m_driverIdentity = nullptr;
+			bool m_isClosingConnection = false;
 			connection_buffer m_inputBuffer;
 			connection_buffer m_outputBuffer;
 		};
-		// This object is not RAII!!!
 		class DriverClientConnectionHandle final
 		{
 		public:

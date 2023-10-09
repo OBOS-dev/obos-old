@@ -83,6 +83,7 @@ global _ZN4obos15thrstack_bottomE
 extern _ZN4obos5kmainEP14multiboot_infoj
 extern _init
 extern _fini
+extern __stack_chk_guard
 
 segment .multiboot.text
 global _start

@@ -9,7 +9,7 @@ set(oboskrnl_files ${oboskrnl_asmSources} ${oboskrnl_platformSpecific}
         "external/list/list_node.c" "external/list/list.c"                     "multitasking/multitasking.cpp"      "elf/elf.cpp"
         "multitasking/thread.cpp"   "multitasking/mutex/mutex.cpp"             "multitasking/mutex/mutexHandle.cpp" "process/process.cpp"
         "driver_api/interrupts.cpp" "driver_api/syscalls.cpp"                  "syscalls/syscalls.cpp"              "external/amalgamated-dist/Zydis.c"
-        "descriptors/gdt/gdt.cpp" "error.cpp" "driver_api/driver_interface.cpp" "driver_api/load/module.cpp")
+        "descriptors/gdt/gdt.cpp" "error.cpp" "driver_api/driver_interface.cpp" "driver_api/load/module.cpp" "stack_canary.cpp")
 
 add_executable(oboskrnl ${oboskrnl_files})
 target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wextra> PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
@@ -54,6 +54,10 @@ message("crtend.o is at ${CRTBEGIN_DIRECTORY}")
 if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     message("Debug configuration.")
     target_compile_definitions(oboskrnl PUBLIC _DEBUG=1)
+    target_compile_options(oboskrnl
+        PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fstack-protector-all>
+        PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-mgeneral-regs-only>
+    )
 else()
     message(FATAL_ERROR "CMAKE_BUILD_TYPE must be \"Debug\".")
 endif()

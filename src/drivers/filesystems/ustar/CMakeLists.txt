@@ -4,7 +4,8 @@
 
 # The ustar filesystem driver.
 
-add_executable (ustarFilesystem "dmain.cpp" "connection.cpp" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/syscalls/syscall_interface.asm")
+add_executable (ustarFilesystem "dmain.cpp" "connection.cpp" 
+                   "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/syscalls/syscall_interface.asm")
 
 target_compile_options(ustarFilesystem 
     PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> 
@@ -12,6 +13,7 @@ target_compile_options(ustarFilesystem
     PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
     PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
     PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+    PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-mgeneral-regs-only>
     PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
     PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mno-red-zone>)
 

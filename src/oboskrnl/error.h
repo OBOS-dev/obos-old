@@ -60,6 +60,8 @@ namespace obos
 		OBOS_ERROR_MUTEX_NOT_LOCKED,
 		// 0x16
 		OBOS_ERROR_TIMEOUT,
+		// 0x17
+		OBOS_ERROR_CONNECTION_CLOSED,
 		
 		// The highest error the system will return.
 		OBOS_HIGHEST_ERROR,

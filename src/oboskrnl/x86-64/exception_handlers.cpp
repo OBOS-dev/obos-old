@@ -77,8 +77,8 @@ namespace obos
 		}
 		if (multitasking::g_initialized && multitasking::g_currentThread->owner)
 		{
-			/*if (multitasking::g_currentThread->owner->isUserMode)
-				multitasking::g_currentThread->owner->TerminateProcess(0xFFFFFFF1);*/
+			if (multitasking::g_currentThread->owner->isUserMode)
+				multitasking::g_currentThread->owner->TerminateProcess(0xFFFFFFF1);
 			if (!multitasking::g_currentThread->owner->isUserMode && utils::testBitInBitfield(frame->errorCode, 2) && utils::testBitInBitfield(frame->errorCode, 0))
 			{
 				// A kernel mode process was put into ring 3 by accident, so we put them back to ring 0.

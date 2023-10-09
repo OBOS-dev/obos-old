@@ -7,7 +7,7 @@
       "name": "oboskrnl-qemu", // a friendly name for the debug configuration 
       "project": "CMakeLists.txt",
       "projectTarget": "oboskrnl",
-      "program": "C:/Users/omark/Documents/obos/out/oboskrnl",
+      "program": "oboskrnl",
       "MIMode": "gdb",
       "customLaunchSetupCommands": [
         {
@@ -15,16 +15,16 @@
           "description": "Adds the kernel's symbol file."
         },
         {
-          "text": "add-symbol-file C:/Code/obos/out/testProgram",
-          "ignoreFailures": true
-        },
-        {
-          "text": "add-symbol-file C:/Code/obos/out/ustarFilesystem",
-          "ignoreFailures": true
+          "text": "add-symbol-file C:/Code/obos/out/ps2Keyboard"
         },
         {
           "text": "target remote :1234",
           "description": "Connects to qemu's gdb stub."
+        },
+        {
+          "text": "set disassembly-flavor intel",
+          "description": "Makes gdb disassemble in intel syntax instead of AT&T syntax.",
+          "ignoreFailures": true
         }
       ],
       "externalConsole": false,
@@ -32,11 +32,6 @@
       "remotePrelaunchWait": "1",
       "miDebuggerPath": "gdb",
       "setupCommands": [
-        {
-          "text": "set disassembly-flavor intel",
-          "description": "Makes gdb disassemble in intel syntax instead of AT&T syntax.",
-          "ignoreFailures": true
-        }
       ],
       "pipeTransport": { "disable": true },
       "showDisplayString": true,

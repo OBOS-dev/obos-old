@@ -43,6 +43,7 @@ _ZN4obos5utils6memcpyEPvPKvy:
 	mov r8, rcx
 	and r8, 0xFFFFFFFFFFFFFFFB
 	jnz .loop
+	shr rdx, 2
 	call _ZN4obos5utils8dwMemcpyEPjPKjy
 	jmp .finish
 

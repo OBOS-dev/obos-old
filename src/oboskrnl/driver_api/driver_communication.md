@@ -32,7 +32,13 @@
 - Gets the next file in the iterator.
 - Parameters:<br>
 &nbsp;&nbsp;&nbsp;iterator - HANDLE
-- Returns the same as OBOS\_SERVICE\_QUERY\_FILE\_DATA.
+- Returns the same as OBOS\_SERVICE\_QUERY\_FILE\_DATA + `SIZE sizeFilepath` and `STRING filepath`.
+- Can only be accessed by the kernel.
+#### OBOS\_SERVICE\_CLOSE\_FILE\_ITERATOR
+- Closes the file iterator.
+- Parameters:<br>
+&nbsp;&nbsp;&nbsp;iterator - HANDLE
+- Returns zero on success, or one if there is no such handle (UINT8_T).
 - Can only be accessed by the kernel.
 ### OBOS\_SERVICE\_TYPE\_INITRD\_FILESYSTEM <- OBOS\_SERVICE\_TYPE\_FILESYSTEM
 #### OBOS\_SERVICE\_READ\_FILE

@@ -44,6 +44,7 @@ extern "C" int _start()
 			return GetLastError();
 
 		CreateThread(PASS_OBOS_API_PARS &thread, 4, ConnectionHandler, (PVOID)connection, 0,0);
+		CloseHandle(PASS_OBOS_API_PARS thread);
 	}
 
 	return 0;
@@ -71,12 +72,7 @@ INT memcmp(PCVOID block1, PCVOID block2, SIZE_T size)
 			return -1;
 	return 0;
 }
-SIZE_T strlen(CSTRING str)
-{
-	SIZE_T i = 0;
-	for (; str[i]; i++);
-	return i;
-}
+extern SIZE_T strlen(CSTRING str);
 INT strcmp(CSTRING str1, CSTRING str2)
 {
 	if (str1 == str2)

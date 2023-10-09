@@ -4,14 +4,19 @@
 
 # The ps/2 keyboard driver.
 
-add_executable (ps2Keyboard "dmain.cpp" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.h")
+add_executable (ps2Keyboard "dmain.cpp" "inline-asm.cpp" "scancodes.cpp" "new.cpp" "connection.cpp"
+            "${CMAKE_SOURCE_DIR}/src/oboskrnl/driver_api/syscall_interface.asm" "${CMAKE_SOURCE_DIR}/src/oboskrnl/syscalls/syscall_interface.asm")
 
 target_compile_options(ps2Keyboard 
     PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wall> 
-    PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror> 
+    PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wextra> 
+    PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Werror>
+    PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-Wno-missing-field-initializers> 
+    PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+    PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+    PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mgeneral-regs-only>
     PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
-    PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mno-red-zone>
-)
+    PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mno-red-zone>)
 
 target_link_options(ps2Keyboard
     PUBLIC "-ffreestanding"
