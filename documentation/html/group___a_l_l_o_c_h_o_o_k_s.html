@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -48,6 +52,22 @@ $(function() {
 </script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('group___a_l_l_o_c_h_o_o_k_s.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -83,15 +103,9 @@ Macros</h2></td></tr>
 <tr class="memitem:ga397816ee230d64fe081f93d31bf5a534"><td class="memItemLeft" align="right" valign="top"><a id="ga397816ee230d64fe081f93d31bf5a534" name="ga397816ee230d64fe081f93d31bf5a534"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>PREFIX</b>(func)&#160;&#160;&#160;k ## func</td></tr>
 <tr class="separator:ga397816ee230d64fe081f93d31bf5a534"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga397816ee230d64fe081f93d31bf5a534"><td class="memItemLeft" align="right" valign="top"><a id="ga397816ee230d64fe081f93d31bf5a534" name="ga397816ee230d64fe081f93d31bf5a534"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>PREFIX</b>(func)&#160;&#160;&#160;k ## func</td></tr>
-<tr class="separator:ga397816ee230d64fe081f93d31bf5a534"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="typedef-members" name="typedef-members"></a>
 Typedefs</h2></td></tr>
-<tr class="memitem:gacf18a0d6c4b39d531e021702e9a77984"><td class="memItemLeft" align="right" valign="top"><a id="gacf18a0d6c4b39d531e021702e9a77984" name="gacf18a0d6c4b39d531e021702e9a77984"></a>
-typedef unsigned long&#160;</td><td class="memItemRight" valign="bottom"><b>size_t</b></td></tr>
-<tr class="separator:gacf18a0d6c4b39d531e021702e9a77984"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacf18a0d6c4b39d531e021702e9a77984"><td class="memItemLeft" align="right" valign="top"><a id="gacf18a0d6c4b39d531e021702e9a77984" name="gacf18a0d6c4b39d531e021702e9a77984"></a>
 typedef unsigned long&#160;</td><td class="memItemRight" valign="bottom"><b>size_t</b></td></tr>
 <tr class="separator:gacf18a0d6c4b39d531e021702e9a77984"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -111,7 +125,7 @@ void *PREFIX()&#160;</td><td class="memItemRight" valign="bottom"><b>malloc</b> 
 <tr class="memdesc:gade084e132bacda7d3c78a16b12a6b332"><td class="mdescLeft">&#160;</td><td class="mdescRight">The standard function. <br /></td></tr>
 <tr class="separator:gade084e132bacda7d3c78a16b12a6b332"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacb14ca2bec2357fa97e3b81e0cc598c4"><td class="memItemLeft" align="right" valign="top"><a id="gacb14ca2bec2357fa97e3b81e0cc598c4" name="gacb14ca2bec2357fa97e3b81e0cc598c4"></a>
-void *PREFIX()&#160;</td><td class="memItemRight" valign="bottom"><b>realloc</b> (void *<a class="el" href="structblock.html">block</a>, size_t count)</td></tr>
+void *PREFIX()&#160;</td><td class="memItemRight" valign="bottom"><b>realloc</b> (void *block, size_t count)</td></tr>
 <tr class="memdesc:gacb14ca2bec2357fa97e3b81e0cc598c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The standard function. <br /></td></tr>
 <tr class="separator:gacb14ca2bec2357fa97e3b81e0cc598c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga82650f666c5e45884fe5a34f0fc731d8"><td class="memItemLeft" align="right" valign="top"><a id="ga82650f666c5e45884fe5a34f0fc731d8" name="ga82650f666c5e45884fe5a34f0fc731d8"></a>
@@ -119,7 +133,7 @@ void *PREFIX()&#160;</td><td class="memItemRight" valign="bottom"><b>calloc</b> 
 <tr class="memdesc:ga82650f666c5e45884fe5a34f0fc731d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The standard function. <br /></td></tr>
 <tr class="separator:ga82650f666c5e45884fe5a34f0fc731d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaed126b66db68698b2e9e7a2cb4e04bb"><td class="memItemLeft" align="right" valign="top"><a id="gaaed126b66db68698b2e9e7a2cb4e04bb" name="gaaed126b66db68698b2e9e7a2cb4e04bb"></a>
-void PREFIX()&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> (void *<a class="el" href="structblock.html">block</a>)</td></tr>
+void PREFIX()&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> (void *block)</td></tr>
 <tr class="memdesc:gaaed126b66db68698b2e9e7a2cb4e04bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">The standard function. <br /></td></tr>
 <tr class="separator:gaaed126b66db68698b2e9e7a2cb4e04bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -136,7 +150,7 @@ void PREFIX()&#160;</td><td class="memItemRight" valign="bottom"><b>free</b> (vo
           <td class="memname">void * liballoc_alloc </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>nPages</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -158,13 +172,13 @@ A pointer to the allocated memory. </dd></dl>
           <td class="memname">int liballoc_free </td>
           <td>(</td>
           <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>block</em>, </td>
+          <td class="paramname">, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>nPages</em>&#160;</td>
+          <td class="paramname">&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -218,9 +232,12 @@ A pointer to the allocated memory. </dd></dl>
 </div>
 </div>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+  </ul>
+</div>
 </body>
 </html>

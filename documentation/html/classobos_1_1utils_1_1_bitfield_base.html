@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classobos_1_1utils_1_1_bitfield_base.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><b>obos</b></li><li class="navelem"><b>utils</b></li><li class="navelem"><a class="el" href="classobos_1_1utils_1_1_bitfield_base.html">BitfieldBase</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
@@ -94,39 +110,43 @@ Inheritance diagram for obos::utils::BitfieldBase:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad1ff5227ec0b0954c245fced17f1b086"><td class="memItemLeft" align="right" valign="top"><a id="ad1ff5227ec0b0954c245fced17f1b086" name="ad1ff5227ec0b0954c245fced17f1b086"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setBit</b> (UINT32_T bitmask)</td></tr>
-<tr class="separator:ad1ff5227ec0b0954c245fced17f1b086"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5154cc91effe7b4376395376ee744054"><td class="memItemLeft" align="right" valign="top"><a id="a5154cc91effe7b4376395376ee744054" name="a5154cc91effe7b4376395376ee744054"></a>
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>clearBit</b> (UINT32_T bitmask)</td></tr>
-<tr class="separator:a5154cc91effe7b4376395376ee744054"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a657cfccec990efc01e5c329e2cf69a08"><td class="memItemLeft" align="right" valign="top"><a id="a657cfccec990efc01e5c329e2cf69a08" name="a657cfccec990efc01e5c329e2cf69a08"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>getBit</b> (UINT32_T bitmask) const</td></tr>
-<tr class="separator:a657cfccec990efc01e5c329e2cf69a08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a94d443f63a4bf694461139518046ff30"><td class="memItemLeft" align="right" valign="top"><a id="a94d443f63a4bf694461139518046ff30" name="a94d443f63a4bf694461139518046ff30"></a>
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator[]</b> (UINT32_T bitmask) const</td></tr>
-<tr class="separator:a94d443f63a4bf694461139518046ff30"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a258163910276c89b946928ba4a868634"><td class="memItemLeft" align="right" valign="top"><a id="a258163910276c89b946928ba4a868634" name="a258163910276c89b946928ba4a868634"></a>
-virtual&#160;</td><td class="memItemRight" valign="bottom"><b>operator UINT32_T</b> ()</td></tr>
-<tr class="separator:a258163910276c89b946928ba4a868634"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cdea6d5fb76271f3769e0dfa08f5d24"><td class="memItemLeft" align="right" valign="top"><a id="a9cdea6d5fb76271f3769e0dfa08f5d24" name="a9cdea6d5fb76271f3769e0dfa08f5d24"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>setBit</b> (UINTPTR_T bitmask)</td></tr>
+<tr class="separator:a9cdea6d5fb76271f3769e0dfa08f5d24"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a018bf2a24599541caa9722f356bda75b"><td class="memItemLeft" align="right" valign="top"><a id="a018bf2a24599541caa9722f356bda75b" name="a018bf2a24599541caa9722f356bda75b"></a>
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>clearBit</b> (UINTPTR_T bitmask)</td></tr>
+<tr class="separator:a018bf2a24599541caa9722f356bda75b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4883228b1b1cf2e91277ebcb33592c4"><td class="memItemLeft" align="right" valign="top"><a id="ab4883228b1b1cf2e91277ebcb33592c4" name="ab4883228b1b1cf2e91277ebcb33592c4"></a>
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>getBit</b> (UINTPTR_T bitmask) const</td></tr>
+<tr class="separator:ab4883228b1b1cf2e91277ebcb33592c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9bd356013443cbcb60befcde834962ad"><td class="memItemLeft" align="right" valign="top"><a id="a9bd356013443cbcb60befcde834962ad" name="a9bd356013443cbcb60befcde834962ad"></a>
+virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>operator[]</b> (UINTPTR_T bitmask) const</td></tr>
+<tr class="separator:a9bd356013443cbcb60befcde834962ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71cfd3c44a0f0c13e74bee9ae95f7ba5"><td class="memItemLeft" align="right" valign="top"><a id="a71cfd3c44a0f0c13e74bee9ae95f7ba5" name="a71cfd3c44a0f0c13e74bee9ae95f7ba5"></a>
+virtual&#160;</td><td class="memItemRight" valign="bottom"><b>operator UINTPTR_T</b> ()</td></tr>
+<tr class="separator:a71cfd3c44a0f0c13e74bee9ae95f7ba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aefc412b84fb0481fe7f8752493aa1a7b"><td class="memItemLeft" align="right" valign="top"><a id="aefc412b84fb0481fe7f8752493aa1a7b" name="aefc412b84fb0481fe7f8752493aa1a7b"></a>
 virtual&#160;</td><td class="memItemRight" valign="bottom"><b>operator bool</b> ()</td></tr>
 <tr class="separator:aefc412b84fb0481fe7f8752493aa1a7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a1afb6c6b206125910708700b71582f71"><td class="memItemLeft" align="right" valign="top"><a id="a1afb6c6b206125910708700b71582f71" name="a1afb6c6b206125910708700b71582f71"></a>
-UINT32_T&#160;</td><td class="memItemRight" valign="bottom"><b>m_bitfield</b></td></tr>
-<tr class="separator:a1afb6c6b206125910708700b71582f71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c37149b50673b6177706ad48137610a"><td class="memItemLeft" align="right" valign="top"><a id="a4c37149b50673b6177706ad48137610a" name="a4c37149b50673b6177706ad48137610a"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>m_bitfield</b></td></tr>
+<tr class="separator:a4c37149b50673b6177706ad48137610a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>C:/Code/obos/src/oboskrnl/utils/<a class="el" href="bitfields_8h_source.html">bitfields.h</a></li>
 <li>C:/Code/obos/src/oboskrnl/utils/bitfields.cpp</li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>obos</b></li><li class="navelem"><b>utils</b></li><li class="navelem"><a class="el" href="classobos_1_1utils_1_1_bitfield_base.html">BitfieldBase</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+  </ul>
+</div>
 </body>
 </html>

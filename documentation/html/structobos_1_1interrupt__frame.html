@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('structobos_1_1interrupt__frame.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,11 +89,6 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><b>obos</b></li><li class="navelem"><a class="el" href="structobos_1_1interrupt__frame.html">interrupt_frame</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-attribs">Public Attributes</a> &#124;
@@ -131,14 +147,91 @@ UINT32_T&#160;</td><td class="memItemRight" valign="bottom"><b>useresp</b></td><
 <tr class="memitem:a6dfb56f0777bc40d779a0f5cffd9975f"><td class="memItemLeft" align="right" valign="top"><a id="a6dfb56f0777bc40d779a0f5cffd9975f" name="a6dfb56f0777bc40d779a0f5cffd9975f"></a>
 UINT32_T&#160;</td><td class="memItemRight" valign="bottom"><b>ss</b></td></tr>
 <tr class="separator:a6dfb56f0777bc40d779a0f5cffd9975f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a268686c562745adf3a3e65e6c43300f3"><td class="memItemLeft" align="right" valign="top"><a id="a268686c562745adf3a3e65e6c43300f3" name="a268686c562745adf3a3e65e6c43300f3"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>ds</b></td></tr>
+<tr class="separator:a268686c562745adf3a3e65e6c43300f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa203624912a704e693b871e805d8c239"><td class="memItemLeft" align="right" valign="top"><a id="aa203624912a704e693b871e805d8c239" name="aa203624912a704e693b871e805d8c239"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>r8</b></td></tr>
+<tr class="separator:aa203624912a704e693b871e805d8c239"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a67f0ecf42edb55dbcc984c7cbb6c4b0f"><td class="memItemLeft" align="right" valign="top"><a id="a67f0ecf42edb55dbcc984c7cbb6c4b0f" name="a67f0ecf42edb55dbcc984c7cbb6c4b0f"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>r9</b></td></tr>
+<tr class="separator:a67f0ecf42edb55dbcc984c7cbb6c4b0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15a6e3ca781a486b07a070a0864748c9"><td class="memItemLeft" align="right" valign="top"><a id="a15a6e3ca781a486b07a070a0864748c9" name="a15a6e3ca781a486b07a070a0864748c9"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>r10</b></td></tr>
+<tr class="separator:a15a6e3ca781a486b07a070a0864748c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab838351fb061ae3073532903b8601cd6"><td class="memItemLeft" align="right" valign="top"><a id="ab838351fb061ae3073532903b8601cd6" name="ab838351fb061ae3073532903b8601cd6"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>r11</b></td></tr>
+<tr class="separator:ab838351fb061ae3073532903b8601cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa76bbc41d995159d5d3135d03e4d177d"><td class="memItemLeft" align="right" valign="top"><a id="aa76bbc41d995159d5d3135d03e4d177d" name="aa76bbc41d995159d5d3135d03e4d177d"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>r12</b></td></tr>
+<tr class="separator:aa76bbc41d995159d5d3135d03e4d177d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59b16ff8d0a986758a5e6d91cad66136"><td class="memItemLeft" align="right" valign="top"><a id="a59b16ff8d0a986758a5e6d91cad66136" name="a59b16ff8d0a986758a5e6d91cad66136"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>r13</b></td></tr>
+<tr class="separator:a59b16ff8d0a986758a5e6d91cad66136"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6407344b8035f6cf1daed73be18a638"><td class="memItemLeft" align="right" valign="top"><a id="af6407344b8035f6cf1daed73be18a638" name="af6407344b8035f6cf1daed73be18a638"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>r14</b></td></tr>
+<tr class="separator:af6407344b8035f6cf1daed73be18a638"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fabecc7d8395be2d5dcdf0515db5a43"><td class="memItemLeft" align="right" valign="top"><a id="a8fabecc7d8395be2d5dcdf0515db5a43" name="a8fabecc7d8395be2d5dcdf0515db5a43"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>r15</b></td></tr>
+<tr class="separator:a8fabecc7d8395be2d5dcdf0515db5a43"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ab7e8460a591f8b74e26d2d924a3bd5"><td class="memItemLeft" align="right" valign="top"><a id="a3ab7e8460a591f8b74e26d2d924a3bd5" name="a3ab7e8460a591f8b74e26d2d924a3bd5"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>rdi</b></td></tr>
+<tr class="separator:a3ab7e8460a591f8b74e26d2d924a3bd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02552960df3587338af15d126a57d46c"><td class="memItemLeft" align="right" valign="top"><a id="a02552960df3587338af15d126a57d46c" name="a02552960df3587338af15d126a57d46c"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>rsi</b></td></tr>
+<tr class="separator:a02552960df3587338af15d126a57d46c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa57170412d0ddfed6ceaa2d444bef15e"><td class="memItemLeft" align="right" valign="top"><a id="aa57170412d0ddfed6ceaa2d444bef15e" name="aa57170412d0ddfed6ceaa2d444bef15e"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>rbp</b></td></tr>
+<tr class="separator:aa57170412d0ddfed6ceaa2d444bef15e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab7bcaf5de9eb0a926d0e63263007d879"><td class="memItemLeft" align="right" valign="top"><a id="ab7bcaf5de9eb0a926d0e63263007d879" name="ab7bcaf5de9eb0a926d0e63263007d879"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>rsp</b></td></tr>
+<tr class="separator:ab7bcaf5de9eb0a926d0e63263007d879"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab5d215062ec7950cad9af0c9add7590e"><td class="memItemLeft" align="right" valign="top"><a id="ab5d215062ec7950cad9af0c9add7590e" name="ab5d215062ec7950cad9af0c9add7590e"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>rbx</b></td></tr>
+<tr class="separator:ab5d215062ec7950cad9af0c9add7590e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1dd222a16b9e1ef70d752367f5540934"><td class="memItemLeft" align="right" valign="top"><a id="a1dd222a16b9e1ef70d752367f5540934" name="a1dd222a16b9e1ef70d752367f5540934"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>rdx</b></td></tr>
+<tr class="separator:a1dd222a16b9e1ef70d752367f5540934"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e75f5bafd9f9a5bd64318bc80355937"><td class="memItemLeft" align="right" valign="top"><a id="a0e75f5bafd9f9a5bd64318bc80355937" name="a0e75f5bafd9f9a5bd64318bc80355937"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>rcx</b></td></tr>
+<tr class="separator:a0e75f5bafd9f9a5bd64318bc80355937"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae8b7e279d2e0227a45c6206248939ef1"><td class="memItemLeft" align="right" valign="top"><a id="ae8b7e279d2e0227a45c6206248939ef1" name="ae8b7e279d2e0227a45c6206248939ef1"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>rax</b></td></tr>
+<tr class="separator:ae8b7e279d2e0227a45c6206248939ef1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf26fefd138f1ef277bf196f4296b57f"><td class="memItemLeft" align="right" valign="top"><a id="acf26fefd138f1ef277bf196f4296b57f" name="acf26fefd138f1ef277bf196f4296b57f"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>intNumber</b></td></tr>
+<tr class="separator:acf26fefd138f1ef277bf196f4296b57f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1671432ff25e98c530d07a1ba8e6385b"><td class="memItemLeft" align="right" valign="top"><a id="a1671432ff25e98c530d07a1ba8e6385b" name="a1671432ff25e98c530d07a1ba8e6385b"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>errorCode</b></td></tr>
+<tr class="separator:a1671432ff25e98c530d07a1ba8e6385b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3c851a97714519fd3e6aa9a54ff3744"><td class="memItemLeft" align="right" valign="top"><a id="ad3c851a97714519fd3e6aa9a54ff3744" name="ad3c851a97714519fd3e6aa9a54ff3744"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>rip</b></td></tr>
+<tr class="separator:ad3c851a97714519fd3e6aa9a54ff3744"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a39a186efbd7f82c54dce5b37560d19f7"><td class="memItemLeft" align="right" valign="top"><a id="a39a186efbd7f82c54dce5b37560d19f7" name="a39a186efbd7f82c54dce5b37560d19f7"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>cs</b></td></tr>
+<tr class="separator:a39a186efbd7f82c54dce5b37560d19f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae712b21eadac4eadb479e1b0eeb90552"><td class="memItemLeft" align="right" valign="top"><a id="ae712b21eadac4eadb479e1b0eeb90552" name="ae712b21eadac4eadb479e1b0eeb90552"></a>
+<a class="el" href="structobos_1_1x86__64__flags.html">x86_64_flags</a>&#160;</td><td class="memItemRight" valign="bottom"><b>rflags</b></td></tr>
+<tr class="separator:ae712b21eadac4eadb479e1b0eeb90552"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2a1f4ab2abca93c8dddece5beeee045"><td class="memItemLeft" align="right" valign="top"><a id="ac2a1f4ab2abca93c8dddece5beeee045" name="ac2a1f4ab2abca93c8dddece5beeee045"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>useresp</b></td></tr>
+<tr class="separator:ac2a1f4ab2abca93c8dddece5beeee045"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb8e7be9dc2beac749e2965535319c0a"><td class="memItemLeft" align="right" valign="top"><a id="abb8e7be9dc2beac749e2965535319c0a" name="abb8e7be9dc2beac749e2965535319c0a"></a>
+UINTPTR_T&#160;</td><td class="memItemRight" valign="bottom"><b>ss</b></td></tr>
+<tr class="separator:abb8e7be9dc2beac749e2965535319c0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this struct was generated from the following file:<ul>
-<li>C:/Code/obos/src/oboskrnl/descriptors/idt/<a class="el" href="idt_8h_source.html">idt.h</a></li>
+<hr/>The documentation for this struct was generated from the following files:<ul>
+<li>C:/Code/obos/src/oboskrnl/descriptors/idt/i686/<a class="el" href="i686_2idt_8h_source.html">idt.h</a></li>
+<li>C:/Code/obos/src/oboskrnl/descriptors/idt/x86-64/<a class="el" href="x86-64_2idt_8h_source.html">idt.h</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>obos</b></li><li class="navelem"><a class="el" href="structobos_1_1interrupt__frame.html">interrupt_frame</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+  </ul>
+</div>
 </body>
 </html>

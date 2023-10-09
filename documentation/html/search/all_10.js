@@ -1,6 +1,19 @@
 var searchData=
 [
-  ['terminatethread_0',['TerminateThread',['../classobos_1_1multitasking_1_1_thread_handle.html#ac400e05ff90349cfee5bd42981ed03f3',1,'obos::multitasking::ThreadHandle']]],
-  ['thread_1',['Thread',['../classobos_1_1multitasking_1_1_thread.html',1,'obos::multitasking']]],
-  ['threadhandle_2',['ThreadHandle',['../classobos_1_1multitasking_1_1_thread_handle.html',1,'obos::multitasking::ThreadHandle'],['../classobos_1_1multitasking_1_1_thread_handle.html#a5c1e42348c87682fa89c3624277028c7',1,'obos::multitasking::ThreadHandle::ThreadHandle()']]]
+  ['r_0',['R',['../struct_zydis_decoded_instruction_raw_rex__.html#ae4357168dbc5c27362df9a6d6dd6dcda',1,'ZydisDecodedInstructionRawRex_::R'],['../struct_zydis_decoded_instruction_raw_xop__.html#a0a39a18f937b77371e8e5124d8fb3248',1,'ZydisDecodedInstructionRawXop_::R'],['../struct_zydis_decoded_instruction_raw_vex__.html#ab8262efb781fc63cd44362ce13e9e2c8',1,'ZydisDecodedInstructionRawVex_::R'],['../struct_zydis_decoded_instruction_raw_evex.html#ac1bd5f4323c235445e8027e4fce9cd11',1,'ZydisDecodedInstructionRawEvex::R'],['../struct_zydis_decoded_instruction_raw_mvex__.html#ad3d70577d064ff82f8e64578b265f617',1,'ZydisDecodedInstructionRawMvex_::R']]],
+  ['r2_1',['R2',['../struct_zydis_decoded_instruction_raw_evex.html#a5ef11cb5594210b7289e330c2f4b34c8',1,'ZydisDecodedInstructionRawEvex::R2'],['../struct_zydis_decoded_instruction_raw_mvex__.html#ad5eb72308ef21a1d9cdd1b3761769e48',1,'ZydisDecodedInstructionRawMvex_::R2']]],
+  ['raw_2',['raw',['../struct_zydis_decoded_instruction__.html#aa6a093b98814e1d391e07705ecb3cd99',1,'ZydisDecodedInstruction_']]],
+  ['realloc_3',['realloc',['../group___a_l_l_o_c_h_o_o_k_s.html#gacb14ca2bec2357fa97e3b81e0cc598c4',1,'realloc(void *p, size_t size):&#160;liballoc_old.c'],['../group___a_l_l_o_c_h_o_o_k_s.html#gacb14ca2bec2357fa97e3b81e0cc598c4',1,'realloc(void *block, size_t count):&#160;liballoc_old.c']]],
+  ['reallocate_4',['reallocate',['../struct_zyan_allocator__.html#a32aaaebede694fcdf5f1b1ac1eca28d4',1,'ZyanAllocator_']]],
+  ['reg_5',['reg',['../struct_zydis_encoder_instruction__.html#af7fc759ba0a8b27c9aa608574f7098ec',1,'ZydisEncoderInstruction_::reg'],['../struct_zydis_decoded_instruction_avx___1_1_zydis_decoded_instruction_avx_mask__.html#af7f72deb8037834934d3d559945266c1',1,'ZydisDecodedInstructionAvx_::ZydisDecodedInstructionAvxMask_::reg'],['../struct_zydis_decoded_instruction_raw___1_1_zydis_decoded_instruction_mod_rm__.html#a0ff3970095c77255813b6fc1a5da5966',1,'ZydisDecodedInstructionRaw_::ZydisDecodedInstructionModRm_::reg']]],
+  ['reg_5finfo_6',['reg_info',['../struct_zydis_decoder_context__.html#a5486e82c69f3a21b27ad5651be74ae7a',1,'ZydisDecoderContext_']]],
+  ['register_7',['Register',['../group__register.html',1,'']]],
+  ['req_5fsize_8',['req_size',['../structliballoc__minor.html#a0e798303ee8177899564e567fea41d3f',1,'liballoc_minor']]],
+  ['request_9',['request',['../struct_zydis_encoder_instruction_match__.html#ab07b3fdf97ca6584ce14eb10b144ff37',1,'ZydisEncoderInstructionMatch_']]],
+  ['resumethread_10',['ResumeThread',['../classobos_1_1multitasking_1_1_thread_handle.html#a4880935ec851330bc00b800c09e06a32',1,'obos::multitasking::ThreadHandle']]],
+  ['rex_5ftype_11',['rex_type',['../struct_zydis_encoder_instruction_match__.html#aee517ac74b3eaada259da551c4fc3b97',1,'ZydisEncoderInstructionMatch_']]],
+  ['rex_5fw_12',['rex_w',['../struct_zydis_encoder_instruction__.html#a58e9872fdf4a4097ee6570de58102fa1',1,'ZydisEncoderInstruction_']]],
+  ['rm_13',['rm',['../struct_zydis_encoder_instruction__.html#a617f9ef60121853e89d71aa79366f905',1,'ZydisEncoderInstruction_::rm'],['../struct_zydis_decoded_instruction_raw___1_1_zydis_decoded_instruction_mod_rm__.html#ad213626092296ec535fd282f92223592',1,'ZydisDecodedInstructionRaw_::ZydisDecodedInstructionModRm_::rm']]],
+  ['rounding_14',['rounding',['../struct_zydis_encoder_request___1_1_zydis_encoder_request_evex_features__.html#a6339968c5ee4709428583025ca248ca2',1,'ZydisEncoderRequest_::ZydisEncoderRequestEvexFeatures_::rounding'],['../struct_zydis_encoder_request___1_1_zydis_encoder_request_mvex_features__.html#af7d83bfa6bf5cac6873323bd4698ff0a',1,'ZydisEncoderRequest_::ZydisEncoderRequestMvexFeatures_::rounding']]],
+  ['runtime_5faddress_15',['runtime_address',['../struct_zydis_formatter_context__.html#a52491211bb82c3461fb5752e28c701ba',1,'ZydisFormatterContext_::runtime_address'],['../struct_zydis_disassembled_instruction__.html#a2c601ddc70c9bcfc41ac17d323234fcf',1,'ZydisDisassembledInstruction_::runtime_address']]]
 ];

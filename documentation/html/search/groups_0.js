@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['liballoc_20hooks_0',['liballoc hooks',['../group___a_l_l_o_c_h_o_o_k_s.html',1,'']]]
+  ['cpu_20flags_0',['CPU flags',['../group__decoder__cpu__flags.html',1,'']]]
 ];

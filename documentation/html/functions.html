@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -48,6 +52,22 @@ $(function() {
 </script>
 <div id="main-nav"></div>
 </div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('functions.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -70,37 +90,32 @@ $(function() {
 </div>
 
 <div class="contents">
-<div class="textblock">Here is a list of all documented class members with links to the class documentation for each member:</div><ul>
-<li>block&#160;:&#160;<a class="el" href="structliballoc__minor.html#aff17c469cb0dcbc1f8320b8342075b1d">liballoc_minor</a></li>
-<li>closeHandle()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a2d5accf0af189cd37961d2b6cdcef542">obos::multitasking::ThreadHandle</a></li>
-<li>CreateThread()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a3ac6d83271d96bac4bc301bef897eb67">obos::multitasking::ThreadHandle</a></li>
-<li>duplicate()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#ac629358e0fd993dc150c54ab87b5ac35">obos::multitasking::ThreadHandle</a></li>
-<li>ExitThread&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a0490a0a75dca5ded64d2181f1ef2db94">obos::multitasking::ThreadHandle</a></li>
-<li>first&#160;:&#160;<a class="el" href="structliballoc__major.html#a8db150d09474fa68d04b5454eb21ab28">liballoc_major</a></li>
-<li>GetExitCode()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#af574b0e9724860ca8074989e5d683338">obos::multitasking::ThreadHandle</a></li>
-<li>GetThreadPriority()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a8cadb682d1a52d97cd9af0a5846294cd">obos::multitasking::ThreadHandle</a></li>
-<li>GetThreadStatus()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a0da1b1e8b10a9f88f1cb08306baf8269">obos::multitasking::ThreadHandle</a></li>
-<li>GetTid()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a79323b9966f3344c31d1b02b972c05b0">obos::multitasking::ThreadHandle</a></li>
-<li>getType()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#afcafaf6ffdc0496cd94acf7899e4c366">obos::multitasking::ThreadHandle</a></li>
-<li>magic&#160;:&#160;<a class="el" href="structliballoc__minor.html#a2a521ac1721a7b39baf53f995e0fcccf">liballoc_minor</a></li>
-<li>next&#160;:&#160;<a class="el" href="structliballoc__major.html#a4a147f5e1587d20f79184a9ec731e7cf">liballoc_major</a>, <a class="el" href="structliballoc__minor.html#a8bb10f7f3cf052b617c718367bf0a095">liballoc_minor</a></li>
-<li>OpenThread()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a9955079eaf56f9ebae1589da3b336df0">obos::multitasking::ThreadHandle</a></li>
-<li>pages&#160;:&#160;<a class="el" href="structliballoc__major.html#ac355949c287ae38eefdfa97dc2abfc93">liballoc_major</a></li>
-<li>PauseThread()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a5b040029ee81fed514f958f0e20125da">obos::multitasking::ThreadHandle</a></li>
-<li>prev&#160;:&#160;<a class="el" href="structliballoc__major.html#ac04a8297d249fe04b86ac22d9f4db11e">liballoc_major</a>, <a class="el" href="structliballoc__minor.html#a9b88d3a051111df81ecdd3147f4386d9">liballoc_minor</a></li>
-<li>req_size&#160;:&#160;<a class="el" href="structliballoc__minor.html#a0e798303ee8177899564e567fea41d3f">liballoc_minor</a></li>
-<li>ResumeThread()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a799f3260788f681efb5f8d9cbc923c9c">obos::multitasking::ThreadHandle</a></li>
-<li>SetThreadPriority()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a25103dd3ec2354008a67bc9b63e4f6bb">obos::multitasking::ThreadHandle</a></li>
-<li>SetThreadStatus()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a6de4da892b2e7d6909a20adcd78c4534">obos::multitasking::ThreadHandle</a></li>
-<li>size&#160;:&#160;<a class="el" href="structliballoc__major.html#a94315a9fd8d95755437248f20450e9ba">liballoc_major</a>, <a class="el" href="structliballoc__minor.html#a138f5528e084fb73761b9a23e106fb4a">liballoc_minor</a></li>
-<li>TerminateThread()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#ac400e05ff90349cfee5bd42981ed03f3">obos::multitasking::ThreadHandle</a></li>
-<li>ThreadHandle()&#160;:&#160;<a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a5c1e42348c87682fa89c3624277028c7">obos::multitasking::ThreadHandle</a></li>
-<li>usage&#160;:&#160;<a class="el" href="structliballoc__major.html#ab4d9c00c552e0ddd4997a91966bfc4f4">liballoc_major</a></li>
+<div class="textblock">Here is a list of all documented class members with links to the class documentation for each member:</div>
+
+<h3><a id="index_a" name="index_a"></a>- a -</h3><ul>
+<li>aaa&#160;:&#160;<a class="el" href="struct_zydis_decoded_instruction_raw_evex.html#ab317c582786c534b72a4dbed0a2b7876">ZydisDecodedInstructionRawEvex</a></li>
+<li>accepts_branch_hints&#160;:&#160;<a class="el" href="struct_zydis_encoder_rel_info__.html#a8373ee00b2e34219a8df8e3bcdaebfb6">ZydisEncoderRelInfo_</a></li>
+<li>accepts_scaling_hints&#160;:&#160;<a class="el" href="struct_zydis_encoder_rel_info__.html#af11d00b3a3fb5a3ce115d7bd11c5f1fa">ZydisEncoderRelInfo_</a></li>
+<li>actions&#160;:&#160;<a class="el" href="struct_zydis_decoded_operand__.html#abcf01cdf69e0304d4975f0b7f08dce67">ZydisDecodedOperand_</a></li>
+<li>addr_base&#160;:&#160;<a class="el" href="struct_zydis_formatter__.html#a195b8a7b463b630d22c2046017761bf1">ZydisFormatter_</a></li>
+<li>addr_padding_absolute&#160;:&#160;<a class="el" href="struct_zydis_formatter__.html#a14eb86b1e9659b729a3e046e6b5ce0b1">ZydisFormatter_</a></li>
+<li>addr_padding_relative&#160;:&#160;<a class="el" href="struct_zydis_formatter__.html#a266a837d286d272f932b31f7ed72a1a2">ZydisFormatter_</a></li>
+<li>addr_signedness&#160;:&#160;<a class="el" href="struct_zydis_formatter__.html#ad50d317734f21a0c9ea9b9928c76fa06">ZydisFormatter_</a></li>
+<li>address_size_hint&#160;:&#160;<a class="el" href="struct_zydis_encoder_request__.html#ac2408201f01a2cb0cc2885d53941c4d9">ZydisEncoderRequest_</a></li>
+<li>address_width&#160;:&#160;<a class="el" href="struct_zydis_decoded_instruction__.html#a3f5d356da2b50cafa42d03f9925f09d5">ZydisDecodedInstruction_</a></li>
+<li>allocate&#160;:&#160;<a class="el" href="struct_zyan_allocator__.html#a8569939be6b94707391756a47c4bda80">ZyanAllocator_</a></li>
+<li>allocator&#160;:&#160;<a class="el" href="struct_zyan_vector__.html#af2e9357054f12ee1cd0489869f23a5e0">ZyanVector_</a></li>
+<li>allowed_encodings&#160;:&#160;<a class="el" href="struct_zydis_encoder_request__.html#a73b7e48df409c3bed0407290460390f5">ZydisEncoderRequest_</a></li>
+<li>attributes&#160;:&#160;<a class="el" href="struct_zydis_decoded_instruction__.html#a10b4d722132bc3240969316abfc4d452">ZydisDecodedInstruction_</a>, <a class="el" href="struct_zydis_encoder_instruction__.html#aba02b17bb2de81658080e284c9e281fe">ZydisEncoderInstruction_</a>, <a class="el" href="struct_zydis_encoder_instruction_match__.html#ab42644d2c74df0e8c7cf0b38fc826ccf">ZydisEncoderInstructionMatch_</a></li>
+<li>avx&#160;:&#160;<a class="el" href="struct_zydis_decoded_instruction__.html#a20693107668e66096e11327a1c3e9f87">ZydisDecodedInstruction_</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+  </ul>
+</div>
 </body>
 </html>

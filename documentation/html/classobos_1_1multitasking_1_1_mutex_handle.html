@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classobos_1_1multitasking_1_1_mutex_handle.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,15 +89,9 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><b>obos</b></li><li class="navelem"><b>multitasking</b></li><li class="navelem"><a class="el" href="classobos_1_1multitasking_1_1_mutex_handle.html">MutexHandle</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="classobos_1_1multitasking_1_1_mutex_handle-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">obos::multitasking::MutexHandle Class Reference<span class="mlabels"><span class="mlabel">final</span></span></div></div>
 </div><!--header-->
@@ -93,22 +108,27 @@ Inheritance diagram for obos::multitasking::MutexHandle:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:ae1ff4b24a25277128417062306cffbd3"><td class="memItemLeft" align="right" valign="top">handleType&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classobos_1_1multitasking_1_1_mutex_handle.html#ae1ff4b24a25277128417062306cffbd3">getType</a> () override</td></tr>
+<tr class="separator:ae1ff4b24a25277128417062306cffbd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7aff6710dfc254a7cd312e3915a6129b"><td class="memItemLeft" align="right" valign="top"><a id="a7aff6710dfc254a7cd312e3915a6129b" name="a7aff6710dfc254a7cd312e3915a6129b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>MutexHandle</b> (bool avoidDeadLocks)</td></tr>
+<tr class="separator:a7aff6710dfc254a7cd312e3915a6129b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a1cd6b4d11be658cd68a494560854c9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classobos_1_1_handle.html">Handle</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classobos_1_1multitasking_1_1_mutex_handle.html#a3a1cd6b4d11be658cd68a494560854c9">duplicate</a> () override</td></tr>
 <tr class="separator:a3a1cd6b4d11be658cd68a494560854c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa3d053669924afb97af4e2191650c4b6"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classobos_1_1multitasking_1_1_mutex_handle.html#aa3d053669924afb97af4e2191650c4b6">closeHandle</a> () override</td></tr>
 <tr class="separator:aa3d053669924afb97af4e2191650c4b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7e0cf68a3e89971b1311c2d8147bcbd"><td class="memItemLeft" align="right" valign="top"><a id="ae7e0cf68a3e89971b1311c2d8147bcbd" name="ae7e0cf68a3e89971b1311c2d8147bcbd"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>Lock</b> (bool waitIfLocked=true)</td></tr>
-<tr class="separator:ae7e0cf68a3e89971b1311c2d8147bcbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaabf9b4289068a82950c737397b65604"><td class="memItemLeft" align="right" valign="top"><a id="aaabf9b4289068a82950c737397b65604" name="aaabf9b4289068a82950c737397b65604"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>Unlock</b> ()</td></tr>
-<tr class="separator:aaabf9b4289068a82950c737397b65604"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a5691156b7c783941b7a648c85ac24fef"><td class="memItemLeft" align="right" valign="top"><a id="a5691156b7c783941b7a648c85ac24fef" name="a5691156b7c783941b7a648c85ac24fef"></a>
-static constexpr handleType&#160;</td><td class="memItemRight" valign="bottom"><b>getType</b> ()</td></tr>
-<tr class="separator:a5691156b7c783941b7a648c85ac24fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60672e590f918cbc2d1e3f5f2683e71e"><td class="memItemLeft" align="right" valign="top"><a id="a60672e590f918cbc2d1e3f5f2683e71e" name="a60672e590f918cbc2d1e3f5f2683e71e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>Lock</b> (bool waitIfLocked=true)</td></tr>
+<tr class="separator:a60672e590f918cbc2d1e3f5f2683e71e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ddb9b24048a72dda53ce45863f6b8b3"><td class="memItemLeft" align="right" valign="top"><a id="a5ddb9b24048a72dda53ce45863f6b8b3" name="a5ddb9b24048a72dda53ce45863f6b8b3"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>Unlock</b> ()</td></tr>
+<tr class="separator:a5ddb9b24048a72dda53ce45863f6b8b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ca58663ecc9b49fed48bb12f090923a"><td class="memItemLeft" align="right" valign="top"><a id="a2ca58663ecc9b49fed48bb12f090923a" name="a2ca58663ecc9b49fed48bb12f090923a"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>IsLocked</b> ()</td></tr>
+<tr class="separator:a2ca58663ecc9b49fed48bb12f090923a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc97fe692d7bff20aabb605578bc3a3c"><td class="memItemLeft" align="right" valign="top"><a id="adc97fe692d7bff20aabb605578bc3a3c" name="adc97fe692d7bff20aabb605578bc3a3c"></a>
+DWORD&#160;</td><td class="memItemRight" valign="bottom"><b>GetLockOwnerTid</b> ()</td></tr>
+<tr class="separator:adc97fe692d7bff20aabb605578bc3a3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="aa3d053669924afb97af4e2191650c4b6" name="aa3d053669924afb97af4e2191650c4b6"></a>
@@ -165,14 +185,45 @@ static constexpr handleType&#160;</td><td class="memItemRight" valign="bottom"><
 
 </div>
 </div>
+<a id="ae1ff4b24a25277128417062306cffbd3" name="ae1ff4b24a25277128417062306cffbd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1ff4b24a25277128417062306cffbd3">&#9670;&#160;</a></span>getType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">handleType obos::multitasking::MutexHandle::getType </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="classobos_1_1_handle.html">obos::Handle</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>C:/Code/obos/src/oboskrnl/multitasking/mutex/<a class="el" href="mutex_handle_8h_source.html">mutexHandle.h</a></li>
 <li>C:/Code/obos/src/oboskrnl/multitasking/mutex/mutexHandle.cpp</li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>obos</b></li><li class="navelem"><b>multitasking</b></li><li class="navelem"><a class="el" href="classobos_1_1multitasking_1_1_mutex_handle.html">MutexHandle</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+  </ul>
+</div>
 </body>
 </html>

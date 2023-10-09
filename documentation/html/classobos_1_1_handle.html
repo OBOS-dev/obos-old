@@ -9,6 +9,10 @@
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
 <link href="search/search.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="search/searchdata.js"></script>
 <script type="text/javascript" src="search/search.js"></script>
@@ -47,6 +51,23 @@ $(function() {
 /* @license-end */
 </script>
 <div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
+$(document).ready(function(){initNavTree('classobos_1_1_handle.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -68,16 +89,11 @@ $(function() {
 </div>
 </div>
 
-<div id="nav-path" class="navpath">
-  <ul>
-<li class="navelem"><b>obos</b></li><li class="navelem"><a class="el" href="classobos_1_1_handle.html">Handle</a></li>  </ul>
-</div>
-</div><!-- top -->
 <div class="header">
   <div class="summary">
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="classobos_1_1_handle-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">obos::Handle Class Reference<span class="mlabels"><span class="mlabel">abstract</span></span></div></div>
@@ -104,19 +120,24 @@ Public Types</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
+<tr class="memitem:acc7b12213f59c06190d80cda213c350c"><td class="memItemLeft" align="right" valign="top">virtual handleType&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classobos_1_1_handle.html#acc7b12213f59c06190d80cda213c350c">getType</a> ()</td></tr>
+<tr class="separator:acc7b12213f59c06190d80cda213c350c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac39399d4af521179c459d9fddb5287a4"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classobos_1_1_handle.html">Handle</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classobos_1_1_handle.html#ac39399d4af521179c459d9fddb5287a4">duplicate</a> ()=0</td></tr>
 <tr class="separator:ac39399d4af521179c459d9fddb5287a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4bf003b8c3474ee1cef5a2f794cc271"><td class="memItemLeft" align="right" valign="top">virtual int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classobos_1_1_handle.html#ae4bf003b8c3474ee1cef5a2f794cc271">closeHandle</a> ()=0</td></tr>
 <tr class="separator:ae4bf003b8c3474ee1cef5a2f794cc271"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6a10b03c6118cba9036a0309b5079be"><td class="memItemLeft" align="right" valign="top"><a id="aa6a10b03c6118cba9036a0309b5079be" name="aa6a10b03c6118cba9036a0309b5079be"></a>
+virtual PVOID&#160;</td><td class="memItemRight" valign="bottom"><b>GetUnderlyingObject</b> ()</td></tr>
+<tr class="separator:aa6a10b03c6118cba9036a0309b5079be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:add4fcc84a099852528ca7b91f0af9af2"><td class="memItemLeft" align="right" valign="top"><a id="add4fcc84a099852528ca7b91f0af9af2" name="add4fcc84a099852528ca7b91f0af9af2"></a>
 SIZE_T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getReferences</b> ()</td></tr>
 <tr class="separator:add4fcc84a099852528ca7b91f0af9af2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a13c457495bff8118a041b2add712ffad"><td class="memItemLeft" align="right" valign="top"><a id="a13c457495bff8118a041b2add712ffad" name="a13c457495bff8118a041b2add712ffad"></a>
-static constexpr handleType&#160;</td><td class="memItemRight" valign="bottom"><b>getType</b> ()</td></tr>
-<tr class="separator:a13c457495bff8118a041b2add712ffad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a331ac11b2a48d318c0b8fb126a7b1290"><td class="memItemLeft" align="right" valign="top"><a id="a331ac11b2a48d318c0b8fb126a7b1290" name="a331ac11b2a48d318c0b8fb126a7b1290"></a>
+DWORD&#160;</td><td class="memItemRight" valign="bottom"><b>magicNumber</b> = OBOS_HANDLE_MAGIC_NUMBER</td></tr>
+<tr class="separator:a331ac11b2a48d318c0b8fb126a7b1290"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
@@ -185,13 +206,44 @@ SIZE_T&#160;</td><td class="memItemRight" valign="bottom"><b>m_references</b> = 
 
 </div>
 </div>
+<a id="acc7b12213f59c06190d80cda213c350c" name="acc7b12213f59c06190d80cda213c350c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acc7b12213f59c06190d80cda213c350c">&#9670;&#160;</a></span>getType()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual handleType obos::Handle::getType </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented in <a class="el" href="classobos_1_1multitasking_1_1_thread_handle.html#a13a94ecac6b1aaf7655496609408b7e4">obos::multitasking::ThreadHandle</a>.</p>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>C:/Code/obos/src/oboskrnl/<a class="el" href="handle_8h_source.html">handle.h</a></li>
 </ul>
 </div><!-- contents -->
+</div><!-- doc-content -->
 <!-- start footer part -->
-<hr class="footer"/><address class="footer"><small>
-Generated by&#160;<a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7
-</small></address>
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>obos</b></li><li class="navelem"><a class="el" href="classobos_1_1_handle.html">Handle</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.7 </li>
+  </ul>
+</div>
 </body>
 </html>
