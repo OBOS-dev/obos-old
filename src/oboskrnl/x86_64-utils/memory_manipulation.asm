@@ -15,7 +15,7 @@ _ZN4obos5utils7memzeroEPvm:
 	mov rax, rdi
 
 .loop:
-	xor byte [rdi], byte [rdi]
+	mov byte [rdi], 0
 
 	inc rdi
 	loop .loop
