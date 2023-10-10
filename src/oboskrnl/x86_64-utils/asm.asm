@@ -31,16 +31,16 @@ _ZN4obos4outdEtj:
 	ret
 _ZN4obos3inbEt:
 	mov eax, 0
-	mov dx, edi
+	mov dx, di
 	in al, dx
 	ret
 _ZN4obos3inwEt:
 	mov eax, 0
-	mov dx, edi
+	mov dx, di
 	in ax, dx
 	ret
 _ZN4obos3indEt:
-	mov dx, edi
+	mov dx, di
 	in eax, dx
 	ret
 _ZN4obos3cliEv:

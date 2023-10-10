@@ -24,5 +24,8 @@ namespace obos
 	void kmain()
 	{
 		ConsoleOutput("Hello, world!");
+		cli();
+		while (1)
+			hlt();
 	}
 }
