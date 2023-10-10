@@ -1,0 +1,18 @@
+﻿{
+  "configurations": [
+    {
+      "name": "OBOS Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "buildRoot": "${projectDir}\\out\\build\\",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeExecutable": "cmake",
+      "cmakeCommandArgs": "-DOUTPUT_DIR=/mnt/c/Code/obos/out/",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "linux_x64" ],
+      "wslPath": "${defaultWSLPath}",
+      "cmakeToolchain": "C:\\Code\\obos\\src\\scripts-toolchains\\x86_64\\toolchain.cmake"
+    }
+  ]
+}
