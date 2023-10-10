@@ -6,6 +6,8 @@
 
 #include <stdint.h>
 
+#include <memory_manipulation.h>
+
 extern "C" char TSS;
 extern "C" char GDT;
 
@@ -26,9 +28,9 @@ namespace obos
 	{
 		uint32_t resv1;
 		uint64_t rsp0;
-		BYTE unused[0x5A];
+		uint8_t unused[0x5A];
 		uint16_t iopb;
-	} attribute(packed);
+	} __attribute__((packed));
 
 	tssEntry s_tssEntry alignas(8);
 
@@ -42,7 +44,7 @@ namespace obos
 
 		gdtEntry* tss = (gdtEntry*)&TSS;
 
-		UINTPTR_T base = GET_FUNC_ADDR(&s_tssEntry);
+		uintptr_t base = reinterpret_cast<uintptr_t>(&s_tssEntry);
 		tss->access = 0x89;
 		tss->granularity = 0x40;
 		tss->limitLow = sizeof(tssEntry) - 1;
@@ -67,6 +69,6 @@ namespace obos
 	}
 	void SetTSSStack(void* rsp)
 	{
-		s_tssEntry.rsp0 = (UINTPTR_T)rsp;
+		s_tssEntry.rsp0 = (uintptr_t)rsp;
 	}
 }

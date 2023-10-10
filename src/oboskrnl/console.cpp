@@ -7,98 +7,49 @@
 #ifdef __INTELLISENSE__
 #undef __STDC_HOSTED__
 #endif
-#include <stdint.h>
-#include <stddef.h>
-#include <limine.h>
+#include <int.h>
 
 #include <console.h>
 
 #include <memory_manipulation.h>
 
-bool strcmp(const char* str1, const char* str2)
-{
-	if (obos::utils::strlen(str1) != obos::utils::strlen(str2))
-		return false;
-	for (size_t i = 0; str1[i]; i++)
-		if (str1[i] != str2[i])
-			return false;
-	return true;
-}
-
 namespace obos
-{
-	static volatile struct limine_framebuffer_request framebuffer_request = {
-		.id = LIMINE_FRAMEBUFFER_REQUEST,
-		.revision = 0
-	};
-	static volatile struct limine_module_request font_module_request = {
-		.id = LIMINE_MODULE_REQUEST,
-		.revision = 0,
-	};
-	uint32_t g_terminalX = 0;
-	uint32_t g_terminalY = 0;
-	uint32_t g_nCharsHorizontal = 0;
-	uint32_t g_nCharsVertical = 0;
-	uint32_t g_framebufferWidth = 0;
-	uint32_t g_framebufferHeight = 0;
-	uint32_t* g_framebuffer = nullptr;
-	uint32_t g_foregroundColour = 0;
-	uint8_t* g_font = nullptr;
-	void EarlyKPanic();
-
-	void plotPixel(uint32_t color, uint32_t x, uint32_t y)
+{	
+	Console::Console(void* font, con_framebuffer output)
 	{
-		g_framebuffer[y * g_framebufferWidth + x] = color;
+		Initialize(font, output);
 	}
 
-	void putChar(char ch, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor)
+	void Console::Initialize(void* font, con_framebuffer output)
 	{
-		if (!framebuffer_request.response->framebuffers)
-			EarlyKPanic();
-		if (!g_framebuffer)
-		{
-			g_framebuffer = (uint32_t*)framebuffer_request.response->framebuffers[0]->address;
-			g_framebufferWidth = framebuffer_request.response->framebuffers[0]->width;
-			g_framebufferHeight = framebuffer_request.response->framebuffers[0]->height;
-			g_nCharsHorizontal = g_framebufferWidth / 16;
-			g_nCharsVertical = g_framebufferHeight / 8;
-		}
-		if (!g_font)
-		{
-			for (size_t i = 0; i < font_module_request.response->module_count; i++)
-			{
-				if (strcmp(font_module_request.response->modules[i]->path, "/obos/font.bin"))
-				{
-					g_font = (uint8_t*)font_module_request.response->modules[i]->address;
-					break;
-				}
-			}
-		}
-		int cx, cy;
-		int mask[8] = { 128,64,32,16,8,4,2,1 };
-		const uint8_t* glyph = g_font + (int)ch * 16;
-		if (x > g_nCharsHorizontal)
-			x = 0;
-		if (y > g_framebufferHeight)
-			y = 0;
-		x <<= 3;
-		y += 16;
-
-		for (cy = 0; cy < 16; cy++) {
-			for (cx = 0; cx < 8; cx++) {
-				plotPixel(glyph[cy] & mask[cx] ? fgcolor : bgcolor, x + cx, y + cy - 12);
-			}
-		}
+		m_font = (uint8_t*)font;
+		m_framebuffer = output;
+		m_nCharsHorizontal = output.width / 16;
+		m_nCharsVertical = output.height / 8;
 	}
 
-	void ConsoleOutput(char ch, uint32_t& x, uint32_t& y)
+	void Console::ConsoleOutput(const char* string)
+	{
+		for(size_t i = 0; string[i]; ConsoleOutput(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
+	}
+	void Console::ConsoleOutput(const char* string, size_t size)
+	{
+		for (size_t i = 0; i < size; ConsoleOutput(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
+	}
+	void Console::ConsoleOutput(char ch)
+	{
+		ConsoleOutput(ch, m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY);
+	}
+	void Console::ConsoleOutput(char ch, uint32_t& x, uint32_t& y)
+	{
+		ConsoleOutput(ch, m_foregroundColour, m_backgroundColour, x, y);
+	}
+	void Console::ConsoleOutput(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y)
 	{
 		switch (ch)
 		{
 		case '\n':
 			y++;
-			x = 0;
-			break;
 		case '\r':
 			x = 0;
 			break;
@@ -106,25 +57,85 @@ namespace obos
 			x += 4 - (x % 4);
 			break;
 		case '\b':
-			x--;
+			putChar(' ', --x, y, foregroundColour, backgroundColour);
 			break;
 		default:
-			putChar(ch, x++,y, 0xffffffff, 0);
+			putChar(ch, x++, y, foregroundColour, backgroundColour);
 			break;
 		}
 	}
 
-	void ConsoleOutput(const char* string)
+	void Console::SetPosition(uint32_t x, uint32_t y)
 	{
-		for(size_t i = 0; string[i]; ConsoleOutput(string[i++]));
+		m_terminalX = x;
+		m_terminalY = y;
 	}
-	void ConsoleOutput(const char* string, size_t size)
+	void Console::GetPosition(uint32_t* x, uint32_t* y)
 	{
-		for (size_t i = 0; i < size; ConsoleOutput(string[i++]));
-	}
-	void ConsoleOutput(char ch)
-	{
-		ConsoleOutput(ch, g_terminalX, g_terminalY);
+		*x = m_terminalX;
+		*y = m_terminalY;
 	}
 
+	void Console::SetColour(uint32_t foregroundColour, uint32_t backgroundColour)
+	{
+		m_foregroundColour = foregroundColour;
+		m_backgroundColour = backgroundColour;
+	}
+	void Console::GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour)
+	{
+		*foregroundColour = m_foregroundColour;
+		*backgroundColour = m_backgroundColour;
+	}
+
+	void Console::SetFont(uint8_t* font)
+	{
+		m_font = font;
+	}
+	void Console::GetFont(uint8_t** font)
+	{
+		*font = m_font;
+	}
+
+	void Console::SetFramebuffer(con_framebuffer framebuffer)
+	{
+		m_framebuffer.addr = framebuffer.addr;
+		m_framebuffer.width = framebuffer.width;
+		m_framebuffer.height = framebuffer.height;
+	}
+	void Console::GetFramebuffer(con_framebuffer* framebuffer)
+	{
+		framebuffer->addr = m_framebuffer.addr;
+		framebuffer->width = m_framebuffer.width;
+		framebuffer->height = m_framebuffer.height;
+	}
+
+	void Console::GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical)
+	{
+		*horizontal = m_nCharsHorizontal;
+		*vertical = m_nCharsVertical;
+	}
+
+
+	void Console::plotPixel(uint32_t color, uint32_t x, uint32_t y)
+	{
+		m_framebuffer.addr[y * m_framebuffer.width + x] = color;
+	}
+	void Console::putChar(char ch, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor)
+	{
+		int cx, cy;
+		int mask[8] = { 128,64,32,16,8,4,2,1 };
+		const uint8_t* glyph = m_font + (int)ch * 16;
+		if (x > m_nCharsHorizontal)
+			x = 0;
+		if (y > m_framebuffer.height)
+			y = 0;
+		x <<= 3;
+		y = y * 16 + 16;
+
+		for (cy = 0; cy < 16; cy++) {
+			for (cx = 0; cx < 8; cx++) {
+				plotPixel(glyph[cy] & mask[cx] ? fgcolor : bgcolor, x + cx, y + cy - 12);
+			}
+		}
+	}
 }

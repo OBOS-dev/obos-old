@@ -1,7 +1,9 @@
+/* From https://github.com/limine-bootloader/limine-barebones */
+
 OUTPUT_FORMAT(elf64-x86-64)
 OUTPUT_ARCH(i386:x86-64)
 
-ENTRY(_ZN4obos5kmainEv)
+ENTRY(_ZN4obos10arch_kmainEv)
 
 PHDRS
 {

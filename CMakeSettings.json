@@ -12,7 +12,8 @@
       "ctestCommandArgs": "",
       "inheritEnvironments": [ "linux_x64" ],
       "wslPath": "${defaultWSLPath}",
-      "cmakeToolchain": "C:\\Code\\obos\\src\\scripts-toolchains\\x86_64\\toolchain.cmake"
+      "cmakeToolchain": "C:\\Code\\obos\\src\\scripts-toolchains\\x86_64\\toolchain.cmake",
+      "remoteCopyUseCompilerDefaults": false
     }
   ]
 }

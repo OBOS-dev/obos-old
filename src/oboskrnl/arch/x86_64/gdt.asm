@@ -45,7 +45,6 @@ _ZN4obos16InitializeGDTASMEv:
 	mov gs, ax
 	mov ss, ax
 
-
 	lgdt [GDT_Ptr]
 	
 	push 0x8

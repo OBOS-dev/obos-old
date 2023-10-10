@@ -2,7 +2,7 @@
 
 # Copyright (c) 2023 Omar Berrow
 
-if (${OUTPUT_DIR} STREQUAL "")
+if (NOT DEFINED OUTPUT_DIR)
 	set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/out")
 endif()
 
@@ -26,6 +26,7 @@ target_compile_options(oboskrnl
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-rtti>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-exceptions>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-missing-field-initializers>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-error=implicit-fallthrough>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mcmodel=kernel>
 )
