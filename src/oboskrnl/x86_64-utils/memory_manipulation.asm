@@ -1,6 +1,29 @@
 [BITS 64]
 
 global _ZN4obos5utils6strlenEPKc
+global _ZN4obos5utils7memzeroEPvm
+
+_ZN4obos5utils7memzeroEPvm:
+	push rbp
+	mov rbp, rsp
+
+	mov rcx, rsi
+
+	test rcx,rcx
+	jz .finish
+
+	mov rax, rdi
+
+.loop:
+	xor byte [rdi], byte [rdi]
+
+	inc rdi
+	loop .loop
+
+.finish:
+
+	leave
+	ret
 
 _ZN4obos5utils6strlenEPKc:
 	push rbp

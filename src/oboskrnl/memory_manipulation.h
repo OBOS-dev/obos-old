@@ -12,6 +12,7 @@ namespace obos
 {
 	namespace utils
 	{
+		void* memzero(void* block, size_t size);
 		size_t strlen(const char* string);
 	}
 }
