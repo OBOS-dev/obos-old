@@ -42,7 +42,7 @@ namespace obos
 
 		// Copies from the framebuffer specified in the parameter to the this->m_framebuffer.
 		// This function can be used for back buffering.
-		void CopyFrom(con_framebuffer* );
+		void CopyFrom(con_framebuffer* buffer);
 	private:
 		void plotPixel(uint32_t color, uint32_t x, uint32_t y);
 		void putChar(char ch, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);

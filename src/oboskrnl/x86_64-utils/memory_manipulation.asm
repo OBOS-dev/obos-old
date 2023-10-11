@@ -2,6 +2,56 @@
 
 global _ZN4obos5utils6strlenEPKc
 global _ZN4obos5utils7memzeroEPvm
+global _ZN4obos5utils8dwMemcpyEPjPKjm
+global _ZN4obos5utils8dwMemsetEPjjm
+
+_ZN4obos5utils8dwMemcpyEPjPKjm:
+	push rbp
+	mov rbp, rsp
+
+	xor rax, rax
+
+	mov rcx, rdx
+	test rcx, rcx
+	jz .finish
+	
+	test rdi, rsi
+	jz .finish
+
+	mov rax, rdi
+.loop:
+	mov r8d, [rsi]
+	mov [rdi], r8d
+
+	add rdi, 4
+	add rsi, 4
+	loop .loop
+
+.finish:
+	
+	leave
+	ret
+_ZN4obos5utils8dwMemsetEPjjm:
+	push rbp
+	mov rbp, rsp
+
+	xor rax, rax
+
+	mov rcx, rdx
+	test rcx, rcx
+	jz .finish
+	
+	mov rax, rdi
+.loop:
+	mov [rdi], rsi
+
+	add rdi, 4
+	loop .loop
+
+.finish:
+	
+	leave
+	ret
 
 _ZN4obos5utils7memzeroEPvm:
 	push rbp

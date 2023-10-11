@@ -6,7 +6,7 @@ if (NOT DEFINED OUTPUT_DIR)
 	set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/out")
 endif()
 
-set (oboskrnl_sources "console.cpp")
+set (oboskrnl_sources "console.cpp" "klog.cpp")
 
 add_executable(oboskrnl ${oboskrnl_sources} ${oboskrnl_platformSpecificSources})
 
@@ -29,6 +29,7 @@ target_compile_options(oboskrnl
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-error=implicit-fallthrough>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mcmodel=kernel>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-omit-frame-pointer>
 )
 
 target_link_options(oboskrnl

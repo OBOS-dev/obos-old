@@ -79,6 +79,8 @@ namespace obos
 	void Console::SetColour(uint32_t foregroundColour, uint32_t backgroundColour)
 	{
 		m_foregroundColour = foregroundColour;
+		if (backgroundColour != m_backgroundColour)
+			utils::dwMemset(m_framebuffer.addr, backgroundColour, m_framebuffer.width * m_framebuffer.height);
 		m_backgroundColour = backgroundColour;
 	}
 	void Console::GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour)
@@ -115,6 +117,13 @@ namespace obos
 		*vertical = m_nCharsVertical;
 	}
 
+
+	void Console::CopyFrom(con_framebuffer* buffer)
+	{
+		if (buffer->height != m_framebuffer.height || buffer->width != m_framebuffer.width)
+			return;
+		utils::dwMemcpy(m_framebuffer.addr, buffer->addr, m_framebuffer.width * m_framebuffer.height);
+	}
 
 	void Console::plotPixel(uint32_t color, uint32_t x, uint32_t y)
 	{

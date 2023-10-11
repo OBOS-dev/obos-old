@@ -10,6 +10,7 @@
 
 #include <int.h>
 #include <console.h>
+#include <klog.h>
 
 #include <x86_64-utils/asm.h>
 
@@ -33,7 +34,7 @@ namespace obos
 {
 	void InitializeGdt();
 	void InitializeIdt();
-	Console console{};
+	Console g_kernelConsole{};
 	static volatile limine_framebuffer_request framebuffer_request = {
 		.id = LIMINE_FRAMEBUFFER_REQUEST,
 		.revision = 0
@@ -48,11 +49,6 @@ namespace obos
 		cli();
 		while (1)
 			hlt();
-	}
-	void int3_handler(interrupt_frame* frame)
-	{
-		(frame = frame);
-		console.ConsoleOutput("Hello from int3.");
 	}
 	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console.
 	void arch_kmain()
@@ -73,12 +69,15 @@ namespace obos
 				break;
 			}
 		}
-		console.Initialize(font, framebuffer);
-		console.SetColour(0xffffffff, 0);
+		g_kernelConsole.Initialize(font, framebuffer);
+		g_kernelConsole.SetColour(0xffffffff, 0);
 		InitializeGdt();
 		InitializeIdt();
-		RegisterInterruptHandler(3, int3_handler);
-		asm volatile("int3");
+		int counter = 0;
+		logger::log("This is a test log message. Counter: %d\n", counter++);
+		logger::warning("This is a test warning. Counter: %d\n", counter++);
+		logger::error("This is a test error. Counter: %d\n", counter++);
+		logger::panic("This is a test panic. Counter: %d\n", counter++);
 		EarlyKPanic();
 	}
 }
