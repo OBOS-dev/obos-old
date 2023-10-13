@@ -15,6 +15,7 @@
 #include <x86_64-utils/asm.h>
 
 #include <arch/interrupt.h>
+#include <arch/x86_64/memory_manager/physical/allocate.h>
 
 #include <memory_manipulation.h>
 
@@ -34,6 +35,8 @@ namespace obos
 {
 	void InitializeGdt();
 	void InitializeIdt();
+	void InitializeIrq();
+	void RegisterExceptionHandlers();
 	Console g_kernelConsole{};
 	static volatile limine_framebuffer_request framebuffer_request = {
 		.id = LIMINE_FRAMEBUFFER_REQUEST,
@@ -71,13 +74,19 @@ namespace obos
 		}
 		g_kernelConsole.Initialize(font, framebuffer);
 		g_kernelConsole.SetColour(0xffffffff, 0);
+		logger::log("%s: Initializing GDT.\n", __func__);
 		InitializeGdt();
+		logger::log("%s: Initializing IDT.\n", __func__);
 		InitializeIdt();
-		int counter = 0;
-		logger::log("This is a test log message. Counter: %d\n", counter++);
-		logger::warning("This is a test warning. Counter: %d\n", counter++);
-		logger::error("This is a test error. Counter: %d\n", counter++);
-		logger::panic("This is a test panic. Counter: %d\n", counter++);
-		EarlyKPanic();
+		logger::log("%s: Registering exception handlers.\n", __func__);
+		RegisterExceptionHandlers();
+		logger::log("%s: Initializing IRQs.\n", __func__);
+		InitializeIrq();
+		logger::log("%s: Initializing the physical memory manager.\n", __func__);
+		memory::InitializePhysicalMemoryManager();
+		
+		cli();
+		while (1)
+			hlt();
 	}
 }

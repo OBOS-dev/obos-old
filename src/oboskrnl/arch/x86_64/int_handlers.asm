@@ -50,6 +50,7 @@ pop rax
 %macro ISR_NOERRCODE 1
 global isr%1
 isr%1:
+%assign current_isr current_isr + 1
 push 0
 push %1
 jmp isr_common_stub
@@ -57,9 +58,12 @@ jmp isr_common_stub
 %macro ISR_ERRCODE 1
 global isr%1
 isr%1:
+%assign current_isr current_isr + 1
 push %1
 jmp isr_common_stub
 %endmacro
+
+%assign current_isr 0
 
  ISR_NOERRCODE 0
  ISR_NOERRCODE 1
@@ -93,6 +97,9 @@ ISR_NOERRCODE 28
 ISR_ERRCODE   29
 ISR_ERRCODE   30
 ISR_NOERRCODE 31
+%rep 224
+ISR_NOERRCODE current_isr
+%endrep
 
 extern _ZN4obos10g_handlersE
 

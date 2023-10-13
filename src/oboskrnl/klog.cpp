@@ -23,15 +23,6 @@ namespace obos
 {
 	namespace logger
 	{
-
-		enum
-		{
-			GREY = 0xD3D3D3,
-			GREEN = 0x03D12B,
-			YELLOW = 0xffcc00,
-			ERROR_RED = 0xcc3300,
-			PANIC_RED = 0xac1616,
-		};
 		size_t printf_impl(void(*printCallback)(char ch, void* userdata), void* userdata, const char* format, va_list list)
 		{
 			size_t ret = 0;
@@ -89,6 +80,7 @@ namespace obos
 						const char* str = va_arg(list, const char*);
 						for (int i = 0; str[i]; i++, ret++)
 							printCallback(str[i], userdata);
+						break;
 					}
 					case 'p':
 					{

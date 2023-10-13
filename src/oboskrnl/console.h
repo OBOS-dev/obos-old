@@ -46,6 +46,7 @@ namespace obos
 	private:
 		void plotPixel(uint32_t color, uint32_t x, uint32_t y);
 		void putChar(char ch, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
+		void newlineHandler(uint32_t& x, uint32_t& y);
 		con_framebuffer m_framebuffer;
 		uint32_t m_terminalX = 0;
 		uint32_t m_terminalY = 0;

@@ -4,6 +4,7 @@ global _ZN4obos5utils6strlenEPKc
 global _ZN4obos5utils7memzeroEPvm
 global _ZN4obos5utils8dwMemcpyEPjPKjm
 global _ZN4obos5utils8dwMemsetEPjjm
+global _ZN4obos5utils6memcmpEPKvS2_m
 
 _ZN4obos5utils8dwMemcpyEPjPKjm:
 	push rbp
@@ -71,6 +72,32 @@ _ZN4obos5utils7memzeroEPvm:
 	loop .loop
 
 .finish:
+
+	leave
+	ret
+
+_ZN4obos5utils6memcmpEPKvS2_m:
+	push rbp
+	mov rbp, rsp
+
+	mov rcx, rdx
+	test rcx,rcx
+	jz .finish
+
+.loop:
+	mov r8b, [rdi]
+	mov r9b, [rsi]
+	sub r8b, r9b
+	jne .finish
+
+	inc rdi
+	inc rsi
+	loop .loop
+
+.finish:
+	
+	test rcx, rcx
+	setz al
 
 	leave
 	ret

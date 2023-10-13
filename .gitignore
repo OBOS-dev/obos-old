@@ -4,3 +4,6 @@
 
 /.vs
 /out/build
+/CMakePresets.json
+/oldCMakeSettings.json
+/out/Ubuntu

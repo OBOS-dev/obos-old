@@ -76,5 +76,6 @@ namespace obos
 		uintptr_t useresp, ds;
 	};
 
-	void RegisterInterruptHandler(byte interrupt, void(*handlers)(interrupt_frame* frame));
+	void RegisterInterruptHandler(byte interrupt, void(*handler)(interrupt_frame* frame));
+	void RegisterIrqHandler(byte offset, void(*handler)(interrupt_frame* frame));
 }

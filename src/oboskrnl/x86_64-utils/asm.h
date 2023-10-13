@@ -20,4 +20,6 @@ namespace obos
 	void cli();
 	void sti();
 	void hlt();
+
+	void* getCR2();
 }

@@ -13,6 +13,7 @@ global _ZN4obos3indEt
 global _ZN4obos3cliEv
 global _ZN4obos3stiEv
 global _ZN4obos3hltEv
+global _ZN4obos6getCR2Ev
 
 _ZN4obos4outbEth:
 	mov dx, di
@@ -51,4 +52,7 @@ _ZN4obos3stiEv:
 	ret
 _ZN4obos3hltEv:
 	sti
+	ret
+_ZN4obos6getCR2Ev:
+	mov rax, cr2
 	ret

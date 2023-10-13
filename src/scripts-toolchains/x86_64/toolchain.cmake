@@ -27,5 +27,5 @@ set (LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/src/scripts-toolchains/x86_64/linker.ld"
 set (oboskrnl_platformSpecificSources 
 	"boot/x86_64/kmain.cpp" "x86_64-utils/memory_manipulation.asm" "x86_64-utils/asm.asm" "arch/x86_64/gdt.cpp"
 	"arch/x86_64/gdt.asm" "arch/x86_64/idt.cpp" "arch/x86_64/idt.asm" "arch/x86_64/int_handlers.asm"
-	"arch/x86_64/trace.cpp"
+	"arch/x86_64/trace.cpp" "arch/x86_64/irq.cpp" "arch/x86_64/exception_handlers.cpp" "arch/x86_64/memory_manager/physical/allocate.cpp"
 )

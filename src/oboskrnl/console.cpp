@@ -24,8 +24,8 @@ namespace obos
 	{
 		m_font = (uint8_t*)font;
 		m_framebuffer = output;
-		m_nCharsHorizontal = output.width / 16;
-		m_nCharsVertical = output.height / 8;
+		m_nCharsHorizontal = output.width / 8;
+		m_nCharsVertical = output.height / 16;
 	}
 
 	void Console::ConsoleOutput(const char* string)
@@ -44,12 +44,14 @@ namespace obos
 	{
 		ConsoleOutput(ch, m_foregroundColour, m_backgroundColour, x, y);
 	}
+
 	void Console::ConsoleOutput(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y)
 	{
 		switch (ch)
 		{
 		case '\n':
-			y++;
+			newlineHandler(x,y);
+			break;
 		case '\r':
 			x = 0;
 			break;
@@ -60,6 +62,8 @@ namespace obos
 			putChar(' ', --x, y, foregroundColour, backgroundColour);
 			break;
 		default:
+			if (x >= m_nCharsHorizontal)
+				newlineHandler(x,y);
 			putChar(ch, x++, y, foregroundColour, backgroundColour);
 			break;
 		}
@@ -134,17 +138,25 @@ namespace obos
 		int cx, cy;
 		int mask[8] = { 128,64,32,16,8,4,2,1 };
 		const uint8_t* glyph = m_font + (int)ch * 16;
-		if (x > m_nCharsHorizontal)
+		y = y * 16 + 16;
+		x <<= 3;
+		if (x > m_framebuffer.width)
 			x = 0;
 		if (y > m_framebuffer.height)
 			y = 0;
-		x <<= 3;
-		y = y * 16 + 16;
-
 		for (cy = 0; cy < 16; cy++) {
 			for (cx = 0; cx < 8; cx++) {
 				plotPixel(glyph[cy] & mask[cx] ? fgcolor : bgcolor, x + cx, y + cy - 12);
 			}
+		}
+	}
+	void Console::newlineHandler(uint32_t& x, uint32_t& y)
+	{
+		x = 0;
+		if (y++ > m_nCharsVertical)
+		{
+			utils::dwMemcpy(m_framebuffer.addr, m_framebuffer.addr + m_framebuffer.width, m_framebuffer.width * m_framebuffer.height - m_framebuffer.width);
+			utils::dwMemset(m_framebuffer.addr, 0, m_framebuffer.width);
 		}
 	}
 }

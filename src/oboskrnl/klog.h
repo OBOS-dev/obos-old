@@ -16,6 +16,15 @@ namespace obos
 	extern Console g_kernelConsole;
 	namespace logger
 	{
+		enum
+		{
+			GREY = 0xD3D3D3,
+			GREEN = 0x03D12B,
+			YELLOW = 0xffcc00,
+			ERROR_RED = 0xcc3300,
+			PANIC_RED = 0xac1616,
+		};
+
 		size_t printf(const char* format, ...);
 		size_t vprintf(const char* format, va_list list);
 		size_t sprintf(char* dest, const char* format, ...); // TODO: Implement this.
