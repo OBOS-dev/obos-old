@@ -65,9 +65,6 @@ pageBlock* allocateNewPageBlock(size_t nPages)
 	if(!blk)
 		obos::logger::panic("Could not allocate a pageBlock at %p.", liballoc_base + totalPagesAllocated * 4096);
 	totalPagesAllocated += nPages;
-#ifndef __x86_64__
-	obos::utils::memzero(blk, nPages * 4096);
-#endif
 	if (!pageBlockHead)
 		pageBlockHead = blk;
 	else

@@ -95,7 +95,7 @@ namespace obos
 		{
 			if (!CanAllocatePages(_base, nPages))
 				return nullptr;
-			uintptr_t base = (uintptr_t)_base;
+			uintptr_t base = (uintptr_t)_base & (~0xfff);
 			if (!base)
 			{
 				base = 0x1000;
@@ -138,7 +138,7 @@ namespace obos
 				return false;
 			if (CanAllocatePages(_base, nPages))
 				return false;
-			uintptr_t base = (uintptr_t)_base;
+			uintptr_t base = (uintptr_t)_base & (~0xfff);
 			PageMap* pageMap = getCurrentPageMap();
 			for (uintptr_t addr = base; addr != (base + nPages * 4096); addr += 4096)
 			{
@@ -180,7 +180,7 @@ namespace obos
 				return false;
 			if (CanAllocatePages(_base, nPages))
 				return false;
-			uintptr_t base = (uintptr_t)_base;
+			uintptr_t base = (uintptr_t)_base & (~0xfff);
 			PageMap* pageMap = getCurrentPageMap();
 			_flags &= PROT_ALL_BITS_SET;
 			for (uintptr_t addr = base; addr != (base + nPages * 4096); addr += 4096)
@@ -198,7 +198,43 @@ namespace obos
 			}
 			return true;
 		}
+
+		static uintptr_t EncodeProtectionFlags(uintptr_t entry)
+		{
+			entry &= (~0xFFFFFFFFFF000);
+			uintptr_t ret = 0;
+			if (entry & 1)
+				ret |= PROT_IS_PRESENT;
+			if (!(entry & ((uintptr_t)1 << 1)))
+				ret |= PROT_READ_ONLY;
+			if (entry & ((uintptr_t)1 << 4))
+				ret |= PROT_DISABLE_CACHE;
+			if (entry & ((uintptr_t)1 << 2))
+				ret |= PROT_USER_MODE_ACCESS;
+			if (!(entry & ((uintptr_t)1 << 63)))
+				ret |= PROT_CAN_EXECUTE;
+			return ret;
+		}
 		
-		bool VirtualGetProtection(void* base, size_t nPages, uintptr_t* _flags);
+		bool VirtualGetProtection(void* _base, size_t nPages, uintptr_t* _flags)
+		{
+			if (!_base)
+				return false;
+			uintptr_t base = (uintptr_t)_base & (~0xfff);
+			PageMap* pageMap = getCurrentPageMap();
+			for (uintptr_t addr = base, i = 0; addr != (base + nPages * 4096); addr += 4096, i++)
+			{
+				if (!PagesAllocated((void*)addr, 1))
+				{
+					_flags[i] = 0;
+					continue;
+				}
+				uintptr_t _pageMapPhys = (uintptr_t)pageMap->getL2PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
+				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMapPhys));
+				uintptr_t entry = _pageMap[PageMap::addressToIndex(addr, 0)];
+				_flags[i] = EncodeProtectionFlags(entry);
+			}
+			return true;
+		}
 	}
 }
