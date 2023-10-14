@@ -79,8 +79,8 @@ namespace obos
 		uintptr_t allocatePhysicalPage()
 		{
 			// Find an available page.
-			uintptr_t ret = 0;
-			for (size_t i = 0x1000; i < g_bitmapSize && getPageStatus(ret); ret += 0x1000, i = addrToIndex(ret));
+			uintptr_t ret = 0x1000;
+			for (size_t i = 0; i < g_bitmapSize && getPageStatus(ret); ret += 0x1000, i = addrToIndex(ret));
 			if (getPageStatus(ret))
 				logger::panic("No more avaliable system memory!\n");
 			markPageAs(ret, true);
