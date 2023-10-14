@@ -129,13 +129,11 @@ namespace obos
 		utils::dwMemcpy(m_framebuffer.addr, buffer->addr, m_framebuffer.width * m_framebuffer.height);
 	}
 
-	void Console::plotPixel(uint32_t color, uint32_t x, uint32_t y)
-	{
-		m_framebuffer.addr[y * m_framebuffer.width + x] = color;
-	}
+#pragma GCC push_options
+#pragma GCC optimize("O3")
 	void Console::putChar(char ch, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor)
 	{
-		int cx, cy;
+		int cy;
 		int mask[8] = { 128,64,32,16,8,4,2,1 };
 		const uint8_t* glyph = m_font + (int)ch * 16;
 		y = y * 16 + 16;
@@ -144,12 +142,22 @@ namespace obos
 			x = 0;
 		if (y > m_framebuffer.height)
 			y = 0;
-		for (cy = 0; cy < 16; cy++) {
-			for (cx = 0; cx < 8; cx++) {
-				plotPixel(glyph[cy] & mask[cx] ? fgcolor : bgcolor, x + cx, y + cy - 12);
-			}
+		for (cy = 0; cy < 16; cy++) 
+		{
+			uint32_t realY = y + cy - 12;
+			uint32_t* framebuffer = m_framebuffer.addr + realY * m_framebuffer.width;
+			framebuffer[x + 0] = (glyph[cy] & mask[0]) ? fgcolor : bgcolor;
+			framebuffer[x + 1] = (glyph[cy] & mask[1]) ? fgcolor : bgcolor;
+			framebuffer[x + 2] = (glyph[cy] & mask[2]) ? fgcolor : bgcolor;
+			framebuffer[x + 3] = (glyph[cy] & mask[3]) ? fgcolor : bgcolor;
+			framebuffer[x + 4] = (glyph[cy] & mask[4]) ? fgcolor : bgcolor;
+			framebuffer[x + 5] = (glyph[cy] & mask[5]) ? fgcolor : bgcolor;
+			framebuffer[x + 6] = (glyph[cy] & mask[6]) ? fgcolor : bgcolor;
+			framebuffer[x + 7] = (glyph[cy] & mask[7]) ? fgcolor : bgcolor;
 		}
 	}
+#pragma GCC pop_options
+
 	void Console::newlineHandler(uint32_t& x, uint32_t& y)
 	{
 		x = 0;

@@ -44,7 +44,6 @@ namespace obos
 		// This function can be used for back buffering.
 		void CopyFrom(con_framebuffer* buffer);
 	private:
-		void plotPixel(uint32_t color, uint32_t x, uint32_t y);
 		void putChar(char ch, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
 		void newlineHandler(uint32_t& x, uint32_t& y);
 		con_framebuffer m_framebuffer;
