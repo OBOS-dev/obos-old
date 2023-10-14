@@ -22,4 +22,6 @@ namespace obos
 	void hlt();
 
 	void* getCR2();
+	uintptr_t getEFER();
+	void invlpg(uintptr_t addr);
 }

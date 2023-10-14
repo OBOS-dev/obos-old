@@ -15,7 +15,11 @@
 #include <x86_64-utils/asm.h>
 
 #include <arch/interrupt.h>
+
 #include <arch/x86_64/memory_manager/physical/allocate.h>
+
+#include <arch/x86_64/memory_manager/virtual/initialize.h>
+#include <arch/x86_64/memory_manager/virtual/allocate.h>
 
 #include <memory_manipulation.h>
 
@@ -45,6 +49,11 @@ namespace obos
 	static volatile limine_module_request module_request = {
 		.id = LIMINE_MODULE_REQUEST,
 		.revision = 0,
+	};
+	static volatile limine_stack_size_request stack_size_request = {
+		.id = LIMINE_STACK_SIZE_REQUEST,
+		.revision = 0,
+		.stack_size = (4 * 4096)
 	};
 	void EarlyKPanic()
 	{
@@ -84,6 +93,12 @@ namespace obos
 		InitializeIrq();
 		logger::log("%s: Initializing the physical memory manager.\n", __func__);
 		memory::InitializePhysicalMemoryManager();
+		logger::log("%s: Initializing the virtual memory manager.\n", __func__);
+		memory::InitializeVirtualMemoryManager();
+		char* mem = new char[30];
+		utils::memcpy(mem, "A string allocated by kmalloc", 30);
+		logger::printf("%s", mem);
+		delete[] mem;
 		cli();
 		while (1)
 			hlt();

@@ -6,15 +6,37 @@
 
 #include <int.h>
 #include <klog.h>
+#include <memory_manipulation.h>
 
 #include <arch/interrupt.h>
 
 #include <x86_64-utils/asm.h>
 
+#include <arch/x86_64/memory_manager/virtual/initialize.h>
+#include <arch/x86_64/memory_manager/virtual/allocate.h>
+
+#include <arch/x86_64/memory_manager/physical/allocate.h>
+
 namespace obos
 {
 	void exception14(interrupt_frame* frame)
 	{
+		if (frame->errorCode & 1)
+		{
+			uintptr_t faultAddress = (uintptr_t)getCR2();
+			memory::PageMap* pageMap = memory::getCurrentPageMap();
+			uintptr_t entry = (uintptr_t)pageMap->getL1PageMapEntryAt(faultAddress);
+			if (entry & ((uintptr_t)1 << 9))
+			{
+				uintptr_t flags = memory::DecodeProtectionFlags(entry >> 52) | 1;
+				uintptr_t newEntry = memory::allocatePhysicalPage();
+				utils::memcpy(memory::mapPageTable((uintptr_t*)newEntry), (void*)faultAddress, 4096);
+				newEntry |= flags;
+				uintptr_t* _pageMap = memory::mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL2PageMapEntryAt(faultAddress) & 0xFFFFFFFFFF000));
+				_pageMap[memory::PageMap::addressToIndex(faultAddress, 0)] = newEntry;
+				return;
+			}
+		}
 		logger::panic("Page fault in %s-mode at %p while trying to %s a %s page. The address of this page is %p. Error code: %d. Dumping registers:\n"
 					  "\tRDI: %p, RSI: %p, RBP: %p\n"
 					  "\tRSP: %p, RBX: %p, RDX: %p\n"

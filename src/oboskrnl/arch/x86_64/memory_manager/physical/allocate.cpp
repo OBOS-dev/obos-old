@@ -11,6 +11,8 @@
 
 #include <arch/x86_64/memory_manager/physical/allocate.h>
 
+#include <arch/x86_64/memory_manager/virtual/initialize.h>
+
 namespace obos
 {
 	namespace memory
@@ -30,24 +32,37 @@ namespace obos
 		{
 			uint32_t index = addrToIndex(address);
 			uint32_t bit   = addrToBit(address);
-			return g_bitmaps[index] & (1 << bit);
+			uint32_t* bitmap = (uint32_t*)mapPageTable((uintptr_t*)(g_bitmaps + index));
+			if (bitmap != (g_bitmaps + index))
+			{
+				uintptr_t offset = reinterpret_cast<uintptr_t>(g_bitmaps + index) & 0xfff;
+				bitmap = reinterpret_cast<uint32_t*>(reinterpret_cast<uintptr_t>(bitmap) + offset);
+			}
+			uint32_t bitmap_val = *bitmap;
+			return bitmap_val & (1 << bit);
 		}
 		static bool markPageAs(uintptr_t address, bool newStatus)
 		{
 			uint32_t index = addrToIndex(address);
 			uint32_t bit   = addrToBit(address);
+			uint32_t* bitmap = (uint32_t*)mapPageTable((uintptr_t*)(g_bitmaps + index));
+			if (bitmap != (g_bitmaps + index))
+			{
+				uintptr_t offset = reinterpret_cast<uintptr_t>(g_bitmaps + index) & 0xfff;
+				bitmap = reinterpret_cast<uint32_t*>(reinterpret_cast<uintptr_t>(bitmap) + offset);
+			}
 			bool ret = getPageStatus(address);
 			if(newStatus)
-				g_bitmaps[index] |= (1 << bit);
+				*bitmap |= (1 << bit);
 			else
-				g_bitmaps[index] &= ~(1 << bit);
+				*bitmap &= ~(1 << bit);
 			return ret;
 		}
 		void InitializePhysicalMemoryManager()
 		{
 			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
 				g_ramSize += mmap_request.response->entries[i]->length;
-			g_bitmapSize = g_ramSize >> 20;
+			g_bitmapSize = g_ramSize >> 15;
 			bool foundSpace = false;
 			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
 			{
@@ -74,6 +89,7 @@ namespace obos
 			uintptr_t bitmap_end = (reinterpret_cast<uintptr_t>(g_bitmaps) + g_bitmapSize + 0xfff) & (~0xfff);
 			for (uintptr_t currentPage = bitmap_start; currentPage != bitmap_end; currentPage += 0x1000)
 				markPageAs(currentPage, true);
+			markPageAs(0, true); // The zero page is allocated.
 		}
 
 		uintptr_t allocatePhysicalPage()

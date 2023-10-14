@@ -6,7 +6,7 @@ if (NOT DEFINED OUTPUT_DIR)
 	set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/out")
 endif()
 
-set (oboskrnl_sources "console.cpp" "klog.cpp")
+set (oboskrnl_sources "console.cpp" "klog.cpp" "liballoc/liballoc.cpp")
 
 add_executable(oboskrnl ${oboskrnl_sources} ${oboskrnl_platformSpecificSources})
 

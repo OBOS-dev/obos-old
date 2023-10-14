@@ -14,6 +14,10 @@ global _ZN4obos3cliEv
 global _ZN4obos3stiEv
 global _ZN4obos3hltEv
 global _ZN4obos6getCR2Ev
+global _ZN4obos6memory17getCurrentPageMapEv
+global _ZN4obos6memory7PageMap12switchToThisEv
+global _ZN4obos7getEFEREv
+global _ZN4obos6invlpgEm
 
 _ZN4obos4outbEth:
 	mov dx, di
@@ -55,4 +59,17 @@ _ZN4obos3hltEv:
 	ret
 _ZN4obos6getCR2Ev:
 	mov rax, cr2
+	ret
+_ZN4obos6memory17getCurrentPageMapEv:
+	mov rax, cr3
+	ret
+_ZN4obos6memory7PageMap12switchToThisEv:
+	mov cr3, rdi
+	ret
+_ZN4obos7getEFEREv:
+	mov ecx, 0xC0000080
+    rdmsr
+	ret
+_ZN4obos6invlpgEm:
+	invlpg [rdi]
 	ret

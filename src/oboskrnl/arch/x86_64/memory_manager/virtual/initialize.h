@@ -12,10 +12,18 @@ namespace obos
 {
 	namespace memory
 	{
+		uintptr_t* mapPageTable(uintptr_t* phys);
+
 		class PageMap
 		{
 		public:
 			PageMap() = delete;
+
+			// L4 -> Page Map
+			// L3 -> Page Directory Pointer
+			// L2 -> Page Directory
+			// L1 -> Page Table
+			// L0 -> Page Table Entry
 
 			uintptr_t* getPageMap() { return (uintptr_t*)this; }
 			uintptr_t* getL4PageMapEntryAt(uintptr_t at); // pageMap[addressToIndex(at, 3)];
@@ -25,8 +33,13 @@ namespace obos
 
 			void switchToThis();
 
-			size_t addressToIndex(uintptr_t address, uint8_t level) { return (address >> (9 * level + 12)) & 0x1FF;  }
+			static size_t addressToIndex(uintptr_t address, uint8_t level) { return (address >> (9 * level + 12)) & 0x1FF; }
 		};
+
+		PageMap* getCurrentPageMap();
+
 		void InitializeVirtualMemoryManager();
+
+		bool CPUSupportsExecuteDisable();
 	}
 }
