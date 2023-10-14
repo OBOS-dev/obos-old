@@ -195,7 +195,7 @@ namespace obos
 		for (uint8_t i = 0; i < nCores; i++)
 			logger::printf("\t%p\n", processorIDs[i]);
 		g_kernelConsole.SetColour(oldForeground, oldBackground); \
-	}	
+	}
 	void InitializeIrq()
 	{
 		g_irqController = IRQ_CONTROLLER_PIC;

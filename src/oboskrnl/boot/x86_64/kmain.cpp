@@ -60,7 +60,7 @@ namespace obos
 		void* font = nullptr;
 		if (!framebuffer_request.response->framebuffers)
 			EarlyKPanic();
-		
+
 		framebuffer.addr = (uint32_t*)framebuffer_request.response->framebuffers[0]->address;
 		framebuffer.width = framebuffer_request.response->framebuffers[0]->width;
 		framebuffer.height = framebuffer_request.response->framebuffers[0]->height;
@@ -84,7 +84,6 @@ namespace obos
 		InitializeIrq();
 		logger::log("%s: Initializing the physical memory manager.\n", __func__);
 		memory::InitializePhysicalMemoryManager();
-		
 		cli();
 		while (1)
 			hlt();
