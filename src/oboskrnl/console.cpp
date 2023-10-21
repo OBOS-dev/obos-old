@@ -4,9 +4,6 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
-#ifdef __INTELLISENSE__
-#undef __STDC_HOSTED__
-#endif
 #include <int.h>
 
 #include <console.h>
@@ -76,8 +73,10 @@ namespace obos
 	}
 	void Console::GetPosition(uint32_t* x, uint32_t* y)
 	{
-		*x = m_terminalX;
-		*y = m_terminalY;
+		if(x)
+			*x = m_terminalX;
+		if(y)
+			*y = m_terminalY;
 	}
 
 	void Console::SetColour(uint32_t foregroundColour, uint32_t backgroundColour)
@@ -89,8 +88,10 @@ namespace obos
 	}
 	void Console::GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour)
 	{
-		*foregroundColour = m_foregroundColour;
-		*backgroundColour = m_backgroundColour;
+		if (foregroundColour)
+			*foregroundColour = m_foregroundColour;
+		if (backgroundColour)
+			*backgroundColour = m_backgroundColour;
 	}
 
 	void Console::SetFont(uint8_t* font)
@@ -99,7 +100,8 @@ namespace obos
 	}
 	void Console::GetFont(uint8_t** font)
 	{
-		*font = m_font;
+		if(font)
+			*font = m_font;
 	}
 
 	void Console::SetFramebuffer(con_framebuffer framebuffer)
@@ -107,9 +109,12 @@ namespace obos
 		m_framebuffer.addr = framebuffer.addr;
 		m_framebuffer.width = framebuffer.width;
 		m_framebuffer.height = framebuffer.height;
+		m_framebuffer.pitch = framebuffer.pitch;
 	}
 	void Console::GetFramebuffer(con_framebuffer* framebuffer)
 	{
+		if (!framebuffer)
+			return;
 		framebuffer->addr = m_framebuffer.addr;
 		framebuffer->width = m_framebuffer.width;
 		framebuffer->height = m_framebuffer.height;
@@ -117,8 +122,10 @@ namespace obos
 
 	void Console::GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical)
 	{
+		if (horizontal)
 		*horizontal = m_nCharsHorizontal;
-		*vertical = m_nCharsVertical;
+		if(vertical)
+			*vertical = m_nCharsVertical;
 	}
 
 
@@ -145,7 +152,7 @@ namespace obos
 		for (cy = 0; cy < 16; cy++) 
 		{
 			uint32_t realY = y + cy - 12;
-			uint32_t* framebuffer = m_framebuffer.addr + realY * m_framebuffer.width;
+			uint32_t* framebuffer = m_framebuffer.addr + realY * (m_framebuffer.pitch / 4);
 			framebuffer[x + 0] = (glyph[cy] & mask[0]) ? fgcolor : bgcolor;
 			framebuffer[x + 1] = (glyph[cy] & mask[1]) ? fgcolor : bgcolor;
 			framebuffer[x + 2] = (glyph[cy] & mask[2]) ? fgcolor : bgcolor;
@@ -161,10 +168,13 @@ namespace obos
 	void Console::newlineHandler(uint32_t& x, uint32_t& y)
 	{
 		x = 0;
-		if (y++ > m_nCharsVertical)
+		if (++y == m_nCharsVertical)
 		{
-			utils::dwMemcpy(m_framebuffer.addr, m_framebuffer.addr + m_framebuffer.width, m_framebuffer.width * m_framebuffer.height - m_framebuffer.width);
-			utils::dwMemset(m_framebuffer.addr, 0, m_framebuffer.width);
+			utils::dwMemset(m_framebuffer.addr, 0, static_cast<size_t>(m_framebuffer.pitch) * 16 / 4);
+			utils::dwMemcpy(m_framebuffer.addr, m_framebuffer.addr + m_framebuffer.pitch * 16 / 4, ((m_framebuffer.pitch / 4) * m_framebuffer.height * 4) - m_framebuffer.pitch * 16 / 4);
+			utils::dwMemset((uint32_t*)(reinterpret_cast<uintptr_t>(m_framebuffer.addr) + (m_framebuffer.pitch * m_framebuffer.height) - m_framebuffer.pitch * 16),
+				m_backgroundColour, m_framebuffer.pitch * 16 / 4);
+			y--;
 		}
 	}
 }

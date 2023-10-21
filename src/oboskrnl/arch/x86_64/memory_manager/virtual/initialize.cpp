@@ -10,8 +10,11 @@
 #include <x86_64-utils/asm.h>
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
+#include <arch/x86_64/memory_manager/virtual/allocate.h>
 
 #include <arch/x86_64/memory_manager/physical/allocate.h>
+
+#include <arch/x86_64/irq/irq.h>
 
 namespace obos
 {
@@ -64,7 +67,7 @@ namespace obos
 		{
 			PageMap* kernelPageMap = getCurrentPageMap();
 			PageMap* newKernelPageMap = (PageMap*)allocatePhysicalPage();
-			uintptr_t* pPageMap = mapPageTable(newKernelPageMap->getPageMap());
+			uintptr_t* pPageMap = (uintptr_t*)newKernelPageMap;
 			s_pageTablePhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageTable) & 0xFFFFFFFFFF000;
 			s_pageDirectoryPhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageDirectory) & 0xFFFFFFFFFF000;
 			pPageMap[511] = (uintptr_t)kernelPageMap->getL4PageMapEntryAt(0xffffffff80000000);
@@ -75,6 +78,8 @@ namespace obos
 			g_initialized = true;
 			utils::memzero((uint32_t*)mapPageTable(nullptr), 4096);
 			freePhysicalPage((uintptr_t)kernelPageMap);
+			MapVirtualPageToPhysical((void*)0xffffffffffffe000, (void*)g_localAPICAddr, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
+			g_localAPICAddr = (volatile LAPIC*)0xffffffffffffe000;
 		}
 		bool CPUSupportsExecuteDisable()
 		{

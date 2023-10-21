@@ -25,6 +25,7 @@ namespace obos
 		size_t g_ramSize = 0;
 		size_t g_bitmapSize = 0;
 		uint32_t* g_bitmaps = nullptr;
+		uintptr_t g_memEnd = 0;
 
 #define addrToIndex(addr) (addr >> 17)
 #define addrToBit(addr) ((addr >> 12) & 0x1f)
@@ -66,13 +67,14 @@ namespace obos
 			bool foundSpace = false;
 			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
 			{
-				if (mmap_request.response->entries[i]->type == LIMINE_MEMMAP_USABLE && mmap_request.response->entries[i]->length >= (g_bitmapSize * 8))
+				if (mmap_request.response->entries[i]->type == LIMINE_MEMMAP_USABLE && mmap_request.response->entries[i]->length >= (g_bitmapSize * 4))
 				{
 					g_bitmaps = reinterpret_cast<uint32_t*>(mmap_request.response->entries[i]->base);
 					foundSpace = true;
 					break;
 				}
 			}
+			g_memEnd = mmap_request.response->entries[mmap_request.response->entry_count - 1]->base + mmap_request.response->entries[mmap_request.response->entry_count - 1]->length;
 			if (!foundSpace)
 				logger::panic("Couldn't find enough space to allocate the bitmap for the physical memory manager.\n");
 			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
@@ -86,7 +88,7 @@ namespace obos
 				}
 			}
 			uintptr_t bitmap_start = reinterpret_cast<uintptr_t>(g_bitmaps) & (~0xfff);
-			uintptr_t bitmap_end = (reinterpret_cast<uintptr_t>(g_bitmaps) + g_bitmapSize + 0xfff) & (~0xfff);
+			uintptr_t bitmap_end = (reinterpret_cast<uintptr_t>(g_bitmaps + g_bitmapSize) + 0xfff) & (~0xfff);
 			for (uintptr_t currentPage = bitmap_start; currentPage != bitmap_end; currentPage += 0x1000)
 				markPageAs(currentPage, true);
 			markPageAs(0, true); // The zero page is allocated.
@@ -96,8 +98,8 @@ namespace obos
 		{
 			// Find an available page.
 			uintptr_t ret = 0x1000;
-			for (size_t i = 0; i < g_bitmapSize && getPageStatus(ret); ret += 0x1000, i = addrToIndex(ret));
-			if (getPageStatus(ret))
+			for (; ret < g_memEnd && getPageStatus(ret); ret += 0x1000);
+			if (ret == g_memEnd)
 				logger::panic("No more avaliable system memory!\n");
 			markPageAs(ret, true);
 			return ret;

@@ -88,6 +88,8 @@ namespace obos
 				flags |= ((uintptr_t)1 << 4);
 			if (_flags & PROT_USER_MODE_ACCESS)
 				flags |= ((uintptr_t)1 << 2);
+			if (_flags & PROT_IS_PRESENT)
+				flags |= ((uintptr_t)1 << 0);
 			return flags;
 		}
 
@@ -125,13 +127,35 @@ namespace obos
 					entry |= flags;
 					entry |= allocatePhysicalPage();
 				}
-				uintptr_t* pageTable = allocatePagingStructures(addr);
-				pageTable[PageMap::addressToIndex(addr, 0)] = entry;
-				invlpg(addr);
+				MapVirtualPageToEntry((void*)addr, entry);
 			}
 			return reinterpret_cast<void*>(base);
 		}
 		
+		static void freePagingStructures(uintptr_t* _pageMap, uintptr_t _pageMapPhys, obos::memory::PageMap* pageMap, uintptr_t addr)
+		{
+			if (utils::memcmp(_pageMap, (uint32_t)0, 4096))
+			{
+				freePhysicalPage(_pageMapPhys);
+				uintptr_t _pageMap2Phys = (uintptr_t)pageMap->getL3PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
+				uintptr_t* _pageMap2 = mapPageTable((uintptr_t*)_pageMap2Phys);
+				_pageMap2[PageMap::addressToIndex(addr, 1)] = 0;
+				if (utils::memcmp(_pageMap2, (uint32_t)0, 4096))
+				{
+					freePhysicalPage((uintptr_t)_pageMap2Phys);
+					uintptr_t _pageMap3Phys = (uintptr_t)pageMap->getL4PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
+					uintptr_t* _pageMap3 = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMap3Phys));
+					_pageMap3[PageMap::addressToIndex(addr, 2)] = 0;
+					if (utils::memcmp(_pageMap3, (uint32_t)0, 4096))
+					{
+						uintptr_t* _pageMap4 = mapPageTable(pageMap->getPageMap());
+						_pageMap4[PageMap::addressToIndex(addr, 3)] = 0;
+						freePhysicalPage((uintptr_t)_pageMap3Phys);
+					}
+				}
+			}
+		}
+
 		bool VirtualFree(void* _base, size_t nPages)
 		{
 			if (!_base)
@@ -149,26 +173,7 @@ namespace obos
 					freePhysicalPage(entry & 0xFFFFFFFFFF000);
 				_pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMapPhys));
 				_pageMap[PageMap::addressToIndex(addr, 0)] = 0;
-				if (utils::memcmp(_pageMap, (uint32_t)0, 4096))
-				{
-					freePhysicalPage(_pageMapPhys);
-					uintptr_t _pageMap2Phys = (uintptr_t)pageMap->getL3PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
-					uintptr_t* _pageMap2 = mapPageTable((uintptr_t*)_pageMap2Phys);
-					_pageMap2[PageMap::addressToIndex(addr, 1)] = 0;
-					if (utils::memcmp(_pageMap2, (uint32_t)0, 4096))
-					{
-						freePhysicalPage((uintptr_t)_pageMap2Phys);
-						uintptr_t _pageMap3Phys = (uintptr_t)pageMap->getL4PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
-						uintptr_t* _pageMap3 = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMap3Phys));
-						_pageMap3[PageMap::addressToIndex(addr, 2)] = 0;
-						if (utils::memcmp(_pageMap3, (uint32_t)0, 4096))
-						{
-							uintptr_t* _pageMap4 = mapPageTable(pageMap->getPageMap());
-							_pageMap4[PageMap::addressToIndex(addr, 3)] = 0;
-							freePhysicalPage((uintptr_t)_pageMap3Phys);
-						}
-					}
-				}
+				freePagingStructures(_pageMap, _pageMapPhys, pageMap, addr);
 				invlpg(addr);
 			}
 			return true;
@@ -236,5 +241,18 @@ namespace obos
 			}
 			return true;
 		}
+
+		void MapVirtualPageToPhysical(void* virt, void* phys, uintptr_t cpuFlags)
+		{
+			MapVirtualPageToEntry(virt, (uintptr_t)phys | cpuFlags);
+		}
+		void MapVirtualPageToEntry(void* _virt, uintptr_t entry)
+		{
+			uintptr_t virt = (uintptr_t)_virt;
+			uintptr_t* pageTable = allocatePagingStructures(virt);
+			pageTable[PageMap::addressToIndex(virt, 0)] = entry;
+			invlpg(virt);
+		}
+
 	}
 }

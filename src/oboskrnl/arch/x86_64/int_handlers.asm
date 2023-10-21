@@ -13,7 +13,6 @@ push rcx
 push rdx
 push rbx
 push rax ; Push rsp
-push rbp
 push rsi
 push rdi
 push r8
@@ -24,11 +23,13 @@ push r12
 push r13
 push r14
 push r15
+push rbp
 %endmacro
 
 ; Cleans up after pushaq.
 
 %macro popaq 0
+pop rbp
 pop r15
 pop r14
 pop r13
@@ -39,7 +40,6 @@ pop r9
 pop r8
 pop rdi
 pop rsi
-pop rbp
 add rsp, 8
 pop rbx
 pop rdx
@@ -105,6 +105,7 @@ extern _ZN4obos10g_handlersE
 
 isr_common_stub:
 	pushaq
+	mov rbp, rsp
 
 	mov rax, ss
 	push rax
@@ -120,8 +121,7 @@ isr_common_stub:
 
 .finished:
 	
-	add rsp, 8
-
+	mov rsp, rbp
 	popaq
 
 	add rsp, 16

@@ -103,20 +103,21 @@ struct safe_lock
 			*m_mutex = true;
 			return true;
 		}
-		obos::cli();
+		m_savedFlags = obos::saveFlagsAndCLI();
 		return false;
 	}
 	bool IsLocked()
 	{
 		if (m_mutex)
 			return *m_mutex;
-		return false;
+		return m_savedFlags & ((uintptr_t)1<<9);
 	}
 	void Unlock()
 	{
 		if (m_mutex && *m_mutex)
 			*m_mutex = false;
-		obos::sti();
+		if(m_savedFlags)
+			obos::restorePreviousInterruptStatus(m_savedFlags);
 	}
 	~safe_lock()
 	{
@@ -124,6 +125,7 @@ struct safe_lock
 	}
 private:
 	bool* m_mutex = nullptr;
+	uintptr_t m_savedFlags = 0;
 };
 
 static bool s_allocatorMutex = false;

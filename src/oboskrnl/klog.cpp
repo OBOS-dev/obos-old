@@ -9,6 +9,10 @@
 
 #include <klog.h>
 
+#ifdef __x86_64__
+#include <x86_64-utils/asm.h>
+#endif
+
 static char* itoa(intptr_t value, char* result, int base);
 static char* itoa_unsigned(uintptr_t value, char* result, int base);
 static char toupper(char ch)
@@ -123,6 +127,9 @@ namespace obos
 		static void consoleOutputCallback(char ch, void*)
 		{
 			g_kernelConsole.ConsoleOutput(ch);
+#if E9_HACK && defined(__x86_64__)
+			outb(0xE9, ch);
+#endif
 		}
 
 		size_t printf(const char* format, ...)
@@ -154,6 +161,10 @@ namespace obos
 		{
 			__impl_log(GREEN, "[Log] ");
 		}
+		size_t info(const char* format, ...)
+		{
+			__impl_log(GREEN, "[Log] ");
+		}
 		size_t warning(const char* format, ...)
 		{
 			__impl_log(YELLOW, "[Warning] ");
@@ -173,6 +184,17 @@ namespace obos
 			va_end(list);
 			stackTrace();
 			while (1);
+		}
+		static void dumpAddr_impl(int a, ...)
+		{
+			va_list list;
+			va_start(list, a);
+			printf_impl([](char ch, void*) { outb(0xE9, ch); }, nullptr, "%p: %p\n", list);
+			va_end(list);
+		}
+		void dumpAddr(uint32_t* addr)
+		{
+			dumpAddr_impl(0, addr, *addr);
 		}
 	}
 }

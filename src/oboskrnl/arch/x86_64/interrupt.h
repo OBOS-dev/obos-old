@@ -61,21 +61,20 @@ namespace obos
 
 	struct interrupt_frame
 	{
-		// (ds) 0
+		// (ss) 0
 		uintptr_t ss;
 		// (r8-r15) 8,16,24,32,40,48,56,64
 		// (rdi-rax) 72,80,88,96,104,112,120,128
-		uintptr_t r8, r9, r10, r11, r12, r13, r14, r15,
-				 rdi, rsi, rbp, rsp, rbx, rdx, rcx, rax;
+		uintptr_t rbp, r8, r9, r10, r11, r12, r13, r14, r15,
+				 rdi, rsi, ignored, rbx, rdx, rcx, rax;
 		// (intNumber) 136, (errorCode) 144
 		uintptr_t intNumber, errorCode;
-		// (rip,cs,rflags,useresp,ss)
+		// (rip,cs,rflags,useresp,ds)
 		// 152,160,168,176,184
 		uintptr_t rip, cs;
 		x86_64_flags rflags;
-		uintptr_t useresp, ds;
+		uintptr_t rsp, ds;
 	};
 
 	void RegisterInterruptHandler(byte interrupt, void(*handler)(interrupt_frame* frame));
-	void RegisterIrqHandler(byte offset, void(*handler)(interrupt_frame* frame));
 }

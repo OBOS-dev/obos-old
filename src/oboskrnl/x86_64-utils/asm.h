@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <int.h>
 
 namespace obos
 {
@@ -20,8 +20,16 @@ namespace obos
 	void cli();
 	void sti();
 	void hlt();
+	
+	uintptr_t saveFlagsAndCLI();
+	void restorePreviousInterruptStatus(uintptr_t flags);
 
 	void* getCR2();
 	uintptr_t getEFER();
 	void invlpg(uintptr_t addr);
+
+	uint64_t rdmsr(uint32_t addr);
+	void wrmsr(uint32_t addr, uint64_t val);
+
+	[[noreturn]] void haltCPU();
 }

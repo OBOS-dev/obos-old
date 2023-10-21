@@ -18,6 +18,11 @@ global _ZN4obos6memory17getCurrentPageMapEv
 global _ZN4obos6memory7PageMap12switchToThisEv
 global _ZN4obos7getEFEREv
 global _ZN4obos6invlpgEm
+global _ZN4obos5rdmsrEj
+global _ZN4obos5wrmsrEjm
+global _ZN4obos15saveFlagsAndCLIEv
+global _ZN4obos30restorePreviousInterruptStatusEm
+global _ZN4obos7haltCPUEv
 
 _ZN4obos4outbEth:
 	mov dx, di
@@ -55,7 +60,7 @@ _ZN4obos3stiEv:
 	sti
 	ret
 _ZN4obos3hltEv:
-	sti
+	hlt
 	ret
 _ZN4obos6getCR2Ev:
 	mov rax, cr2
@@ -73,3 +78,52 @@ _ZN4obos7getEFEREv:
 _ZN4obos6invlpgEm:
 	invlpg [rdi]
 	ret
+
+_ZN4obos5rdmsrEj:
+	push rbp
+	mov rbp, rsp
+
+	xor rax,rax
+	xor rdx,rdx
+	xor rcx,rcx
+
+	; Load the msr address.
+	mov ecx, edi
+
+	rdmsr
+
+	sal rdx, 32
+	or rax, rdx
+
+	leave
+	ret
+_ZN4obos5wrmsrEjm:
+	push rbp
+	mov rbp, rsp
+
+;	Setup the registers for wrmsr.
+
+	mov ecx, edi
+
+	mov eax, esi
+	mov rdx, rsi
+	sar rdx, 32
+
+	wrmsr
+
+	leave
+	ret
+_ZN4obos15saveFlagsAndCLIEv:
+	pushfq
+	pop rax
+	cli
+	ret
+_ZN4obos30restorePreviousInterruptStatusEm:
+	push rdi
+	popfq
+	ret
+_ZN4obos7haltCPUEv:
+	cli
+.loop:
+	hlt
+	jmp .loop

@@ -30,10 +30,12 @@ namespace obos
 		size_t sprintf(char* dest, const char* format, ...); // TODO: Implement this.
 
 		size_t log(const char* format, ...);
+		size_t info(const char* format, ...);
 		size_t warning(const char* format, ...);
 		size_t error(const char* format, ...);
 		[[noreturn]] void panic(const char* format, ...);
 
 		void stackTrace();
+		void dumpAddr(uint32_t* addr);
 	}
 }

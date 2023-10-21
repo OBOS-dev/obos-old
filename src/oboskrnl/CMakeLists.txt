@@ -5,8 +5,15 @@
 if (NOT DEFINED OUTPUT_DIR)
 	set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/out")
 endif()
+if (NOT DEFINED E9_HACK)
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+		set(E9_HACK "1")
+	else()
+		set(E9_HACK "0")
+	endif()
+endif()
 
-set (oboskrnl_sources "console.cpp" "klog.cpp" "liballoc/liballoc.cpp")
+set (oboskrnl_sources "console.cpp" "klog.cpp" "liballoc/liballoc.cpp" "multitasking/scheduler.cpp")
 
 add_executable(oboskrnl ${oboskrnl_sources} ${oboskrnl_platformSpecificSources})
 
@@ -15,6 +22,8 @@ set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR
 
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/limine")
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
+
+target_compile_definitions(oboskrnl PUBLIC E9_HACK=${E9_HACK})
 
 target_compile_options(oboskrnl 
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wall>

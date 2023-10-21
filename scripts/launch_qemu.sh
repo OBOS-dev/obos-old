@@ -8,6 +8,7 @@ qemu-system-x86_64 \
 -drive if=pflash,format=raw,unit=1,file=ovmf/OVMF_VARS_4M.fd \
 -cpu qemu64,+nx \
 -monitor stdio \
+-debugcon file:stdout \
 -smp cores=2,threads=1,sockets=1
 
 cd scripts

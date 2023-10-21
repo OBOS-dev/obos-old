@@ -19,11 +19,11 @@ namespace obos
 			/// </summary>
 			PROT_READ_ONLY = 0b1,
 			/// <summary>
-			/// Whether user mode threads (cs=0x1b,ds=0x23) can access the pages allocated.
+			/// Whether user mode threads (cs=0x1b,ds=0x23) can access the pages allocated. This is the default when using any syscalls.
 			/// </summary>
 			PROT_USER_MODE_ACCESS = 0b10,
 			/// <summary>
-			/// Whether the pages can be executed or not. If the processor doesn't support this, all pages can be executable
+			/// Whether the pages can be executed or not. If the processor doesn't support this, all pages are executable
 			/// </summary>
 			PROT_CAN_EXECUTE = 0b100,
 			/// <summary>
@@ -41,6 +41,11 @@ namespace obos
 			PROT_ALL_BITS_SET = 0b111111,
 		};
 
+		/// <summary>
+		/// Decodes PageProtectionFlags into a format that the CPU understands.
+		/// </summary>
+		/// <param name="_flags">The PageProtectionFlags</param>
+		/// <returns>The decoded flags.</returns>
 		uintptr_t DecodeProtectionFlags(uintptr_t _flags);
 
 		/// <summary>
@@ -71,5 +76,8 @@ namespace obos
 		/// <param name="nPages">The amount of pages to get the protection for.</param>
 		/// <param name="flags">A pointer to a buffer of the size "sizeof(PageProtectionFlags) * nPages" to store the protection in.</param>
 		bool VirtualGetProtection(void* base, size_t nPages, uintptr_t* flags);
+
+		void MapVirtualPageToPhysical(void* virt, void* phys, uintptr_t cpuFlags);
+		void MapVirtualPageToEntry(void* virt, uintptr_t entry);
 	}
 }

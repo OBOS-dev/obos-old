@@ -21,6 +21,9 @@
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 #include <arch/x86_64/memory_manager/virtual/allocate.h>
 
+#include <arch/x86_64/irq/irq.h>
+#include <arch/x86_64/irq/timer.h>
+
 #include <memory_manipulation.h>
 
 #include <limine.h>
@@ -39,7 +42,6 @@ namespace obos
 {
 	void InitializeGdt();
 	void InitializeIdt();
-	void InitializeIrq();
 	void RegisterExceptionHandlers();
 	Console g_kernelConsole{};
 	static volatile limine_framebuffer_request framebuffer_request = {
@@ -62,6 +64,7 @@ namespace obos
 		while (1)
 			hlt();
 	}
+
 	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console.
 	void arch_kmain()
 	{
@@ -73,6 +76,9 @@ namespace obos
 		framebuffer.addr = (uint32_t*)framebuffer_request.response->framebuffers[0]->address;
 		framebuffer.width = framebuffer_request.response->framebuffers[0]->width;
 		framebuffer.height = framebuffer_request.response->framebuffers[0]->height;
+		framebuffer.pitch = framebuffer_request.response->framebuffers[0]->pitch;
+		if (framebuffer_request.response->framebuffers[0]->bpp != 32)
+			EarlyKPanic();
 		for (size_t i = 0; i < module_request.response->module_count; i++)
 		{
 			if (strcmp(module_request.response->modules[i]->path, "/obos/font.bin"))
@@ -83,23 +89,20 @@ namespace obos
 		}
 		g_kernelConsole.Initialize(font, framebuffer);
 		g_kernelConsole.SetColour(0xffffffff, 0);
-		logger::log("%s: Initializing GDT.\n", __func__);
+		logger::info("%s: Initializing GDT.\n", __func__);
 		InitializeGdt();
-		logger::log("%s: Initializing IDT.\n", __func__);
+		logger::info("%s: Initializing IDT.\n", __func__);
 		InitializeIdt();
-		logger::log("%s: Registering exception handlers.\n", __func__);
+		logger::info("%s: Registering exception handlers.\n", __func__);
 		RegisterExceptionHandlers();
-		logger::log("%s: Initializing IRQs.\n", __func__);
+		logger::info("%s: Initializing IRQs.\n", __func__);
 		InitializeIrq();
-		logger::log("%s: Initializing the physical memory manager.\n", __func__);
+		sti();
+		logger::info("%s: Initializing the physical memory manager.\n", __func__);
 		memory::InitializePhysicalMemoryManager();
-		logger::log("%s: Initializing the virtual memory manager.\n", __func__);
+		logger::info("%s: Initializing the virtual memory manager.\n", __func__);
 		memory::InitializeVirtualMemoryManager();
-		char* mem = new char[30];
-		utils::memcpy(mem, "A string allocated by kmalloc", 30);
-		logger::printf("%s", mem);
-		delete[] mem;
-		cli();
+		/*cli();*/
 		while (1)
 			hlt();
 	}
