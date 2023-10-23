@@ -1,5 +1,5 @@
 /*
-	oboskrnl/boot/x86_64/main.cpp
+	oboskrnl/boot/x86_64/kmain_arch.cpp
 
 	Copyright (c) 2023 Omar Berrow
 */
@@ -27,6 +27,8 @@
 #include <memory_manipulation.h>
 
 #include <limine.h>
+
+#include <multitasking/scheduler.h>
 
 bool strcmp(const char* str1, const char* str2)
 {
@@ -97,13 +99,12 @@ namespace obos
 		RegisterExceptionHandlers();
 		logger::info("%s: Initializing IRQs.\n", __func__);
 		InitializeIrq();
-		sti();
 		logger::info("%s: Initializing the physical memory manager.\n", __func__);
 		memory::InitializePhysicalMemoryManager();
 		logger::info("%s: Initializing the virtual memory manager.\n", __func__);
 		memory::InitializeVirtualMemoryManager();
-		/*cli();*/
-		while (1)
-			hlt();
+		logger::info("%s: Initializing the scheduler.\n", __func__);
+		thread::InitializeScheduler();
+		logger::panic("Failed to initialize the scheduler.");
 	}
 }

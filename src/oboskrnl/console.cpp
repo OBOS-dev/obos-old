@@ -10,6 +10,8 @@
 
 #include <memory_manipulation.h>
 
+#include <atomic.h>
+
 namespace obos
 {	
 	Console::Console(void* font, con_framebuffer output)

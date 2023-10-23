@@ -25,8 +25,9 @@ set(TARGET_COMPILE_OPTIONS -mcmodel=kernel -mno-red-zone)
 
 set (LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/src/scripts-toolchains/x86_64/linker.ld")
 set (oboskrnl_platformSpecificSources 
-	"boot/x86_64/kmain.cpp" "x86_64-utils/memory_manipulation.asm" "x86_64-utils/asm.asm" "arch/x86_64/gdt.cpp"
+	"boot/x86_64/kmain_arch.cpp" "x86_64-utils/memory_manipulation.asm" "x86_64-utils/asm.asm" "arch/x86_64/gdt.cpp"
 	"arch/x86_64/gdt.asm" "arch/x86_64/idt.cpp" "arch/x86_64/idt.asm" "arch/x86_64/int_handlers.asm"
 	"arch/x86_64/trace.cpp" "arch/x86_64/irq/irq.cpp" "arch/x86_64/exception_handlers.cpp" "arch/x86_64/memory_manager/physical/allocate.cpp"
 	"arch/x86_64/memory_manager/virtual/initialize.cpp" "arch/x86_64/memory_manager/virtual/allocate.cpp" "arch/x86_64/irq/timer.cpp" "multitasking/x86_64/taskSwitchImpl.asm"
+	"multitasking/x86_64/setupFrameInfo.cpp" "multitasking/x86_64/scheduler_bootstrapper.cpp"
 )

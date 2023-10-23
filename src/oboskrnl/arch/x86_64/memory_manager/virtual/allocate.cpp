@@ -95,8 +95,9 @@ namespace obos
 
 		void* VirtualAlloc(void* _base, size_t nPages, uintptr_t _flags)
 		{
-			if (!CanAllocatePages(_base, nPages))
-				return nullptr;
+			if(_base != nullptr)
+				if (!CanAllocatePages(_base, nPages))
+					return nullptr;
 			uintptr_t base = (uintptr_t)_base & (~0xfff);
 			if (!base)
 			{

@@ -23,6 +23,8 @@ global _ZN4obos5wrmsrEjm
 global _ZN4obos15saveFlagsAndCLIEv
 global _ZN4obos30restorePreviousInterruptStatusEm
 global _ZN4obos7haltCPUEv
+global _ZN4obos9__cpuid__EmmPmS0_S0_S0_
+global _ZN4obos5rdtscEv
 
 _ZN4obos4outbEth:
 	mov dx, di
@@ -92,7 +94,7 @@ _ZN4obos5rdmsrEj:
 
 	rdmsr
 
-	sal rdx, 32
+	shl rdx, 32
 	or rax, rdx
 
 	leave
@@ -127,3 +129,42 @@ _ZN4obos7haltCPUEv:
 .loop:
 	hlt
 	jmp .loop
+_ZN4obos9__cpuid__EmmPmS0_S0_S0_:
+	push rbp
+	mov rbp, rsp
+	push rdx
+
+	mov r10, rcx
+	mov r11, rdx
+
+	mov eax, edi
+	mov ecx, esi
+	cpuid
+
+	mov [r11], rax
+	mov [r10], rbx
+	mov [r8], rcx
+	mov [r9], rdx
+
+	pop rdx
+	leave
+	ret
+_ZN4obos5rdtscEv:
+	push rbp
+	mov rbp, rsp
+	
+	rdtsc
+
+	shl rdx, 32
+	or rax, rdx
+
+	leave
+	ret
+global _ZN4obos10atomic_setEPb
+_ZN4obos10atomic_setEPb:
+	lock mov byte [rdi], 1
+	ret
+global _Z11atomic_testPb
+_Z11atomic_testPb:
+	lock mov al, byte [rdi]
+	ret

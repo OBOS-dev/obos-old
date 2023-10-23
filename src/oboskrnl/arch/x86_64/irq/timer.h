@@ -26,6 +26,6 @@ namespace obos
 		TIMER_DIVISOR_ONE_HUNDERED_TWENTY_EIGHT = 0b1100,
 		TIMER_DIVISOR_ONE = 0b1101,
 	};
-	void ConfigureAPICTimer(void(*handler)(interrupt_frame* frame), byte isr, uint32_t initialCount, TimerConfig timerConfig, TimerDivisor divisor);
+	void ConfigureAPICTimer(void(*handler)(interrupt_frame* frame), byte isr, uint32_t initialCount, TimerConfig timerConfig, TimerDivisor divisor, bool maskIrq = true);
 	void MaskTimer(bool mask); // Masks the timer interrupt. If !mask, the timer interrupt is disabled.
 }

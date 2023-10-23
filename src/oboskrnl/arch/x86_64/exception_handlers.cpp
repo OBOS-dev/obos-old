@@ -22,10 +22,10 @@ namespace obos
 	void exception14(interrupt_frame* frame)
 	{
 		uintptr_t entry = 0;
+		memory::PageMap* pageMap = memory::getCurrentPageMap();
+		uintptr_t faultAddress = (uintptr_t)getCR2() & ~0xfff;
 		if (frame->errorCode & 1)
 		{
-			uintptr_t faultAddress = (uintptr_t)getCR2() & ~0xfff;
-			memory::PageMap* pageMap = memory::getCurrentPageMap();
 			entry = (uintptr_t)pageMap->getL1PageMapEntryAt(faultAddress);
 			if (entry & ((uintptr_t)1 << 9))
 			{
@@ -38,21 +38,24 @@ namespace obos
 				return;
 			}
 		}
-		logger::panic("Page fault in %s-mode at %p while trying to %s a %s page. The address of this page is %p. Error code: %d. PTE: %p. Dumping registers:\n"
-					  "\tRDI: %p, RSI: %p, RBP: %p\n"
-					  "\tRSP: %p, RBX: %p, RDX: %p\n"
-					  "\tRCX: %p, RAX: %p, RIP: %p\n"
-					  "\t R8: %p,  R9: %p, R10: %p\n"
-					  "\tR11: %p, R12: %p, R13: %p\n"
-					  "\tR14: %p, R15: %p, RFL: %p\n"
-					  "\t SS: %p,  DS: %p,  CS: %p\n",
+		logger::panic("Page fault in %s-mode at %p while trying to %s a %s page. The address of this page is %p. Error code: %d.\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\n Dumping registers:\n"
+			"\tRDI: %p, RSI: %p, RBP: %p\n"
+			"\tRSP: %p, RBX: %p, RDX: %p\n"
+			"\tRCX: %p, RAX: %p, RIP: %p\n"
+			"\t R8: %p,  R9: %p, R10: %p\n"
+			"\tR11: %p, R12: %p, R13: %p\n"
+			"\tR14: %p, R15: %p, RFL: %p\n"
+			"\t SS: %p,  DS: %p,  CS: %p\n",
 			(frame->errorCode & ((uintptr_t)1 << 2)) ? "user" : "kernel",
 			frame->rip,
 			(frame->errorCode & ((uintptr_t)1 << 1)) ? "write" : "read",
 			(frame->errorCode & ((uintptr_t)1 << 0)) ? "present" : "non-present",
 			getCR2(),
-			frame->errorCode, 
+			frame->errorCode,
 			entry,
+			pageMap->getL2PageMapEntryAt(faultAddress),
+			pageMap->getL3PageMapEntryAt(faultAddress),
+			pageMap->getL4PageMapEntryAt(faultAddress),
 			frame->rdi, frame->rsi, frame->rbp,
 			frame->rsp, frame->rbx, frame->rdx,
 			frame->rcx, frame->rax, frame->rip,

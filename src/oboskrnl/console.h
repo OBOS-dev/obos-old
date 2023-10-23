@@ -55,5 +55,6 @@ namespace obos
 		uint32_t m_foregroundColour = 0;
 		uint32_t m_backgroundColour = 0;
 		uint8_t* m_font = nullptr;
+		bool m_lock = false;
 	};
 }

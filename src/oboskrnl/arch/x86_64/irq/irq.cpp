@@ -86,9 +86,10 @@ namespace obos
 		}
 		return ret;
 	}
-	void DefaultInterruptHandler(interrupt_frame*)
+	void DefaultInterruptHandler(interrupt_frame* frame)
 	{
-		SendEOI();
+		if(frame->intNumber != 0xff)
+			SendEOI();
 	}
 	void InitializeAPIC(acpi::MADTTable* madtTable)
 	{

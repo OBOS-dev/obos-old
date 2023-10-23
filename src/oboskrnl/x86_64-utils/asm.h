@@ -31,5 +31,12 @@ namespace obos
 	uint64_t rdmsr(uint32_t addr);
 	void wrmsr(uint32_t addr, uint64_t val);
 
+	void __cpuid__(uint64_t initialEax, uint64_t initialEcx, uint64_t* eax, uint64_t* ebx, uint64_t* ecx, uint64_t* edx);
+
+	uint64_t rdtsc();
+
+	void atomic_set(bool* val);
+	bool atomic_test(bool* val);
+
 	[[noreturn]] void haltCPU();
 }

@@ -29,6 +29,11 @@ namespace obos
 		size_t vprintf(const char* format, va_list list);
 		size_t sprintf(char* dest, const char* format, ...); // TODO: Implement this.
 
+		constexpr const char* LOG_PREFIX_MESSAGE = "[Log] ";
+		constexpr const char* INFO_PREFIX_MESSAGE = "[Log] ";
+		constexpr const char* WARNING_PREFIX_MESSAGE = "[Warning] ";
+		constexpr const char* ERROR_PREFIX_MESSAGE = "[Error] ";
+
 		size_t log(const char* format, ...);
 		size_t info(const char* format, ...);
 		size_t warning(const char* format, ...);

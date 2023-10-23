@@ -22,7 +22,7 @@ namespace obos
 			g_currentTimerHandler(frame);
 		SendEOI();
 	}
-	void ConfigureAPICTimer(void(*handler)(interrupt_frame* frame), byte isr, uint32_t initialCount, TimerConfig timerConfig, TimerDivisor divisor)
+	void ConfigureAPICTimer(void(*handler)(interrupt_frame* frame), byte isr, uint32_t initialCount, TimerConfig timerConfig, TimerDivisor divisor, bool mask)
 	{
 		uintptr_t savedFlags = saveFlagsAndCLI();
 		RegisterInterruptHandler(isr, IntermediateTimerIntHandler);
@@ -32,6 +32,7 @@ namespace obos
 			timerConfig = TIMER_CONFIG_PERIODIC;
 		g_localAPICAddr->divideConfig = divisor;
 		g_localAPICAddr->lvtTimer = isr | timerConfig;
+		MaskTimer(mask);
 		g_localAPICAddr->initialCount = initialCount;
 		logger::dumpAddr((uint32_t*)&g_localAPICAddr->divideConfig);
 		logger::dumpAddr((uint32_t*)&g_localAPICAddr->lvtTimer);
@@ -40,9 +41,9 @@ namespace obos
 	}
 	void MaskTimer(bool mask)
 	{
-		if(mask)
-			g_localAPICAddr->lvtTimer |= (uint32_t)mask << 16;
+		if(!mask)
+			g_localAPICAddr->lvtTimer |= (1 << 16);
 		else
-			g_localAPICAddr->lvtTimer &= ~((uint32_t)mask << 16);
+			g_localAPICAddr->lvtTimer &= ~(1 << 16);
 	}
 }

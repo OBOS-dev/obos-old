@@ -159,19 +159,19 @@ namespace obos
 
 		size_t log(const char* format, ...)
 		{
-			__impl_log(GREEN, "[Log] ");
+			__impl_log(GREEN, LOG_PREFIX_MESSAGE);
 		}
 		size_t info(const char* format, ...)
 		{
-			__impl_log(GREEN, "[Log] ");
+			__impl_log(GREEN, INFO_PREFIX_MESSAGE);
 		}
 		size_t warning(const char* format, ...)
 		{
-			__impl_log(YELLOW, "[Warning] ");
+			__impl_log(YELLOW, WARNING_PREFIX_MESSAGE);
 		}
 		size_t error(const char* format, ...)
 		{
-			__impl_log(ERROR_RED, "[Error] ");
+			__impl_log(ERROR_RED, ERROR_PREFIX_MESSAGE);
 
 		}
 		[[noreturn]] void panic(const char* format, ...)
@@ -187,10 +187,12 @@ namespace obos
 		}
 		static void dumpAddr_impl(int a, ...)
 		{
+#ifdef __x86_64__
 			va_list list;
 			va_start(list, a);
 			printf_impl([](char ch, void*) { outb(0xE9, ch); }, nullptr, "%p: %p\n", list);
 			va_end(list);
+#endif
 		}
 		void dumpAddr(uint32_t* addr)
 		{

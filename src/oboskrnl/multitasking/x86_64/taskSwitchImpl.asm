@@ -4,6 +4,14 @@
 
 [BITS 64]
 
+segment .bss
+
+blockCallbackStackBottom:
+RESB 8192
+blockCallbackStack:
+
+segment .text
+
 %macro popaq 0
 pop rbp
 pop r15
@@ -26,12 +34,15 @@ pop rax
 extern _ZN4obos11SetTSSStackEPv
 
 global _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE
+global _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
+global idleTask
 
 _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE:
 	mov rax, [rdi]
 	mov cr3, rax
 	push rdi
 	mov rdi, [rdi+8]
+	add rdi, 4096*4
 	call _ZN4obos11SetTSSStackEPv
 	pop rdi
 	add rdi, 16
@@ -48,3 +59,30 @@ _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE:
 	add rsp, 16
 
 	iretq
+_ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_:
+	push rbp
+	mov rbp, rsp
+	push r15
+
+	mov rax, cr3
+	push rax
+
+	mov r15, rsp
+
+	mov rsp, blockCallbackStack
+
+	mov rdi, rdx
+	mov rsi, rcx
+	call rsi
+
+	mov rsp, r15
+	pop r11
+	mov cr3, r11
+	
+	pop r15
+	leave
+	ret
+idleTask:
+	sti
+	hlt
+	jmp idleTask

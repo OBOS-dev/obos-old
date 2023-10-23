@@ -37,14 +37,16 @@ namespace obos
 		x86_64_flags() = default;
 		x86_64_flags(uintptr_t flags)
 		{
-			m_bitfield = flags;
+			m_bitfield = flags | 2;
 		}
 		void setBit(uintptr_t bitmask)
 		{
+			bitmask |= 0b10;
 			m_bitfield |= bitmask;
 		}
 		void clearBit(uintptr_t bitmask)
 		{
+			bitmask &= ~(0b10);
 			m_bitfield &= (~bitmask);
 		}
 		bool getBit(uintptr_t bitmask) const

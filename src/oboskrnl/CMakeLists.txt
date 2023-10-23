@@ -13,7 +13,8 @@ if (NOT DEFINED E9_HACK)
 	endif()
 endif()
 
-set (oboskrnl_sources "console.cpp" "klog.cpp" "liballoc/liballoc.cpp" "multitasking/scheduler.cpp")
+set (oboskrnl_sources "console.cpp" "klog.cpp" "liballoc/liballoc.cpp" "multitasking/scheduler.cpp"
+					  "boot/kmain.cpp")
 
 add_executable(oboskrnl ${oboskrnl_sources} ${oboskrnl_platformSpecificSources})
 
