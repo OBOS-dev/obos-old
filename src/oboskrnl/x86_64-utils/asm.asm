@@ -168,3 +168,11 @@ global _Z11atomic_testPb
 _Z11atomic_testPb:
 	lock mov al, byte [rdi]
 	ret
+global _ZN4obos6getCR4Ev
+_ZN4obos6getCR4Ev:
+	mov rax, cr4
+	ret
+global _ZN4obos6setCR4Em
+_ZN4obos6setCR4Em:
+	mov cr4, rdi
+	ret

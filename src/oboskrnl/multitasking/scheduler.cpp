@@ -119,6 +119,8 @@ namespace obos
 				if(foundIdlePriority < 2)
 					goto find;
 			}
+			if (foundIdlePriority == 2)
+				newThread = g_priorityLists[0].head;
 			if (newThread == g_currentThread)
 			{
 				g_schedulerLock = false;

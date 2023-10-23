@@ -34,7 +34,6 @@ namespace obos
 				utils::memcpy(memory::mapPageTable((uintptr_t*)newEntry), (void*)faultAddress, 4096);
 				newEntry |= flags;
 				memory::MapVirtualPageToEntry((void*)faultAddress, newEntry);
-				logger::log("Page fault at %p. Old PTE: %p. New PTE: %p.\n", faultAddress, entry, newEntry);
 				return;
 			}
 		}

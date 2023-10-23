@@ -70,13 +70,14 @@ namespace obos
 			uintptr_t* pPageMap = (uintptr_t*)newKernelPageMap;
 			s_pageTablePhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageTable) & 0xFFFFFFFFFF000;
 			s_pageDirectoryPhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageDirectory) & 0xFFFFFFFFFF000;
+			utils::memzero(newKernelPageMap, 4096);
 			pPageMap[511] = (uintptr_t)kernelPageMap->getL4PageMapEntryAt(0xffffffff80000000);
 			pPageMap[PageMap::addressToIndex(0xffff800000000000, 3)] = (uintptr_t)kernelPageMap->getL4PageMapEntryAt(0xffff800000000000);
 			reinterpret_cast<uintptr_t*>((uintptr_t)newKernelPageMap->getL4PageMapEntryAt(0xfffffffffffff000) & 0xFFFFFFFFFF000)
 				[PageMap::addressToIndex(0xfffffffffffff000, 2)] = s_pageDirectoryPhys | 3;
 			newKernelPageMap->switchToThis();
 			g_initialized = true;
-			utils::memzero((uint32_t*)mapPageTable(nullptr), 4096);
+			utils::memzero(mapPageTable(nullptr), 4096);
 			freePhysicalPage((uintptr_t)kernelPageMap);
 			MapVirtualPageToPhysical((void*)0xffffffffffffe000, (void*)g_localAPICAddr, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
 			g_localAPICAddr = (volatile LAPIC*)0xffffffffffffe000;

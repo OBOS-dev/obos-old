@@ -25,6 +25,8 @@ namespace obos
 	void restorePreviousInterruptStatus(uintptr_t flags);
 
 	void* getCR2();
+	uintptr_t getCR4();
+	void setCR4(uintptr_t val);
 	uintptr_t getEFER();
 	void invlpg(uintptr_t addr);
 

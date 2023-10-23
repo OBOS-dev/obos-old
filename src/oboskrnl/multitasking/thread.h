@@ -8,8 +8,6 @@
 
 #include <int.h>
 
-#include <arch/interrupt.h>
-
 #include <multitasking/arch.h>
 
 namespace obos

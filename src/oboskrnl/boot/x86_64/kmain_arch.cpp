@@ -40,6 +40,9 @@ bool strcmp(const char* str1, const char* str2)
 	return true;
 }
 
+#define CPUID_FSGSBASE (1)
+#define CR4_FSGSBASE ((uintptr_t)1<<16)
+
 namespace obos
 {
 	void InitializeGdt();
@@ -103,6 +106,13 @@ namespace obos
 		memory::InitializePhysicalMemoryManager();
 		logger::info("%s: Initializing the virtual memory manager.\n", __func__);
 		memory::InitializeVirtualMemoryManager();
+		uint64_t unused = 0, rbx = 0;
+		__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
+		if (rbx & CPUID_FSGSBASE)
+		{
+			logger::info("%s: Disabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
+			setCR4(getCR4() & ~CR4_FSGSBASE);
+		}
 		logger::info("%s: Initializing the scheduler.\n", __func__);
 		thread::InitializeScheduler();
 		logger::panic("Failed to initialize the scheduler.");

@@ -46,6 +46,8 @@ namespace obos
 
 	void Console::ConsoleOutput(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y)
 	{
+		while (atomic_test(&m_lock));
+		atomic_set(&m_lock);
 		switch (ch)
 		{
 		case '\n':
