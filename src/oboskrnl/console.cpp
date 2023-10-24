@@ -68,6 +68,7 @@ namespace obos
 			putChar(ch, x++, y, foregroundColour, backgroundColour);
 			break;
 		}
+		atomic_clear(&m_lock);
 	}
 
 	void Console::SetPosition(uint32_t x, uint32_t y)

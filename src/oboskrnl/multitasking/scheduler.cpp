@@ -31,7 +31,7 @@ namespace obos
 			{
 				bool clearTimeSliceIndex = currentThread->status & THREAD_STATUS_CLEAR_TIME_SLICE_INDEX;
 				
-				if (currentThread->priority == currentThread->timeSliceIndex++)
+				if (currentThread->priority == currentThread->timeSliceIndex)
 					currentThread->status |= THREAD_STATUS_CLEAR_TIME_SLICE_INDEX;
 				
 				if (currentThread->status == THREAD_STATUS_CAN_RUN && (currentThread->timeSliceIndex < currentThread->priority))
@@ -44,7 +44,7 @@ namespace obos
 					currentThread->timeSliceIndex = 0;
 				}
 
-				currentThread = currentThread->next_run;
+				currentThread = currentThread->prev_run;
 			}
 
 			return ret;
@@ -108,18 +108,18 @@ namespace obos
 			callBlockCallbacksOnList(g_priorityLists[1]);
 			callBlockCallbacksOnList(g_priorityLists[0]);
 
-			Thread::ThreadList& list = findThreadPriorityList();
-			int foundIdlePriority = 0;
+			Thread::ThreadList* list = &findThreadPriorityList();
+			int foundHighPriority = 0;
 			find:
-			Thread* newThread = findRunnableThreadInList(list);
+			Thread* newThread = findRunnableThreadInList(*list);
 			if (!newThread)
 			{
-				list = *list.nextThreadList;
-				foundIdlePriority += &list == g_priorityLists + 0;
-				if(foundIdlePriority < 2)
+				foundHighPriority += list == &g_priorityLists[3];
+				list = list->prevThreadList;
+				if(foundHighPriority < 2)
 					goto find;
 			}
-			if (foundIdlePriority == 2)
+			if (foundHighPriority == 2)
 				newThread = g_priorityLists[0].head;
 			if (newThread == g_currentThread)
 			{
@@ -127,6 +127,7 @@ namespace obos
 				return;
 			}
 			g_currentThread = newThread;
+			g_currentThread->timeSliceIndex++;
 			g_schedulerLock = false;
 			switchToThreadImpl(&g_currentThread->context);
 		}
@@ -135,25 +136,25 @@ namespace obos
 		{
 			Thread* kernelMainThread = g_currentThread = new Thread{};
 
-			kernelMainThread->tid = 0;
+			kernelMainThread->tid = g_nextTid++;
 			kernelMainThread->status = THREAD_STATUS_CAN_RUN;
 			kernelMainThread->priority = THREAD_PRIORITY_NORMAL;
 			kernelMainThread->exitCode = 0;
 			kernelMainThread->lastError = 0;
 			kernelMainThread->priorityList = g_priorityLists + 2;
 			kernelMainThread->threadList = new Thread::ThreadList;
-			setupThreadContext(&kernelMainThread->context, (uintptr_t)kmain_common, 0, 65536, false);
-			
+			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 65536, false);
+
 			Thread* idleThread = new Thread{};
 
-			idleThread->tid = 1;
+			idleThread->tid = g_nextTid++;
 			idleThread->status = THREAD_STATUS_CAN_RUN;
 			idleThread->priority = THREAD_PRIORITY_IDLE;
 			idleThread->exitCode = 0;
 			idleThread->lastError = 0;
 			idleThread->priorityList = g_priorityLists + 0;
 			idleThread->threadList = kernelMainThread->threadList;
-			setupThreadContext(&idleThread->context, (uintptr_t)idleTask, 0, 0, false);
+			setupThreadContext(&idleThread->context, &idleThread->stackInfo, (uintptr_t)idleTask, 0, 4096, false);
 
 			kernelMainThread->threadList->head = kernelMainThread;
 			kernelMainThread->threadList->tail = idleThread;

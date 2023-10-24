@@ -16,6 +16,7 @@ namespace obos
 		extern Thread* g_currentThread;
 		extern bool g_initialized;
 		extern uint64_t g_schedulerFrequency;
+		extern uint32_t g_nextTid;
 		void InitializeScheduler();
 	}
 }

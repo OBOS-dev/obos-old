@@ -47,15 +47,16 @@ namespace obos
 			uint32_t exitCode;
 			uint64_t lastTimePreempted;
 			uint32_t lastError;
+			uint32_t references;
 			struct
 			{
 				bool(*callback)(Thread* _this, void* userData);
 				void* userdata;
 			} blockCallback;
-			struct
+			struct StackInfo
 			{
 				void* addr;
-				size_t nPages;
+				size_t size;
 			} stackInfo;
 			taskSwitchInfo context;
 			Thread* next_run; // The next in the priority list.

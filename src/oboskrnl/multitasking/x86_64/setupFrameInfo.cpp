@@ -13,6 +13,7 @@
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 
 #include <multitasking/arch.h>
+#include <multitasking/thread.h>
 
 #define BIT(n) (1<<n)
 
@@ -20,7 +21,7 @@ namespace obos
 {
 	namespace thread
 	{
-		void setupThreadContext(taskSwitchInfo* info, uintptr_t entry, uintptr_t userdata, size_t stackSize, bool isUsermodeProgram)
+		void setupThreadContext(taskSwitchInfo* info, void* _stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, bool isUsermodeProgram)
 		{
 			if (stackSize == 0)
 				stackSize = 8192;
@@ -37,6 +38,11 @@ namespace obos
 			info->frame.rsp = ((uintptr_t)memory::VirtualAlloc(nullptr, stackSize >> 12, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
 			*(uintptr_t*)info->frame.rsp = 0;
 			info->frame.rflags.setBit(x86_64_flags::RFLAGS_INTERRUPT_ENABLE | x86_64_flags::RFLAGS_CPUID);
+			
+			Thread::StackInfo* stackInfo = (Thread::StackInfo*)_stackInfo;
+
+			stackInfo->size = stackSize;
+			stackInfo->addr = reinterpret_cast<void*>(info->frame.rsp - (stackSize - 8));
 
 			if(isUsermodeProgram)
 				info->frame.rflags.setBit(BIT(12) | BIT(13));

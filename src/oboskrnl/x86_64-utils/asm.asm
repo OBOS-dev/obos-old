@@ -162,11 +162,19 @@ _ZN4obos5rdtscEv:
 	ret
 global _ZN4obos10atomic_setEPb
 _ZN4obos10atomic_setEPb:
-	lock mov byte [rdi], 1
+	mov al, [rdi]
+	mov sil, 1
+	lock cmpxchg byte [rdi], sil
 	ret
-global _Z11atomic_testPb
-_Z11atomic_testPb:
-	lock mov al, byte [rdi]
+global _ZN4obos12atomic_clearEPb
+_ZN4obos12atomic_clearEPb:
+	mov al, [rdi]
+	mov sil, 0
+	lock cmpxchg byte [rdi], sil
+	ret
+global _ZN4obos11atomic_testEPb
+_ZN4obos11atomic_testEPb:
+	mov al, byte [rdi]
 	ret
 global _ZN4obos6getCR4Ev
 _ZN4obos6getCR4Ev:

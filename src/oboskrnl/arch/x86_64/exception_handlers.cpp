@@ -37,6 +37,9 @@ namespace obos
 				return;
 			}
 		}
+		const char* action = (frame->errorCode & ((uintptr_t)1 << 1)) ? "write" : "read";
+		if (frame->errorCode & ((uintptr_t)1 << 4))
+			action = "execute";
 		logger::panic("Page fault in %s-mode at %p while trying to %s a %s page. The address of this page is %p. Error code: %d.\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\n Dumping registers:\n"
 			"\tRDI: %p, RSI: %p, RBP: %p\n"
 			"\tRSP: %p, RBX: %p, RDX: %p\n"
@@ -47,7 +50,7 @@ namespace obos
 			"\t SS: %p,  DS: %p,  CS: %p\n",
 			(frame->errorCode & ((uintptr_t)1 << 2)) ? "user" : "kernel",
 			frame->rip,
-			(frame->errorCode & ((uintptr_t)1 << 1)) ? "write" : "read",
+			action,
 			(frame->errorCode & ((uintptr_t)1 << 0)) ? "present" : "non-present",
 			getCR2(),
 			frame->errorCode,

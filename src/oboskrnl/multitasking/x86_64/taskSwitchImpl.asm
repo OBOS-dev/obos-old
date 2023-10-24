@@ -32,12 +32,15 @@ pop rax
 %endmacro
 
 extern _ZN4obos11SetTSSStackEPv
+extern _ZN4obos7SendEOIEv
 
 global _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE
 global _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 global idleTask
 
 _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE:
+	call _ZN4obos7SendEOIEv
+	
 	mov rax, [rdi]
 	mov cr3, rax
 	push rdi
