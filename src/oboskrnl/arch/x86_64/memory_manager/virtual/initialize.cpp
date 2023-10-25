@@ -24,8 +24,8 @@ namespace obos
 
 		static uintptr_t s_pageDirectory[512] alignas(4096);
 		static uintptr_t s_pageTable[512] alignas(4096);
-		static uintptr_t s_pageTablePhys = 0;
-		static uintptr_t s_pageDirectoryPhys = 0;
+		uintptr_t s_pageTablePhys = 0;
+		uintptr_t s_pageDirectoryPhys = 0;
 		
 		uintptr_t* mapPageTable(uintptr_t* phys)
 		{

@@ -8,6 +8,7 @@
 
 #include <int.h>
 #include <klog.h>
+#include <memory_manipulation.h>
 
 #include <arch/x86_64/memory_manager/physical/allocate.h>
 
@@ -77,6 +78,7 @@ namespace obos
 			g_memEnd = mmap_request.response->entries[mmap_request.response->entry_count - 1]->base + mmap_request.response->entries[mmap_request.response->entry_count - 1]->length;
 			if (!foundSpace)
 				logger::panic("Couldn't find enough space to allocate the bitmap for the physical memory manager.\n");
+			utils::memzero(g_bitmaps, g_bitmapSize);
 			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
 			{
 				if (mmap_request.response->entries[i]->type != LIMINE_MEMMAP_USABLE)

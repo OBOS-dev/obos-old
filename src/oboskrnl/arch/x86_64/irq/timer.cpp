@@ -34,9 +34,6 @@ namespace obos
 		g_localAPICAddr->lvtTimer = isr | timerConfig;
 		MaskTimer(mask);
 		g_localAPICAddr->initialCount = initialCount;
-		logger::dumpAddr((uint32_t*)&g_localAPICAddr->divideConfig);
-		logger::dumpAddr((uint32_t*)&g_localAPICAddr->lvtTimer);
-		logger::dumpAddr((uint32_t*)&g_localAPICAddr->initialCount);
 		restorePreviousInterruptStatus(savedFlags);
 	}
 	void MaskTimer(bool mask)

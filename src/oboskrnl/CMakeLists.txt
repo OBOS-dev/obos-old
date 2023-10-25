@@ -13,10 +13,12 @@ if (NOT DEFINED E9_HACK)
 	endif()
 endif()
 
-set (oboskrnl_sources "console.cpp" "klog.cpp" "liballoc/liballoc.cpp" "multitasking/scheduler.cpp"
-					  "boot/kmain.cpp" "error.cpp" "threadAPI/thrHandle.cpp")
+set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "liballoc/liballoc.cpp" 
+					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp" 
+					  "multitasking/process/x86_64/procInfo.cpp" "multitasking/process/x86_64/loader/elf.cpp"
+)
 
-add_executable(oboskrnl ${oboskrnl_sources} ${oboskrnl_platformSpecificSources})
+add_executable(oboskrnl  ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
 
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${LINKER_SCRIPT}")
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
@@ -37,6 +39,7 @@ target_compile_options(oboskrnl
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-exceptions>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-missing-field-initializers>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-error=implicit-fallthrough>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-error=array-bounds>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mcmodel=kernel>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-omit-frame-pointer>

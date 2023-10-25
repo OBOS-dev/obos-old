@@ -13,36 +13,33 @@
 #include <multitasking/thread.h>
 #include <multitasking/arch.h>
 
-#include <threadAPI/thrHandle.h>
+#include <multitasking/threadAPI/thrHandle.h>
+
+#include <multitasking/process/process.h>
 
 namespace obos
 {
 	void _thread(uintptr_t)
 	{
 		logger::log("Hello from tid %d.\n", thread::g_currentThread->tid);
-		uintptr_t val = thread::stopTimer();
-		thread::g_currentThread->status = thread::THREAD_STATUS_DEAD;
-		thread::startTimer(val);
-		thread::callScheduler();
+		thread::ExitThread(0);
 	}
 	void kmain_common()
 	{
 		thread::g_initialized = true;
 		logger::log("Multitasking initialized! In \"%s\" now.\n", __func__);
 		
-		thread::ThreadHandle* thread1 = new thread::ThreadHandle{};
-		thread::ThreadHandle* thread2 = new thread::ThreadHandle{};
-		thread::ThreadHandle* thread3 = new thread::ThreadHandle{};
-		thread::ThreadHandle* thread4 = new thread::ThreadHandle{};
+		process::Process* kernelProc = new process::Process;
+		kernelProc->pid = 0;
+		kernelProc->isUsermode = false;
+		kernelProc->parent = nullptr;
+#ifdef __x86_64__
+		kernelProc->context.cr3 = thread::g_currentThread->context.cr3; // Only this time... (reference to line 7)
+#endif
+		thread::g_currentThread->owner = kernelProc;
 
-		thread1->CreateThread(thread::THREAD_PRIORITY_IDLE, 8192, _thread, 0);
-		thread2->CreateThread(thread::THREAD_PRIORITY_NORMAL, 8192, _thread, 0);
-		thread3->CreateThread(thread::THREAD_PRIORITY_LOW, 8192, _thread, 0);
-		thread4->CreateThread(thread::THREAD_PRIORITY_HIGH, 8192, _thread, 0);
-
-		thread::callScheduler();
-
-		while (1);
+		logger::log("Done booting!\n");
+		thread::ExitThread(0);
 	}
 
 }

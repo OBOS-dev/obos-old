@@ -168,7 +168,7 @@ namespace obos
 		logger::log("%s: System OEM: %c%c%c%c%c\n", __func__, rsdp->OEMID[0], rsdp->OEMID[1], rsdp->OEMID[2], rsdp->OEMID[3], rsdp->OEMID[4]);
 		acpi::ACPISDTHeader* xsdt = (acpi::ACPISDTHeader*)rsdp->XsdtAddress;
 		acpi::ACPISDTHeader** tableAddresses = reinterpret_cast<acpi::ACPISDTHeader**>(xsdt + 1);
-		acpi::MADTTable* madtTable;
+		acpi::MADTTable* madtTable = nullptr;
 		for (uint32_t i = 0; i < (xsdt->Length - sizeof(*xsdt)) / 8; i++)
 		{
 			acpi::ACPISDTHeader* currentSDT = tableAddresses[i];

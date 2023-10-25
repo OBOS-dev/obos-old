@@ -22,6 +22,8 @@ namespace obos
 		bool g_initialized = false;
 		bool g_schedulerLock = false;
 
+#pragma GCC push_options
+#pragma GCC optimize("O3")
 		Thread* findRunnableThreadInList(Thread::ThreadList& list)
 		{
 			Thread* currentThread = list.tail;
@@ -131,6 +133,7 @@ namespace obos
 			g_schedulerLock = false;
 			switchToThreadImpl(&g_currentThread->context);
 		}
+#pragma GCC pop_options
 
 		void InitializeScheduler()
 		{

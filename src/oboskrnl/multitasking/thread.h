@@ -59,18 +59,13 @@ namespace obos
 				size_t size;
 			} stackInfo;
 			taskSwitchInfo context;
+			void* owner; // a Process*
 			Thread* next_run; // The next in the priority list.
 			Thread* prev_run; // The previous in the priority list.
 			Thread* next_list; // The next in the process thread list.
 			Thread* prev_list;  // The previous in the process thread list.
 			ThreadList* priorityList; // A pointer to the priority list.
 			ThreadList* threadList; // A pointer to the process' thread list.
-		};
-		struct ThreadList
-		{
-			Thread* head;
-			Thread* tail;
-			size_t size;
 		};
 	}
 }

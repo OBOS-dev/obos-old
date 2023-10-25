@@ -71,12 +71,13 @@ _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 	push rax
 
 	mov r15, rsp
+	mov r8, rsi
 
 	mov rsp, blockCallbackStack
 
 	mov rdi, rdx
 	mov rsi, rcx
-	call rsi
+	call r8
 
 	mov rsp, r15
 	pop r11

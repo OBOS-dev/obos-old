@@ -8,9 +8,6 @@
 
 #include <memory_manipulation.h>
 
-extern "C" char TSS;
-extern "C" char GDT;
-
 namespace obos
 {
 	struct gdtEntry
@@ -22,7 +19,7 @@ namespace obos
 		uint8_t  granularity;
 		uint8_t  baseMiddle2;
 		uint64_t baseHigh;
-	};
+	} __attribute__((packed));
 
 	struct tssEntry
 	{
@@ -31,6 +28,9 @@ namespace obos
 		uint8_t unused[0x5A];
 		uint16_t iopb;
 	} __attribute__((packed));
+
+	extern "C" char TSS[sizeof(gdtEntry)];
+	extern "C" char GDT;
 
 	tssEntry s_tssEntry alignas(8);
 

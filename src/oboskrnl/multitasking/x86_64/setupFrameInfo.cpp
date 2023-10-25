@@ -35,7 +35,7 @@ namespace obos
 			info->frame.rip = entry;
 			info->frame.rdi = userdata;
 			info->frame.rbp = 0;
-			info->frame.rsp = ((uintptr_t)memory::VirtualAlloc(nullptr, stackSize >> 12, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
+			info->frame.rsp = ((uintptr_t)memory::VirtualAlloc(nullptr, stackSize / 4096, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
 			*(uintptr_t*)info->frame.rsp = 0;
 			info->frame.rflags.setBit(x86_64_flags::RFLAGS_INTERRUPT_ENABLE | x86_64_flags::RFLAGS_CPUID);
 			
@@ -51,6 +51,13 @@ namespace obos
 			info->cr3 = memory::getCurrentPageMap();
 			if(isUsermodeProgram)
 				info->tssStackBottom = memory::VirtualAlloc(nullptr, 4, memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE);
+		}
+		void freeThreadStackInfo(void* _stackInfo)
+		{
+			Thread::StackInfo* stackInfo = (Thread::StackInfo*)_stackInfo;
+			memory::VirtualFree(stackInfo->addr, stackInfo->size / 4096);
+			stackInfo->addr = nullptr;
+			stackInfo->size = 0;
 		}
 	}
 }
