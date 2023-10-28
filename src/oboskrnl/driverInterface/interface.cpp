@@ -50,7 +50,7 @@ namespace obos
 			AttemptUnlock(buffer);
 			return true;
 		}
-		bool DriverConnection::RecvDataOnBuffer(byte* data, size_t size, con_buffer* buffer, bool isConnectionClosed, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
+		bool DriverConnection::RecvDataOnBuffer(byte* data, size_t size, con_buffer* buffer, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
 		{
 			if (!buffer)
 			{
@@ -91,10 +91,6 @@ namespace obos
 					buffer->szBuf = 0;
 					kfree(buffer->buf);
 					buffer->buf = nullptr;
-					if (isConnectionClosed)
-					{
-
-					}
 					goto finish;
 				}
 				byte* newBuf = (byte*)kcalloc(buffer->szBuf - size, sizeof(byte));
@@ -167,12 +163,39 @@ namespace obos
 		{
 			if (!m_rawCon || !m_rawCon->connectionOpen)
 			{
-				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				SetLastError(m_rawCon ? OBOS_ERROR_CONNECTION_CLOSED : OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
 			}
 			// Threads can still read from the connections, but not send.
-			m_rawCon->connectionOpen = false;
-			thread::callScheduler();
+			if (!(--m_rawCon->references))
+			{
+				if(m_rawCon->buf1.buf)
+					kfree(m_rawCon->buf1.buf);
+				if(m_rawCon->buf2.buf)
+					kfree(m_rawCon->buf2.buf);
+				m_rawCon->connectionOpen = false;
+				driverIdentity* identity = (driverIdentity*)m_rawCon->_driverIdentity;
+				DriverConnectionNode* node = identity->connections.head;
+				while (node)
+				{
+					if (node->val == m_rawCon)
+						break;
+
+					node = node->next;
+				}
+				if(node->prev)
+					node->prev->next = node->next;
+				if (node->next)
+					node->next->prev = node->prev;
+				if (node == identity->connections.head)
+					identity->connections.head = node->next;
+				if (node == identity->connections.tail)
+					identity->connections.tail = node->prev;
+				identity->connections.size--;
+				delete node;
+				delete m_rawCon;
+			}
+			m_rawCon = nullptr;
 			return true;
 		}
 
@@ -229,6 +252,8 @@ namespace obos
 
 			m_rawCon = new DriverConnection;
 			m_rawCon->connectionOpen = true;
+			m_rawCon->references++;
+			m_rawCon->_driverIdentity = identity;
 
 			DriverConnectionList& list = identity->connections;
 			DriverConnectionNode* node = new DriverConnectionNode;
@@ -287,8 +312,9 @@ namespace obos
 			thread::g_currentThread->blockCallback.userdata = data;
 			thread::g_currentThread->status |= thread::THREAD_STATUS_BLOCKED;
 			thread::callScheduler();
-			if (!this->m_rawCon)
+			if (!m_rawCon)
 				return false;
+			m_rawCon->references++;
 			return true;
 		}
 

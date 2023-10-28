@@ -1,0 +1,500 @@
+ffffffff80000000 T obos::utils::strcmp(char const*, char const*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/x86_64/kmain_arch.cpp:41
+ffffffff80000090 T obos::EarlyKPanic()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/x86_64/kmain_arch.cpp:68
+ffffffff800000af T obos::arch_kmain()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/x86_64/kmain_arch.cpp:77
+ffffffff8000034f t __static_initialization_and_destruction_0(int, int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/x86_64/kmain_arch.cpp:123
+ffffffff80000395 t _GLOBAL__sub_I__ZN4obos5utils6strcmpEPKcS2_
+ffffffff800003b0 T obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long)	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:12
+ffffffff800003c7 t obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long) [clone .loop]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:26
+ffffffff800003d7 t obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long) [clone .finish]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:35
+ffffffff800003d9 T obos::utils::dwMemset(unsigned int*, unsigned int, unsigned long)	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:38
+ffffffff800003eb t obos::utils::dwMemset(unsigned int*, unsigned int, unsigned long) [clone .loop]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:49
+ffffffff800003f4 t obos::utils::dwMemset(unsigned int*, unsigned int, unsigned long) [clone .finish]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:56
+ffffffff800003f6 T obos::utils::memcpy(void*, void const*, unsigned long)	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:60
+ffffffff80000408 t obos::utils::memcpy(void*, void const*, unsigned long) [clone .loop]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:71
+ffffffff80000416 t obos::utils::memcpy(void*, void const*, unsigned long) [clone .finish]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:80
+ffffffff80000418 T obos::utils::memzero(void*, unsigned long)	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:84
+ffffffff80000427 t obos::utils::memzero(void*, unsigned long) [clone .loop]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:95
+ffffffff8000042f t obos::utils::memzero(void*, unsigned long) [clone .finish]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:102
+ffffffff80000431 T obos::utils::memcmp(void const*, void const*, unsigned long)	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:106
+ffffffff8000043d t obos::utils::memcmp(void const*, void const*, unsigned long) [clone .loop]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:114
+ffffffff80000450 t obos::utils::memcmp(void const*, void const*, unsigned long) [clone .finish]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:125
+ffffffff80000458 T obos::utils::memcmp(void const*, unsigned int, unsigned long)	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:132
+ffffffff80000464 t obos::utils::memcmp(void const*, unsigned int, unsigned long) [clone .loop]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:140
+ffffffff80000471 t obos::utils::memcmp(void const*, unsigned int, unsigned long) [clone .finish]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:149
+ffffffff80000479 T obos::utils::strlen(char const*)	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:156
+ffffffff80000482 t obos::utils::strlen(char const*) [clone .loop]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:162
+ffffffff8000048c t obos::utils::strlen(char const*) [clone .finished]	../../../src/oboskrnl/x86_64-utils/memory_manipulation.asm:169
+ffffffff800004a0 T obos::outb(unsigned short, unsigned char)	../../../src/oboskrnl/x86_64-utils/asm.asm:30
+ffffffff800004a8 T obos::outw(unsigned short, unsigned short)	../../../src/oboskrnl/x86_64-utils/asm.asm:35
+ffffffff800004b1 T obos::outd(unsigned short, unsigned int)	../../../src/oboskrnl/x86_64-utils/asm.asm:40
+ffffffff800004b8 T obos::inb(unsigned short)	../../../src/oboskrnl/x86_64-utils/asm.asm:45
+ffffffff800004c2 T obos::inw(unsigned short)	../../../src/oboskrnl/x86_64-utils/asm.asm:50
+ffffffff800004cd T obos::ind(unsigned short)	../../../src/oboskrnl/x86_64-utils/asm.asm:55
+ffffffff800004d2 T obos::cli()	../../../src/oboskrnl/x86_64-utils/asm.asm:59
+ffffffff800004d4 T obos::sti()	../../../src/oboskrnl/x86_64-utils/asm.asm:62
+ffffffff800004d6 T obos::hlt()	../../../src/oboskrnl/x86_64-utils/asm.asm:65
+ffffffff800004d8 T obos::getCR2()	../../../src/oboskrnl/x86_64-utils/asm.asm:68
+ffffffff800004dc T obos::memory::getCurrentPageMap()	../../../src/oboskrnl/x86_64-utils/asm.asm:71
+ffffffff800004e0 T obos::memory::PageMap::switchToThis()	../../../src/oboskrnl/x86_64-utils/asm.asm:74
+ffffffff800004e4 T obos::getEFER()	../../../src/oboskrnl/x86_64-utils/asm.asm:77
+ffffffff800004ec T obos::invlpg(unsigned long)	../../../src/oboskrnl/x86_64-utils/asm.asm:81
+ffffffff800004f0 T obos::rdmsr(unsigned int)	../../../src/oboskrnl/x86_64-utils/asm.asm:85
+ffffffff8000050a T obos::wrmsr(unsigned int, unsigned long)	../../../src/oboskrnl/x86_64-utils/asm.asm:103
+ffffffff8000051d T obos::saveFlagsAndCLI()	../../../src/oboskrnl/x86_64-utils/asm.asm:119
+ffffffff80000521 T obos::restorePreviousInterruptStatus(unsigned long)	../../../src/oboskrnl/x86_64-utils/asm.asm:124
+ffffffff80000524 T obos::haltCPU()	../../../src/oboskrnl/x86_64-utils/asm.asm:128
+ffffffff80000525 t obos::haltCPU() [clone .loop]	../../../src/oboskrnl/x86_64-utils/asm.asm:130
+ffffffff80000528 T obos::__cpuid__(unsigned long, unsigned long, unsigned long*, unsigned long*, unsigned long*, unsigned long*)	../../../src/oboskrnl/x86_64-utils/asm.asm:133
+ffffffff80000548 T obos::rdtsc()	../../../src/oboskrnl/x86_64-utils/asm.asm:153
+ffffffff80000557 T obos::atomic_set(bool*)	../../../src/oboskrnl/x86_64-utils/asm.asm:165
+ffffffff80000562 T obos::atomic_clear(bool*)	../../../src/oboskrnl/x86_64-utils/asm.asm:171
+ffffffff8000056d T obos::atomic_test(bool*)	../../../src/oboskrnl/x86_64-utils/asm.asm:177
+ffffffff80000570 T obos::getCR4()	../../../src/oboskrnl/x86_64-utils/asm.asm:181
+ffffffff80000574 T obos::setCR4(unsigned long)	../../../src/oboskrnl/x86_64-utils/asm.asm:185
+ffffffff80000578 T obos::InitializeGdt()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/gdt.cpp:41
+ffffffff80000650 T obos::SetTSSStack(void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/gdt.cpp:70
+ffffffff80000670 T obos::InitializeGDTASM()	../../../src/oboskrnl/arch/x86_64/gdt.asm:35
+ffffffff800006a3 t obos::InitializeGDTASM() [clone .flush_tss]	../../../src/oboskrnl/arch/x86_64/gdt.asm:54
+ffffffff800006ac T obos::_RegisterInterruptInIDT(int, void (*)(), unsigned char)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/idt.cpp:301
+ffffffff80000772 T obos::RegisterInterruptInIDT(int, void (*)())	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/idt.cpp:314
+ffffffff8000079a T obos::InitializeIdt()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/idt.cpp:320
+ffffffff80001dad T obos::RegisterInterruptHandler(unsigned char, void (*)(obos::interrupt_frame*))	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/idt.cpp:581
+ffffffff80001dd0 T idtFlush	../../../src/oboskrnl/arch/x86_64/idt.asm:10
+ffffffff80001de0 T isr0	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001dea T isr1	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001df4 T isr2	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001dfe T isr3	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e08 T isr4	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e12 T isr5	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e1c T isr6	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e26 T isr7	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e30 T isr8	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001e38 T isr9	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e42 T isr10	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001e4a T isr11	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001e52 T isr12	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001e5a T isr13	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001e62 T isr14	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001e6a T isr15	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e74 T isr16	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e7e T isr17	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001e86 T isr18	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e90 T isr19	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001e9a T isr20	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001ea4 T isr21	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001eac T isr22	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001eb6 T isr23	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001ec0 T isr24	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001eca T isr25	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001ed4 T isr26	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001ede T isr27	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001ee8 T isr28	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001ef2 T isr29	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001efa T isr30	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:65
+ffffffff80001f02 T isr31	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f0c T isr32	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f16 T isr33	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f20 T isr34	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f2a T isr35	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f34 T isr36	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f3e T isr37	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f48 T isr38	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f52 T isr39	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f5c T isr40	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f66 T isr41	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f70 T isr42	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f7a T isr43	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f84 T isr44	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f8e T isr45	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001f98 T isr46	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001fa2 T isr47	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001fac T isr48	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001fb6 T isr50	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001fc0 T isr51	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001fca T isr52	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001fd4 T isr53	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001fde T isr54	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001fe8 T isr55	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001ff2 T isr56	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80001ffc T isr57	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002006 T isr58	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002010 T isr59	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000201a T isr60	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002024 T isr61	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000202e T isr62	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002038 T isr63	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002042 T isr64	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000204c T isr65	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002056 T isr66	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002060 T isr67	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000206a T isr68	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002074 T isr69	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000207e T isr70	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002088 T isr71	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002092 T isr72	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000209c T isr73	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800020a6 T isr74	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800020b0 T isr75	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800020ba T isr76	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800020c4 T isr77	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800020ce T isr78	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800020d8 T isr79	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800020e2 T isr80	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800020ec T isr81	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800020f6 T isr82	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002100 T isr83	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000210a T isr84	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002114 T isr85	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000211e T isr86	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002128 T isr87	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002132 T isr88	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000213c T isr89	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002146 T isr90	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002150 T isr91	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000215a T isr92	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002164 T isr93	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000216e T isr94	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002178 T isr95	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002182 T isr96	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000218c T isr97	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002196 T isr98	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021a0 T isr99	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021aa T isr100	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021b4 T isr101	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021be T isr102	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021c8 T isr103	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021d2 T isr104	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021dc T isr105	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021e6 T isr106	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021f0 T isr107	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800021fa T isr108	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002204 T isr109	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000220e T isr110	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002218 T isr111	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002222 T isr112	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000222c T isr113	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002236 T isr114	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002240 T isr115	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000224a T isr116	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002254 T isr117	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000225e T isr118	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002268 T isr119	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002272 T isr120	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000227c T isr121	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002286 T isr122	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002290 T isr123	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000229a T isr124	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800022a4 T isr125	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800022ae T isr126	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800022b8 T isr127	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800022c2 T isr128	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800022cf T isr129	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800022dc T isr130	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800022e9 T isr131	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800022f6 T isr132	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002303 T isr133	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002310 T isr134	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000231d T isr135	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000232a T isr136	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002337 T isr137	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002344 T isr138	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002351 T isr139	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000235e T isr140	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000236b T isr141	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002378 T isr142	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002385 T isr143	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002392 T isr144	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000239f T isr145	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800023ac T isr146	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800023b9 T isr147	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800023c6 T isr148	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800023d3 T isr149	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800023e0 T isr150	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800023ed T isr151	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800023fa T isr152	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002407 T isr153	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002414 T isr154	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002421 T isr155	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000242e T isr156	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000243b T isr157	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002448 T isr158	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002455 T isr159	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002462 T isr160	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000246f T isr161	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000247c T isr162	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002489 T isr163	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002496 T isr164	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800024a3 T isr165	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800024b0 T isr166	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800024bd T isr167	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800024ca T isr168	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800024d7 T isr169	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800024e4 T isr170	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800024f1 T isr171	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800024fe T isr172	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000250b T isr173	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002518 T isr174	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002525 T isr175	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002532 T isr176	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000253f T isr177	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000254c T isr178	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002559 T isr179	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002566 T isr180	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002573 T isr181	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002580 T isr182	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000258d T isr183	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000259a T isr184	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800025a7 T isr185	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800025b4 T isr186	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800025c1 T isr187	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800025ce T isr188	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800025db T isr189	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800025e8 T isr190	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800025f5 T isr191	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002602 T isr192	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000260f T isr193	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000261c T isr194	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002629 T isr195	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002636 T isr196	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002643 T isr197	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002650 T isr198	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000265d T isr199	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000266a T isr200	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002677 T isr201	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002684 T isr202	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002691 T isr203	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000269e T isr204	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800026ab T isr205	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800026b8 T isr206	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800026c5 T isr207	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800026d2 T isr208	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800026df T isr209	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800026ec T isr210	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800026f9 T isr211	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002706 T isr212	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002713 T isr213	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002720 T isr214	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000272d T isr215	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000273a T isr216	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002747 T isr217	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002754 T isr218	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002761 T isr219	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000276e T isr220	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000277b T isr221	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002788 T isr222	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002795 T isr223	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800027a2 T isr224	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800027af T isr225	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800027bc T isr226	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800027c9 T isr227	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800027d6 T isr228	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800027e3 T isr229	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800027f0 T isr230	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800027fd T isr231	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000280a T isr232	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002817 T isr233	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002824 T isr234	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002831 T isr235	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000283e T isr236	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000284b T isr237	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002858 T isr238	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002865 T isr239	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002872 T isr240	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000287f T isr241	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000288c T isr242	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002899 T isr243	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028a3 T isr244	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028ad T isr245	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028b7 T isr246	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028c1 T isr247	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028cb T isr248	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028d5 T isr249	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028df T isr250	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028e9 T isr251	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028f3 T isr252	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff800028fd T isr253	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002907 T isr254	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff80002911 T isr255	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:56
+ffffffff8000291b t isr_common_stub	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:8
+ffffffff80002961 t isr_common_stub.finished	../../../src/oboskrnl/arch/x86_64/int_handlers.asm:132
+ffffffff80002989 T obos::logger::countTo(char const*, char)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/trace.cpp:18
+ffffffff800029f5 T obos::logger::hex2bin(char const*, unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/trace.cpp:25
+ffffffff80002adb T obos::logger::addr2func(void*, char*&, unsigned long&, char const*, char const*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/trace.cpp:79
+ffffffff80002c62 T obos::logger::addr2file(void*, char*&, char const*, char const*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/trace.cpp:107
+ffffffff80002db9 T obos::logger::getKernelMapFile(unsigned long*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/trace.cpp:131
+ffffffff80002eaa T obos::logger::stackTrace()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/trace.cpp:161
+ffffffff80003035 T obos::RemapPIC()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/irq/irq.cpp:29
+ffffffff800030b4 T obos::ProcessEntryHeader(obos::acpi::MADT_EntryHeader*, void*&, void*&, unsigned char&, unsigned char*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/irq/irq.cpp:46
+ffffffff800031a2 T obos::DefaultInterruptHandler(obos::interrupt_frame*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/irq/irq.cpp:89
+ffffffff800031c9 T obos::InitializeAPIC(obos::acpi::MADTTable*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/irq/irq.cpp:94
+ffffffff800033f5 T obos::SendEOI()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/irq/irq.cpp:155
+ffffffff8000340d T obos::InitializeIrq()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/irq/irq.cpp:159
+ffffffff80003563 T obos::exception14(obos::interrupt_frame*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/exception_handlers.cpp:22
+ffffffff800038fc T obos::defaultExceptionHandler(obos::interrupt_frame*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/exception_handlers.cpp:70
+ffffffff80003a63 T obos::RegisterExceptionHandlers()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/exception_handlers.cpp:92
+ffffffff80003ad0 T obos::memory::getPageStatus(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:33
+ffffffff80003b73 t obos::memory::markPageAs(unsigned long, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:47
+ffffffff80003c51 T obos::memory::InitializePhysicalMemoryManager()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:63
+ffffffff80003f6f T obos::memory::allocatePhysicalPage()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:99
+ffffffff80003feb T obos::memory::freePhysicalPage(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:109
+ffffffff8000402a T obos::memory::mapPageTable(unsigned long*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:30
+ffffffff8000410e T obos::memory::PageMap::getL4PageMapEntryAt(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:45
+ffffffff8000415c T obos::memory::PageMap::getL3PageMapEntryAt(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:50
+ffffffff800041c2 T obos::memory::PageMap::getL2PageMapEntryAt(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:55
+ffffffff80004228 T obos::memory::PageMap::getL1PageMapEntryAt(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:60
+ffffffff8000428d T obos::memory::InitializeVirtualMemoryManager()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:66
+ffffffff8000443c T obos::memory::CPUSupportsExecuteDisable()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:85
+ffffffff80004452 t obos::memory::allocatePagingStructures(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:22
+ffffffff80004674 t obos::memory::PagesAllocated(void*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:52
+ffffffff80004760 t obos::memory::CanAllocatePages(void*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:69
+ffffffff800047c5 T obos::memory::DecodeProtectionFlags(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:79
+ffffffff8000485b T obos::memory::VirtualAlloc(void*, unsigned long, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:96
+ffffffff800049aa t obos::memory::freePagingStructures(unsigned long*, unsigned long, obos::memory::PageMap*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:137
+ffffffff80004b33 T obos::memory::VirtualFree(void*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:160
+ffffffff80004c9e T obos::memory::VirtualProtect(void*, unsigned long, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:183
+ffffffff80004e1d t obos::memory::EncodeProtectionFlags(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:209
+ffffffff80004e93 T obos::memory::VirtualGetProtection(void*, unsigned long, unsigned long*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:225
+ffffffff80004fca T obos::memory::MapVirtualPageToPhysical(void*, void*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:246
+ffffffff80004ffb T obos::memory::MapVirtualPageToEntry(void*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:250
+ffffffff8000505f t obos::IntermediateTimerIntHandler(obos::interrupt_frame*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/irq/timer.cpp:20
+ffffffff8000508f T obos::ConfigureAPICTimer(void (*)(obos::interrupt_frame*), unsigned char, unsigned int, obos::TimerConfig, obos::TimerDivisor, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/irq/timer.cpp:25
+ffffffff80005147 T obos::MaskTimer(bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/arch/x86_64/irq/timer.cpp:39
+ffffffff800051a0 T obos::thread::switchToThreadImpl(obos::thread::taskSwitchInfo*)	../../../src/oboskrnl/multitasking/x86_64/taskSwitchImpl.asm:46
+ffffffff800051fc T obos::thread::callBlockCallbackOnThread(obos::thread::taskSwitchInfo*, bool (*)(void*, void*), void*, void*)	../../../src/oboskrnl/multitasking/x86_64/taskSwitchImpl.asm:72
+ffffffff80005232 T idleTask	../../../src/oboskrnl/multitasking/x86_64/taskSwitchImpl.asm:100
+ffffffff80005236 T obos::thread::setupThreadContext(obos::thread::taskSwitchInfo*, void*, unsigned long, unsigned long, unsigned long, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/x86_64/setupFrameInfo.cpp:25
+ffffffff8000541d T obos::thread::freeThreadStackInfo(void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/x86_64/setupFrameInfo.cpp:59
+ffffffff8000546c T obos::thread::FindCounterValueFromFrequency(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:31
+ffffffff800054cc T obos::thread::scheduler_bootstrap(obos::interrupt_frame*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:41
+ffffffff80005526 T obos::thread::setupTimerInterrupt()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:50
+ffffffff8000557d T obos::thread::stopTimer()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:57
+ffffffff80005592 T obos::thread::startTimer(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:62
+ffffffff800055b7 T obos::thread::callScheduler()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:67
+ffffffff800055c0 T obos::process::setupContextInfo(obos::process::procContextInfo*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/process/x86_64/procInfo.cpp:24
+ffffffff800056ef T obos::process::switchToProcessContext(obos::process::procContextInfo*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/process/x86_64/procInfo.cpp:39
+ffffffff80005715 t obos::process::loader::load(unsigned char*, unsigned long, unsigned long&, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/process/x86_64/loader/elf.cpp:24
+ffffffff800058e0 T obos::process::loader::LoadElfFile(unsigned char*, unsigned long, unsigned long&, unsigned long&, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/process/x86_64/loader/elf.cpp:62
+ffffffff80005956 T obos::process::loader::CheckElfFile(unsigned char*, unsigned long, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/process/x86_64/loader/elf.cpp:70
+ffffffff80005a33 t obos::driverInterface::getElfString(obos::process::loader::Elf64_Ehdr*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/x86_64/load.cpp:27
+ffffffff80005a85 T obos::driverInterface::LoadModule(unsigned char*, unsigned long, obos::thread::ThreadHandle**)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/x86_64/load.cpp:34
+ffffffff80005d2c T obos::driverInterface::RegisterSyscall(unsigned char, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/x86_64/call.cpp:19
+ffffffff80005d70 T isr49	../../../src/oboskrnl/driverInterface/x86_64/driver_call.asm:12
+ffffffff80005d81 t isr49.finish	../../../src/oboskrnl/driverInterface/x86_64/driver_call.asm:20
+ffffffff80005d90 t pitInterrupt	../../../src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:19
+ffffffff80005dc7 T calibrateTimer	../../../src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:53
+ffffffff80005de6 t calibrateTimer.hasCpuid21	../../../src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:67
+ffffffff80005df6 t calibrateTimer.noCpuid21	../../../src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:75
+ffffffff80005e40 t calibrateTimer.retry	../../../src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:102
+ffffffff80005e6e t calibrateTimer.finish	../../../src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:129
+ffffffff80005e74 T obos::_thread(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/kmain.cpp:31
+ffffffff80005ea6 t obos::kmain_common()::{lambda(char const**)#1}::operator()(char const**) const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/kmain.cpp:67
+ffffffff80005ecf t obos::kmain_common()::{lambda(char const**)#1}::_FUN(char const**)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/kmain.cpp:67
+ffffffff80005eee t obos::kmain_common()::{lambda(char const**)#1}::operator void (*)(char const**)() const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/kmain.cpp:67
+ffffffff80005f00 t obos::kmain_common()::{lambda(unsigned int const*)#2}::operator()(unsigned int const*) const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/kmain.cpp:70
+ffffffff80005f1d t obos::kmain_common()::{lambda(unsigned int const*)#2}::_FUN(unsigned int const*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/kmain.cpp:70
+ffffffff80005f3c t obos::kmain_common()::{lambda(unsigned int const*)#2}::operator void (*)(unsigned int const*)() const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/kmain.cpp:70
+ffffffff80005f4d T obos::kmain_common()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/boot/kmain.cpp:36
+ffffffff800061f0 T obos::Console::Console(void*, obos::con_framebuffer)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:17
+ffffffff800061f0 T obos::Console::Console(void*, obos::con_framebuffer)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:17
+ffffffff80006280 T obos::Console::Initialize(void*, obos::con_framebuffer)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:22
+ffffffff800062e0 T obos::Console::ConsoleOutput(char const*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:30
+ffffffff80006360 T obos::Console::ConsoleOutput(char const*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:34
+ffffffff800063e0 T obos::Console::ConsoleOutput(char)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:38
+ffffffff80006430 T obos::Console::ConsoleOutput(char, unsigned int&, unsigned int&)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:42
+ffffffff80006480 T obos::Console::ConsoleOutput(char, unsigned int, unsigned int, unsigned int&, unsigned int&)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:47
+ffffffff800065e0 T obos::Console::SetPosition(unsigned int, unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:74
+ffffffff80006610 T obos::Console::GetPosition(unsigned int*, unsigned int*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:79
+ffffffff80006650 T obos::Console::SetColour(unsigned int, unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:87
+ffffffff800066b0 T obos::Console::GetColour(unsigned int*, unsigned int*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:94
+ffffffff800066f0 T obos::Console::SetFont(unsigned char*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:102
+ffffffff80006710 T obos::Console::GetFont(unsigned char**)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:106
+ffffffff80006740 T obos::Console::SetFramebuffer(obos::con_framebuffer)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:112
+ffffffff80006780 T obos::Console::GetFramebuffer(obos::con_framebuffer*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:119
+ffffffff800067d0 T obos::Console::GetConsoleBounds(unsigned int*, unsigned int*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:128
+ffffffff80006810 T obos::Console::CopyFrom(obos::con_framebuffer*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:137
+ffffffff80006880 T obos::Console::putChar(char, unsigned int, unsigned int, unsigned int, unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:146
+ffffffff80006a40 T obos::Console::newlineHandler(unsigned int&, unsigned int&)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/console.cpp:173
+ffffffff80006b7c t toupper(char)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:19
+ffffffff80006baa T obos::logger::printf_impl(void (*)(char, void*), void*, char const*, __va_list_tag*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:30
+ffffffff80007325 t obos::logger::consoleOutputCallback(char, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:128
+ffffffff8000735e T obos::logger::printf(char const*, ...)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:135
+ffffffff800073be T obos::logger::vprintf(char const*, __va_list_tag*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:143
+ffffffff800073ef T obos::logger::log(char const*, ...)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:161
+ffffffff800074ca T obos::logger::info(char const*, ...)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:165
+ffffffff800075a5 T obos::logger::warning(char const*, ...)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:169
+ffffffff80007680 T obos::logger::error(char const*, ...)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:173
+ffffffff8000775b T obos::logger::panic(char const*, ...)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:178
+ffffffff800077d8 t obos::logger::dumpAddr_impl(int, ...)::{lambda(char, void*)#1}::operator()(char, void*) const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:194
+ffffffff80007803 t obos::logger::dumpAddr_impl(int, ...)::{lambda(char, void*)#1}::_FUN(char, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:194
+ffffffff8000782a t obos::logger::dumpAddr_impl(int, ...)::{lambda(char, void*)#1}::operator void (*)(char, void*)() const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:194
+ffffffff8000783b t obos::logger::dumpAddr_impl(int, ...)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:190
+ffffffff8000789b T obos::logger::dumpAddr(unsigned int*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:198
+ffffffff800078c6 t itoa(long, char*, int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:206
+ffffffff800079b8 T strreverse(char*, int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:229
+ffffffff80007a41 t itoa_unsigned(unsigned long, char*, int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/klog.cpp:243
+ffffffff80007ae6 T allocateNewPageBlock(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:61
+ffffffff80007bed T freePageBlock(pageBlock*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:79
+ffffffff80007c83 T kmalloc	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:139
+ffffffff80007ec9 T kcalloc	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:217
+ffffffff80007f08 T krealloc	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:221
+ffffffff80007f99 T kfree	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:239
+ffffffff800080dd T operator new(unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:272
+ffffffff80008109 T operator new[](unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:280
+ffffffff80008123 T operator delete(void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:284
+ffffffff8000813e T operator delete[](void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:288
+ffffffff80008159 T operator delete(void*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:292
+ffffffff80008178 T operator delete[](void*, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:296
+ffffffff80008197 T operator new(unsigned long, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:301
+ffffffff800081a9 T operator new[](unsigned long, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:305
+ffffffff800081bb T operator delete(void*, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:309
+ffffffff800081ca T operator delete[](void*, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/liballoc/liballoc.cpp:311
+ffffffff800081d9 T obos::thread::findRunnableThreadInList(obos::thread::Thread::ThreadList&)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/scheduler.cpp:27
+ffffffff80008245 T obos::thread::findThreadPriorityList()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/scheduler.cpp:54
+ffffffff8000831a T obos::thread::callBlockCallbacksOnList(obos::thread::Thread::ThreadList&)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/scheduler.cpp:83
+ffffffff80008355 T obos::thread::schedule()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/scheduler.cpp:99
+ffffffff80008431 T obos::thread::InitializeScheduler()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/scheduler.cpp:138
+ffffffff800086f4 T obos::SetLastError(unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/error.cpp:15
+ffffffff80008725 T obos::GetLastError()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/error.cpp:22
+ffffffff80008736 T obos::thread::lookForThreadInList(obos::thread::Thread::ThreadList&, unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:22
+ffffffff8000877c T obos::thread::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:34
+ffffffff8000877c T obos::thread::ThreadHandle::ThreadHandle()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:34
+ffffffff80008792 T obos::thread::ThreadHandle::OpenThread(unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:38
+ffffffff80008832 T obos::thread::ThreadHandle::CreateThread(unsigned int, unsigned long, void (*)(unsigned long), unsigned long, void*, bool, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:56
+ffffffff80008afe T obos::thread::ThreadHandle::PauseThread()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:124
+ffffffff80008b6a T obos::thread::ThreadHandle::ResumeThread()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:142
+ffffffff80008bd6 T obos::thread::ThreadHandle::SetThreadPriority(unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:160
+ffffffff80008e0c T obos::thread::ThreadHandle::TerminateThread(unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:227
+ffffffff80008f8a T obos::thread::ThreadHandle::GetThreadStatus()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:263
+ffffffff80008fc8 T obos::thread::ThreadHandle::GetThreadExitCode()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:273
+ffffffff80009006 T obos::thread::ThreadHandle::GetThreadLastError()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:283
+ffffffff80009044 T obos::thread::ThreadHandle::CloseHandle()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:294
+ffffffff800091c3 T obos::thread::ExitThreadImpl(void*, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:326
+ffffffff80009360 T obos::thread::ExitThread(unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:348
+ffffffff80009397 T obos::process::CreateProcess(bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/multitasking/process/process.cpp:21
+ffffffff8000950a T obos::driverInterface::DriverConnection::SendDataOnBuffer(unsigned char const*, unsigned long, obos::driverInterface::con_buffer*, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:26
+ffffffff8000965a t obos::driverInterface::DriverConnection::RecvDataOnBuffer(unsigned char*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)::{lambda(obos::thread::Thread*, void*)#1}::operator()(obos::thread::Thread*, void*) const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:65
+ffffffff800096b5 t obos::driverInterface::DriverConnection::RecvDataOnBuffer(unsigned char*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)::{lambda(obos::thread::Thread*, void*)#1}::_FUN(obos::thread::Thread*, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:65
+ffffffff800096dc t obos::driverInterface::DriverConnection::RecvDataOnBuffer(unsigned char*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)::{lambda(obos::thread::Thread*, void*)#1}::operator bool (*)(obos::thread::Thread*, void*)() const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:65
+ffffffff800096ee T obos::driverInterface::DriverConnection::RecvDataOnBuffer(unsigned char*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:53
+ffffffff800098fc t obos::driverInterface::DriverConnection::AttemptLock(obos::driverInterface::con_buffer*, bool)::{lambda(obos::thread::Thread*, void*)#1}::operator()(obos::thread::Thread*, void*) const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:112
+ffffffff8000993d t obos::driverInterface::DriverConnection::AttemptLock(obos::driverInterface::con_buffer*, bool)::{lambda(obos::thread::Thread*, void*)#1}::_FUN(obos::thread::Thread*, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:112
+ffffffff80009964 t obos::driverInterface::DriverConnection::AttemptLock(obos::driverInterface::con_buffer*, bool)::{lambda(obos::thread::Thread*, void*)#1}::operator bool (*)(obos::thread::Thread*, void*)() const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:112
+ffffffff80009976 T obos::driverInterface::DriverConnection::AttemptLock(obos::driverInterface::con_buffer*, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:108
+ffffffff80009a10 T obos::driverInterface::DriverConnection::AttemptUnlock(obos::driverInterface::con_buffer*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:129
+ffffffff80009a2c T obos::driverInterface::DriverConnectionBase::SendData(unsigned char const*, unsigned long, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:137
+ffffffff80009a7e T obos::driverInterface::DriverConnectionBase::RecvData(unsigned char*, unsigned long, bool, bool, unsigned int, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:148
+ffffffff80009ae4 T obos::driverInterface::DriverConnectionBase::CloseConnection()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:162
+ffffffff80009ccc t obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)::{lambda(obos::thread::Thread*, void*)#1}::operator()(obos::thread::Thread*, void*) const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:238
+ffffffff80009d12 t obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)::{lambda(obos::thread::Thread*, void*)#1}::_FUN(obos::thread::Thread*, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:238
+ffffffff80009d3a t obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)::{lambda(obos::thread::Thread*, void*)#1}::operator bool (*)(obos::thread::Thread*, void*)() const	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:238
+ffffffff80009d4c T obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:204
+ffffffff80009fb4 T obos::driverInterface::DriverClient::SendData(unsigned char const*, unsigned long, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:274
+ffffffff8000a042 T obos::driverInterface::DriverClient::RecvData(unsigned char*, unsigned long, bool, bool, unsigned int, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:283
+ffffffff8000a0d2 T obos::driverInterface::DriverServer::Listen(unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:295
+ffffffff8000a1d0 T obos::driverInterface::DriverServer::SendData(unsigned char const*, unsigned long, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:321
+ffffffff8000a260 T obos::driverInterface::DriverServer::RecvData(unsigned char*, unsigned long, bool, bool, unsigned int, bool)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:330
+ffffffff8000a2ea T obos::driverInterface::DriverServer::ListenCallback(obos::thread::Thread*, void*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:340
+ffffffff8000a439 T obos::driverInterface::SyscallAllocDriverServer()	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:379
+ffffffff8000a460 T obos::driverInterface::SyscallFreeDriverServer(obos::driverInterface::DriverServer*)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:383
+ffffffff8000a488 T obos::driverInterface::DummyClass1::Listen(unsigned int)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:388
+ffffffff8000a49a T obos::driverInterface::DummyClass2::OpenConnection(unsigned int, unsigned long)	/home/omar/.vs/obos/out/build/x86_64-debug/../../../src/oboskrnl/driverInterface/interface.cpp:392

@@ -61,8 +61,8 @@ extern "C" void _start()
 	}
 
 	{
-		char strInteger[9] = {};
-		itoa(i, strInteger, 16);
+		char strInteger[32] = {};
+		itoa(i, strInteger, 10);
 		str = "Received ";
 		Syscall(0, &str);
 		str = (char*)&strInteger;

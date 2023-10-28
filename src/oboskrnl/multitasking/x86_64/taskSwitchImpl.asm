@@ -17,6 +17,7 @@ segment .text
 
 %macro popaq 0
 pop rbp
+add rsp, 8
 pop r15
 pop r14
 pop r13

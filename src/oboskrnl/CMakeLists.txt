@@ -59,6 +59,7 @@ add_custom_command(TARGET oboskrnl POST_BUILD
 				   COMMAND objcopy -S isodir/obos/oboskrnl
 				   COMMAND cp -u out/testDriver isodir/obos/testDriver
 				   COMMAND objcopy -S isodir/obos/testDriver
+				   COMMAND nm out/oboskrnl --demangle=gnu-v3 -ln | grep -w --ignore-case T > isodir/obos/oboskrnl.map
 				   COMMAND xorriso -as mkisofs -b limine/limine-bios-cd.bin  -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine/limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label isodir -o ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
 				   COMMAND ./limine/limine bios-install ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
                    COMMAND echo "Finished build!"

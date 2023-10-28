@@ -23,6 +23,7 @@ push r12
 push r13
 push r14
 push r15
+push qword [rsp+0x88]
 push rbp
 %endmacro
 
@@ -30,6 +31,7 @@ push rbp
 
 %macro popaq 0
 pop rbp
+add rsp, 8
 pop r15
 pop r14
 pop r13
@@ -116,7 +118,7 @@ isr_common_stub:
 	mov rax, ss
 	push rax
 
-	mov rax, [rsp+0x88]
+	mov rax, [rsp+0x90]
 	mov rax, [_ZN4obos10g_handlersE+rax*8]
 
 	test rax, rax

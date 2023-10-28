@@ -63,18 +63,19 @@ namespace obos
 
 	struct interrupt_frame
 	{
-		// (ss) 0
+		// 0x00
 		uintptr_t ss;
-		// (r8-r15) 8,16,24,32,40,48,56,64
-		// (rdi-rax) 72,80,88,96,104,112,120,128
-		uintptr_t rbp, r8, r9, r10, r11, r12, r13, r14, r15,
-				 rdi, rsi, ignored, rbx, rdx, rcx, rax;
-		// (intNumber) 136, (errorCode) 144
+		// 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50
+		// 0x58, 0x60, 0x68, 0x70, 0x78, 0x80, 0x88
+		uintptr_t rbp, ignored1, r8, r9, r10, r11, r12, r13, r14, r15,
+				 rdi, rsi, ignored2, rbx, rdx, rcx, rax;
+		// 0x90, 0x98
 		uintptr_t intNumber, errorCode;
-		// (rip,cs,rflags,useresp,ds)
-		// 152,160,168,176,184
+		// 0x100, 0x108
 		uintptr_t rip, cs;
+		// 0x110
 		x86_64_flags rflags;
+		// 0x118, 0x120
 		uintptr_t rsp, ds;
 	};
 
