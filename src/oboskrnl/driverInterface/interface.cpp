@@ -50,7 +50,7 @@ namespace obos
 			AttemptUnlock(buffer);
 			return true;
 		}
-		bool DriverConnection::RecvDataOnBuffer(byte* data, size_t size, con_buffer* buffer, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
+		bool DriverConnection::RecvDataOnBuffer(byte* data, size_t size, con_buffer* buffer, bool isConnectionClosed, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
 		{
 			if (!buffer)
 			{
@@ -65,7 +65,7 @@ namespace obos
 				thread::g_currentThread->blockCallback.callback = [](thread::Thread* thread, void* _buff)->bool
 					{
 						con_buffer* buff = (con_buffer*)_buff;
-						return buff->wake || (buff->amountExcepted >= buff->szBuf) || (thread::g_timerTicks > thread->wakeUpTime);
+						return buff->wake || (buff->szBuf >= buff->amountExcepted) || (thread::g_timerTicks > thread->wakeUpTime);
 					};
 				thread::g_currentThread->blockCallback.userdata = buffer;
 				thread::g_currentThread->wakeUpTime = ticksToWait;
@@ -91,6 +91,10 @@ namespace obos
 					buffer->szBuf = 0;
 					kfree(buffer->buf);
 					buffer->buf = nullptr;
+					if (isConnectionClosed)
+					{
+
+					}
 					goto finish;
 				}
 				byte* newBuf = (byte*)kcalloc(buffer->szBuf - size, sizeof(byte));
@@ -166,15 +170,8 @@ namespace obos
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
 			}
-			m_rawCon->AttemptLock(&m_rawCon->buf1, true);
-			m_rawCon->AttemptLock(&m_rawCon->buf2, true);
-			m_rawCon->buf1.wake = true;
-			m_rawCon->buf2.wake = true;
-			kfree(m_rawCon->buf1.buf);
-			kfree(m_rawCon->buf2.buf);
+			// Threads can still read from the connections, but not send.
 			m_rawCon->connectionOpen = false;
-			m_rawCon->AttemptUnlock(&m_rawCon->buf1);
-			m_rawCon->AttemptUnlock(&m_rawCon->buf2);
 			thread::callScheduler();
 			return true;
 		}
@@ -253,16 +250,16 @@ namespace obos
 		{
 			if (!m_rawCon || !m_rawCon->connectionOpen)
 			{
-				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				SetLastError(m_rawCon ? OBOS_ERROR_CONNECTION_CLOSED : OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
 			}
 			return m_rawCon->SendDataOnBuffer(data,size, &m_rawCon->buf2, spinOnLock);
 		}
 		bool DriverClient::RecvData(byte* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
 		{
-			if (!m_rawCon || !m_rawCon->connectionOpen)
+			if (!m_rawCon)
 			{
-				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
 			}
 			return m_rawCon->RecvDataOnBuffer(data, size, &m_rawCon->buf1, peek, spinOnBuffer, ticksToWait, spinOnLock);
@@ -299,14 +296,14 @@ namespace obos
 		{
 			if (!m_rawCon || !m_rawCon->connectionOpen)
 			{
-				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				SetLastError(m_rawCon ? OBOS_ERROR_CONNECTION_CLOSED : OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
 			}
 			return m_rawCon->SendDataOnBuffer(data,size, &m_rawCon->buf1, spinOnLock);
 		}
 		bool DriverServer::RecvData(byte* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
 		{
-			if (!m_rawCon || !m_rawCon->connectionOpen)
+			if (!m_rawCon)
 			{
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;

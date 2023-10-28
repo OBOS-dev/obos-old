@@ -6,27 +6,48 @@
 
 global calibrateTimer
 extern _ZN4obos15g_localAPICAddrE
+extern _ZN4obos24RegisterInterruptHandlerEhPFvPNS_15interrupt_frameEE
 
-getPITCount:
-	push rbp
-	mov rbp, rsp
-	pop rbx
+segment .bss
 
-	mov al, 0b1110010
-	mov dx, 0x43
-	out dx,al
+currentCount: 
+	resd 1
 
-	xor rbx,rbx
+segment .text
 
-	in al, 0x40
-	mov bl, al
-	in al, 0x40
-	mov bh, al
-	mov rax, rbx
-	
-	pop rbx
-	leave
+pitInterrupt:
+	mov r15, [_ZN4obos15g_localAPICAddrE]
+	mov edx, dword [r15+0x390] ; currentCount
+	mov [currentCount], edx
+	mov dword [r15+0x380], 0 ; initialCount
+	mov dword [r15+0xb0], 0 ; EOI
+	mov al, 0x20
+	out 0x20, al
+	mov al, 0xff
+	out 0x21, al
+	out 0xA1, al
 	ret
+
+; getPITCount:
+; 	push rbp
+; 	mov rbp, rsp
+; 	pop rbx
+; 
+; 	mov al, 0b1110010
+; 	mov dx, 0x43
+; 	out dx,al
+; 
+; 	xor rbx,rbx
+; 
+; 	in al, 0x40
+; 	mov bl, al
+; 	in al, 0x40
+; 	mov bh, al
+; 	mov rax, rbx
+; 	
+; 	pop rbx
+; 	leave
+; 	ret
 
 calibrateTimer:
 	push rbp
@@ -54,6 +75,7 @@ calibrateTimer:
 	pushfq
 	cli
 
+	mov dword [r15+0xb0], 0 ; EOI
 	mov dword [r15+0x3E0], 13  ; divisorConfig
 
 	mov al, 0x30
@@ -69,15 +91,35 @@ calibrateTimer:
 	out 0x40, al
 	pop rdi
 
-	mov dword [r15+0x380], 0xffffffff  ; initialCount
+	push rdi
+	mov rdi, 0x20
+	mov rsi, pitInterrupt
+	call _ZN4obos24RegisterInterruptHandlerEhPFvPNS_15interrupt_frameEE
+	pop rdi
 
-.loop:
-	call getPITCount
-	test rax,rax
-	jnz .loop
+.retry:
 
-	mov edx, dword [r15+0x390] ; currentCount
-	mov dword [r15+0x380], 0 ; initialCount
+	mov al, 0xfe
+	out 0x21, al
+	mov al, 0xff
+	out 0xA1, al
+
+	mov dword [r15+0x380], 0xffffffff ; initialCount
+	
+	; It's pretty hard to wait for the interrupt when interrupts are disabled...
+	sti
+	; Wait for the interrupt.
+	hlt
+	cli
+
+	; pitInterrupt disables the pic
+	; mov al, 0xff
+	; out 0x21, al
+	; out 0xA1, al
+
+	mov edx, dword [currentCount] ; currentCount
+	test edx, 0xffffffff
+	je .retry
 	mov rax, 0xffffffff
 	sub rax, rdx
 	

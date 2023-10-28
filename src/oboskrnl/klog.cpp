@@ -150,6 +150,7 @@ namespace obos
 			uint32_t oldBackground = 0;\
 			g_kernelConsole.GetColour(&oldForeground, &oldBackground);\
 			g_kernelConsole.SetColour(colour, oldBackground);\
+			while(*format == '\n') { printf("\n"); format++; } \
 			va_list list; va_start(list, format);\
 			size_t ret = printf(msg);\
 			ret += vprintf(format, list);\

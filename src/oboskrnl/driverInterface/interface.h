@@ -27,7 +27,7 @@ namespace obos
 			DriverConnection() = default;
 
 			bool SendDataOnBuffer(const byte* data, size_t size, con_buffer* buffer, bool spinOnLock = true);
-			bool RecvDataOnBuffer(byte* data, size_t size, con_buffer* buffer, bool peek = false, bool spinOnBuffer = true, uint32_t ticksToWait = 1000, bool spinOnLock = true);
+			bool RecvDataOnBuffer(byte* data, size_t size, con_buffer* buffer, bool isConnectionClosed, bool peek = false, bool spinOnBuffer = true, uint32_t ticksToWait = 1000, bool spinOnLock = true);
 			
 			con_buffer buf1;
 			con_buffer buf2;

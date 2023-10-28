@@ -67,6 +67,7 @@ add_custom_command(TARGET oboskrnl POST_BUILD
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_definitions(oboskrnl PUBLIC "OBOS_DEBUG")
+	target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:-g -F dwarf>)
 else (CMAKE_BUILD_TYPE STREQUAL "Release")
 	target_compile_definitions(oboskrnl PUBLIC "OBOS_RELEASE")
 endif()

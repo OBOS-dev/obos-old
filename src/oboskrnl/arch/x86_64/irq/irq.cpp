@@ -29,13 +29,13 @@ namespace obos
 	void RemapPIC()
 	{
 		// The first pic.
-		outb(0x20, 0x10 | 0x01);
+		outb(0x20, 0x11);
 		outb(0x21, 0x20);
 		outb(0x21, 0x4);
 		outb(0x21, 0x1);
 
 		// The second pic.
-		outb(0xA0, 0x10 | 0x01);
+		outb(0xA0, 0x11);
 		outb(0xA1, 0x28);
 		outb(0xA1, 0x2);
 		outb(0xA1, 0x1);
@@ -138,8 +138,8 @@ namespace obos
 
 		g_localAPICAddr->errorStatus = 0;
 
-		g_localAPICAddr->lvtLINT0 = 0xf8;
-		g_localAPICAddr->lvtLINT1 = 0xf9;
+		g_localAPICAddr->lvtLINT0 |= 0xf8;
+		g_localAPICAddr->lvtLINT1 |= 0xf9;
 		g_localAPICAddr->lvtError = 0xfa;
 		g_localAPICAddr->lvtCMCI = 0xfb;
 		g_localAPICAddr->lvtPerformanceMonitoringCounters = 0xfc;

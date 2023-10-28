@@ -30,8 +30,10 @@ namespace obos
 		// Assumes the timer divisor is one.
 		uint64_t FindCounterValueFromFrequency(uint64_t freq)
 		{
-			//return calibrateTimer(freq);
-			return freq;
+			logger::log("%s: Calibrating the timer at a frequency of %d.\n", __func__, freq);
+			uint64_t ret = calibrateTimer(freq);
+			logger::log("%s: Timer count is %d.\n", __func__, ret);
+			return ret;
 		}
 
 		extern bool g_schedulerLock;
