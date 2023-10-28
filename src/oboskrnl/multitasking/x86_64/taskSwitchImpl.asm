@@ -9,6 +9,9 @@ segment .bss
 blockCallbackStackBottom:
 RESB 8192
 blockCallbackStack:
+switcherStackBottom:
+RESB 8192
+switcherStack:
 
 segment .text
 
@@ -39,6 +42,8 @@ global _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_
 global idleTask
 
 _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE:
+	mov rsp, switcherStack
+
 	call _ZN4obos7SendEOIEv
 	
 	mov rax, [rdi]

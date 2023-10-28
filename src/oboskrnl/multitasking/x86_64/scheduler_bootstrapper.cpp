@@ -6,6 +6,7 @@
 
 #include <int.h>
 #include <klog.h>
+#include <memory_manipulation.h>
 
 #include <arch/interrupt.h>
 
@@ -100,7 +101,7 @@ namespace obos
 		{
 			if (!g_initialized || !g_currentThread || g_schedulerLock)
 				return;
-			g_currentThread->context.frame = *frame;
+			utils::dwMemcpy((uint32_t*)&g_currentThread->context.frame, (uint32_t*)frame, sizeof(interrupt_frame) / 4);
 			schedule();
 		}
 

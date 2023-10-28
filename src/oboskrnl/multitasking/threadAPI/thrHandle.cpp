@@ -53,7 +53,7 @@ namespace obos
 			return true;
 		}
 
-		bool ThreadHandle::CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, bool startPaused, bool isUsermode)
+		bool ThreadHandle::CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, void* threadList, bool startPaused, bool isUsermode)
 		{
 			if (m_obj)
 			{
@@ -90,7 +90,8 @@ namespace obos
 			thread->exitCode = 0;
 			thread->lastError = 0;
 			thread->priorityList = priorityList;
-			thread->threadList = g_currentThread->threadList;
+			thread->threadList = threadList ? (thread::Thread::ThreadList*)threadList : g_currentThread->threadList;
+			thread->owner = g_currentThread->owner;
 			setupThreadContext(&thread->context, &thread->stackInfo, (uintptr_t)entry, userdata, stackSize, isUsermode);
 
 			uintptr_t val = stopTimer();
@@ -312,6 +313,8 @@ namespace obos
 				obj->threadList->size--;
 				startTimer(val);
 
+				delete obj;
+
 				return true;
 			}
 
@@ -334,7 +337,9 @@ namespace obos
 			if (g_currentThread->priorityList->tail == g_currentThread)
 				g_currentThread->priorityList->tail = g_currentThread->prev_run;
 			g_currentThread->priorityList->size--;
-			freeThreadStackInfo(&g_currentThread->stackInfo);
+			freeThreadStackInfo((void*)&g_currentThread->stackInfo);
+			if(!g_currentThread->references)
+				delete g_currentThread;
 			startTimer(0);
 			callScheduler();
 			return false;
@@ -343,7 +348,7 @@ namespace obos
 		[[noreturn]] void ExitThread(uint32_t exitCode)
 		{
 			stopTimer();
-			callBlockCallbackOnThread(&g_currentThread->context, ExitThreadImpl, (void*)(uintptr_t)exitCode,nullptr);
+			callBlockCallbackOnThread((taskSwitchInfo*)&g_currentThread->context, ExitThreadImpl, (void*)(uintptr_t)exitCode, nullptr);
 			while (1);
 		}
 }

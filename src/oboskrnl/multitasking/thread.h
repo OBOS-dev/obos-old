@@ -46,6 +46,7 @@ namespace obos
 			uint32_t timeSliceIndex;
 			uint32_t exitCode;
 			uint64_t lastTimePreempted;
+			uint64_t wakeUpTime;
 			uint32_t lastError;
 			uint32_t references;
 			struct

@@ -7,3 +7,4 @@ cmake_minimum_required(VERSION 3.0)
 project(obos C CXX ASM_NASM)
 
 add_subdirectory("src/oboskrnl")
+add_subdirectory("src/drivers/generic/test")

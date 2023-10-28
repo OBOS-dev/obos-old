@@ -22,6 +22,7 @@ namespace obos
 		};
 		struct Process
 		{
+			Process() = default;
 			struct ProcessList
 			{
 				Process *head, *tail;
@@ -34,8 +35,14 @@ namespace obos
 			Process* parent;
 			ProcessList children;
 			bool isUsermode;
+			void* _driverIdentity;
 			procContextInfo context;
+			Process* prev;
+			Process* next;
+			Process* prev_child;
+			Process* next_child;
 		};
+		extern Process::ProcessList g_processes;
 		Process* CreateProcess(bool isUsermode);
 	}
 }

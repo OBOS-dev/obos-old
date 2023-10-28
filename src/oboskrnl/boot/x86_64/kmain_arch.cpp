@@ -30,30 +30,33 @@
 
 #include <multitasking/scheduler.h>
 
-bool strcmp(const char* str1, const char* str2)
-{
-	if (obos::utils::strlen(str1) != obos::utils::strlen(str2))
-		return false;
-	for (size_t i = 0; str1[i]; i++)
-		if (str1[i] != str2[i])
-			return false;
-	return true;
-}
 
 #define CPUID_FSGSBASE (1)
 #define CR4_FSGSBASE ((uintptr_t)1<<16)
 
 namespace obos
 {
+	namespace utils
+	{
+		bool strcmp(const char* str1, const char* str2)
+		{
+			if (obos::utils::strlen(str1) != obos::utils::strlen(str2))
+				return false;
+			for (size_t i = 0; str1[i]; i++)
+				if (str1[i] != str2[i])
+					return false;
+			return true;
+		}
+	}
 	void InitializeGdt();
 	void InitializeIdt();
 	void RegisterExceptionHandlers();
 	Console g_kernelConsole{};
-	static volatile limine_framebuffer_request framebuffer_request = {
+	volatile limine_framebuffer_request framebuffer_request = {
 		.id = LIMINE_FRAMEBUFFER_REQUEST,
 		.revision = 0
 	};
-	static volatile limine_module_request module_request = {
+	volatile limine_module_request module_request = {
 		.id = LIMINE_MODULE_REQUEST,
 		.revision = 0,
 	};
@@ -70,7 +73,7 @@ namespace obos
 			hlt();
 	}
 
-	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console.
+	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console. This also must enable the scheduler.
 	void arch_kmain()
 	{
 		con_framebuffer framebuffer;
@@ -86,7 +89,7 @@ namespace obos
 			EarlyKPanic();
 		for (size_t i = 0; i < module_request.response->module_count; i++)
 		{
-			if (strcmp(module_request.response->modules[i]->path, "/obos/font.bin"))
+			if (utils::strcmp(module_request.response->modules[i]->path, "/obos/font.bin"))
 			{
 				font = (uint8_t*)module_request.response->modules[i]->address;
 				break;

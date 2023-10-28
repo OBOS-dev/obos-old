@@ -19,5 +19,6 @@ namespace obos
 		bool memcmp(const void* blk1, const void* blk2, size_t size);
 		bool memcmp(const void* blk1, uint32_t val, size_t size);
 		size_t strlen(const char* string);
+		bool strcmp(const char* str1, const char* str2);
 	}
 }

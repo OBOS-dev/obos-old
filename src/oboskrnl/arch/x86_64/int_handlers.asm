@@ -51,6 +51,7 @@ pop rax
 global isr%1
 isr%1:
 %assign current_isr current_isr + 1
+cld
 push 0
 push %1
 jmp isr_common_stub
@@ -59,6 +60,7 @@ jmp isr_common_stub
 global isr%1
 isr%1:
 %assign current_isr current_isr + 1
+cld
 push %1
 jmp isr_common_stub
 %endmacro
@@ -97,7 +99,11 @@ ISR_NOERRCODE 28
 ISR_ERRCODE   29
 ISR_ERRCODE   30
 ISR_NOERRCODE 31
-%rep 224
+%rep 17
+ISR_NOERRCODE current_isr
+%endrep
+%assign current_isr current_isr + 1
+%rep 206
 ISR_NOERRCODE current_isr
 %endrep
 

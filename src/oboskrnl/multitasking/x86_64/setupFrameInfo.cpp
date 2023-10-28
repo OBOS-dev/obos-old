@@ -19,6 +19,7 @@
 
 namespace obos
 {
+	extern void kmain_common();
 	namespace thread
 	{
 		void setupThreadContext(taskSwitchInfo* info, void* _stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, bool isUsermodeProgram)
@@ -35,7 +36,10 @@ namespace obos
 			info->frame.rip = entry;
 			info->frame.rdi = userdata;
 			info->frame.rbp = 0;
-			info->frame.rsp = ((uintptr_t)memory::VirtualAlloc(nullptr, stackSize / 4096, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
+			if ((void(*)())entry != kmain_common)
+				info->frame.rsp = ((uintptr_t)memory::VirtualAlloc(nullptr, stackSize / 4096, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
+			else
+				info->frame.rsp = ((uintptr_t)memory::VirtualAlloc((void*)0xFFFFFFFF90000000, stackSize / 4096, memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
 			*(uintptr_t*)info->frame.rsp = 0;
 			info->frame.rflags.setBit(x86_64_flags::RFLAGS_INTERRUPT_ENABLE | x86_64_flags::RFLAGS_CPUID);
 			

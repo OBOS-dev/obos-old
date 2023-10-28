@@ -79,4 +79,5 @@ namespace obos
 	};
 
 	void RegisterInterruptHandler(byte interrupt, void(*handler)(interrupt_frame* frame));
+	void RegisterInterruptInIDT(int n, void(*handler)());
 }

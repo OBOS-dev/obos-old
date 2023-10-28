@@ -17,9 +17,11 @@ namespace obos
 		public:
 			ThreadHandle();
 			
+			void* GetUnderlyingObject() const { return m_obj; }
+
 			bool OpenThread(uint32_t tid);
 			
-			bool CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, bool startPaused = false, bool isUsermode = false);
+			bool CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, void* threadList = nullptr, bool startPaused = false, bool isUsermode = false);
 
 			bool PauseThread();
 			bool ResumeThread();

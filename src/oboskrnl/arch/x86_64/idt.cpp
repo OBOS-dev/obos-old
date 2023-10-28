@@ -311,7 +311,12 @@ namespace obos
 		g_idtEntries[n].offset2 = base >> 16;
 		g_idtEntries[n].offset3 = base >> 32;
 	}
+	void RegisterInterruptInIDT(int n, void(*handler)())
+	{
+		_RegisterInterruptInIDT(n, handler, DEFAULT_TYPE_ATTRIBUTE | TYPE_ATTRIBUTE_USER_MODE);
+	}
 #define RegisterInterruptInIDT(n) _RegisterInterruptInIDT(n, isr ##n, DEFAULT_TYPE_ATTRIBUTE | TYPE_ATTRIBUTE_USER_MODE)
+#define RegisterInterruptInIDT_NoUserMode(n) _RegisterInterruptInIDT(n, isr ##n, DEFAULT_TYPE_ATTRIBUTE)
 	void InitializeIdt()
 	{
 		RegisterInterruptInIDT(0);
@@ -363,7 +368,7 @@ namespace obos
 		RegisterInterruptInIDT(46);
 		RegisterInterruptInIDT(47);
 		RegisterInterruptInIDT(48);
-		RegisterInterruptInIDT(49);
+		RegisterInterruptInIDT_NoUserMode(49);
 		RegisterInterruptInIDT(50);
 		RegisterInterruptInIDT(51);
 		RegisterInterruptInIDT(52);

@@ -32,7 +32,7 @@ namespace obos
 					uintptr_t allocFlags = memory::PROT_USER_MODE_ACCESS;
 					if (programHeader->p_flags & PF_X)
 						allocFlags |= memory::PROT_CAN_EXECUTE;
-					if (programHeader->p_flags & PF_R)
+					if (!(programHeader->p_flags & PF_W))
 						allocFlags |= memory::PROT_READ_ONLY;
 					if (programHeader->p_vaddr > 0xFFFFFFFF80000000 || !programHeader->p_vaddr)
 					{

@@ -16,11 +16,11 @@ namespace obos
 	namespace thread
 	{
 		Thread::ThreadList g_priorityLists[4];
-		Thread* g_currentThread = nullptr;
+		volatile Thread* g_currentThread = nullptr;
 		uint64_t g_schedulerFrequency = 1000;
 		uint64_t g_timerTicks = 0;
 		bool g_initialized = false;
-		bool g_schedulerLock = false;
+		volatile bool g_schedulerLock = false;
 
 #pragma GCC push_options
 #pragma GCC optimize("O3")
@@ -129,15 +129,16 @@ namespace obos
 				return;
 			}
 			g_currentThread = newThread;
-			g_currentThread->timeSliceIndex++;
+			g_currentThread->timeSliceIndex = g_currentThread->timeSliceIndex + 1;
 			g_schedulerLock = false;
-			switchToThreadImpl(&g_currentThread->context);
+			switchToThreadImpl((taskSwitchInfo*)&g_currentThread->context);
 		}
 #pragma GCC pop_options
 
 		void InitializeScheduler()
 		{
-			Thread* kernelMainThread = g_currentThread = new Thread{};
+			Thread* kernelMainThread  = new Thread{};
+			g_currentThread = (volatile Thread*)kernelMainThread;
 
 			kernelMainThread->tid = g_nextTid++;
 			kernelMainThread->status = THREAD_STATUS_CAN_RUN;
@@ -181,7 +182,7 @@ namespace obos
 			g_priorityLists[0].nextThreadList = g_priorityLists + 1;
 
 			setupTimerInterrupt();
-			switchToThreadImpl(&g_currentThread->context);
+			switchToThreadImpl((taskSwitchInfo*)&g_currentThread->context);
 		}
 	}
 }

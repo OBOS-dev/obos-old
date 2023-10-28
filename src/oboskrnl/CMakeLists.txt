@@ -14,11 +14,10 @@ if (NOT DEFINED E9_HACK)
 endif()
 
 set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "liballoc/liballoc.cpp" 
-					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp" 
-					  "multitasking/process/x86_64/procInfo.cpp" "multitasking/process/x86_64/loader/elf.cpp"
-)
+					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp"
+ "driverInterface/interface.cpp")
 
-add_executable(oboskrnl  ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
+add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
 
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${LINKER_SCRIPT}")
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
@@ -58,8 +57,16 @@ add_custom_command(TARGET oboskrnl POST_BUILD
                    COMMAND echo "Generating the iso..."
 				   COMMAND cp -u out/oboskrnl isodir/obos/oboskrnl
 				   COMMAND objcopy -S isodir/obos/oboskrnl
-				   COMMAND xorriso -as mkisofs -b limine/limine-bios-cd.bin  -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine/limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label isodir -o ${OUTPUT_DIR}/obos.iso
-				   COMMAND ./limine/limine bios-install ${OUTPUT_DIR}/obos.iso
+				   COMMAND cp -u out/testDriver isodir/obos/testDriver
+				   COMMAND objcopy -S isodir/obos/testDriver
+				   COMMAND xorriso -as mkisofs -b limine/limine-bios-cd.bin  -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine/limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label isodir -o ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
+				   COMMAND ./limine/limine bios-install ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
                    COMMAND echo "Finished build!"
                    WORKING_DIRECTORY ${OUTPUT_DIR}/../
                    BYPRODUCTS "${OUTPUT_DIR}/obos.iso")
+
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	target_compile_definitions(oboskrnl PUBLIC "OBOS_DEBUG")
+else (CMAKE_BUILD_TYPE STREQUAL "Release")
+	target_compile_definitions(oboskrnl PUBLIC "OBOS_RELEASE")
+endif()
