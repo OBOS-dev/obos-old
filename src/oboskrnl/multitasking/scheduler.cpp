@@ -23,7 +23,7 @@ namespace obos
 		volatile bool g_schedulerLock = false;
 
 #pragma GCC push_options
-#pragma GCC optimize("O3")
+#pragma GCC optimize("O1")
 		Thread* findRunnableThreadInList(Thread::ThreadList& list)
 		{
 			Thread* currentThread = list.tail;

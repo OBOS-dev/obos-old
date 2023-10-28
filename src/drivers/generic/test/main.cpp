@@ -49,18 +49,30 @@ extern "C" void _start()
 	conn->Listen();
 	uint32_t i = 69;
 	conn->SendData((byte*)&i, sizeof(i));
-	conn->RecvData((byte*)&i, sizeof(i));
-	
-	char strInteger[9] = {};
-	itoa(i, strInteger, 16);
+	bool ret = conn->RecvData((byte*)&i, sizeof(i));
 	const char* str = "Received ";
-	str = "Received ";
-	Syscall(0, &str);
-	Syscall(0, &strInteger);
-	str = "\n";
-	Syscall(0, &str);
-	conn->CloseConnection();
 
+	if (!ret)
+	{
+		str = "Receive error!\n";
+		Syscall(0, &str);
+		conn->CloseConnection();
+		goto finish;
+	}
+
+	{
+		char strInteger[9] = {};
+		itoa(i, strInteger, 16);
+		str = "Received ";
+		Syscall(0, &str);
+		str = (char*)&strInteger;
+		Syscall(0, &str);
+		str = "\n";
+		Syscall(0, &str);
+		conn->CloseConnection();
+	}
+
+finish:
 	uint32_t exitCode = 0;
 	Syscall(1, &exitCode); // ExitThread
 }

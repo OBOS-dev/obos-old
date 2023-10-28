@@ -175,6 +175,7 @@ namespace obos
 			m_rawCon->connectionOpen = false;
 			m_rawCon->AttemptUnlock(&m_rawCon->buf1);
 			m_rawCon->AttemptUnlock(&m_rawCon->buf2);
+			thread::callScheduler();
 			return true;
 		}
 
@@ -217,7 +218,7 @@ namespace obos
 				thread::g_currentThread->blockCallback.callback = [](thread::Thread* thr, void* _data)->bool
 					{
 						driverIdentity* identity = (driverIdentity*)_data;
-						return identity->listening && (thread::g_timerTicks >= thr->wakeUpTime);
+						return identity->listening || (thread::g_timerTicks >= thr->wakeUpTime);
 					};
 				thread::g_currentThread->blockCallback.userdata = identity;
 				thread::g_currentThread->status |= thread::THREAD_STATUS_BLOCKED;

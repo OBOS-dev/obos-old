@@ -16,7 +16,7 @@ namespace obos
 	{
 		thread::g_currentThread->lastError = err;
 #ifdef OBOS_DEBUG
-		logger::warning("Error thrown: %d.", err);
+		logger::warning("\nError thrown: %d.\n", err);
 #endif
 	}
 	uint32_t GetLastError() 
