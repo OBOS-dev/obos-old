@@ -7,6 +7,7 @@
 #pragma once
 
 #include <int.h>
+#include <console.h>
 
 #include <multitasking/thread.h>
 
@@ -34,6 +35,7 @@ namespace obos
 			uint32_t magicNumber = PROCESS_MAGIC_NUMBER;
 			Process* parent;
 			ProcessList children;
+			Console* console;
 			bool isUsermode;
 			void* _driverIdentity;
 			procContextInfo context;

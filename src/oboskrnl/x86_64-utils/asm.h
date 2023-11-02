@@ -40,5 +40,8 @@ namespace obos
 	void atomic_set(bool* val);
 	bool atomic_test(bool* val);
 
+	// If *val1 == nullptr, val1 = val2.
+	void set_if_zero(uint64_t* val1, uint64_t val2);
+
 	[[noreturn]] void haltCPU();
 }

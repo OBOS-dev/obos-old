@@ -56,13 +56,16 @@ namespace obos
 		}
 		uintptr_t stopTimer()
 		{
-			MaskTimer(false);
-			return saveFlagsAndCLI();
+			uintptr_t ret = saveFlagsAndCLI();
+			if(g_localAPICAddr)
+				MaskTimer(false);
+			return ret;
 		}
 		void startTimer(uintptr_t flags)
 		{
+			if (g_localAPICAddr)
+				MaskTimer(true);
 			restorePreviousInterruptStatus(flags);
-			MaskTimer(true);
 		}
 		void callScheduler()
 		{

@@ -10,6 +10,8 @@
 #include <klog.h>
 #include <memory_manipulation.h>
 
+#include <x86_64-utils/asm.h>
+
 #include <arch/x86_64/memory_manager/physical/allocate.h>
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
@@ -27,6 +29,8 @@ namespace obos
 		size_t g_bitmapSize = 0;
 		uint32_t* g_bitmaps = nullptr;
 		uintptr_t g_memEnd = 0;
+		uintptr_t g_lastPageAllocated = 0x1000;
+		uintptr_t g_lastPageFreed = 0x1000;
 
 #define addrToIndex(addr) (addr >> 17)
 #define addrToBit(addr) ((addr >> 12) & 0x1f)
@@ -54,10 +58,12 @@ namespace obos
 				bitmap = reinterpret_cast<uint32_t*>(reinterpret_cast<uintptr_t>(bitmap) + offset);
 			}
 			bool ret = getPageStatus(address);
-			if(newStatus)
+			newStatus = !(!newStatus);
+			*bitmap = (*bitmap & ~(1 << bit)) | (newStatus << bit);
+			/*if(newStatus)
 				*bitmap |= (1 << bit);
 			else
-				*bitmap &= ~(1 << bit);
+				*bitmap &= ~(1 << bit);*/
 			return ret;
 		}
 		void InitializePhysicalMemoryManager()
@@ -94,23 +100,42 @@ namespace obos
 			for (uintptr_t currentPage = bitmap_start; currentPage != bitmap_end; currentPage += 0x1000)
 				markPageAs(currentPage, true);
 			markPageAs(0, true); // The zero page is allocated.
+			g_lastPageAllocated = g_lastPageFreed = bitmap_end;
 		}
 
 		uintptr_t allocatePhysicalPage()
 		{
 			// Find an available page.
-			uintptr_t ret = 0x1000;
-			for (; ret < g_memEnd && getPageStatus(ret); ret += 0x1000);
+			uintptr_t ret = 0;
+			bool bAddr = (g_lastPageFreed < g_lastPageAllocated && !getPageStatus(g_lastPageFreed));
+			ret = g_lastPageFreed * bAddr;
+			//set_if_zero(&ret, g_lastPageFreed);
+			uintptr_t newRet = ((!bAddr) * g_lastPageAllocated);
+			bAddr = (bool)newRet;
+			newRet += ((uint32_t)getPageStatus(g_lastPageAllocated) * 0x1000 * bAddr);
+			//if (!ret)
+			//	ret = newRet;
+			//asm volatile("test %0, %0; cmove %1, %0;" : "=r"(ret) : "a"(newRet));
+			// Use cmove as an optimization.
+			set_if_zero(&ret, newRet);
+			if (!newRet && !ret)
+				for (ret = 0x1000; ret < g_memEnd && getPageStatus(ret); ret += 0x1000);
+			if (getPageStatus(ret))
+				for (ret = g_lastPageFreed; ret < g_memEnd && getPageStatus(ret); ret += 0x1000);
 			if (ret == g_memEnd)
-				logger::panic("No more avaliable system memory!\n");
+			{
+				for (ret = 0x1000; ret < g_memEnd && getPageStatus(ret); ret += 0x1000);
+				if (ret == g_memEnd)
+					logger::panic("No more avaliable system memory!\n");
+			}
 			markPageAs(ret, true);
+			g_lastPageAllocated = ret;
 			return ret;
 		}
 		bool freePhysicalPage(uintptr_t addr)
 		{
-			if (!getPageStatus(addr))
-				return false;
-			markPageAs(addr, false);
+			addr &= ~(0xfff);
+			g_lastPageFreed = markPageAs(addr, false) * addr;
 			return true;
 		}
 	}

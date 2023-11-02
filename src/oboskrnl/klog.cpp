@@ -175,14 +175,18 @@ namespace obos
 			__impl_log(ERROR_RED, ERROR_PREFIX_MESSAGE);
 
 		}
-		[[noreturn]] void panic(const char* format, ...)
+		void panic(const char* format, ...)
 		{
-			g_kernelConsole.SetPosition(0,0);
-			g_kernelConsole.SetColour(GREY, PANIC_RED);
 			va_list list;
 			va_start(list, format);
+			panicVariadic(format, list);
+			va_end(list); // shouldn't get hit
+		}
+		void panicVariadic(const char* format, va_list list)
+		{
+			g_kernelConsole.SetPosition(0, 0);
+			g_kernelConsole.SetColour(GREY, PANIC_RED, true);
 			vprintf(format, list);
-			va_end(list);
 			stackTrace();
 			while (1);
 		}

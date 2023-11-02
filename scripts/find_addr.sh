@@ -1,3 +1,5 @@
+clear
+
 cd ..
 export address=$@
 addr2line -e out/oboskrnl -Cfpira 0x$address

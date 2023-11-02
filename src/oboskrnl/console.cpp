@@ -12,6 +12,8 @@
 
 #include <atomic.h>
 
+#include <multitasking/arch.h>
+
 namespace obos
 {	
 	Console::Console(void* font, con_framebuffer output)
@@ -29,11 +31,15 @@ namespace obos
 
 	void Console::ConsoleOutput(const char* string)
 	{
+		uintptr_t val = thread::stopTimer();
 		for(size_t i = 0; string[i]; ConsoleOutput(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
+		thread::startTimer(val);
 	}
 	void Console::ConsoleOutput(const char* string, size_t size)
 	{
+		uintptr_t val = thread::stopTimer();
 		for (size_t i = 0; i < size; ConsoleOutput(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
+		thread::startTimer(val);
 	}
 	void Console::ConsoleOutput(char ch)
 	{
@@ -46,8 +52,11 @@ namespace obos
 
 	void Console::ConsoleOutput(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y)
 	{
+		if (!m_framebuffer.addr)
+			return;
 		while (atomic_test(&m_lock));
 		atomic_set(&m_lock);
+		uintptr_t val = thread::stopTimer();
 		switch (ch)
 		{
 		case '\n':
@@ -69,6 +78,7 @@ namespace obos
 			break;
 		}
 		atomic_clear(&m_lock);
+		thread::startTimer(val);
 	}
 
 	void Console::SetPosition(uint32_t x, uint32_t y)
@@ -84,11 +94,21 @@ namespace obos
 			*y = m_terminalY;
 	}
 
-	void Console::SetColour(uint32_t foregroundColour, uint32_t backgroundColour)
+	void fillBackgroundTransparent(con_framebuffer& framebuffer, uint32_t backgroundColour, uint32_t initialBackgroundColour)
 	{
-		m_foregroundColour = foregroundColour;
+		for (uint32_t i = 0; i < framebuffer.height * framebuffer.width; i++)
+			framebuffer.addr[i] = (framebuffer.addr[i] == initialBackgroundColour) ? backgroundColour : framebuffer.addr[i];
+	}
+
+	void Console::SetColour(uint32_t foregroundColour, uint32_t backgroundColour, bool clearConsole)
+	{
 		if (backgroundColour != m_backgroundColour)
-			utils::dwMemset(m_framebuffer.addr, backgroundColour, m_framebuffer.width * m_framebuffer.height);
+			if (!clearConsole)
+				fillBackgroundTransparent(m_framebuffer, backgroundColour, m_backgroundColour);
+			else
+				utils::dwMemset(m_framebuffer.addr, backgroundColour, static_cast<size_t>(m_framebuffer.height) * m_framebuffer.width);
+		else {}
+		m_foregroundColour = foregroundColour;
 		m_backgroundColour = backgroundColour;
 	}
 	void Console::GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour)
@@ -115,6 +135,8 @@ namespace obos
 		m_framebuffer.width = framebuffer.width;
 		m_framebuffer.height = framebuffer.height;
 		m_framebuffer.pitch = framebuffer.pitch;
+		m_nCharsHorizontal = framebuffer.width / 8;
+		m_nCharsVertical = framebuffer.height / 16;
 	}
 	void Console::GetFramebuffer(con_framebuffer* framebuffer)
 	{
@@ -123,6 +145,7 @@ namespace obos
 		framebuffer->addr = m_framebuffer.addr;
 		framebuffer->width = m_framebuffer.width;
 		framebuffer->height = m_framebuffer.height;
+		framebuffer->pitch = m_framebuffer.pitch;
 	}
 
 	void Console::GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical)

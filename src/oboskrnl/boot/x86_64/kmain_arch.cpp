@@ -24,6 +24,8 @@
 #include <arch/x86_64/irq/irq.h>
 #include <arch/x86_64/irq/timer.h>
 
+#include <arch/x86_64/syscall/register.h>
+
 #include <memory_manipulation.h>
 
 #include <limine.h>
@@ -36,18 +38,6 @@
 
 namespace obos
 {
-	namespace utils
-	{
-		bool strcmp(const char* str1, const char* str2)
-		{
-			if (obos::utils::strlen(str1) != obos::utils::strlen(str2))
-				return false;
-			for (size_t i = 0; str1[i]; i++)
-				if (str1[i] != str2[i])
-					return false;
-			return true;
-		}
-	}
 	void InitializeGdt();
 	void InitializeIdt();
 	void RegisterExceptionHandlers();
@@ -65,13 +55,7 @@ namespace obos
 		.revision = 0,
 		.stack_size = (4 * 4096)
 	};
-	void EarlyKPanic()
-	{
-		outb(0x64, 0xFE);
-		cli();
-		while (1)
-			hlt();
-	}
+	void EarlyKPanic();
 
 	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console. This also must enable the scheduler.
 	void arch_kmain()
@@ -116,8 +100,29 @@ namespace obos
 			logger::info("%s: Disabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
 			setCR4(getCR4() & ~CR4_FSGSBASE);
 		}
+		logger::info("%s: Registering all syscalls.\n", __func__);
+		syscalls::RegisterSyscalls();
 		logger::info("%s: Initializing the scheduler.\n", __func__);
 		thread::InitializeScheduler();
 		logger::panic("Failed to initialize the scheduler.");
+	}
+	void EarlyKPanic()
+	{
+		outb(0x64, 0xFE);
+		cli();
+		while (1)
+			hlt();
+	}
+	namespace utils
+	{
+		bool strcmp(const char* str1, const char* str2)
+		{
+			if (obos::utils::strlen(str1) != obos::utils::strlen(str2))
+				return false;
+			for (size_t i = 0; str1[i]; i++)
+				if (str1[i] != str2[i])
+					return false;
+			return true;
+		}
 	}
 }

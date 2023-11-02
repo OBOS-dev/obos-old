@@ -53,13 +53,18 @@ target_link_options(oboskrnl
 
 target_link_libraries(oboskrnl PUBLIC ${LIBGCC})
 
+target_compile_definitions(oboskrnl PUBLIC OBOS_KERNEL=1)
+
 add_custom_command(TARGET oboskrnl POST_BUILD
                    COMMAND echo "Generating the iso..."
 				   COMMAND cp -u out/oboskrnl isodir/obos/oboskrnl
 				   COMMAND objcopy -S isodir/obos/oboskrnl
-				   COMMAND cp -u out/testDriver isodir/obos/testDriver
-				   COMMAND objcopy -S isodir/obos/testDriver
+				   COMMAND cp -u out/initrdDriver isodir/obos/initrdDriver
+				   COMMAND objcopy -S isodir/obos/initrdDriver
 				   COMMAND nm out/oboskrnl --demangle=gnu-v3 -ln | grep -w --ignore-case T > isodir/obos/oboskrnl.map
+				   COMMAND cd scripts
+				   COMMAND ./make_initrd.sh
+				   COMMAND cd ..
 				   COMMAND xorriso -as mkisofs -b limine/limine-bios-cd.bin  -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine/limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label isodir -o ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
 				   COMMAND ./limine/limine bios-install ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
                    COMMAND echo "Finished build!"

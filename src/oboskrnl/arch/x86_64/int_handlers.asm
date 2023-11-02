@@ -49,6 +49,49 @@ pop rcx
 pop rax
 %endmacro
 
+%macro pushaq_syscall 0
+push rax
+; rax has rsp.
+mov rax, rsp
+add rax, 8
+push rcx
+push rdx
+push rbx
+push rax ; Push rsp
+push rsi
+push rdi
+push r8
+push r9
+push r10
+push r11
+push r12
+push r13
+push r14
+push r15
+push qword [rsp+0x78]
+push rbp
+%endmacro
+
+%macro popaq_syscall 0
+pop rbp
+add rsp, 8 ; Skip the pushed rip.
+pop r15
+pop r14
+pop r13
+pop r12
+pop r11
+pop r10
+pop r9
+pop r8
+pop rdi
+pop rsi
+add rsp, 8 ; Skip the pushed rsp
+pop rbx
+add rsp, 8 ; Skip rdx
+pop rcx
+add rsp, 8 ; Skip rax
+%endmacro
+
 %macro ISR_NOERRCODE 1
 global isr%1
 isr%1:
@@ -104,8 +147,8 @@ ISR_NOERRCODE 31
 %rep 17
 ISR_NOERRCODE current_isr
 %endrep
-%assign current_isr current_isr + 1
-%rep 206
+%assign current_isr current_isr + 2
+%rep 205
 ISR_NOERRCODE current_isr
 %endrep
 
@@ -134,4 +177,32 @@ isr_common_stub:
 
 	add rsp, 16
 
+	iretq
+
+extern _ZN4obos8syscalls14g_syscallTableE
+global isr50
+; (in) rdi: A pointer to a structure with the parameters.
+; (in) rax: The syscall number.
+; (out) rax: Lower 64 bits of the return value.
+; (out) rdx: Upper 64 bits of the return value.
+; Registers are preserved except for rax and rdx.
+isr50:
+	pushaq_syscall
+	mov rbp, rsp
+
+	mov rax, [rsp+0x80]
+	mov rax, [_ZN4obos8syscalls14g_syscallTableE+rax*8]
+
+	test rax,rax
+	mov r15, 0xB16B00B1E5DEADBE
+	cmovz rax, r15
+	mov r15, 0xEF15B00B1E500000
+	cmovz rdx, r15
+	jz .finish
+
+	call rax
+
+.finish:
+	
+	popaq_syscall
 	iretq

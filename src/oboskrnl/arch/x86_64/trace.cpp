@@ -18,8 +18,10 @@ namespace obos
 		size_t countTo(const char* string, char ch)
 		{
 			size_t i = 0;
-			for (; string[i] != ch && string[i]; i++);
-			return string[i] ? i : npos;
+			for (; *string; i++, string++)
+				if (*string == ch)
+					break;
+			return *string ? i : npos;
 		}
 
 		uintptr_t hex2bin(const char* str, unsigned size)
@@ -174,7 +176,7 @@ namespace obos
 			for (int i = nFrames; i != -1; i--)
 			{
 				if(!mapFileStart)
-					printf("\t%d: %p\n", i, frame->rip);
+					printf("\t%p: No map file.\n", frame->rip);
 				else
 				{
 					char* functionName = nullptr;
@@ -182,11 +184,11 @@ namespace obos
 					addr2func(frame->rip, functionName, functionStart, mapFileStart, mapFileStart + mapFileSize);
 					if(functionName)
 					{
-						printf("\t%d: %s+%d\n", i, functionName, (uintptr_t)frame->rip - functionStart);
+						printf("\t%p: %s+%d\n", frame->rip, functionName, (uintptr_t)frame->rip - functionStart);
 						delete[] functionName;
 					}
 					else
-						printf("\t%d: External Code (%p)\n", i, frame->rip);
+						printf("\t%p: External Code\n", frame->rip);
 				}
 				frame = frame->down;
 			}

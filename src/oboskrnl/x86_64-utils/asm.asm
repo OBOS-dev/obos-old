@@ -25,6 +25,7 @@ global _ZN4obos30restorePreviousInterruptStatusEm
 global _ZN4obos7haltCPUEv
 global _ZN4obos9__cpuid__EmmPmS0_S0_S0_
 global _ZN4obos5rdtscEv
+global _ZN4obos11set_if_zeroEPmm
 
 _ZN4obos4outbEth:
 	mov dx, di
@@ -183,4 +184,15 @@ _ZN4obos6getCR4Ev:
 global _ZN4obos6setCR4Em
 _ZN4obos6setCR4Em:
 	mov cr4, rdi
+	ret
+_ZN4obos11set_if_zeroEPmm:
+	pushfq
+	pop rax
+	and rax, ~(1<<6)
+	push rax
+	popfq
+	mov rax, [rdi]
+	test rax, rax
+	cmovz rax, rsi
+	mov [rdi], rax
 	ret

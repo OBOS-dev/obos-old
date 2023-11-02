@@ -10,13 +10,16 @@
 
 #include <multitasking/scheduler.h>
 
+#include <multitasking/process/process.h>
+
 namespace obos
 {
 	void SetLastError(uint32_t err) 
 	{
 		thread::g_currentThread->lastError = err;
 #ifdef OBOS_DEBUG
-		logger::warning("\nError thrown: %d.\n", err);
+		if (((process::Process*)thread::g_currentThread->owner)->pid == 0)
+			logger::warning("\nError thrown: %d.\n", err);
 #endif
 	}
 	uint32_t GetLastError() 

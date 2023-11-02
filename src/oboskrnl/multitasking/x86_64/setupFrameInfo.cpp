@@ -25,7 +25,7 @@ namespace obos
 		void setupThreadContext(taskSwitchInfo* info, void* _stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, bool isUsermodeProgram)
 		{
 			if (stackSize == 0)
-				stackSize = 8192;
+				stackSize = 0x8000;
 
 			stackSize = ((stackSize + 0xfff) & (~0xfff));
 

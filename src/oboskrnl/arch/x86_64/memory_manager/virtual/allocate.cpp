@@ -6,6 +6,7 @@
 
 #include <int.h>
 #include <memory_manipulation.h>
+#include <error.h>
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 #include <arch/x86_64/memory_manager/virtual/allocate.h>
@@ -96,8 +97,13 @@ namespace obos
 		void* VirtualAlloc(void* _base, size_t nPages, uintptr_t _flags)
 		{
 			if(_base != nullptr)
+			{
 				if (!CanAllocatePages(_base, nPages))
+				{
+					SetLastError(OBOS_ERROR_BASE_ADDRESS_USED);
 					return nullptr;
+				}
+			}
 			uintptr_t base = (uintptr_t)_base & (~0xfff);
 			if (!base)
 			{
@@ -109,7 +115,10 @@ namespace obos
 						break;
 				}
 				if (!base)
+				{
+					SetLastError(OBOS_ERROR_NO_FREE_REGION);
 					return nullptr;
+				}
 			}
 			_flags &= PROT_ALL_BITS_SET;
 			uintptr_t flags = DecodeProtectionFlags(_flags) | 1;
@@ -160,9 +169,15 @@ namespace obos
 		bool VirtualFree(void* _base, size_t nPages)
 		{
 			if (!_base)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
 				return false;
+			}
 			if (CanAllocatePages(_base, nPages))
+			{
+				SetLastError(OBOS_ERROR_ADDRESS_ALREADY_FREED);
 				return false;
+			}
 			uintptr_t base = (uintptr_t)_base & (~0xfff);
 			PageMap* pageMap = getCurrentPageMap();
 			for (uintptr_t addr = base; addr != (base + nPages * 4096); addr += 4096)
@@ -183,9 +198,15 @@ namespace obos
 		bool VirtualProtect(void* _base, size_t nPages, uintptr_t _flags)
 		{
 			if (!_base)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
 				return false;
+			}
 			if (CanAllocatePages(_base, nPages))
+			{
+				SetLastError(OBOS_ERROR_ADDRESS_ALREADY_FREED);
 				return false;
+			}
 			uintptr_t base = (uintptr_t)_base & (~0xfff);
 			PageMap* pageMap = getCurrentPageMap();
 			_flags &= PROT_ALL_BITS_SET;
@@ -225,7 +246,10 @@ namespace obos
 		bool VirtualGetProtection(void* _base, size_t nPages, uintptr_t* _flags)
 		{
 			if (!_base)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
 				return false;
+			}
 			uintptr_t base = (uintptr_t)_base & (~0xfff);
 			PageMap* pageMap = getCurrentPageMap();
 			for (uintptr_t addr = base, i = 0; addr != (base + nPages * 4096); addr += 4096, i++)

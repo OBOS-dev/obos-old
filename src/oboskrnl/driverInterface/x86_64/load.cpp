@@ -4,7 +4,10 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
+#include <limine.h>
+
 #include <int.h>
+#include <klog.h>
 #include <error.h>
 #include <memory_manipulation.h>
 
@@ -21,6 +24,7 @@
 
 namespace obos
 {
+	extern volatile limine_module_request module_request;
 	namespace driverInterface
 	{
 		static const char* getElfString(process::loader::Elf64_Ehdr* elfHeader, uintptr_t index)
@@ -71,15 +75,47 @@ namespace obos
 			process::switchToProcessContext(&driverProc->context);
 
 			uintptr_t entryPoint = 0, baseAddress = 0;
+			
+			if (header->requests & driverHeader::VPRINTF_FUNCTION_REQUEST)
+				header->vprintfFunctionResponse = logger::vprintf;
+			if (header->requests & driverHeader::PANIC_FUNCTION_REQUEST)
+				header->panicFunctionResponse = logger::panicVariadic;
+			if (header->requests & driverHeader::MEMORY_MANIPULATION_FUNCTIONS_REQUEST)
+			{
+				header->memoryManipFunctionsResponse.memzero = utils::memzero;
+				header->memoryManipFunctionsResponse.memcpy = utils::memcpy;
+				header->memoryManipFunctionsResponse.memcmp = utils::memcmp;
+				header->memoryManipFunctionsResponse.memcmp_toByte = utils::memcmp;
+				header->memoryManipFunctionsResponse.strlen = utils::strlen;
+				header->memoryManipFunctionsResponse.strcmp = utils::strcmp;
+			}
+			if (header->requests & driverHeader::INITRD_LOCATION_REQUEST)
+			{
+				for (size_t moduleIndex = 0; moduleIndex < module_request.response->module_count; moduleIndex++)
+				{
+					if (utils::strcmp(module_request.response->modules[moduleIndex]->path, "/obos/initrd.tar"))
+					{
+						header->initrdLocationResponse.addr = module_request.response->modules[moduleIndex]->address;
+						header->initrdLocationResponse.size = module_request.response->modules[moduleIndex]->size;
+						break;
+					}
+				}
+			}
+
+			thread::ThreadHandle* thread = new thread::ThreadHandle{};
+			if (mainThread)
+				*mainThread = thread;
 
 			uint32_t ret = process::loader::LoadElfFile(file, size, entryPoint, baseAddress);
 			if (ret)
 				return 0;
 
-			thread::ThreadHandle* thread = new thread::ThreadHandle{};
-			if (mainThread)
-				*mainThread = thread;
-			thread->CreateThread(thread::THREAD_PRIORITY_NORMAL, header->stackSize, (void(*)(uintptr_t))entryPoint, 0, &driverProc->threads);
+			thread->CreateThread(
+				thread::THREAD_PRIORITY_NORMAL, 
+				(header->requests & driverHeader::SET_STACK_SIZE_REQUEST) ? header->stackSize : 0,
+				(void(*)(uintptr_t))entryPoint,
+				0x0B00B1E5B16B00B5 /* as a surprise for any drivers */,
+				&driverProc->threads);
 			((thread::Thread*)thread->GetUnderlyingObject())->owner = driverProc;
 
 			process::switchToProcessContext(&((process::Process*)thread::g_currentThread->owner)->context);

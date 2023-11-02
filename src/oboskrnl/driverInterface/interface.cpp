@@ -23,7 +23,7 @@ namespace obos
 	{
 		// class DriverConnection
 
-		bool DriverConnection::SendDataOnBuffer(const byte* data, size_t size, con_buffer* buffer, bool spinOnLock)
+		bool DriverConnection::SendDataOnBuffer(const void* data, size_t size, con_buffer* buffer, bool spinOnLock)
 		{
 			if (!buffer)
 			{
@@ -38,19 +38,23 @@ namespace obos
 				// Allocate the buffer.
 				buffer->buf = (byte*)kcalloc(size + 1, sizeof(byte));
 				buffer->szBuf = size;
-				utils::memcpy(buffer->buf, data, size);
+				if(data)
+					utils::memcpy(buffer->buf, data, size);
 				
 				AttemptUnlock(buffer);
 				return true;
 			}
 			buffer->buf = (byte*)krealloc(buffer->buf, buffer->szBuf + size + 1);
-			utils::memcpy(buffer->buf + buffer->szBuf, data, size);
+			if(data)
+				utils::memcpy(buffer->buf + buffer->szBuf, data, size);
+			else
+				utils::memzero(buffer->buf + buffer->szBuf, size);
 			buffer->szBuf += size;
 
 			AttemptUnlock(buffer);
 			return true;
 		}
-		bool DriverConnection::RecvDataOnBuffer(byte* data, size_t size, con_buffer* buffer, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
+		bool DriverConnection::RecvDataOnBuffer(void* data, size_t size, con_buffer* buffer, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
 		{
 			if (!buffer)
 			{
@@ -134,7 +138,7 @@ namespace obos
 
 		// class DriverConnectionBase
 
-		bool DriverConnectionBase::SendData(const byte* data, size_t size, bool spinOnLock)
+		bool DriverConnectionBase::SendData(const void* data, size_t size, bool spinOnLock)
 		{
 			(void)data;
 			(void)size;
@@ -145,7 +149,7 @@ namespace obos
 			_data[0] = _data[0] - 1;
 			return false;
 		}
-		bool DriverConnectionBase::RecvData(byte* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
+		bool DriverConnectionBase::RecvData(void* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
 		{
 			(void)size;
 			(void)peek;
@@ -196,6 +200,7 @@ namespace obos
 				delete m_rawCon;
 			}
 			m_rawCon = nullptr;
+			m_didWeCloseConnection = true;
 			return true;
 		}
 
@@ -271,7 +276,7 @@ namespace obos
 			return true;
 		}
 		
-		bool DriverClient::SendData(const byte* data, size_t size, bool spinOnLock)
+		bool DriverClient::SendData(const void* data, size_t size, bool spinOnLock)
 		{
 			if (!m_rawCon || !m_rawCon->connectionOpen)
 			{
@@ -280,7 +285,7 @@ namespace obos
 			}
 			return m_rawCon->SendDataOnBuffer(data,size, &m_rawCon->buf2, spinOnLock);
 		}
-		bool DriverClient::RecvData(byte* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
+		bool DriverClient::RecvData(void* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
 		{
 			if (!m_rawCon)
 			{
@@ -292,7 +297,7 @@ namespace obos
 
 		// class DriverServer
 
-		bool DriverServer::Listen(uint32_t timeoutTicks)
+		bool DriverServer::Listen(uint64_t timeoutTicks)
 		{
 			if (m_rawCon)
 			{
@@ -307,18 +312,22 @@ namespace obos
 				return false;
 			}
 			uintptr_t data[2] = { (uintptr_t)this, identity->connections.size };
-			thread::g_currentThread->wakeUpTime = thread::g_timerTicks + timeoutTicks;
+			thread::g_currentThread->wakeUpTime = timeoutTicks ? thread::g_timerTicks + timeoutTicks : 0xffffffffffffffff;
 			thread::g_currentThread->blockCallback.callback = ListenCallback;
 			thread::g_currentThread->blockCallback.userdata = data;
 			thread::g_currentThread->status |= thread::THREAD_STATUS_BLOCKED;
 			thread::callScheduler();
 			if (!m_rawCon)
+			{
+				// Check ListenCallback
+				//SetLastError(OBOS_ERROR_TIMEOUT);
 				return false;
+			}
 			m_rawCon->references++;
 			return true;
 		}
 
-		bool DriverServer::SendData(const byte* data, size_t size, bool spinOnLock)
+		bool DriverServer::SendData(const void* data, size_t size, bool spinOnLock)
 		{
 			if (!m_rawCon || !m_rawCon->connectionOpen)
 			{
@@ -327,7 +336,7 @@ namespace obos
 			}
 			return m_rawCon->SendDataOnBuffer(data,size, &m_rawCon->buf1, spinOnLock);
 		}
-		bool DriverServer::RecvData(byte* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
+		bool DriverServer::RecvData(void* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
 		{
 			if (!m_rawCon)
 			{
@@ -339,7 +348,7 @@ namespace obos
 
 		bool DriverServer::ListenCallback(thread::Thread* thr, void* userdata)
 		{
-			if (thread::g_timerTicks >= thr->wakeUpTime)
+			if (thread::g_timerTicks > thr->wakeUpTime)
 			{
 				thr->lastError = OBOS_ERROR_TIMEOUT;
 				return true;
@@ -354,7 +363,7 @@ namespace obos
 				_this->m_rawCon = list.tail->val;
 				return true;
 			}
-			if (previousCount > identity->connections.size)
+			if (identity->connections.size > previousCount)
 			{
 				// Get the element at "previousElement"
 				DriverConnectionList& list = identity->connections;
@@ -380,18 +389,21 @@ namespace obos
 		{
 			return new DriverServer;
 		}
-		void SyscallFreeDriverServer(DriverServer* obj)
+		void SyscallFreeDriverServer(DriverServer** obj)
 		{
-			delete obj;
+			delete *obj;
 		}
 
-		bool DummyClass1::Listen(uint32_t)
+		bool DummyClass1::Listen(uint64_t)
 		{
 			return false;
 		}
+		bool DummyClass1::IsConnectionClosed() { return true; }
+
 		bool DummyClass2::OpenConnection(uint32_t, uint64_t)
 		{
 			return false;
 		}
+		bool DummyClass2::IsConnectionClosed() { return true; }
 }
 }

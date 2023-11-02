@@ -39,6 +39,7 @@ namespace obos
 		size_t warning(const char* format, ...);
 		size_t error(const char* format, ...);
 		[[noreturn]] void panic(const char* format, ...);
+		[[noreturn]] void panicVariadic(const char* format, va_list list);
 
 		void stackTrace();
 		void dumpAddr(uint32_t* addr);

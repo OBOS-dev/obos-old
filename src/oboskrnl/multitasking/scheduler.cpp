@@ -147,7 +147,7 @@ namespace obos
 			kernelMainThread->lastError = 0;
 			kernelMainThread->priorityList = g_priorityLists + 2;
 			kernelMainThread->threadList = new Thread::ThreadList;
-			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 65536, false);
+			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 0x8000, false);
 
 			Thread* idleThread = new Thread{};
 

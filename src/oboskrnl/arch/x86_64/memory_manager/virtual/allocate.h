@@ -61,6 +61,7 @@ namespace obos
 		/// </summary>
 		/// <param name="base">The base address to free.</param>
 		/// <param name="nPages">The amount of pages to free.</param>
+		/// <returns>false on failure, otherwise true. If this function fails, use GetLastError for extra error information.</returns>
 		bool VirtualFree(void* base, size_t nPages);
 		/// <summary>
 		/// Sets the protection for the pages at base.
@@ -68,6 +69,7 @@ namespace obos
 		/// <param name="base">The base address to set the protection for.</param>
 		/// <param name="nPages">The amount of pages to set the protection for.</param>
 		/// <param name="flags">The new protection flags</param>
+		/// <returns>false on failure, otherwise true. If this function fails, use GetLastError for extra error information.</returns>
 		bool VirtualProtect(void* base, size_t nPages, uintptr_t flags);
 		/// <summary>
 		/// Gets the protection for base.
@@ -75,6 +77,7 @@ namespace obos
 		/// <param name="base">The base address to get the protection for.</param>
 		/// <param name="nPages">The amount of pages to get the protection for.</param>
 		/// <param name="flags">A pointer to a buffer of the size "sizeof(PageProtectionFlags) * nPages" to store the protection in.</param>
+		/// <returns>false on failure, otherwise true. If this function fails, use GetLastError for extra error information.</returns>
 		bool VirtualGetProtection(void* base, size_t nPages, uintptr_t* flags);
 
 		void MapVirtualPageToPhysical(void* virt, void* phys, uintptr_t cpuFlags);
