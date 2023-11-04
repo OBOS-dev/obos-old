@@ -29,7 +29,7 @@
 - Returns an `HANDLE` that can be used with iterator commands.
 - Can only be accessed by the kernel.
 #### OBOS\_SERVICE\_NEXT\_FILE
-- Gets the next file in the iterator, and returns the file data of the current file.
+- Returns the file data of the current file, then seeks to the next file in the iterator. If the end of the partition is reached, then this command must return FILE_DOESNT_EXIST.
 - Parameters:<br>
 &nbsp;&nbsp;&nbsp;iterator - HANDLE
 - Returns the same as OBOS\_SERVICE\_QUERY\_FILE\_DATA + `SIZE sizeFilepath` and `STRING filepath`.

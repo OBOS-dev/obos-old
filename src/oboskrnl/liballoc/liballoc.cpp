@@ -21,6 +21,9 @@
 #define MIN_PAGES_ALLOCATED 8
 #define MEMBLOCK_MAGIC  0x6AB450AA
 #define PAGEBLOCK_MAGIC	0x768AADFC
+#define PTR_ALIGNMENT 16
+#define ROUND_PTR_UP(ptr) (((ptr) + PTR_ALIGNMENT) & ~(PTR_ALIGNMENT - 1))
+#define ROUND_PTR_DOWN(ptr) ((ptr) & ~(PTR_ALIGNMENT - 1))
 
 struct memBlock
 {
@@ -143,13 +146,13 @@ extern "C" {
 		if (!amount)
 			return nullptr;
 
-		amount += (sizeof(uintptr_t) - (amount % sizeof(uintptr_t)));
+		amount = ROUND_PTR_UP(amount);
 
 		pageBlock* currentPageBlock = nullptr;
 
 		// Choose a pageBlock that fits a block with "amount"
 		
-		const size_t amountNeeded = amount + sizeof(memBlock);
+		size_t amountNeeded = amount + sizeof(memBlock);
 
 		if (nPageBlocks == 0)
 		{
@@ -203,11 +206,11 @@ extern "C" {
 
 		block->magic = MEMBLOCK_MAGIC;
 		block->allocAddr = (void*)((uintptr_t)block + sizeof(memBlock));
+		block->size = amount;
 		block->pageBlock = currentPageBlock;
 		block->prev = currentPageBlock->lastBlock;
 		if (currentPageBlock->lastBlock)
 			currentPageBlock->lastBlock->next = block;
-		block->size = amount;
 		currentPageBlock->nBytesUsed += amountNeeded;
 		currentPageBlock->lastBlock = block;
 		currentPageBlock->nMemBlocks++;
@@ -221,7 +224,7 @@ extern "C" {
 	void* krealloc(void* ptr, size_t newSize)
 	{
 		if (!ptr)
-			return nullptr;
+			return kcalloc(newSize, 1);
 	
 		size_t oldSize = 0;
 		

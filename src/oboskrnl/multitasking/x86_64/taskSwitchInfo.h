@@ -19,6 +19,7 @@ namespace obos
 			void* cr3;
 			void* tssStackBottom;
 			interrupt_frame frame;
+			alignas(0x10) uint8_t fpuState[512];
 		};
 	}
 }

@@ -15,7 +15,7 @@ endif()
 
 set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "liballoc/liballoc.cpp" 
 					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp"
- "driverInterface/interface.cpp")
+ "driverInterface/interface.cpp" "vfs/mount/mount.cpp")
 
 add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
 
@@ -33,22 +33,23 @@ target_compile_options(oboskrnl
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Werror>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-ffreestanding>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-nostdlib>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-mgeneral-regs-only>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-rtti>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-exceptions>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-missing-field-initializers>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-error=implicit-fallthrough>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-error=array-bounds>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-use-cxa-atexit>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-mcmodel=kernel>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-omit-frame-pointer>
+	PRIVATE $<$<COMPILE_LANGUAGE:C>:${TARGET_COMPILE_OPTIONS_C}>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${TARGET_COMPILE_OPTIONS_CPP}>
 )
 
 target_link_options(oboskrnl
 	PUBLIC "-T" PUBLIC "${LINKER_SCRIPT}"
-	PUBLIC "-mcmodel=kernel"
 	PUBLIC "-ffreestanding"
 	PUBLIC "-nostdlib"
+	PUBLIC ${TARGET_LINKER_OPTIONS}
 )
 
 target_link_libraries(oboskrnl PUBLIC ${LIBGCC})

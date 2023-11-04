@@ -1,4 +1,24 @@
 # OBOS
+## Goals
+- [x] A module loader/interface
+- [x] An initrd driver
+- [ ] A VFS
+- [ ] Disk drivers for AHCI and NVME.
+- [ ] A FAT driver and ext2/3/4 driver.
+- [ ] Support for USB.
+- [ ] Support for ACPI power management.
+- [ ] Porting mlibc.
+- [ ] Porting binutils and GCC to the os, and making a GCC target for the os.
+- [ ] Porting CMake and Make.
+- [ ] Porting tar.
+- [ ] A terminal.
+- [ ] A network stack.
+- [ ] An audio stack.
+- [ ] A GUI.
+- [ ] Porting python.
+- [ ] Porting 7zip.
+- [ ] Porting a browser and curl.
+- [ ] Porting qemu.
 ## Building
 ### Prerequisites
 - CMake

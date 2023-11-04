@@ -22,7 +22,11 @@ extern size_t printf(const char* format, ...);
 
 extern driverInterface::driverHeader g_driverHeader;
 
-filesystemCache g_iterators;
+struct
+{
+	fileIterator *head, *tail;
+	size_t size;
+} g_iterators;
 
 extern void ConnectionHandler(uintptr_t _conn)
 {
@@ -70,12 +74,10 @@ extern void ConnectionHandler(uintptr_t _conn)
 		}
 		case obos::driverInterface::OBOS_SERVICE_MAKE_FILE_ITERATOR:
 		{
-			ustarEntryCacheNode* iter = (ustarEntryCacheNode*)Malloc(sizeof(ustarEntryCacheNode*));
-			iter->next = g_filesystemCache.head->next;
-			iter->prev = g_filesystemCache.head->prev;
-			iter->cache = g_filesystemCache.head->cache;
+			fileIterator* iter = (fileIterator*)Malloc(sizeof(fileIterator*));
+			iter->currentNode = g_filesystemCache.head;
 			conn->RecvData(nullptr, 9);
-			conn->SendData(&iter, sizeof(*iter));
+			conn->SendData(&iter, sizeof(iter));
 			if (g_iterators.tail)
 				g_iterators.tail->next = iter;
 			if (!g_iterators.head)
@@ -87,14 +89,14 @@ extern void ConnectionHandler(uintptr_t _conn)
 		}
 		case obos::driverInterface::OBOS_SERVICE_NEXT_FILE:
 		{
-			ustarEntryCacheNode* iter = nullptr;
+			fileIterator* iter = nullptr;
 			if (!conn->RecvData(&iter, sizeof(ustarEntryCacheNode*)))
 			{
 				conn->SendData(nullptr, 40);
 				break;
 			}
 			{
-				ustarEntryCacheNode* node = g_iterators.head;
+				fileIterator* node = g_iterators.head;
 				while (node)
 				{
 					if (node == iter)
@@ -108,15 +110,21 @@ extern void ConnectionHandler(uintptr_t _conn)
 					break;
 				}
 			}
-			uintptr_t ret[4] = { iter->cache->entryFilesize, 0, iter->cache->entryAttributes, g_driverHeader.memoryManipFunctionsResponse.strlen(iter->cache->entry->path) };
+			if (!iter->currentNode)
+			{
+				conn->SendData(nullptr, 40);
+				break;
+			}
+			uintptr_t ret[4] = { iter->currentNode->cache->entryFilesize, 0, iter->currentNode->cache->entryAttributes, g_driverHeader.memoryManipFunctionsResponse.strlen(iter->currentNode->cache->entry->path) };
 			if (!conn->SendData(&ret[0], sizeof(ret))) 
 				break;
-			conn->SendData(&iter->cache->entry->path[0], ret[3]);
+			conn->SendData(&iter->currentNode->cache->entry->path[0], ret[3]);
+			iter->currentNode = iter->currentNode->next;
 			break;
 		}
 		case obos::driverInterface::OBOS_SERVICE_CLOSE_FILE_ITERATOR:
 		{
-			ustarEntryCacheNode* iter = nullptr;
+			fileIterator* iter = nullptr;
 			uint8_t errCode = 0;
 			if (!conn->RecvData(&iter, sizeof(ustarEntryCacheNode*)))
 			{
@@ -125,7 +133,7 @@ extern void ConnectionHandler(uintptr_t _conn)
 				break;
 			}
 			{
-				ustarEntryCacheNode* node = g_iterators.head;
+				fileIterator* node = g_iterators.head;
 				while (node)
 				{
 					if (node == iter)

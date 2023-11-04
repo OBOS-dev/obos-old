@@ -42,6 +42,8 @@ namespace obos
 	}
 	
 	volatile LAPIC* g_localAPICAddr = nullptr;
+	volatile HPET* g_HPETAddr = nullptr;
+	uint64_t g_hpetFrequency = 0;
 
 	size_t ProcessEntryHeader(acpi::MADT_EntryHeader* entryHeader, void*& lapicAddressOut, void*& ioapicAddressOut, uint8_t& nCores, uint8_t* processorIDs)
 	{
@@ -108,30 +110,6 @@ namespace obos
 			ProcessEntryHeader(entryHeader, lapicAddress, ioapicAddress, nCores, &processorIDs[0]);
 		logger::log("Found %d cores, local apic address: %p, io apic address: %p.\n", nCores, lapicAddress, ioapicAddress);
 		g_localAPICAddr = (LAPIC*)lapicAddress;
-		/*logger::log("Dumping LAPIC registers.\n" 
-					"\tlapicID: %p, lapicVersion: %p.\n"
-					"\ttaskPriority: %p, processorPriority: %p.\n"
-					"\tremoteRead: %p, logicalDestination: %p.\n"
-					"\tdestinationFormat: %p, spuriousInterruptVector: %p.\n"
-					"\terrorStatus: %p, lvtCMCI: %p.\n"
-					"\tinterruptCommand0_31: %p, interruptCommand32_63: %p.\n"
-					"\tlvtTimer: %p, lvtThermalSensor: %p.\n"
-					"\tlvtPerformanceMonitoringCounters: %p, lvtLINT0: %p.\n"
-					"\tlvtLINT1: %p, lvtError: %p.\n"
-					"\tinitialCount: %p, currentCount: %p.\n"
-					"\tdivideConfig: %p\n",
-			g_localAPICAddr->lapicID, g_localAPICAddr->lapicVersion, 
-			g_localAPICAddr->taskPriority, g_localAPICAddr->processorPriority,
-			g_localAPICAddr->remoteRead, g_localAPICAddr->logicalDestination,
-			g_localAPICAddr->destinationFormat, g_localAPICAddr->spuriousInterruptVector,
-			g_localAPICAddr->errorStatus, g_localAPICAddr->lvtCMCI,
-			g_localAPICAddr->interruptCommand0_31, g_localAPICAddr->interruptCommand32_63,
-			g_localAPICAddr->lvtTimer, g_localAPICAddr->lvtThermalSensor,
-			g_localAPICAddr->lvtPerformanceMonitoringCounters, g_localAPICAddr->lvtLINT0,
-			g_localAPICAddr->lvtLINT1, g_localAPICAddr->lvtError,
-			g_localAPICAddr->initialCount, g_localAPICAddr->currentCount,
-			g_localAPICAddr->divideConfig
-		);*/
 		uint64_t msr = rdmsr(IA32_APIC_BASE);
 		msr |= ((uint64_t)1 << 11) | ((uint64_t)1 << 8);
 		wrmsr(IA32_APIC_BASE, msr);
@@ -169,15 +147,22 @@ namespace obos
 		acpi::ACPISDTHeader* xsdt = (acpi::ACPISDTHeader*)rsdp->XsdtAddress;
 		acpi::ACPISDTHeader** tableAddresses = reinterpret_cast<acpi::ACPISDTHeader**>(xsdt + 1);
 		acpi::MADTTable* madtTable = nullptr;
+		acpi::HPET_Table* hpetTable = nullptr;
 		for (uint32_t i = 0; i < (xsdt->Length - sizeof(*xsdt)) / 8; i++)
 		{
 			acpi::ACPISDTHeader* currentSDT = tableAddresses[i];
 			if (utils::memcmp(currentSDT->Signature, "APIC", 4))
-			{
 				madtTable = (acpi::MADTTable*)currentSDT;
+			if (utils::memcmp(currentSDT->Signature, "HPET", 4))
+				hpetTable = (acpi::HPET_Table*)currentSDT;
+			
+			if (hpetTable != nullptr && madtTable != nullptr)
 				break;
-			}
 		}
+		if (!hpetTable)
+			logger::panic("The HPET is not supported on your computer!\n");
+		g_HPETAddr = (HPET*)hpetTable->baseAddress.address;
+		g_hpetFrequency = 1000000000000000 / g_HPETAddr->generalCapabilitiesAndID.counterCLKPeriod;
 		if (madtTable)
 		{
 			logger::log("%s: Using the APIC as the irq controller.\n", __func__);

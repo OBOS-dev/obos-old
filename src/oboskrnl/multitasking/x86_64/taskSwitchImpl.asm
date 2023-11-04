@@ -67,6 +67,8 @@ _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE:
 
 	add rsp, 16
 
+	fxrstor [rsp+0x30]
+
 	iretq
 _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_:
 	push rbp

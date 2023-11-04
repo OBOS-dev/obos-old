@@ -48,6 +48,11 @@ struct ustarEntryCacheNode
 	ustarEntryCacheNode *next, *prev;
 	ustarEntryCache* cache;
 };
+struct fileIterator
+{
+	ustarEntryCacheNode* currentNode;
+	fileIterator *next, *prev; // The next file iterator in the file iterator list.
+};
 struct filesystemCache
 {
 	ustarEntryCacheNode *head, *tail;

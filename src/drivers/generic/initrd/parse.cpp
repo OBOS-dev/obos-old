@@ -42,7 +42,10 @@ void InitializeFilesystemCache()
 		cache->entry = entry;
 		cache->entryFilesize = filesize;
 		cache->dataStart = (uint8_t*)(entry + 1);
-		cache->dataEnd = cache->dataStart + ((filesize / 512 + 1) * 512);
+		if (filesize)
+			cache->dataEnd = cache->dataStart + ((filesize / 512 + 1) * 512);
+		else
+			cache->dataEnd = cache->dataStart;
 		node->cache = cache;
 		switch (entry->type)
 		{
@@ -65,8 +68,7 @@ void InitializeFilesystemCache()
 		node->prev = g_filesystemCache.tail;
 		g_filesystemCache.tail = node;
 		g_filesystemCache.size++;
-		entry = (ustarEntry*)((uintptr_t)entry + ((filesize / 512 + 1) * 512));
-		entry++;
+		entry = (ustarEntry*)cache->dataEnd;
 	}
 }
 

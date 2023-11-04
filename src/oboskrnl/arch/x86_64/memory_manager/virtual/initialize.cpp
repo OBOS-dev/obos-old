@@ -80,7 +80,9 @@ namespace obos
 			utils::memzero(mapPageTable(nullptr), 4096);
 			freePhysicalPage((uintptr_t)kernelPageMap);
 			MapVirtualPageToPhysical((void*)0xffffffffffffe000, (void*)g_localAPICAddr, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
+			MapVirtualPageToPhysical((void*)0xffffffffffffd000, (void*)g_HPETAddr, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
 			g_localAPICAddr = (volatile LAPIC*)0xffffffffffffe000;
+			g_HPETAddr = (volatile HPET*)0xffffffffffffd000;
 		}
 		bool CPUSupportsExecuteDisable()
 		{

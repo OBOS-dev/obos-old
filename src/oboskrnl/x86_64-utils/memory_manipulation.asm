@@ -1,6 +1,7 @@
 [BITS 64]
 
 global _ZN4obos5utils6strlenEPKc
+global _ZN4obos5utils14strCountToCharEPKcc
 global _ZN4obos5utils7memzeroEPvm
 global _ZN4obos5utils8dwMemcpyEPjPKjm
 global _ZN4obos5utils8dwMemsetEPjjm
@@ -152,21 +153,26 @@ _ZN4obos5utils6memcmpEPKvjm:
 	leave
 	ret
 
-_ZN4obos5utils6strlenEPKc:
+_ZN4obos5utils14strCountToCharEPKcc:
 	push rbp
 	mov rbp, rsp
 
-	mov rax, 0
+	xor rax,rax
 
 .loop:
 	mov dl, [rdi+rax]
 	inc rax
 
-	test dl,dl
-	jnz .loop
+	cmp dl,sil
+	jne .loop
 .finished:
 
 	dec rax
 
 	leave
+	ret
+
+_ZN4obos5utils6strlenEPKc:
+	xor sil, sil
+	call _ZN4obos5utils14strCountToCharEPKcc
 	ret

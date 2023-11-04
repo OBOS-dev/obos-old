@@ -42,7 +42,8 @@ namespace obos
 				info->frame.rsp = ((uintptr_t)memory::VirtualAlloc((void*)0xFFFFFFFF90000000, stackSize / 4096, memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
 			*(uintptr_t*)info->frame.rsp = 0;
 			info->frame.rflags.setBit(x86_64_flags::RFLAGS_INTERRUPT_ENABLE | x86_64_flags::RFLAGS_CPUID);
-			
+			asm volatile("fninit; fxsave (%0)" : : "r"(info->fpuState) : "memory");
+
 			Thread::StackInfo* stackInfo = (Thread::StackInfo*)_stackInfo;
 
 			stackInfo->size = stackSize;

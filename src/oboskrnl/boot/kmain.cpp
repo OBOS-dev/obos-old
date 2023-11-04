@@ -12,6 +12,8 @@
 #include <klog.h>
 #include <memory_manipulation.h>
 
+#include <new>
+
 #include <multitasking/scheduler.h>
 #include <multitasking/thread.h>
 #include <multitasking/arch.h>
@@ -25,6 +27,9 @@
 #include <driverInterface/call.h>
 #include <driverInterface/interface.h>
 #include <driverInterface/struct.h>
+
+#include <vfs/mount/mount.h>
+#include <vfs/vfsNode.h>
 
 namespace obos
 {
@@ -77,29 +82,12 @@ namespace obos
 		driverInterface::RegisterSyscall(6, (uintptr_t)driverInterface::SyscallMapPhysToVirt);
 		driverInterface::RegisterSyscall(7, (uintptr_t)driverInterface::SyscallGetInitrdLocation);
 		
-		driverInterface::DriverClient client;
-		client.OpenConnection(
-			driverInterface::LoadModule(procExecutable, module_request.response->modules[moduleIndex]->size, nullptr),
-			0xfffffff0 - thread::g_timerTicks
-		);
-		
-		uint32_t command = driverInterface::OBOS_SERVICE_GET_SERVICE_TYPE;
-		client.SendData((byte*)&command, sizeof(command));
-		uint32_t serviceType = 0;
-		client.RecvData(&serviceType, sizeof(serviceType));
-		logger::log("The InitRD Driver reports to be a service of type %d.\n", serviceType);
-		command = driverInterface::OBOS_SERVICE_READ_FILE;
-		size_t par1 = 8;
-		client.SendData(&command, sizeof(command));
-		client.SendData(&par1, sizeof(par1));
-		client.SendData("test.txt", 8);
-		size_t filesize = 0;
-		client.RecvData(&filesize, sizeof(filesize));
-		char* fileData = new char[filesize + 1];
-		client.RecvData(fileData, filesize);
-		logger::printf("Contents of 0:/file.txt:\n%s\n", fileData);
-		client.CloseConnection();
-		delete[] fileData;
+		driverInterface::LoadModule(procExecutable, module_request.response->modules[moduleIndex]->size, nullptr);
+
+		new (&vfs::g_mountPoints) Vector<vfs::MountPoint*>{};
+
+		uint32_t point = (uint32_t)-1;
+		vfs::mount(point, 0); // Mount the initrd.
 
 		thread::ExitThread(0);
 	}

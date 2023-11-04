@@ -149,7 +149,7 @@ namespace obos
 			_data[0] = _data[0] - 1;
 			return false;
 		}
-		bool DriverConnectionBase::RecvData(void* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
+		bool DriverConnectionBase::RecvData(void* data, size_t size, uint32_t ticksToWait, bool peek, bool spinOnBuffer, bool spinOnLock)
 		{
 			(void)size;
 			(void)peek;
@@ -285,7 +285,7 @@ namespace obos
 			}
 			return m_rawCon->SendDataOnBuffer(data,size, &m_rawCon->buf2, spinOnLock);
 		}
-		bool DriverClient::RecvData(void* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
+		bool DriverClient::RecvData(void* data, size_t size, uint32_t ticksToWait, bool peek, bool spinOnBuffer, bool spinOnLock)
 		{
 			if (!m_rawCon)
 			{
@@ -336,7 +336,7 @@ namespace obos
 			}
 			return m_rawCon->SendDataOnBuffer(data,size, &m_rawCon->buf1, spinOnLock);
 		}
-		bool DriverServer::RecvData(void* data, size_t size, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
+		bool DriverServer::RecvData(void* data, size_t size, uint32_t ticksToWait, bool peek, bool spinOnBuffer, bool spinOnLock)
 		{
 			if (!m_rawCon)
 			{

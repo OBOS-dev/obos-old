@@ -36,6 +36,8 @@
 #define CPUID_FSGSBASE (1)
 #define CR4_FSGSBASE ((uintptr_t)1<<16)
 
+extern "C" void fpuInit();
+
 namespace obos
 {
 	void InitializeGdt();
@@ -56,6 +58,7 @@ namespace obos
 		.stack_size = (4 * 4096)
 	};
 	void EarlyKPanic();
+	extern void initSSE();
 
 	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console. This also must enable the scheduler.
 	void arch_kmain()
@@ -93,6 +96,10 @@ namespace obos
 		memory::InitializePhysicalMemoryManager();
 		logger::info("%s: Initializing the virtual memory manager.\n", __func__);
 		memory::InitializeVirtualMemoryManager();
+		logger::info("%s: Initializing the 0x87 fpu.\n", __func__);
+		fpuInit();
+		logger::info("%s: Initializing SSE.\n", __func__);
+		initSSE();
 		uint64_t unused = 0, rbx = 0;
 		__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
 		if (rbx & CPUID_FSGSBASE)

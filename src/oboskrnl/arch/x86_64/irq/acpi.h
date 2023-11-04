@@ -100,5 +100,23 @@ namespace obos
 			uint32_t flags;
 			uint32_t acpiID;
 		} __attribute__((packed));
+
+		struct HPET_Addr
+		{
+			uint8_t addressSpaceId;
+			uint8_t registerBitWidth;
+			uint8_t registerBitOffset;
+			uint8_t resv;
+			uintptr_t address;
+		}  __attribute__((packed));
+		struct HPET_Table
+		{
+			ACPISDTHeader sdtHeader;
+			uint32_t eventTimerBlockID;
+			HPET_Addr baseAddress;
+			uint8_t hpetNumber;
+			uint16_t mainCounterMinimum/*ClockTickPeriodicMode*/;
+			uint8_t pageProtectionAndOEMAttrib;
+		} __attribute__((packed));
 	}
 }

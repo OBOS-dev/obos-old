@@ -60,7 +60,7 @@ namespace obos
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 			virtual bool SendData(const void* data, size_t size, bool spinOnLock = true);
-			virtual bool RecvData(void* data, size_t size, bool peek = false, bool spinOnBuffer = true, uint32_t ticksToWait = 1000, bool spinOnLock = true);
+			virtual bool RecvData(void* data, size_t size, uint32_t ticksToWait = 1000, bool peek = false, bool spinOnBuffer = true, bool spinOnLock = true);
 #pragma GCC pop_options
 
 			virtual bool IsConnectionClosed() { if (!m_rawCon) return false; return !(m_rawCon->references - !m_didWeCloseConnection) || !m_rawCon->connectionOpen; }
@@ -79,7 +79,7 @@ namespace obos
 			virtual bool Listen(uint64_t timeoutTicks = 0);
 
 			virtual bool SendData(const void* data, size_t size, bool spinOnLock = true) override;
-			virtual bool RecvData(void* data, size_t size, bool peek = false, bool spinOnBuffer = true, uint32_t ticksToWait = 1000, bool spinOnLock = true) override;
+			virtual bool RecvData(void* data, size_t size, uint32_t ticksToWait = 1000, bool peek = false, bool spinOnBuffer = true, bool spinOnLock = true) override;
 
 			virtual bool CloseConnection() override { return DriverConnectionBase::CloseConnection(); }
 		private:
@@ -91,7 +91,7 @@ namespace obos
 			virtual bool OpenConnection(uint32_t pid, uint64_t timeoutTicks);
 
 			virtual bool SendData(const void* data, size_t size, bool spinOnLock = true) override;
-			virtual bool RecvData(void* data, size_t size, bool peek = false, bool spinOnBuffer = true, uint32_t ticksToWait = 1000, bool spinOnLock = true) override;
+			virtual bool RecvData(void* data, size_t size, uint32_t ticksToWait = 1000, bool peek = false, bool spinOnBuffer = true, bool spinOnLock = true) override;
 			
 			virtual bool CloseConnection() override { return DriverConnectionBase::CloseConnection(); }
 		};
