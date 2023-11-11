@@ -9,6 +9,7 @@
 #include <int.h>
 #include <vector.h>
 
+#include <vector.h>
 #include <vfs/vfsNode.h>
 
 namespace obos

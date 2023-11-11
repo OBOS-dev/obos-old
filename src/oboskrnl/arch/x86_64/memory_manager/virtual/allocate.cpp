@@ -170,7 +170,7 @@ namespace obos
 		{
 			if (!_base)
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (CanAllocatePages(_base, nPages))
@@ -199,7 +199,7 @@ namespace obos
 		{
 			if (!_base)
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (CanAllocatePages(_base, nPages))
@@ -247,7 +247,7 @@ namespace obos
 		{
 			if (!_base)
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			uintptr_t base = (uintptr_t)_base & (~0xfff);

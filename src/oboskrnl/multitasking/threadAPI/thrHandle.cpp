@@ -76,7 +76,7 @@ namespace obos
 				priorityList = g_priorityLists + 3;
 				break;
 			default:
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 				break;
 			}
@@ -189,7 +189,7 @@ namespace obos
 				newPriorityList = g_priorityLists + 3;
 				break;
 			default:
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 				break;
 			}

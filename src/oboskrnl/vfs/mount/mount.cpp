@@ -60,7 +60,7 @@ namespace obos
 			}
 			return true;
 		}
-		bool GetFileAttributes(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, uint64_t*& fileAttribs)
+		bool GetFileAttributes(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, uint64_t* fileAttribs)
 		{
 			if (!SendCommand(client, driverInterface::OBOS_SERVICE_QUERY_FILE_DATA))
 				return false;
@@ -94,6 +94,65 @@ namespace obos
 			}
 			return true;
 		}
+		bool ReadFile(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, void** data, size_t* filesize, size_t nToSkip, size_t nToRead)
+		{
+			if (!SendCommand(client, driverInterface::OBOS_SERVICE_READ_FILE))
+				return false;
+			size_t filepathLen = utils::strlen(path);
+			if (!client.SendData(&filepathLen, sizeof(filepathLen)))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			if (!client.SendData(path, filepathLen))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			uint64_t driveId = partitionId >> 24;
+			if (!client.SendData(&driveId, sizeof(driveId)))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			byte driverPartitionId = partitionId & 0xff;
+			if (!client.SendData(&driverPartitionId, sizeof(driverPartitionId)))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			size_t _filesize = 0;
+			if (!client.RecvData(&_filesize, sizeof(_filesize), 15000))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			if (filesize)
+				*filesize = _filesize;
+			void* _data = nullptr;
+			if (data)
+			{
+				_data = new char[nToRead + 1];
+				utils::memzero(_data, nToRead + 1);
+				*data = _data;
+			}
+			if (!client.RecvData(nullptr, nToSkip, 15000))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			if (!client.RecvData(data ? _data : nullptr, nToRead, 15000))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			if (!client.RecvData(nullptr, _filesize - nToSkip - nToRead, 15000))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			return true;
+		}
 		void dividePathToTokens(const char* filepath, const char**& tokens, size_t& nTokens, bool useOffset = true)
 		{
 			for (; filepath[0] == '/'; filepath++);
@@ -109,12 +168,7 @@ namespace obos
 				if (filepath[i] == '/' || i == 0)
 				{
 					if (!useOffset)
-					{
-						size_t filepathLen = utils::strlen(filepath);
-						((char*)filepath)[filepathLen] = '/'; // So strCountToChar doesn't go off the string.
-						tokens[nTokensCounted++] = (const char*)utils::memcpy(new char[utils::strCountToChar(filepath + i + 1, '/') + 1], filepath + i + (i != 0), utils::strCountToChar(filepath + i + (i != 0), '/'));
-						((char*)filepath)[filepathLen] = 0;
-					}
+						tokens[nTokensCounted++] = (const char*)utils::memcpy(new char[utils::strCountToChar(filepath + i + 1, '/') + 2], filepath + i + (i != 0), utils::strCountToChar(filepath + i + (i != 0), '/') + 1);
 					else
 						tokens[nTokensCounted++] = filepath + i + (i != 0);
 				}
@@ -167,66 +221,147 @@ namespace obos
 						return false;
 					}
 				}
-				if (utils::memcmp(&fileAttribs[0], (uint32_t)0, sizeof(fileAttribs)))
+ 				if (utils::memcmp(&fileAttribs[0], (uint32_t)0, sizeof(fileAttribs)))
 				{
 					if (filepath)
 						delete[] filepath;
 					break;
 				}
-				const char** tokens = nullptr;
+				const char** tokens = nullptr, **sTokens = nullptr;
 				size_t nTokens = 0;
-				dividePathToTokens(filepath, tokens, nTokens, false);
+				dividePathToTokens(filepath, tokens, nTokens);
+				dividePathToTokens(filepath, sTokens, nTokens, false);
 				DirectoryEntry* directoryEntry = nullptr;
 				for(size_t i = 0; i < nTokens; i++)
 				{
 					if (i == 0)
 					{
-						if (point->head)
+						directoryEntry = point->children.head;
+						while (directoryEntry)
 						{
-							for (DirectoryEntry* currentEntry = point->head; currentEntry;)
-							{
-								if (utils::strcmp(currentEntry->path.str, tokens[i]))
-								{
-									directoryEntry = currentEntry;
-									break;
-								}
+							if (utils::strcmp(directoryEntry->path.str, sTokens[i]))
+								break;
 
-								currentEntry = currentEntry->next;
-							}
+							directoryEntry = directoryEntry->next;
 						}
-						if (!directoryEntry)
+						if (directoryEntry)
+							continue; // Continue linking the next part of the path
+						// We must make a new directory entry.
+						// If the entry that we're making is a directory, all of it's tokens will be a directory as well.
+						uint64_t attribs[3] = { fileAttribs[0], fileAttribs[1], fileAttribs[2] };
+						if(!(attribs[2] & driverInterface::FILE_ATTRIBUTES_DIRECTORY))
 						{
-							uint64_t pathAttrib[3] = {};
-							uint64_t *_pathAttrib = &pathAttrib[0];
-							if (!GetFileAttributes(client, tokens[0], point->partitionId, _pathAttrib))
+							if (!GetFileAttributes(client, sTokens[i], point->partitionId, (uint64_t*)&attribs))
 							{
 								for (size_t j = 0; j < nTokens; j++)
-									delete[] tokens[j];
+									delete[] sTokens[j];
 								delete[] tokens;
+								delete[] sTokens;
 								delete[] filepath;
 								return false;
 							}
-							if (pathAttrib[0] & driverInterface::FILE_ATTRIBUTES_DIRECTORY)
-							{
-								directoryEntry = new Directory{};
-								Directory* directory = (Directory*)directoryEntry;
-								if (point->tail)
-									point->tail->next = directory;
-								if (!point->head)
-									point->head = directory;
-								directory->next = nullptr;
-								directory->prev = point->tail;
-								point->tail = directory;
-								point->nDirectories++;
-								directory->fileAttrib = (driverInterface::fileAttributes)(pathAttrib[0] & ~driverInterface::FILE_ATTRIBUTES_DIRECTORY);
-								directory->path.str = (char*)tokens[i];
-								directory->path.strLen = utils::strlen(tokens[i]);
-							}
-							else
-								directoryEntry = new DirectoryEntry{};
+						}
+						if(attribs[2] & driverInterface::FILE_ATTRIBUTES_DIRECTORY)
+							directoryEntry = new Directory{};
+						else
+							directoryEntry = new DirectoryEntry{};
+						directoryEntry->path = (char*)utils::memcpy(new char[utils::strlen(sTokens[i]) + 1], sTokens[i], utils::strlen(sTokens[i]));
+						directoryEntry->fileAttrib = attribs[2];
+						if (point->children.tail)
+							point->children.tail->next = directoryEntry;
+						if (!point->children.head)
+							point->children.head = directoryEntry;
+						directoryEntry->prev = point->children.tail;
+						directoryEntry->mountPoint = point;
+						point->children.tail = directoryEntry;
+						point->children.size++;
+						if (attribs[2] & driverInterface::FILE_ATTRIBUTES_FILE)
+							directoryEntry->direntType = DIRECTORY_ENTRY_TYPE_FILE;
+						continue;
+					}
+					DirectoryEntry* newDirectoryEntry = nullptr;
+					char* path = nullptr;
+					if ((i + 1) == nTokens)
+						path = (char*)utils::memcpy(new char[utils::strlen(filepath) + 1], filepath, utils::strlen(filepath));
+					else
+					{
+						// Calculate the size of the path.
+						size_t szPath = 1;
+						for (size_t j = 0; j < (i + 1); j++)
+							szPath += utils::strlen(sTokens[j]) + ((j + 1) != (i + 1)); // The size of the token+'/' if this token isn't the last token
+						path = new char[szPath];
+						char* iter = path;
+						for (size_t j = 0; j < (i + 1); j++)
+						{
+							size_t szToken = utils::strlen(sTokens[j]);
+							utils::memcpy(iter, sTokens[j], szToken);
+							iter += szToken;
+							if (((j + 1) != (i + 1)) && sTokens[j][szToken - 1] != '/')
+								*iter++ = '/';
 						}
 					}
+					if(directoryEntry)
+						newDirectoryEntry = directoryEntry->children.head;
+					else
+						newDirectoryEntry = point->children.head;
+					while (newDirectoryEntry)
+					{
+						if (utils::strcmp(newDirectoryEntry->path.str, path))
+							break;
+
+						newDirectoryEntry = newDirectoryEntry->next;
+					}
+					if (newDirectoryEntry)
+					{
+						directoryEntry = newDirectoryEntry;
+						if(path != filepath)
+							delete[] path;
+						continue; // Continue linking the next part of the path
+					}
+					uint64_t attribs[3] = { fileAttribs[0], fileAttribs[1], fileAttribs[2] };
+					if (!(attribs[2] & driverInterface::FILE_ATTRIBUTES_DIRECTORY))
+					{
+						if (!GetFileAttributes(client, path, point->partitionId, (uint64_t*)&attribs))
+						{
+							for (size_t j = 0; j < nTokens; j++)
+								delete[] sTokens[j];
+							delete[] tokens;
+							delete[] sTokens;
+							delete[] filepath;
+							if (path != filepath)
+								delete[] path;
+							return false;
+						}
+					}
+					if (attribs[2] & driverInterface::FILE_ATTRIBUTES_DIRECTORY)
+						newDirectoryEntry = new Directory{};
+					else
+					{
+						newDirectoryEntry = new DirectoryEntry{};
+						newDirectoryEntry->direntType = DIRECTORY_ENTRY_TYPE_FILE;
+					}
+					newDirectoryEntry->parent = directoryEntry;
+					newDirectoryEntry->path = path;
+					if (directoryEntry->children.tail)
+						directoryEntry->children.tail->next = newDirectoryEntry;
+					if (!directoryEntry->children.head)
+						directoryEntry->children.head = newDirectoryEntry;
+					newDirectoryEntry->prev = directoryEntry->children.tail;
+					newDirectoryEntry->mountPoint = point;
+					directoryEntry->children.tail = newDirectoryEntry;
+					directoryEntry->children.size++;
+					newDirectoryEntry->fileAttrib = attribs[2];
+					newDirectoryEntry->filesize = attribs[0];
+
+
+					directoryEntry = newDirectoryEntry;
 				}
+
+				for (size_t j = 0; j < nTokens; j++)
+					delete[] sTokens[j];
+				delete[] sTokens;
+				delete[] tokens;
+				delete[] filepath;
 				filepath = nullptr;
 			}
 
@@ -272,14 +407,17 @@ namespace obos
 			{
 				newPoint->filesystemDriver = existingMountPoint->filesystemDriver;
 				newPoint->children = existingMountPoint->children;
-				newPoint->countChildren = existingMountPoint->countChildren;
 				newPoint->otherMountPointsReferencing++;
 			}
 			else
 			{
 				if (partitionId == 0)
 					newPoint->filesystemDriver = (driverInterface::driverIdentity*)process::g_processes.head->next->_driverIdentity;
-				else {} // TODO: Find the filesystem driver associated with the partition.
+				else 
+				{
+					SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
+					return false;
+				} // TODO: Find the filesystem driver associated with the partition.
 				bool ret = setupMountPointEntries(newPoint);
 				if (ret)
 					g_mountPoints.push_back(newPoint);
@@ -293,9 +431,11 @@ namespace obos
 			return false;
 		}
 
-		uint32_t getPartitionIDForMountPoint(uint32_t /*mountPoint*/)
+		uint32_t getPartitionIDForMountPoint(uint32_t mountPoint)
 		{
-			return 0;
+			if (mountPoint > g_mountPoints.length())
+				return 0;
+			return g_mountPoints[mountPoint]->partitionId;
 		}
 
 		void getMountPointsForPartitionID(uint32_t /*partitionId*/, uint32_t** /*oMountPoints*/)

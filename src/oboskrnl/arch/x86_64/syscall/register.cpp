@@ -25,7 +25,10 @@ namespace obos
 		void SyscallSetLastError(uint32_t* newError)
 		{
 			if(!canAccessUserMemory(newError, sizeof(*newError), false))
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return;
+			}
 			SetLastError(*newError);
 		}
 

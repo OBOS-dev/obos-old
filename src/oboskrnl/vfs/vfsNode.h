@@ -18,6 +18,15 @@ namespace obos
 		{
 			char* str;
 			size_t strLen;
+			VFSString() = default;
+			VFSString(const char* str) : str{ (char*)str }
+			{
+				for (strLen = 0; str[strLen]; strLen++);
+			}
+			VFSString(char* str) : str{ str }
+			{
+				for (strLen = 0; str[strLen]; strLen++);
+			}
 		};
 
 		enum NodeType
@@ -28,17 +37,23 @@ namespace obos
 		};
 		enum DirectoryEntryType
 		{
+			DIRECTORY_ENTRY_TYPE_INVALID = -1,
 			DIRECTORY_ENTRY_TYPE_FILE,
 			DIRECTORY_ENTRY_TYPE_SYMLINK,
 			DIRECTORY_ENTRY_TYPE_DIRECTORY,
+		};
+		struct DirectoryEntryList
+		{
+			struct DirectoryEntry *head, *tail;
+			size_t size;
 		};
 		struct VFSNode
 		{
 			VFSNode() = default;
 			VFSNode(NodeType _type) : type{ _type } {}
-			struct DirectoryEntry *next, *prev;
-			struct DirectoryEntry *parent, *children;
-			size_t countChildren;
+			struct DirectoryEntry *next, *prev; // used for the children.
+			struct DirectoryEntry *parent;
+			DirectoryEntryList children;
 			struct MountPoint* mountPoint;
 			NodeType type = VFS_INVALID_NODE_TYPE;
 		};
@@ -48,11 +63,19 @@ namespace obos
 			MountPoint() : VFSNode{ VFS_NODE_MOUNTPOINT }
 			{}
 			uint32_t id;
-			uint32_t partitionId;
+			uint32_t partitionId = ((uint32_t)-1);
 			driverInterface::driverIdentity* filesystemDriver; // The filesystem driver to invoke.
 			uint32_t otherMountPointsReferencing;
-			struct Directory *head, *tail;
-			size_t nDirectories;
+		};
+		struct HandleListNode
+		{
+			HandleListNode *next, *prev;
+			void* handle;
+		};
+		struct HandleList
+		{
+			HandleListNode *head, *tail;
+			size_t size;
 		};
 		struct DirectoryEntry : public VFSNode
 		{
@@ -60,19 +83,17 @@ namespace obos
 			{}
 			DirectoryEntry(DirectoryEntryType _direntType) : VFSNode{ VFS_NODE_DIRECTORY_ENTRY }, direntType{ _direntType }
 			{}
-			DirectoryEntryType direntType;
-			driverInterface::fileAttributes fileAttrib;
+			DirectoryEntryType direntType = DIRECTORY_ENTRY_TYPE_INVALID;
+			uint32_t fileAttrib;
+			size_t filesize;
 			VFSString path; // Never should be null.
-			VFSString linkedPath; // Only non-null if direntType == DIRECTORY_ENTRY_TYPE_SYMLINK
-			uint32_t fileHandlesReferencing;
-			// TODO: Add a list of file handles.
+			DirectoryEntry* linkedNode; // Only non-null when direntType == DIRECTORY_ENTRY_TYPE_SYMLINK
+			HandleList fileHandlesReferencing;
 		};
 		struct Directory : public DirectoryEntry
 		{
 			Directory() : DirectoryEntry{ DIRECTORY_ENTRY_TYPE_DIRECTORY }
 			{}
-			DirectoryEntry *head, *tail;
-			size_t nFiles;
 		};
 	}
 }

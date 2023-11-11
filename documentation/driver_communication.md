@@ -1,4 +1,5 @@
-# Driver communications
+# OBOS Driver communication specification
+
 ## Commands
 
 ### Common commands
@@ -15,55 +16,57 @@
 #### OBOS_SERVICE\_QUERY\_FILE\_DATA
 - Queries file properties
 - Parameters:<br>
-&nbsp;&nbsp;&nbsp;sizeFilepath - SIZE\_T<br>
-&nbsp;&nbsp;&nbsp;filepath - STRING<br>
-&nbsp;&nbsp;&nbsp;driveId - UINT64\_T<br>
-&nbsp;&nbsp;&nbsp;partitionId - UINT8\_T<br>
+&nbsp;&nbsp;&nbsp;sizeFilepath - size\_t<br>
+&nbsp;&nbsp;&nbsp;filepath - char\*<br>
+&nbsp;&nbsp;&nbsp;driveId - uint64\_t<br>
+&nbsp;&nbsp;&nbsp;partitionId - uint8\_t<br>
 - Returns the file size in bytes, the LBA offset of the file, and `enum fileExistsReturn`
 - Can only be accessed by the kernel.
 #### OBOS\_SERVICE\_MAKE\_FILE\_ITERATOR
 - Creates a file iterator.
 - Parameters:<br>
-&nbsp;&nbsp;&nbsp;driveId - UINT64\_T<br>
-&nbsp;&nbsp;&nbsp;partitionId - UINT8\_T<br>
-- Returns an `HANDLE` that can be used with iterator commands.
+&nbsp;&nbsp;&nbsp;driveId - uint64\_t<br>
+&nbsp;&nbsp;&nbsp;partitionId - uint8\_t<br>
+- Returns an `uintptr_t` that can be used with iterator commands.
 - Can only be accessed by the kernel.
 #### OBOS\_SERVICE\_NEXT\_FILE
 - Returns the file data of the current file, then seeks to the next file in the iterator. If the end of the partition is reached, then this command must return FILE_DOESNT_EXIST.
 - Parameters:<br>
-&nbsp;&nbsp;&nbsp;iterator - HANDLE
-- Returns the same as OBOS\_SERVICE\_QUERY\_FILE\_DATA + `SIZE sizeFilepath` and `STRING filepath`.
+&nbsp;&nbsp;&nbsp;iterator - uintptr\_t
+- Returns the same as OBOS\_SERVICE\_QUERY\_FILE\_DATA + `SIZE sizeFilepath` and `char\* filepath`.
 - Can only be accessed by the kernel.
 #### OBOS\_SERVICE\_CLOSE\_FILE\_ITERATOR
 - Closes the file iterator.
 - Parameters:<br>
-&nbsp;&nbsp;&nbsp;iterator - HANDLE
-- Returns zero on success, or one if there is no such handle (UINT8_T).
+&nbsp;&nbsp;&nbsp;iterator - uintptr\_t
+- Returns zero on success, or one if there is no such uintptr\_t (uint8_t).
 - Can only be accessed by the kernel.
-### OBOS\_SERVICE\_TYPE\_INITRD\_FILESYSTEM <- OBOS\_SERVICE\_TYPE\_FILESYSTEM
 #### OBOS\_SERVICE\_READ\_FILE
 - Reads the file specified by the file path parameter synchronously.
 - Parameters:<br>
-&nbsp;&nbsp;&nbsp;sizeFilepath - SIZE\_T<br>
-&nbsp;&nbsp;&nbsp;filepath - STRING<br>
+&nbsp;&nbsp;&nbsp;sizeFilepath - size\_t<br>
+&nbsp;&nbsp;&nbsp;filepath - char\*<br>
+&nbsp;&nbsp;&nbsp;driveId - uint64\_t<br>
+&nbsp;&nbsp;&nbsp;partitionId - uint8\_t<br>
 - Returns the size of the data read, and the file data.
 - Can only be accessed by the kernel.
+### OBOS\_SERVICE\_TYPE\_INITRD\_FILESYSTEM <- OBOS\_SERVICE\_TYPE\_FILESYSTEM (No unique commands yet)
 ### OBOS\_SERVICE\_TYPE\_STORAGE\_DEVICE, SERVICE\_TYPE\_VIRTUAL\_STORAGE\_DEVICE
 #### OBOS\_SERVICE\_READ\_LBA
 - Reads `nSectors` at the offset `lbaOffset` from `driverId`
 - Parameters:<br>
-&nbsp;&nbsp;&nbsp;driveId - UINT64\_T<br>
-&nbsp;&nbsp;&nbsp;lbaOffset - UINT64\_T<br>
-&nbsp;&nbsp;&nbsp;nSectors - SIZE\_T<br>
-- Returns a BYTE array with a size of nSectors * 512.
+&nbsp;&nbsp;&nbsp;driveId - uint64\_t<br>
+&nbsp;&nbsp;&nbsp;lbaOffset - uint64\_t<br>
+&nbsp;&nbsp;&nbsp;nSectors - size\_t<br>
+- Returns a byte array with a size of nSectors * 512.
 - Can be accessed by anyone.
 #### OBOS\_SERVICE\_WRITE\_LBA
 - Writes `nSectors` at the offset `lbaOffset` to `driverId`
 - Parameters:<br>
-&nbsp;&nbsp;&nbsp;driveId - UINT64\_T<br>
-&nbsp;&nbsp;&nbsp;lbaOffset - UINT64\_T<br>
-&nbsp;&nbsp;&nbsp;nSectors - SIZE\_T<br>
-&nbsp;&nbsp;&nbsp;data - BYTE[nSectors * 512]<br>
+&nbsp;&nbsp;&nbsp;driveId - uint64\_t<br>
+&nbsp;&nbsp;&nbsp;lbaOffset - uint64\_t<br>
+&nbsp;&nbsp;&nbsp;nSectors - size\_t<br>
+&nbsp;&nbsp;&nbsp;data - byte[nSectors * 512]<br>
 - Returns void.
 - Can be accessed by anyone.
 ### OBOS\_SERVICE\_TYPE\_USER\_INPUT\_DEVICE, SERVICE\_TYPE\_VIRTUAL\_USER\_INPUT\_DEVICE
@@ -77,9 +80,9 @@
 #### OBOS\_SERVICE\_CONFIGURE\_COMMUNICATION
 - Configures communication on the device. This is driver specific and can do whatever it wants with the parameters.
 - Parameters:<br>
-&nbsp;&nbsp;&nbsp;szParameters - SIZE\_T<br>
-&nbsp;&nbsp;&nbsp;parameters - BYTE[szParameters]<br>
-- Returns a `HANDLE` to the connection.
+&nbsp;&nbsp;&nbsp;szParameters - size\_t<br>
+&nbsp;&nbsp;&nbsp;parameters - byte[szParameters]<br>
+- Returns a `uintptr_t` to the connection.
 - Can be accessed anywhere.
 #### OBOS\_SERVICE\_RECV\_BYTE\_FROM\_DEVICE
 - Receives one byte from the device.
@@ -89,6 +92,6 @@
 #### OBOS\_SERVICE\_SEND\_BYTE\_TO\_DEVICE
 - Sends one byte to the device.
 - Parameters:<br>
-&nbsp;&nbsp;&nbsp;toSend - BYTE<br>
+&nbsp;&nbsp;&nbsp;toSend - byte<br>
 - This function returns a DWORD describing a driver-specific error code.
 - Can be accessed anywhere.

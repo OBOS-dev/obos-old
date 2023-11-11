@@ -19,7 +19,7 @@ namespace obos
 		thread::g_currentThread->lastError = err;
 #ifdef OBOS_DEBUG
 		if (((process::Process*)thread::g_currentThread->owner)->pid == 0)
-			logger::warning("\nError thrown: %d.\n", err);
+			logger::warning("\nSetLastError called from a function called by the kernel, error code: %d.\n", err);
 #endif
 	}
 	uint32_t GetLastError() 

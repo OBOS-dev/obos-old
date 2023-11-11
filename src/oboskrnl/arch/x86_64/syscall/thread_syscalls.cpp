@@ -37,17 +37,17 @@ namespace obos
 			} *par = (_par*)pars;
 			if (!canAccessUserMemory(par, sizeof(*par), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (!canAccessUserMemory(par->_this, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if ((uintptr_t)par->entry > 0xffffffff80000000)
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			return par->_this->CreateThread(par->priority, par->stackSize, par->entry, par->userdata, nullptr, par->startPaused, ((process::Process*)thread::g_currentThread->owner)->isUsermode);
@@ -61,17 +61,17 @@ namespace obos
 			} *par = (_par*)pars;
 			if (!canAccessUserMemory(par, sizeof(*par), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (!canAccessUserMemory(par->_this, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (par->tid < 2 || par->tid > thread::g_nextTid)
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			return par->_this->OpenThread(par->tid);
@@ -80,12 +80,12 @@ namespace obos
 		{
 			if (!canAccessUserMemory(pars, sizeof(*pars), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (!canAccessUserMemory((void*)*pars, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			thread::ThreadHandle* _this = (thread::ThreadHandle*)*pars;
@@ -95,12 +95,12 @@ namespace obos
 		{
 			if (!canAccessUserMemory(pars, sizeof(*pars), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (!canAccessUserMemory((void*)*pars, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			thread::ThreadHandle* _this = (thread::ThreadHandle*)*pars;
@@ -115,12 +115,12 @@ namespace obos
 			} *par = (_par*)pars;
 			if (!canAccessUserMemory(par, sizeof(*par), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (!canAccessUserMemory(par->_this, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			return par->_this->SetThreadPriority(par->priority);
@@ -134,12 +134,12 @@ namespace obos
 			} *par = (_par*)pars;
 			if (!canAccessUserMemory(par, sizeof(*par), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (!canAccessUserMemory(par->_this, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			return par->_this->TerminateThread(par->exitCode);
@@ -149,12 +149,12 @@ namespace obos
 		{
 			if (!canAccessUserMemory(_this, sizeof(*_this), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 0;
 			}
 			if (!canAccessUserMemory((void*)*_this, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 0;
 			}
 			thread::ThreadHandle* this_ = (thread::ThreadHandle*)*_this;
@@ -164,12 +164,12 @@ namespace obos
 		{
 			if (!canAccessUserMemory(_this, sizeof(*_this), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 0;
 			}
 			if (!canAccessUserMemory((void*)*_this, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 0;
 			}
 			thread::ThreadHandle* this_ = (thread::ThreadHandle*)*_this;
@@ -179,12 +179,12 @@ namespace obos
 		{
 			if (!canAccessUserMemory(_this, sizeof(*_this), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 0;
 			}
 			if (!canAccessUserMemory((void*)*_this, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 0;
 			}
 			thread::ThreadHandle* this_ = (thread::ThreadHandle*)*_this;
@@ -195,12 +195,12 @@ namespace obos
 		{
 			if (!canAccessUserMemory(_this, sizeof(*_this), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 0;
 			}
 			if (!canAccessUserMemory((void*)*_this, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return 0;
 			}
 			thread::ThreadHandle* this_ = (thread::ThreadHandle*)*_this;
@@ -210,12 +210,12 @@ namespace obos
 		{
 			if (!canAccessUserMemory(_this, sizeof(*_this), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory((void*)*_this, sizeof(thread::ThreadHandle), true, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			thread::ThreadHandle* this_ = (thread::ThreadHandle*)*_this;

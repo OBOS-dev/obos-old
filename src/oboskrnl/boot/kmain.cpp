@@ -30,6 +30,7 @@
 
 #include <vfs/mount/mount.h>
 #include <vfs/vfsNode.h>
+#include <vfs/fileManip/fileHandle.h>
 
 namespace obos
 {
@@ -71,6 +72,7 @@ namespace obos
 		if (!procExecutable)
 			logger::panic("Couldn't find the initrd driver.\n");
 		
+		logger::log("Initializing driver syscalls.\n");
 		driverInterface::RegisterSyscall(0, (uintptr_t)driverInterface::SyscallVPrintf);
 		driverInterface::RegisterSyscall(1, (uintptr_t)(void(*)(const uint32_t*))[](const uint32_t* exitCode) { 
 			thread::ExitThread(*exitCode); 
@@ -86,8 +88,18 @@ namespace obos
 
 		new (&vfs::g_mountPoints) Vector<vfs::MountPoint*>{};
 
-		uint32_t point = (uint32_t)-1;
+		uint64_t val = thread::stopTimer();
+		logger::log("Mounting the initrd.\n");
+		thread::startTimer(val);
+		uint32_t point = 0;
 		vfs::mount(point, 0); // Mount the initrd.
+
+		vfs::FileHandle handle;
+		handle.Open("0:/directory/subdirectory/other_subdirectory/you_guessed_it_another_test.txt");
+		char* data = new char[handle.GetFileSize() + 1];
+		handle.Read(data, handle.GetFileSize());
+		logger::printf("0:/directory/subdirectory/other_subdirectory/you_guessed_it_another_test.txt: %s\n", data);
+		delete[] data;
 
 		thread::ExitThread(0);
 	}

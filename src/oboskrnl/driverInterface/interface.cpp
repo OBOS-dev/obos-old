@@ -27,7 +27,7 @@ namespace obos
 		{
 			if (!buffer)
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (!AttemptLock(buffer, spinOnLock))
@@ -58,10 +58,12 @@ namespace obos
 		{
 			if (!buffer)
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			
+			if (!size)
+				return true;
+
 			if (buffer->szBuf < size && spinOnBuffer)
 			{
 				buffer->amountExcepted = buffer->szBuf + size;
@@ -171,6 +173,8 @@ namespace obos
 				return false;
 			}
 			// Threads can still read from the connections, but not send.
+			m_rawCon->buf1.wake = true;
+			m_rawCon->buf2.wake = true;
 			if (!(--m_rawCon->references))
 			{
 				if(m_rawCon->buf1.buf)
@@ -215,7 +219,7 @@ namespace obos
 			}
 			if (pid >= process::g_processes.size)
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			bool direction = pid < (process::g_processes.size / 2);
@@ -345,6 +349,9 @@ namespace obos
 			}
 			return m_rawCon->RecvDataOnBuffer(data, size, &m_rawCon->buf2, peek, spinOnBuffer, ticksToWait, spinOnLock);
 		}
+		
+		bool DriverServer::CloseConnection() { return DriverConnectionBase::CloseConnection(); }
+		bool DriverClient::CloseConnection() { return DriverConnectionBase::CloseConnection(); }
 
 		bool DriverServer::ListenCallback(thread::Thread* thr, void* userdata)
 		{

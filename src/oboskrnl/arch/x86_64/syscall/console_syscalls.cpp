@@ -53,7 +53,7 @@ namespace obos
 			char* ch = (char*)pars;
 			if (!canAccessUserMemory(ch, sizeof(*ch), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -70,7 +70,7 @@ namespace obos
 			} *pars = (_par*)_pars;
 			if (!canAccessUserMemory(pars, sizeof(*pars), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -89,7 +89,7 @@ namespace obos
 			} *pars = (_par*)_pars;
 			if (!canAccessUserMemory(pars, sizeof(*pars), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -101,12 +101,12 @@ namespace obos
 			const char** str = (const char**)pars;
 			if (!canAccessUserMemory(str, sizeof(str), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory((void*)*str, sizeof(*str), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -122,7 +122,7 @@ namespace obos
 			} *pars = (_par*)_pars;
 			if (!canAccessUserMemory(pars, sizeof(*pars), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -133,7 +133,7 @@ namespace obos
 			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 2, false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -144,17 +144,17 @@ namespace obos
 			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 2, false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(pars[0], sizeof(*pars), true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(pars[1], sizeof(*pars), true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -165,7 +165,7 @@ namespace obos
 			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 3, false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -176,17 +176,17 @@ namespace obos
 			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 2, false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(pars[0], sizeof(*pars), true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(pars[1], sizeof(*pars), true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -197,12 +197,12 @@ namespace obos
 			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
 			if (!canAccessUserMemory(font, sizeof(*font), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(*font, 4096, false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)
@@ -213,17 +213,17 @@ namespace obos
 			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
 			if (!canAccessUserMemory(font, sizeof(*font), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(*font, sizeof(**font), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(**font, 4096, true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			uint8_t* _font = nullptr;
@@ -239,7 +239,7 @@ namespace obos
 			con_framebuffer* pars = (con_framebuffer*)_pars;
 			if (!canAccessUserMemory(pars, sizeof(*pars), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
@@ -251,12 +251,12 @@ namespace obos
 			con_framebuffer** pars = (con_framebuffer**)_pars;
 			if (!canAccessUserMemory(pars, sizeof(*pars), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(*pars, sizeof(*pars), true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
@@ -268,17 +268,17 @@ namespace obos
 			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 2, false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(pars[0], sizeof(*pars), true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (!canAccessUserMemory(pars[1], sizeof(*pars), true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
 			if (proc->console)

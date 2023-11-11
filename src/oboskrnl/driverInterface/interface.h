@@ -81,7 +81,7 @@ namespace obos
 			virtual bool SendData(const void* data, size_t size, bool spinOnLock = true) override;
 			virtual bool RecvData(void* data, size_t size, uint32_t ticksToWait = 1000, bool peek = false, bool spinOnBuffer = true, bool spinOnLock = true) override;
 
-			virtual bool CloseConnection() override { return DriverConnectionBase::CloseConnection(); }
+			virtual bool CloseConnection() override;
 		private:
 			static bool ListenCallback(thread::Thread* _this, void* userdata);
 		};
@@ -93,7 +93,7 @@ namespace obos
 			virtual bool SendData(const void* data, size_t size, bool spinOnLock = true) override;
 			virtual bool RecvData(void* data, size_t size, uint32_t ticksToWait = 1000, bool peek = false, bool spinOnBuffer = true, bool spinOnLock = true) override;
 			
-			virtual bool CloseConnection() override { return DriverConnectionBase::CloseConnection(); }
+			virtual bool CloseConnection() override;
 		};
 
 		class DummyClass1 final : public DriverServer

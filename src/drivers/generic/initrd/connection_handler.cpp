@@ -169,6 +169,7 @@ extern void ConnectionHandler(uintptr_t _conn)
 				Free(filepath);
 				break;
 			}
+			conn->RecvData(nullptr, 9);
 			if (!FileExists(filepath))
 			{
 				conn->SendData(nullptr, sizeof(size_t));

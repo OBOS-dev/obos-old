@@ -26,7 +26,7 @@ namespace obos
 			} *pars = (_par*)_pars;
 			if (!canAccessUserMemory(pars, sizeof(_par), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return nullptr;
 			}
 			return memory::VirtualAlloc(pars->base, pars->nPages, (pars->flags | memory::PROT_USER_MODE_ACCESS) & ~memory::PROT_NO_COW_ON_ALLOCATE);
@@ -40,7 +40,7 @@ namespace obos
 			} *pars = (_par*)_pars;
 			if (!canAccessUserMemory(pars, sizeof(_par), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			return memory::VirtualFree(pars->base, pars->nPages);
@@ -55,7 +55,7 @@ namespace obos
 			} *pars = (_par*)_pars;
 			if (!canAccessUserMemory(pars, sizeof(_par), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			return memory::VirtualProtect(pars->base, pars->nPages, pars->flags | memory::PROT_USER_MODE_ACCESS);
@@ -70,12 +70,12 @@ namespace obos
 			} *pars = (_par*)_pars;
 			if (!canAccessUserMemory(pars, sizeof(_par), false))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			if (!canAccessUserMemory(pars->flags, sizeof(_par), true))
 			{
-				SetLastError(OBOS_ERROR_INVALID_PARAMETERS);
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
 			return memory::VirtualGetProtection(pars->base, pars->nPages, pars->flags);
