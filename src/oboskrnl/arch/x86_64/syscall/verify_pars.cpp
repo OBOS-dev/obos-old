@@ -11,8 +11,12 @@
 #include <arch/x86_64/memory_manager/virtual/allocate.h>
 
 #include <multitasking/scheduler.h>
+#include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
 
 #include <multitasking/process/process.h>
+
+#define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 
 namespace obos
 {
@@ -22,7 +26,7 @@ namespace obos
 		{
 			if (checkingHandle && (uintptr_t)addr < 0xfffffffff0000070)
 				return false;
-			bool checkUsermode = checkingHandle && ((process::Process*)thread::g_currentThread->owner)->isUsermode;
+			bool checkUsermode = checkingHandle && ((process::Process*)getCPULocal()->currentThread->owner)->isUsermode;
 			size_t nPagesToCheck = ((size + 0xfff) & ~0xfff) / 4096;
 			uintptr_t* pageFlags = new uintptr_t[nPagesToCheck];
 			uintptr_t requiredFlags = memory::PROT_IS_PRESENT | ((uintptr_t)checkUsermode * memory::PROT_USER_MODE_ACCESS);

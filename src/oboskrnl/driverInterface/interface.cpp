@@ -12,10 +12,13 @@
 #include <driverInterface/struct.h>
 
 #include <multitasking/scheduler.h>
+#include <multitasking/cpu_local.h>
 
 #include <liballoc/liballoc.h>
 
 #include <multitasking/process/process.h>
+
+#define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 
 namespace obos
 {
@@ -30,7 +33,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			if (!AttemptLock(buffer, spinOnLock))
+			if (!buffer->inUse.Lock(0, spinOnLock))
 				return false;
 
 			if (!buffer->buf)
@@ -41,7 +44,7 @@ namespace obos
 				if(data)
 					utils::memcpy(buffer->buf, data, size);
 				
-				AttemptUnlock(buffer);
+				buffer->inUse.Unlock();
 				return true;
 			}
 			buffer->buf = (byte*)krealloc(buffer->buf, buffer->szBuf + size + 1);
@@ -50,8 +53,7 @@ namespace obos
 			else
 				utils::memzero(buffer->buf + buffer->szBuf, size);
 			buffer->szBuf += size;
-
-			AttemptUnlock(buffer);
+			buffer->inUse.Unlock();
 			return true;
 		}
 		bool DriverConnection::RecvDataOnBuffer(void* data, size_t size, con_buffer* buffer, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
@@ -68,14 +70,15 @@ namespace obos
 			{
 				buffer->amountExcepted = buffer->szBuf + size;
 
-				thread::g_currentThread->blockCallback.callback = [](thread::Thread* thread, void* _buff)->bool
+				volatile thread::Thread*& currentThread = getCPULocal()->currentThread;
+				currentThread->blockCallback.callback = [](thread::Thread* thread, void* _buff)->bool
 					{
 						con_buffer* buff = (con_buffer*)_buff;
 						return buff->wake || (buff->szBuf >= buff->amountExcepted) || (thread::g_timerTicks > thread->wakeUpTime);
 					};
-				thread::g_currentThread->blockCallback.userdata = buffer;
-				thread::g_currentThread->wakeUpTime = ticksToWait;
-				thread::g_currentThread->status |= thread::THREAD_STATUS_BLOCKED;
+				currentThread->blockCallback.userdata = buffer;
+				currentThread->wakeUpTime = ticksToWait;
+				currentThread->status |= thread::THREAD_STATUS_BLOCKED;
 				thread::callScheduler();
 			}
 			if (buffer->szBuf < size)
@@ -84,7 +87,7 @@ namespace obos
 				return false;
 			}
 
-			if (!AttemptLock(buffer, spinOnLock))
+			if (!buffer->inUse.Lock(0, spinOnLock))
 				return false;
 
 			if(data)
@@ -108,36 +111,10 @@ namespace obos
 			}
 
 			finish:
-			AttemptUnlock(buffer);
+			buffer->inUse.Unlock();
 			return true;
 		}
-		bool DriverConnection::AttemptLock(con_buffer* buffer, bool spinOnLock)
-		{
-			if (buffer->inUse && spinOnLock)
-			{
-				thread::g_currentThread->blockCallback.callback = [](thread::Thread*, void* _buff)->bool
-					{
-						con_buffer* buff = (con_buffer*)_buff;
-						return !buff->inUse || buff->wake;
-					};
-				thread::g_currentThread->blockCallback.userdata = buffer;
-				thread::g_currentThread->status |= thread::THREAD_STATUS_BLOCKED;
-				thread::callScheduler();
-			}
-			if (buffer->inUse)
-			{
-				SetLastError(OBOS_ERROR_MUTEX_LOCKED);
-				return false;
-			}
-			buffer->inUse = true;
-			return true;
-		}
-		bool DriverConnection::AttemptUnlock(con_buffer* buffer)
-		{
-			buffer->inUse = false;
-			return true;
-		}
-
+		
 		// class DriverConnectionBase
 
 		bool DriverConnectionBase::SendData(const void* data, size_t size, bool spinOnLock)
@@ -243,14 +220,15 @@ namespace obos
 
 			if (!identity->listening && timeoutTicks)
 			{
-				thread::g_currentThread->wakeUpTime = thread::g_timerTicks + timeoutTicks;
-				thread::g_currentThread->blockCallback.callback = [](thread::Thread* thr, void* _data)->bool
+				volatile thread::Thread*& currentThread = getCPULocal()->currentThread;
+				currentThread->wakeUpTime = thread::g_timerTicks + timeoutTicks;
+				currentThread->blockCallback.callback = [](thread::Thread* thr, void* _data)->bool
 					{
 						driverIdentity* identity = (driverIdentity*)_data;
 						return identity->listening || (thread::g_timerTicks >= thr->wakeUpTime);
 					};
-				thread::g_currentThread->blockCallback.userdata = identity;
-				thread::g_currentThread->status |= thread::THREAD_STATUS_BLOCKED;
+				currentThread->blockCallback.userdata = identity;
+				currentThread->status |= thread::THREAD_STATUS_BLOCKED;
 				thread::callScheduler();
 			}
 			if (!identity->listening)
@@ -308,7 +286,8 @@ namespace obos
 				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
 				return false;
 			}
-			driverIdentity* identity = (driverIdentity*)((process::Process*)thread::g_currentThread->owner)->_driverIdentity;
+			volatile thread::Thread*& currentThread = getCPULocal()->currentThread;
+			driverIdentity* identity = (driverIdentity*)((process::Process*)currentThread->owner)->_driverIdentity;
 			identity->listening = true;
 			if (!identity)
 			{
@@ -316,17 +295,13 @@ namespace obos
 				return false;
 			}
 			uintptr_t data[2] = { (uintptr_t)this, identity->connections.size };
-			thread::g_currentThread->wakeUpTime = timeoutTicks ? thread::g_timerTicks + timeoutTicks : 0xffffffffffffffff;
-			thread::g_currentThread->blockCallback.callback = ListenCallback;
-			thread::g_currentThread->blockCallback.userdata = data;
-			thread::g_currentThread->status |= thread::THREAD_STATUS_BLOCKED;
+			currentThread->wakeUpTime = timeoutTicks ? thread::g_timerTicks + timeoutTicks : 0xffffffffffffffff;
+			currentThread->blockCallback.callback = ListenCallback;
+			currentThread->blockCallback.userdata = data;
+			currentThread->status |= thread::THREAD_STATUS_BLOCKED;
 			thread::callScheduler();
 			if (!m_rawCon)
-			{
-				// Check ListenCallback
-				//SetLastError(OBOS_ERROR_TIMEOUT);
 				return false;
-			}
 			m_rawCon->references++;
 			return true;
 		}

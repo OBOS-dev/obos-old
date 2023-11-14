@@ -26,6 +26,7 @@ GDT_Ptr:
 
 [GLOBAL TSS]
 [GLOBAL GDT]
+[GLOBAL GDT_Ptr]
 
 segment .text
 
@@ -38,14 +39,14 @@ _ZN4obos16InitializeGDTASMEv:
 	lea rax, [GDT]
 	mov [GDT_Ptr+2], rax
 
+	lgdt [GDT_Ptr]
+
 	mov ax, 0x10
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
 	mov gs, ax
 	mov ss, ax
-
-	lgdt [GDT_Ptr]
 	
 	push 0x8
 	push .flush_tss

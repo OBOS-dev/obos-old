@@ -9,21 +9,25 @@
 #include <error.h>
 
 #include <multitasking/scheduler.h>
+#include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
 
 #include <multitasking/process/process.h>
+
+#define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 
 namespace obos
 {
 	void SetLastError(uint32_t err) 
 	{
-		thread::g_currentThread->lastError = err;
+		getCPULocal()->currentThread->lastError = err;
 #ifdef OBOS_DEBUG
-		if (((process::Process*)thread::g_currentThread->owner)->pid == 0)
+		if (((process::Process*)getCPULocal()->currentThread->owner)->pid == 0)
 			logger::warning("\nSetLastError called from a function called by the kernel, error code: %d.\n", err);
 #endif
 	}
 	uint32_t GetLastError() 
 	{
-		return thread::g_currentThread->lastError;
+		return getCPULocal()->currentThread->lastError;
 	}
 }

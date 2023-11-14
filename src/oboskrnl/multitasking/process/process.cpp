@@ -8,6 +8,7 @@
 
 #include <multitasking/thread.h>
 #include <multitasking/scheduler.h>
+#include <multitasking/cpu_local.h>
 
 #include <multitasking/process/process.h>
 #include <multitasking/process/arch.h>
@@ -25,7 +26,7 @@ namespace obos
 			setupContextInfo(&ret->context);
 			ret->pid = g_nextPID++;
 			ret->isUsermode = isUsermode;
-			ret->parent = (process::Process*)thread::g_currentThread->owner;
+			ret->parent = (process::Process*)((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->currentThread->owner;
 			if (g_processes.tail)
 			{
 				g_processes.tail->next = ret;

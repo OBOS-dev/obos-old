@@ -34,5 +34,5 @@ set (oboskrnl_platformSpecificSources
 	"multitasking/x86_64/setupFrameInfo.cpp" "multitasking/x86_64/scheduler_bootstrapper.cpp" "multitasking/process/x86_64/procInfo.cpp" "multitasking/process/x86_64/loader/elf.cpp"
 	"driverInterface/x86_64/load.cpp" "driverInterface/x86_64/call.cpp" "driverInterface/x86_64/driver_call.asm" "multitasking/x86_64/calibrate_timer.asm"
 	"arch/x86_64/syscall/register.cpp" "arch/x86_64/syscall/memory_syscalls.cpp" "arch/x86_64/syscall/verify_pars.cpp" "arch/x86_64/syscall/console_syscalls.cpp"
-	"arch/x86_64/syscall/thread_syscalls.cpp" "arch/x86_64/sse.asm"
+	"arch/x86_64/syscall/thread_syscalls.cpp" "arch/x86_64/sse.asm" "arch/x86_64/smp_start.cpp" "arch/x86_64/smp_trampoline.asm"
 )

@@ -10,7 +10,7 @@
 
 namespace obos
 {
-	void InitializeIrq();
+	void InitializeIrq(bool isBSP);
 	void SendEOI();
 
 	struct LAPIC

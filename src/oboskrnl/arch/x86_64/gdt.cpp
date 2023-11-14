@@ -25,7 +25,7 @@ namespace obos
 	{
 		uint32_t resv1;
 		uint64_t rsp0;
-		uint8_t unused[0x5A];
+		uint8_t unused1[0x5A];
 		uint16_t iopb;
 	} __attribute__((packed));
 
@@ -53,7 +53,7 @@ namespace obos
 		tss->baseMiddle2 = (base >> 24) & 0xFF;
 		tss->baseHigh = base >> 32;
 		s_tssEntry.iopb = 103;
-
+		
 		gdtEntry* userCodeSeg = (gdtEntry*)((&GDT) + 0x18);
 		gdtEntry* userDataSeg = (gdtEntry*)((&GDT) + 0x20);
 

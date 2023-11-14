@@ -54,8 +54,7 @@ namespace obos
 	{
 		if (!m_framebuffer.addr)
 			return;
-		while (atomic_test(&m_lock));
-		atomic_set(&m_lock);
+		m_lock.Lock();
 		uintptr_t val = thread::stopTimer();
 		switch (ch)
 		{
@@ -77,8 +76,8 @@ namespace obos
 			putChar(ch, x++, y, foregroundColour, backgroundColour);
 			break;
 		}
-		atomic_clear(&m_lock);
 		thread::startTimer(val);
+		m_lock.Unlock();
 	}
 
 	void Console::SetPosition(uint32_t x, uint32_t y)

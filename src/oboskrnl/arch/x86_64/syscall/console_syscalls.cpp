@@ -15,8 +15,12 @@
 #include <arch/x86_64/syscall/console_syscalls.h>
 
 #include <multitasking/scheduler.h>
+#include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
 
 #include <multitasking/process/process.h>
+
+#define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 
 namespace obos
 {
@@ -24,7 +28,7 @@ namespace obos
 	{
 		void SyscallAllocConsole()
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			if (!proc->console)
 				proc->console = new Console;
 			void* font = nullptr;
@@ -49,7 +53,7 @@ namespace obos
 
 		void SyscallConsoleOutputCharacter(void* pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			char* ch = (char*)pars;
 			if (!canAccessUserMemory(ch, sizeof(*ch), false))
 			{
@@ -61,7 +65,7 @@ namespace obos
 		}
 		void SyscallConsoleOutputCharacterAt(void* _pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			struct _par
 			{
 				alignas(0x08) char ch;
@@ -78,7 +82,7 @@ namespace obos
 		}
 		void SyscallConsoleOutputCharacterAtWithColour(void* _pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			struct _par
 			{
 				alignas(0x08) char ch;
@@ -97,7 +101,7 @@ namespace obos
 		}
 		void SyscallConsoleOutputString(void* pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			const char** str = (const char**)pars;
 			if (!canAccessUserMemory(str, sizeof(str), false))
 			{
@@ -114,7 +118,7 @@ namespace obos
 		}
 		void SyscallConsoleOutputStringSz(void* _pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			struct _par
 			{
 				alignas(0x08) const char* str;
@@ -130,7 +134,7 @@ namespace obos
 		}
 		void SyscallConsoleSetPosition(uint32_t* pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 2, false))
 			{
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
@@ -141,7 +145,7 @@ namespace obos
 		}
 		void SyscallConsoleGetPosition(uint32_t** pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 2, false))
 			{
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
@@ -162,7 +166,7 @@ namespace obos
 		}
 		void SyscallConsoleSetColour(uint32_t* pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 3, false))
 			{
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
@@ -173,7 +177,7 @@ namespace obos
 		}
 		void SyscallConsoleGetColour(uint32_t** pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 2, false))
 			{
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
@@ -194,7 +198,7 @@ namespace obos
 		}
 		void SyscallConsoleSetFont(uint8_t** font)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			if (!canAccessUserMemory(font, sizeof(*font), false))
 			{
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
@@ -210,7 +214,7 @@ namespace obos
 		}
 		void SyscallConsoleGetFont(uint8_t*** font)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			if (!canAccessUserMemory(font, sizeof(*font), false))
 			{
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
@@ -242,8 +246,8 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
-			if(proc->console)
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
+			if (proc->console)
 				proc->console->SetFramebuffer(*pars);
 		}
 		void SyscallConsoleGetFramebuffer(void* _pars)
@@ -259,13 +263,13 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return;
 			}
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			if (proc->console)
 				proc->console->GetFramebuffer(*pars);
 		}
 		void SyscallConsoleGetConsoleBounds(uint32_t** pars)
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
 			if (!canAccessUserMemory(pars, sizeof(*pars) * 2, false))
 			{
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
@@ -287,8 +291,8 @@ namespace obos
 
 		void SyscallFreeConsole()
 		{
-			process::Process* proc = (process::Process*)thread::g_currentThread->owner;
-			if(proc->console)
+			process::Process* proc = (process::Process*)getCPULocal()->currentThread->owner;
+			if (proc->console)
 			{
 				delete proc->console;
 				proc->console = nullptr;

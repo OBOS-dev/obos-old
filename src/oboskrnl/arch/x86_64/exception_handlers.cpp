@@ -12,6 +12,11 @@
 
 #include <x86_64-utils/asm.h>
 
+#include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
+
+#include <multitasking/process/process.h>
+
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 #include <arch/x86_64/memory_manager/virtual/allocate.h>
 
@@ -40,7 +45,22 @@ namespace obos
 		const char* action = (frame->errorCode & ((uintptr_t)1 << 1)) ? "write" : "read";
 		if (frame->errorCode & ((uintptr_t)1 << 4))
 			action = "execute";
-		logger::panic("Page fault in %s-mode at %p while trying to %s a %s page. The address of this page is %p. Error code: %d.\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\nDumping registers:\n"
+		uint32_t cpuId = 0, pid = -1, tid = -1;
+		if ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
+		{
+			cpuId = ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->cpuId;
+			volatile thread::Thread* currentThread = ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->currentThread;
+			if (currentThread)
+			{
+				tid = currentThread->tid;
+				if (currentThread->owner)
+				{
+					process::Process* proc = (process::Process*)currentThread->owner;
+					pid = proc->pid;
+				}
+			}
+		}
+		logger::panic("Page fault in %s-mode at %p (cpu %d, pid %d, tid %d) while trying to %s a %s page. The address of this page is %p. Error code: %d.\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\nDumping registers:\n"
 			"\tRDI: %p, RSI: %p, RBP: %p\n"
 			"\tRSP: %p, RBX: %p, RDX: %p\n"
 			"\tRCX: %p, RAX: %p, RIP: %p\n"
@@ -50,6 +70,8 @@ namespace obos
 			"\t SS: %p,  DS: %p,  CS: %p\n",
 			(frame->errorCode & ((uintptr_t)1 << 2)) ? "user" : "kernel",
 			frame->rip,
+			cpuId,
+			pid,tid,
 			action,
 			(frame->errorCode & ((uintptr_t)1 << 0)) ? "present" : "non-present",
 			getCR2(),
@@ -69,7 +91,26 @@ namespace obos
 	}
 	void defaultExceptionHandler(interrupt_frame* frame)
 	{
-		logger::panic("Exception %d at %p. Error code: %d.\nDumping registers:\n"
+		uint32_t cpuId = 0, pid = 0, tid = 0;
+		if ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
+		{
+			cpuId = ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->cpuId;
+			volatile thread::Thread* currentThread = ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->currentThread;
+			if (currentThread)
+			{
+				tid = currentThread->tid;
+				if (currentThread->owner)
+				{
+					process::Process* proc = (process::Process*)currentThread->owner;
+					pid = proc->pid;
+				}
+				else
+					pid = (uint32_t)-1;
+			}
+			else
+				tid = (uint32_t)-1;
+		}
+		logger::panic("Exception %d at %p (cpu %d, pid %d, tid %d). Error code: %d.\nDumping registers:\n"
 			"\tRDI: %p, RSI: %p, RBP: %p\n"
 			"\tRSP: %p, RBX: %p, RDX: %p\n"
 			"\tRCX: %p, RAX: %p, RIP: %p\n"
@@ -79,6 +120,8 @@ namespace obos
 			"\t SS: %p,  DS: %p,  CS: %p\n",
 			frame->intNumber,
 			frame->rip,
+			cpuId,
+			pid,tid,
 			frame->errorCode,
 			frame->rdi, frame->rsi, frame->rbp,
 			frame->rsp, frame->rbx, frame->rdx,

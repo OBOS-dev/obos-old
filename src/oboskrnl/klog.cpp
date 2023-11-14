@@ -5,9 +5,14 @@
 */
 
 #include <int.h>
+#include <klog.h>
+#include <atomic.h>
+
 #include <stdarg.h>
 
-#include <klog.h>
+#include <multitasking/arch.h>
+
+#include <multitasking/locks/mutex.h>
 
 #ifdef __x86_64__
 #include <x86_64-utils/asm.h>
@@ -132,8 +137,10 @@ namespace obos
 #endif
 		}
 
+		locks::Mutex printf_lock;
 		size_t printf(const char* format, ...)
 		{
+			printf_lock.Lock();
 			va_list list;
 			va_start(list, format);
 			size_t ret = printf_impl(consoleOutputCallback, nullptr, format, list);
@@ -142,10 +149,18 @@ namespace obos
 		}
 		size_t vprintf(const char* format, va_list list)
 		{
-			return printf_impl(consoleOutputCallback, nullptr, format, list);
+			printf_lock.Lock();
+			size_t ret = printf_impl(consoleOutputCallback, nullptr, format, list);
+			printf_lock.Unlock();
+			return ret;
 		}
-		
-#define __impl_log(colour, msg) \
+
+
+		locks::Mutex log_lock;
+		locks::Mutex warning_lock;
+		locks::Mutex error_lock;
+#define __impl_log(colour, msg, lock_name) \
+			lock_name.Lock();\
 			uint32_t oldForeground = 0;\
 			uint32_t oldBackground = 0;\
 			g_kernelConsole.GetColour(&oldForeground, &oldBackground);\
@@ -156,23 +171,24 @@ namespace obos
 			ret += vprintf(format, list);\
 			va_end(list);\
 			g_kernelConsole.SetColour(oldForeground, oldBackground);\
+			lock_name.Unlock();\
 			return ret
 
 		size_t log(const char* format, ...)
 		{
-			__impl_log(GREEN, LOG_PREFIX_MESSAGE);
+			__impl_log(GREEN, LOG_PREFIX_MESSAGE, log_lock);
 		}
 		size_t info(const char* format, ...)
 		{
-			__impl_log(GREEN, INFO_PREFIX_MESSAGE);
+			__impl_log(GREEN, INFO_PREFIX_MESSAGE, log_lock);
 		}
 		size_t warning(const char* format, ...)
 		{
-			__impl_log(YELLOW, WARNING_PREFIX_MESSAGE);
+			__impl_log(YELLOW, WARNING_PREFIX_MESSAGE, warning_lock);
 		}
 		size_t error(const char* format, ...)
 		{
-			__impl_log(ERROR_RED, ERROR_PREFIX_MESSAGE);
+			__impl_log(ERROR_RED, ERROR_PREFIX_MESSAGE, error_lock);
 
 		}
 		void panic(const char* format, ...)
@@ -184,10 +200,14 @@ namespace obos
 		}
 		void panicVariadic(const char* format, va_list list)
 		{
+			thread::StopCPUs(false);
+			printf_lock.Unlock();
+			thread::stopTimer();
 			g_kernelConsole.SetPosition(0, 0);
 			g_kernelConsole.SetColour(GREY, PANIC_RED, true);
 			vprintf(format, list);
 			stackTrace();
+			thread::StopCPUs(true);
 			while (1);
 		}
 		static void dumpAddr_impl(int a, ...)

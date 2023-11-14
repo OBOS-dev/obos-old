@@ -12,6 +12,9 @@
 #include <memory_manipulation.h>
 
 #include <multitasking/scheduler.h>
+#include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
+
 #include <multitasking/threadAPI/thrHandle.h>
 
 #include <driverInterface/load.h>
@@ -21,6 +24,8 @@
 #include <multitasking/process/x86_64/loader/elfStructures.h>
 
 #include <multitasking/process/process.h>
+
+#define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 
 namespace obos
 {
@@ -118,7 +123,7 @@ namespace obos
 				&driverProc->threads);
 			((thread::Thread*)thread->GetUnderlyingObject())->owner = driverProc;
 
-			process::switchToProcessContext(&((process::Process*)thread::g_currentThread->owner)->context);
+			process::switchToProcessContext(&((process::Process*)getCPULocal()->currentThread->owner)->context);
 			thread::startTimer(val);
 
 			return driverProc->pid;

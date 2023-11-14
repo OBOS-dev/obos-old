@@ -58,6 +58,7 @@ namespace obos
 		{
 			return getBit(bitmask);
 		}
+	private:
 		uintptr_t m_bitfield;
 	};
 

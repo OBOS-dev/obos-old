@@ -317,6 +317,10 @@ namespace obos
 	}
 #define RegisterInterruptInIDT(n) _RegisterInterruptInIDT(n, isr ##n, DEFAULT_TYPE_ATTRIBUTE | TYPE_ATTRIBUTE_USER_MODE)
 #define RegisterInterruptInIDT_NoUserMode(n) _RegisterInterruptInIDT(n, isr ##n, DEFAULT_TYPE_ATTRIBUTE)
+	void InitializeIDT_CPU()
+	{
+		idtFlush(&g_idtPointer);
+	}
 	void InitializeIdt()
 	{
 		RegisterInterruptInIDT(0);
@@ -576,7 +580,7 @@ namespace obos
 		RegisterInterruptInIDT(254);
 		RegisterInterruptInIDT(255);
 
-		idtFlush(&g_idtPointer);
+		InitializeIDT_CPU();
 	}
 	void RegisterInterruptHandler(byte interrupt, void(*handler)(interrupt_frame* frame))
 	{

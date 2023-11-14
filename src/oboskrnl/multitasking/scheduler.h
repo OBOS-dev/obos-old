@@ -13,7 +13,6 @@ namespace obos
 	namespace thread
 	{
 		extern Thread::ThreadList g_priorityLists[4];
-		extern volatile Thread* g_currentThread;
 		extern bool g_initialized;
 		extern uint64_t g_schedulerFrequency;
 		extern uint32_t g_nextTid;

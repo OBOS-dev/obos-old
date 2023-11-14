@@ -15,7 +15,8 @@ endif()
 
 set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "liballoc/liballoc.cpp" 
 					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp"
- "driverInterface/interface.cpp" "vfs/mount/mount.cpp" "vfs/fileManip/fileHandle.cpp")
+				      "driverInterface/interface.cpp" "vfs/mount/mount.cpp" "vfs/fileManip/fileHandle.cpp" "multitasking/locks/mutex.cpp"
+)
 
 add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
 

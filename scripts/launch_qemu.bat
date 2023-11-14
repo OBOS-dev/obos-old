@@ -11,10 +11,11 @@ qemu-system-x86_64 ^
 -cpu qemu64,+nx ^
 -monitor stdio ^
 -debugcon file:CON ^
--smp cores=2,threads=1,sockets=1
-@rem -no-reboot -no-shutdown
-@rem -d int ^
-@rem -D qemu_log.txt ^
-@rem -M smm=off ^
+-smp cores=2,threads=1,sockets=1 ^
+-M smm=off ^
+-d int ^
+-D qemu_log.txt ^
+-no-reboot ^
+-no-shutdown
 
 cd scripts

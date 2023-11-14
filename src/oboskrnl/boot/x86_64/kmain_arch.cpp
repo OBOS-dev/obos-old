@@ -91,7 +91,7 @@ namespace obos
 		logger::info("%s: Registering exception handlers.\n", __func__);
 		RegisterExceptionHandlers();
 		logger::info("%s: Initializing IRQs.\n", __func__);
-		InitializeIrq();
+		InitializeIrq(true);
 		logger::info("%s: Initializing the physical memory manager.\n", __func__);
 		memory::InitializePhysicalMemoryManager();
 		logger::info("%s: Initializing the virtual memory manager.\n", __func__);

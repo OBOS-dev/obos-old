@@ -12,9 +12,14 @@
 #include <new>
 
 #include <liballoc/liballoc.h>
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
+
+#include <multitasking/locks/mutex.h>
 
 #include <memory_manipulation.h>
+
+#ifdef __x86_64__
+#include <arch/x86_64/memory_manager/virtual/allocate.h>
+#endif
 
 #define GET_FUNC_ADDR(addr) reinterpret_cast<uintptr_t>(addr)
 
@@ -95,7 +100,7 @@ void freePageBlock(pageBlock* block)
 struct safe_lock
 {
 	safe_lock() = delete;
-	safe_lock(bool* mutex)
+	safe_lock(obos::locks::Mutex* mutex)
 	{
 		m_mutex = mutex;
 	}
@@ -103,35 +108,31 @@ struct safe_lock
 	{
 		if (m_mutex)
 		{
-			*m_mutex = true;
+			m_mutex->Lock();
 			return true;
 		}
-		m_savedFlags = obos::saveFlagsAndCLI();
 		return false;
 	}
 	bool IsLocked()
 	{
 		if (m_mutex)
-			return *m_mutex;
-		return m_savedFlags & ((uintptr_t)1<<9);
+			return m_mutex->Locked();
+		return false;
 	}
 	void Unlock()
 	{
-		if (m_mutex && *m_mutex)
-			*m_mutex = false;
-		if(m_savedFlags)
-			obos::restorePreviousInterruptStatus(m_savedFlags);
+		if (m_mutex)
+			m_mutex->Unlock();
 	}
 	~safe_lock()
 	{
 		Unlock();
 	}
 private:
-	bool* m_mutex = nullptr;
-	uintptr_t m_savedFlags = 0;
+	obos::locks::Mutex* m_mutex = nullptr;
 };
 
-static bool s_allocatorMutex = false;
+static obos::locks::Mutex s_allocatorMutex;
 
 #define makeSafeLock(vName) safe_lock vName{ &s_allocatorMutex }; vName.Lock();
 

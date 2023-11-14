@@ -11,9 +11,14 @@
 #include <arch/x86_64/syscall/verify_pars.h>
 
 #include <multitasking/threadAPI/thrHandle.h>
+
 #include <multitasking/scheduler.h>
+#include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
 
 #include <multitasking/process/process.h>
+
+#define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 
 namespace obos
 {
@@ -50,7 +55,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			return par->_this->CreateThread(par->priority, par->stackSize, par->entry, par->userdata, nullptr, par->startPaused, ((process::Process*)thread::g_currentThread->owner)->isUsermode);
+			return par->_this->CreateThread(par->priority, par->stackSize, par->entry, par->userdata, nullptr, par->startPaused, ((process::Process*)getCPULocal()->currentThread->owner)->isUsermode);
 		}
 		bool SyscallOpenThread(void* pars)
 		{

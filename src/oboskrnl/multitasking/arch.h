@@ -11,7 +11,7 @@
 #include <int.h>
 
 #if defined(__x86_64__)
-#include <multitasking/x86_64/taskSwitchInfo.h>
+#include <multitasking/x86_64/arch_structs.h>
 #endif
 
 extern "C" void idleTask();
@@ -26,9 +26,14 @@ namespace obos
 		void freeThreadStackInfo(void* stackInfo);
 		void setupTimerInterrupt();
 
+
 		uintptr_t stopTimer();
 		void startTimer(uintptr_t);
 		
 		void callScheduler();
+
+		void* getCurrentCpuLocalPtr();
+		bool StartCPUs();
+		void StopCPUs(bool includingSelf);
 	}
 }

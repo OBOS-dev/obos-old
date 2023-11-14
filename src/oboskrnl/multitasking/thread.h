@@ -10,6 +10,8 @@
 
 #include <multitasking/arch.h>
 
+#define MULTIASKING_THREAD_H_INCLUDED
+
 namespace obos
 {
 	namespace thread
@@ -21,6 +23,7 @@ namespace obos
 			THREAD_STATUS_BLOCKED = 0b100,
 			THREAD_STATUS_PAUSED = 0b1000,
 			THREAD_STATUS_CLEAR_TIME_SLICE_INDEX = 0b10000,
+			THREAD_STATUS_RUNNING = 0b100000,
 		};
 		enum thrPriority
 		{
@@ -39,6 +42,7 @@ namespace obos
 				ThreadList* nextThreadList;
 				ThreadList* prevThreadList;
 				size_t iterations; // How many times the scheduler has run the list since the last iterations clear.
+				bool lock;
 			};
 			uint32_t tid;
 			uint32_t status;

@@ -5,10 +5,15 @@
 */
 
 #include <int.h>
+#include <klog.h>
+#include <atomic.h>
 
 #include <multitasking/scheduler.h>
 #include <multitasking/thread.h>
 #include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
+
+#define getCPULocal() ((cpu_local*)getCurrentCpuLocalPtr())
 
 namespace obos
 {
@@ -16,11 +21,9 @@ namespace obos
 	namespace thread
 	{
 		Thread::ThreadList g_priorityLists[4];
-		volatile Thread* g_currentThread = nullptr;
 		uint64_t g_schedulerFrequency = 1000;
 		uint64_t g_timerTicks = 0;
 		bool g_initialized = false;
-		volatile bool g_schedulerLock = false;
 
 #pragma GCC push_options
 #pragma GCC optimize("O1")
@@ -73,11 +76,19 @@ namespace obos
 			}
 			if (g_priorityLists[0].iterations >= (int)THREAD_PRIORITY_IDLE)
 			{
-				for (int i = 0; i < 4; i++)
-					g_priorityLists[i].iterations = 0;
+				for (int j = 0; j < 4; j++)
+				{
+					while (atomic_test(&g_priorityLists[j].lock));
+					atomic_set(&g_priorityLists[j].lock);
+					g_priorityLists[j].iterations = 0;
+					atomic_clear(&g_priorityLists[j].lock);
+				}
 				return findThreadPriorityList();
 			}
+			while (atomic_test(&g_priorityLists[i].lock));
+			atomic_set(&g_priorityLists[i].lock);
 			g_priorityLists[i].iterations++;
+			atomic_clear(&g_priorityLists[i].lock);
 			return *list;
 		}
 		void callBlockCallbacksOnList(Thread::ThreadList& list)
@@ -98,12 +109,15 @@ namespace obos
 
 		void schedule()
 		{
-			g_timerTicks++;
-			g_currentThread->lastTimePreempted = g_timerTicks;
-			if (g_schedulerLock)
+			if(getCPULocal()->cpuId == 0)
+				g_timerTicks++;
+			volatile Thread*& currentThread = getCPULocal()->currentThread;
+			currentThread->lastTimePreempted = g_timerTicks;
+			currentThread->status = THREAD_STATUS_CAN_RUN;
+			if (getCPULocal()->schedulerLock)
 				return;
 
-			g_schedulerLock = true;
+			atomic_set((bool*)&getCPULocal()->schedulerLock);
 
 			callBlockCallbacksOnList(g_priorityLists[3]);
 			callBlockCallbacksOnList(g_priorityLists[2]);
@@ -123,22 +137,26 @@ namespace obos
 			}
 			if (foundHighPriority == 2)
 				newThread = g_priorityLists[0].head;
-			if (newThread == g_currentThread)
+			if (newThread == currentThread)
 			{
-				g_schedulerLock = false;
+				atomic_clear((bool*)&getCPULocal()->schedulerLock);
 				return;
 			}
-			g_currentThread = newThread;
-			g_currentThread->timeSliceIndex = g_currentThread->timeSliceIndex + 1;
-			g_schedulerLock = false;
-			switchToThreadImpl((taskSwitchInfo*)&g_currentThread->context);
+			currentThread = newThread;
+			currentThread->timeSliceIndex = currentThread->timeSliceIndex + 1;
+			currentThread->status = THREAD_STATUS_RUNNING;
+			atomic_clear((bool*)&getCPULocal()->schedulerLock);
+			switchToThreadImpl((taskSwitchInfo*)&currentThread->context);
 		}
 #pragma GCC pop_options
 
 		void InitializeScheduler()
 		{
+			if (!StartCPUs())
+				logger::panic("Could not start the other cores.");
+			volatile Thread*& currentThread = getCPULocal()->currentThread;
 			Thread* kernelMainThread  = new Thread{};
-			g_currentThread = (volatile Thread*)kernelMainThread;
+			currentThread = (volatile Thread*)kernelMainThread;
 
 			kernelMainThread->tid = g_nextTid++;
 			kernelMainThread->status = THREAD_STATUS_CAN_RUN;
@@ -159,7 +177,7 @@ namespace obos
 			idleThread->priorityList = g_priorityLists + 0;
 			idleThread->threadList = kernelMainThread->threadList;
 			setupThreadContext(&idleThread->context, &idleThread->stackInfo, (uintptr_t)idleTask, 0, 4096, false);
-
+			
 			kernelMainThread->threadList->head = kernelMainThread;
 			kernelMainThread->threadList->tail = idleThread;
 			kernelMainThread->threadList->size = 2;
@@ -181,8 +199,16 @@ namespace obos
 			g_priorityLists[1].nextThreadList = g_priorityLists + 2;
 			g_priorityLists[0].nextThreadList = g_priorityLists + 1;
 
+			for (size_t i = 1; i < g_nCPUs; i++)
+				g_cpuInfo[i].currentThread = idleThread;
+
 			setupTimerInterrupt();
-			switchToThreadImpl((taskSwitchInfo*)&g_currentThread->context);
+			switchToThreadImpl((taskSwitchInfo*)&currentThread->context);
+		}
+
+		cpu_local* GetCurrentCpuLocalPtr()
+		{
+			return getCPULocal();
 		}
 	}
 }

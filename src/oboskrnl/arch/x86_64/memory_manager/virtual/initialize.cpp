@@ -44,21 +44,25 @@ namespace obos
 
 		uintptr_t* PageMap::getL4PageMapEntryAt(uintptr_t at)
 		{
+			at &= ~0xfff;
 			uintptr_t* pageMap = mapPageTable(getPageMap());
 			return (uintptr_t*)pageMap[addressToIndex(at, 3)];
 		}
 		uintptr_t* PageMap::getL3PageMapEntryAt(uintptr_t at)
 		{
+			at &= ~0xfff;
 			uintptr_t* pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)getL4PageMapEntryAt(at) & 0xFFFFFFFFFF000));
 			return (uintptr_t*)pageMap[addressToIndex(at, 2)];
 		}
 		uintptr_t* PageMap::getL2PageMapEntryAt(uintptr_t at) 
 		{
+			at &= ~0xfff;
 			uintptr_t* pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)getL3PageMapEntryAt(at) & 0xFFFFFFFFFF000));
 			return (uintptr_t*)pageMap[addressToIndex(at, 1)];
 		}
 		uintptr_t* PageMap::getL1PageMapEntryAt(uintptr_t at) 
 		{
+			at &= ~0xfff;
 			uintptr_t* pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)getL2PageMapEntryAt(at) & 0xFFFFFFFFFF000));
 			return (uintptr_t*)pageMap[addressToIndex(at, 0)];
 		}

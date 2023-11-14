@@ -10,6 +10,8 @@
 
 #include <multitasking/thread.h>
 
+#include <multitasking/locks/mutex.h>
+
 namespace obos
 {
 	namespace driverInterface
@@ -19,7 +21,8 @@ namespace obos
 			byte* buf;
 			size_t szBuf;
 			size_t amountExcepted; // For RecvDataOnBuffer
-			bool inUse, wake;
+			bool wake;
+			locks::Mutex inUse;
 		};
 		class DriverConnection
 		{
@@ -35,9 +38,6 @@ namespace obos
 			size_t references;
 			void* _driverIdentity = nullptr;
 			friend class DriverConnectionBase;
-		private:
-			bool AttemptLock(con_buffer* buffer, bool spinOnLock);
-			bool AttemptUnlock(con_buffer* buffer);
 		};
 		struct DriverConnectionNode
 		{

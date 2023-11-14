@@ -17,6 +17,7 @@
 #include <multitasking/scheduler.h>
 #include <multitasking/thread.h>
 #include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
 
 #include <multitasking/threadAPI/thrHandle.h>
 
@@ -32,14 +33,11 @@
 #include <vfs/vfsNode.h>
 #include <vfs/fileManip/fileHandle.h>
 
+#define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
+
 namespace obos
 {
 	extern volatile limine_module_request module_request;
-	void _thread(uintptr_t)
-	{
-		logger::log("Hello from tid %d.\n", thread::g_currentThread->tid);
-		thread::ExitThread(0);
-	}
 	void kmain_common()
 	{
 		thread::g_initialized = true;
@@ -51,11 +49,11 @@ namespace obos
 		kernelProc->isUsermode = false;
 		kernelProc->parent = nullptr;
 #ifdef __x86_64__
-		kernelProc->context.cr3 = thread::g_currentThread->context.cr3; // Only this time... (reference to line 7)
+		kernelProc->context.cr3 = getCPULocal()->currentThread->context.cr3; // Only this time... (reference to line 7)
 #endif
 		process::g_processes.tail = process::g_processes.head = kernelProc;
 		process::g_processes.size++;
-		thread::g_currentThread->owner = kernelProc;
+		getCPULocal()->currentThread->owner = kernelProc;
 
 		byte* procExecutable = nullptr;
 		size_t moduleIndex = 0;

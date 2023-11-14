@@ -8,6 +8,7 @@
 
 #include <int.h>
 #include <klog.h>
+#include <atomic.h>
 #include <memory_manipulation.h>
 
 #include <x86_64-utils/asm.h>
@@ -31,6 +32,7 @@ namespace obos
 		uintptr_t g_memEnd = 0;
 		uintptr_t g_lastPageAllocated = 0x1000;
 		uintptr_t g_lastPageFreed = 0x1000;
+		bool g_physicalMemoryManagerLock = false;
 
 #define addrToIndex(addr) (addr >> 17)
 #define addrToBit(addr) ((addr >> 12) & 0x1f)
@@ -105,6 +107,8 @@ namespace obos
 
 		uintptr_t allocatePhysicalPage()
 		{
+			while (atomic_test(&g_physicalMemoryManagerLock));
+			atomic_set(&g_physicalMemoryManagerLock);
 			// Find an available page.
 			uintptr_t ret = 0;
 			bool bAddr = (g_lastPageFreed < g_lastPageAllocated && !getPageStatus(g_lastPageFreed));
@@ -130,13 +134,17 @@ namespace obos
 			}
 			markPageAs(ret, true);
 			g_lastPageAllocated = ret;
+			atomic_clear(&g_physicalMemoryManagerLock);
 			return ret;
 		}
 		bool freePhysicalPage(uintptr_t addr)
 		{
+			while (atomic_test(&g_physicalMemoryManagerLock));
+			atomic_set(&g_physicalMemoryManagerLock);
 			addr &= ~(0xfff);
-			g_lastPageFreed = markPageAs(addr, false) * addr;
-			return true;
+			g_lastPageFreed = markPageAs(addr, !((bool)addr)) * addr;
+			atomic_clear(&g_physicalMemoryManagerLock);
+			return (bool)addr;
 		}
 	}
 }

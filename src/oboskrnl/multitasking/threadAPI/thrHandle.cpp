@@ -11,8 +11,11 @@
 #include <multitasking/scheduler.h>
 #include <multitasking/thread.h>
 #include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
 
 #define GET_THREAD reinterpret_cast<obos::thread::Thread*>(m_obj)
+
+#define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 
 namespace obos
 {
@@ -90,8 +93,8 @@ namespace obos
 			thread->exitCode = 0;
 			thread->lastError = 0;
 			thread->priorityList = priorityList;
-			thread->threadList = threadList ? (thread::Thread::ThreadList*)threadList : g_currentThread->threadList;
-			thread->owner = g_currentThread->owner;
+			thread->threadList = threadList ? (thread::Thread::ThreadList*)threadList : getCPULocal()->currentThread->threadList;
+			thread->owner = getCPULocal()->currentThread->owner;
 			setupThreadContext(&thread->context, &thread->stackInfo, (uintptr_t)entry, userdata, stackSize, isUsermode);
 
 			uintptr_t val = stopTimer();
@@ -237,7 +240,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_THREAD_DIED);
 				return false;
 			}
-			if (obj == g_currentThread)
+			if (obj == getCPULocal()->currentThread)
 				ExitThread(exitCode);
 
 			obj->status = THREAD_STATUS_DEAD;
@@ -325,21 +328,22 @@ namespace obos
 
 		bool ExitThreadImpl(void* _exitCode, void*)
 		{
+			volatile Thread*& currentThread = getCPULocal()->currentThread;
 			uintptr_t exitCode = (uintptr_t)_exitCode;
-			g_currentThread->exitCode = exitCode;
-			g_currentThread->status = THREAD_STATUS_DEAD;
-			if (g_currentThread->prev_run)
-				g_currentThread->prev_run->next_run = g_currentThread->next_run;
-			if (g_currentThread->next_run)
-				g_currentThread->next_run->prev_run = g_currentThread->prev_run;
-			if (g_currentThread->priorityList->head == g_currentThread)
-				g_currentThread->priorityList->head = g_currentThread->next_run;
-			if (g_currentThread->priorityList->tail == g_currentThread)
-				g_currentThread->priorityList->tail = g_currentThread->prev_run;
-			g_currentThread->priorityList->size--;
-			freeThreadStackInfo((void*)&g_currentThread->stackInfo);
-			if(!g_currentThread->references)
-				delete g_currentThread;
+			currentThread->exitCode = exitCode;
+			currentThread->status = THREAD_STATUS_DEAD;
+			if (currentThread->prev_run)
+				currentThread->prev_run->next_run = currentThread->next_run;
+			if (currentThread->next_run)
+				currentThread->next_run->prev_run = currentThread->prev_run;
+			if (currentThread->priorityList->head == currentThread)
+				currentThread->priorityList->head = currentThread->next_run;
+			if (currentThread->priorityList->tail == currentThread)
+				currentThread->priorityList->tail = currentThread->prev_run;
+			currentThread->priorityList->size--;
+			freeThreadStackInfo((void*)&currentThread->stackInfo);
+			if(!currentThread->references)
+				delete currentThread;
 			startTimer(0);
 			callScheduler();
 			return false;
@@ -348,7 +352,7 @@ namespace obos
 		[[noreturn]] void ExitThread(uint32_t exitCode)
 		{
 			stopTimer();
-			callBlockCallbackOnThread((taskSwitchInfo*)&g_currentThread->context, ExitThreadImpl, (void*)(uintptr_t)exitCode, nullptr);
+			callBlockCallbackOnThread((taskSwitchInfo*)&getCPULocal()->currentThread->context, ExitThreadImpl, (void*)(uintptr_t)exitCode, nullptr);
 			while (1);
 		}
 }

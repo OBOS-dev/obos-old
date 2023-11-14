@@ -14,10 +14,14 @@
 #include <arch/x86_64/irq/irq.h>
 
 #include <multitasking/scheduler.h>
+#include <multitasking/arch.h>
+#include <multitasking/cpu_local.h>
 
 #include <x86_64-utils/asm.h>
 
-#define MISC_ENABLE 0x1a0
+#define GS_BASE 0xC0000101
+
+#define getCPULocal() GetCurrentCpuLocalPtr()
 
 extern "C" uint64_t calibrateTimer(uint64_t femtoseconds);
 
@@ -40,21 +44,24 @@ namespace obos
 		// Assumes the timer divisor is one.
 		uint64_t FindCounterValueFromFrequency(uint64_t freq)
 		{
-			logger::log("%s: Calibrating the timer at a frequency of %d.\n", __func__, freq);
-			//uint64_t freqInFemtoseconds = 1.0f / freq * 1000000000000000;
+			logger::log("%s, cpu %d: Calibrating the timer at a frequency of %d.\n", __func__, getCPULocal()->cpuId, freq);
 			uint64_t ret = calibrateTimer(freq);
-			logger::log("%s: Timer count is %d.\n", __func__, ret);
+			logger::log("%s, cpu %d: Timer count is %d.\n", __func__, getCPULocal()->cpuId, ret);
 			return ret;
 		}
 
-		extern bool g_schedulerLock;
-
 		void scheduler_bootstrap(interrupt_frame* frame)
 		{
-			if (!g_initialized || !g_currentThread || g_schedulerLock)
+			if (!g_initialized)
 				return;
-			utils::dwMemcpy((uint32_t*)&g_currentThread->context.frame, (uint32_t*)frame, sizeof(interrupt_frame) / 4); // save the interrupt frame
-			asm volatile("fxsave (%0)" : :"r"(g_currentThread->context.fpuState) : "memory"); // save the fpu state.
+			volatile Thread*& currentThread = getCPULocal()->currentThread;
+			if (!currentThread)
+				return;
+			if (!getCPULocal()->schedulerLock)
+			{
+				utils::dwMemcpy((uint32_t*)&currentThread->context.frame, (uint32_t*)frame, sizeof(interrupt_frame) / 4); // save the interrupt frame
+				asm volatile("fxsave (%0)" : : "r"(currentThread->context.fpuState) : "memory"); // save the fpu state.
+			}
 			schedule();
 		}
 
@@ -81,6 +88,11 @@ namespace obos
 		void callScheduler()
 		{
 			asm volatile("int $0x30");
+		}
+	
+		void* getCurrentCpuLocalPtr()
+		{
+			return (void*)rdmsr(GS_BASE);
 		}
 	}
 }
