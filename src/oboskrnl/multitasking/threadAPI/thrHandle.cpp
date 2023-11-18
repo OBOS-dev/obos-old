@@ -15,7 +15,7 @@
 
 #define GET_THREAD reinterpret_cast<obos::thread::Thread*>(m_obj)
 
-#define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
+#define getCPULocal() (thread::GetCurrentCpuLocalPtr())
 
 namespace obos
 {
@@ -241,7 +241,10 @@ namespace obos
 				return false;
 			}
 			if (obj == getCPULocal()->currentThread)
-				ExitThread(exitCode);
+			{
+				SetLastError(OBOS_ERROR_ACCESS_DENIED);
+				return false;
+			}
 
 			obj->status = THREAD_STATUS_DEAD;
 			obj->exitCode = exitCode;
@@ -292,6 +295,16 @@ namespace obos
 			}
 			Thread* obj = GET_THREAD;
 			return obj->lastError;
+		}
+		uint32_t ThreadHandle::GetThreadTID()
+		{
+			if (!m_obj)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return 0xffffffff;
+			}
+			Thread* obj = GET_THREAD;
+			return obj->tid;
 		}
 
 		bool ThreadHandle::CloseHandle()
@@ -347,6 +360,10 @@ namespace obos
 			startTimer(0);
 			callScheduler();
 			return false;
+		}
+		uint32_t GetTID()
+		{
+			return getCPULocal()->currentThread->tid;
 		}
 
 		[[noreturn]] void ExitThread(uint32_t exitCode)

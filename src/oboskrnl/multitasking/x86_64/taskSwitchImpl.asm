@@ -6,12 +6,12 @@
 
 segment .bss
 
-blockCallbackStackBottom:
-RESB 8192
-blockCallbackStack:
-switcherStackBottom:
-RESB 8192
-switcherStack:
+; blockCallbackStackBottom:
+; RESB 8192
+; blockCallbackStack:
+; switcherStackBottom:
+; RESB 8192
+; switcherStack:
 
 segment .text
 
@@ -37,13 +37,21 @@ pop rax
 
 extern _ZN4obos11SetTSSStackEPv
 extern _ZN4obos7SendEOIEv
+extern _ZN4obos5rdmsrEj
 
 global _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE
 global _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 global idleTask
 
 _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE:
-	mov rsp, switcherStack
+; rsp = GetCurrentCpuLocalPtr()->temp_stack.addr + 0x2000
+	push rdi
+	mov rdi, 0xC0000101
+	call _ZN4obos5rdmsrEj
+	pop rdi
+	add rax, 0x28
+	mov rsp, [rax]
+	add rsp, 0x2000
 
 	call _ZN4obos7SendEOIEv
 	
@@ -75,7 +83,18 @@ _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 	mov rbp, rsp
 	push r15
 
-	mov rsp, blockCallbackStack
+; rsp = GetCurrentCpuLocalPtr()->temp_stack.addr + 0x2000
+	push rdi
+	push rcx
+	push rdx
+	mov rdi, 0xC0000101
+	call _ZN4obos5rdmsrEj
+	pop rdx
+	pop rcx
+	pop rdi
+	add rax, 0x28
+	mov rsp, [rax]
+	add rsp, 0x2000
 
 	mov rax, cr3
 	push rax

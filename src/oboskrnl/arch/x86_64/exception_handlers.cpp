@@ -8,7 +8,7 @@
 #include <klog.h>
 #include <memory_manipulation.h>
 
-#include <arch/interrupt.h>
+#include <arch/x86_64/interrupt.h>
 
 #include <x86_64-utils/asm.h>
 
@@ -24,6 +24,7 @@
 
 namespace obos
 {
+	bool g_halt;
 	void exception14(interrupt_frame* frame)
 	{
 		uintptr_t entry = 0;
@@ -42,6 +43,7 @@ namespace obos
 				return;
 			}
 		}
+		thread::StopCPUs(false);
 		const char* action = (frame->errorCode & ((uintptr_t)1 << 1)) ? "write" : "read";
 		if (frame->errorCode & ((uintptr_t)1 << 4))
 			action = "execute";
@@ -71,7 +73,7 @@ namespace obos
 			(frame->errorCode & ((uintptr_t)1 << 2)) ? "user" : "kernel",
 			frame->rip,
 			cpuId,
-			pid,tid,
+			pid, tid,
 			action,
 			(frame->errorCode & ((uintptr_t)1 << 0)) ? "present" : "non-present",
 			getCR2(),
@@ -83,14 +85,15 @@ namespace obos
 			frame->rdi, frame->rsi, frame->rbp,
 			frame->rsp, frame->rbx, frame->rdx,
 			frame->rcx, frame->rax, frame->rip,
-			frame-> r8, frame-> r9, frame->r10,
+			frame->r8, frame->r9, frame->r10,
 			frame->r11, frame->r12, frame->r13,
 			frame->r14, frame->r15, frame->rflags,
-			frame-> ss, frame-> ds, frame-> cs
+			frame->ss, frame->ds, frame->cs
 		);
 	}
 	void defaultExceptionHandler(interrupt_frame* frame)
 	{
+		thread::StopCPUs(false);
 		uint32_t cpuId = 0, pid = 0, tid = 0;
 		if ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 		{
@@ -121,7 +124,7 @@ namespace obos
 			frame->intNumber,
 			frame->rip,
 			cpuId,
-			pid,tid,
+			pid, tid,
 			frame->errorCode,
 			frame->rdi, frame->rsi, frame->rbp,
 			frame->rsp, frame->rbx, frame->rdx,
@@ -132,9 +135,18 @@ namespace obos
 			frame->ss, frame->ds, frame->cs
 		);
 	}
+	[[noreturn]] void nmiHandler(interrupt_frame*)
+	{
+		if (g_halt)
+			haltCPU();
+		logger::panic("NMI thrown by the hardware. System control port: %d.\n", inb(0x92) | (inb(0x61) << 8));
+	}
 	void RegisterExceptionHandlers()
 	{
-		for (byte i = 0; i < 14; i++)
+		RegisterInterruptHandler(0, defaultExceptionHandler);
+		RegisterInterruptHandler(1, defaultExceptionHandler);
+		RegisterInterruptHandler(2, nmiHandler);
+		for (int i = 3; i < 14; i++)
 			RegisterInterruptHandler(i, defaultExceptionHandler);
 		RegisterInterruptHandler(14, exception14);
 		for (byte i = 15; i < 32; i++)

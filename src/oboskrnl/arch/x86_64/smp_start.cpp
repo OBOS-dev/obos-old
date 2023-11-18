@@ -38,6 +38,7 @@ namespace obos
 	extern void initSSE();
 	extern uint8_t g_lapicIDs[256];
 	extern uint8_t g_nCores;
+	extern bool g_halt;
 	namespace thread
 	{
 		static memory::PageMap* kernel_cr3;
@@ -72,31 +73,38 @@ namespace obos
 			utils::memcpy(memory::mapPageTable(nullptr), &_strampoline, ((uintptr_t)&_etrampoline - (uintptr_t)&_strampoline)-0x58);
 			uintptr_t flags = saveFlagsAndCLI();
 			memory::VirtualAlloc((void*)0xFFFFFFFF90008000, (g_nCPUs - 1) * 2, memory::PROT_NO_COW_ON_ALLOCATE);
-			for (size_t i = 1; i < g_nCPUs; i++)
+			uintptr_t temp_stacks_base = (0xFFFFFFFF90008000 + ((g_nCPUs - 1) * 2) * 4096);
+			memory::VirtualAlloc((void*)temp_stacks_base, g_nCPUs * 2, memory::PROT_NO_COW_ON_ALLOCATE);
+			for (size_t i = 0; i < g_nCPUs; i++)
 			{
+				if (g_lapicIDs[i] == g_localAPICAddr->lapicID)
+				{
+					g_cpuInfo[i].temp_stack.addr = (void*)temp_stacks_base;
+					continue;
+				}
 				// Assert the INIT# pin of the AP.
 				(*(void**)0xFD8) = &g_cpuInfo[i];
 				if (i != 1)
 					g_cpuInfo[i].startup_stack.addr = (char*)g_cpuInfo[i - 1].startup_stack.addr + 0x2000;
 				else
 					g_cpuInfo[i].startup_stack.addr = (void*)0xFFFFFFFF90008000;
+				g_cpuInfo[i].temp_stack.addr = (char*)g_cpuInfo[i - 1].temp_stack.addr + 0x2000;
 				g_cpuInfo[i].cpuId = i;
 				g_cpuInfo[i].startup_stack.size = 0x2000;
+				g_cpuInfo[i].temp_stack.size = 0x2000;
 				g_localAPICAddr->interruptCommand32_63 = g_lapicIDs[i] << (56 - 32);
 				g_localAPICAddr->interruptCommand0_31 = 0xC500;
+				// Wait for the IPI to finish being sent
 				while (g_localAPICAddr->interruptCommand0_31 & (1 << 12))
-					asm volatile("pause");
+					pause();
 				g_localAPICAddr->interruptCommand32_63 = g_lapicIDs[i] << (56 - 32);
 				g_localAPICAddr->interruptCommand0_31 = 0x600;
+				// Wait for the IPI to finish being sent
 				while (g_localAPICAddr->interruptCommand0_31 & (1 << 12))
-					asm volatile("pause");
+					pause();
 				while (!(*(uintptr_t*)0xfe8)); // Wait for "trampoline_done_jumping"
 				(*(uintptr_t*)0xfe8) = false;
 			}
-			memory::MapVirtualPageToPhysical(nullptr, nullptr, 0);
-			utils::memzero(memory::mapPageTable(nullptr), 0x1000);
-			restorePreviousInterruptStatus(flags);
-			wrmsr(GS_BASE, (uintptr_t)g_cpuInfo);
 			g_cpuInfo[0].initialized = true;
 			bool allInitialized = false;
 			while (!allInitialized)
@@ -109,13 +117,18 @@ namespace obos
 						break;
 				}
 			}
+			memory::MapVirtualPageToPhysical(nullptr, nullptr, 0);
+			utils::memzero(memory::mapPageTable(nullptr), 0x1000);
+			restorePreviousInterruptStatus(flags);
+			wrmsr(GS_BASE, (uintptr_t)g_cpuInfo);
 			return true;
 		}
 		void StopCPUs(bool includingSelf)
 		{
+			g_halt = true; // tell the nmi handler to halt the cpu.
 			g_localAPICAddr->interruptCommand32_63 = 0;
-			// Send the IPI 0x2f to other all cpus.
-			g_localAPICAddr->interruptCommand0_31 = 0x8002F; 
+			// Send an NMI to all other cpus.
+			g_localAPICAddr->interruptCommand0_31 = 0xC0400;
 			
 			while (includingSelf);
 		}

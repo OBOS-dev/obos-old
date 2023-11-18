@@ -17,134 +17,77 @@
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 
+#include <multitasking/locks/mutex.h>
+
 namespace obos
 {
+	static volatile limine_memmap_request mmap_request = {
+		.id = LIMINE_MEMMAP_REQUEST,
+		.revision = 0
+	};
 	namespace memory
 	{
-		static volatile limine_memmap_request mmap_request = {
-			.id = LIMINE_MEMMAP_REQUEST,
-			.revision = 0
+		struct MemoryNode
+		{
+			MemoryNode *next, *prev;
 		};
-		
-		size_t g_ramSize = 0;
-		size_t g_bitmapSize = 0;
-		uint32_t* g_bitmaps = nullptr;
-		uintptr_t g_memEnd = 0;
-		uintptr_t g_lastPageAllocated = 0x1000;
-		uintptr_t g_lastPageFreed = 0x1000;
-		bool g_physicalMemoryManagerLock = false;
+		MemoryNode *g_memoryHead, *g_memoryTail;
+		locks::Mutex g_pmmLock;
 
-#define addrToIndex(addr) (addr >> 17)
-#define addrToBit(addr) ((addr >> 12) & 0x1f)
-		bool getPageStatus(uintptr_t address)
-		{
-			uint32_t index = addrToIndex(address);
-			uint32_t bit   = addrToBit(address);
-			uint32_t* bitmap = (uint32_t*)mapPageTable((uintptr_t*)(g_bitmaps + index));
-			if (bitmap != (g_bitmaps + index))
-			{
-				uintptr_t offset = reinterpret_cast<uintptr_t>(g_bitmaps + index) & 0xfff;
-				bitmap = reinterpret_cast<uint32_t*>(reinterpret_cast<uintptr_t>(bitmap) + offset);
-			}
-			uint32_t bitmap_val = *bitmap;
-			return bitmap_val & (1 << bit);
-		}
-		static bool markPageAs(uintptr_t address, bool newStatus)
-		{
-			uint32_t index = addrToIndex(address);
-			uint32_t bit   = addrToBit(address);
-			uint32_t* bitmap = (uint32_t*)mapPageTable((uintptr_t*)(g_bitmaps + index));
-			if (bitmap != (g_bitmaps + index))
-			{
-				uintptr_t offset = reinterpret_cast<uintptr_t>(g_bitmaps + index) & 0xfff;
-				bitmap = reinterpret_cast<uint32_t*>(reinterpret_cast<uintptr_t>(bitmap) + offset);
-			}
-			bool ret = getPageStatus(address);
-			newStatus = !(!newStatus);
-			*bitmap = (*bitmap & ~(1 << bit)) | (newStatus << bit);
-			/*if(newStatus)
-				*bitmap |= (1 << bit);
-			else
-				*bitmap &= ~(1 << bit);*/
-			return ret;
-		}
+#pragma GCC push_options
+#pragma GCC optimize("O1")
 		void InitializePhysicalMemoryManager()
 		{
 			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
-				g_ramSize += mmap_request.response->entries[i]->length;
-			g_bitmapSize = g_ramSize >> 15;
-			bool foundSpace = false;
-			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
-			{
-				if (mmap_request.response->entries[i]->type == LIMINE_MEMMAP_USABLE && mmap_request.response->entries[i]->length >= (g_bitmapSize * 4))
-				{
-					g_bitmaps = reinterpret_cast<uint32_t*>(mmap_request.response->entries[i]->base);
-					foundSpace = true;
-					break;
-				}
-			}
-			g_memEnd = mmap_request.response->entries[mmap_request.response->entry_count - 1]->base + mmap_request.response->entries[mmap_request.response->entry_count - 1]->length;
-			if (!foundSpace)
-				logger::panic("Couldn't find enough space to allocate the bitmap for the physical memory manager.\n");
-			utils::memzero(g_bitmaps, g_bitmapSize);
-			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
 			{
 				if (mmap_request.response->entries[i]->type != LIMINE_MEMMAP_USABLE)
+					continue;
+				uintptr_t base = mmap_request.response->entries[i]->base;
+				if (base < 0x1000)
+					base = 0x1000;
+				if (base & 0xfff)
+					base = (base + 0xfff) & 0xfff;
+				size_t size = mmap_request.response->entries[i]->length & ~0xfff;
+				for (uintptr_t addr = base; addr < (base + size); addr += 0x1000)
 				{
-					uintptr_t start = mmap_request.response->entries[i]->base & (~0xfff);
-					uintptr_t end = (mmap_request.response->entries[i]->base + mmap_request.response->entries[i]->length + 0xfff) & (~0xfff);
-					for (uintptr_t currentPage = start; currentPage != end; currentPage += 0x1000)
-						markPageAs(currentPage, true);
+					MemoryNode* newNode = (MemoryNode*)addr;
+					if (g_memoryTail)
+						g_memoryTail->next = newNode;
+					if (!g_memoryHead)
+						g_memoryHead = newNode;
+					newNode->prev = g_memoryTail;
+					newNode->next = nullptr;
+					g_memoryTail = newNode;
 				}
 			}
-			uintptr_t bitmap_start = reinterpret_cast<uintptr_t>(g_bitmaps) & (~0xfff);
-			uintptr_t bitmap_end = (reinterpret_cast<uintptr_t>(g_bitmaps + g_bitmapSize) + 0xfff) & (~0xfff);
-			for (uintptr_t currentPage = bitmap_start; currentPage != bitmap_end; currentPage += 0x1000)
-				markPageAs(currentPage, true);
-			markPageAs(0, true); // The zero page is allocated.
-			g_lastPageAllocated = g_lastPageFreed = bitmap_end;
 		}
+#pragma GCC pop_options
 
 		uintptr_t allocatePhysicalPage()
 		{
-			while (atomic_test(&g_physicalMemoryManagerLock));
-			atomic_set(&g_physicalMemoryManagerLock);
-			// Find an available page.
-			uintptr_t ret = 0;
-			bool bAddr = (g_lastPageFreed < g_lastPageAllocated && !getPageStatus(g_lastPageFreed));
-			ret = g_lastPageFreed * bAddr;
-			//set_if_zero(&ret, g_lastPageFreed);
-			uintptr_t newRet = ((!bAddr) * g_lastPageAllocated);
-			bAddr = (bool)newRet;
-			newRet += ((uint32_t)getPageStatus(g_lastPageAllocated) * 0x1000 * bAddr);
-			//if (!ret)
-			//	ret = newRet;
-			//asm volatile("test %0, %0; cmove %1, %0;" : "=r"(ret) : "a"(newRet));
-			// Use cmove as an optimization.
-			set_if_zero(&ret, newRet);
-			if (!newRet && !ret)
-				for (ret = 0x1000; ret < g_memEnd && getPageStatus(ret); ret += 0x1000);
-			if (getPageStatus(ret))
-				for (ret = g_lastPageFreed; ret < g_memEnd && getPageStatus(ret); ret += 0x1000);
-			if (ret == g_memEnd)
-			{
-				for (ret = 0x1000; ret < g_memEnd && getPageStatus(ret); ret += 0x1000);
-				if (ret == g_memEnd)
-					logger::panic("No more avaliable system memory!\n");
-			}
-			markPageAs(ret, true);
-			g_lastPageAllocated = ret;
-			atomic_clear(&g_physicalMemoryManagerLock);
+			if (!g_memoryTail)
+				logger::panic("No more available physical memory left.\n");
+			uintptr_t ret = (uintptr_t)g_memoryTail;
+			MemoryNode* node = (MemoryNode*)memory::mapPageTable((uintptr_t*)ret);
+			MemoryNode* next = node->next;
+			MemoryNode* prev = node->prev;
+			if (prev)
+				((MemoryNode*)memory::mapPageTable((uintptr_t*)prev))->next = next;
+			g_memoryTail = prev;
+			memory::mapPageTable((uintptr_t*)ret);
+			node->next = nullptr;
+			node->prev = nullptr;
 			return ret;
 		}
 		bool freePhysicalPage(uintptr_t addr)
 		{
-			while (atomic_test(&g_physicalMemoryManagerLock));
-			atomic_set(&g_physicalMemoryManagerLock);
-			addr &= ~(0xfff);
-			g_lastPageFreed = markPageAs(addr, !((bool)addr)) * addr;
-			atomic_clear(&g_physicalMemoryManagerLock);
-			return (bool)addr;
+			MemoryNode* node = (MemoryNode*)memory::mapPageTable((uintptr_t*)addr);
+			node->prev = g_memoryTail;
+			node->next = nullptr;
+			MemoryNode* lastNode = (MemoryNode*)memory::mapPageTable((uintptr_t*)g_memoryTail);
+			g_memoryTail = (MemoryNode*)addr;
+			lastNode->next = g_memoryTail;
+			return true;
 		}
 	}
 }

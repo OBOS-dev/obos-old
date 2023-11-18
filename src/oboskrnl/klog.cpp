@@ -145,6 +145,7 @@ namespace obos
 			va_start(list, format);
 			size_t ret = printf_impl(consoleOutputCallback, nullptr, format, list);
 			va_end(list);
+			printf_lock.Unlock();
 			return ret;
 		}
 		size_t vprintf(const char* format, va_list list)

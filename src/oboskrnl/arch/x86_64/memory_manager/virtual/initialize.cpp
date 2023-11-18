@@ -51,19 +51,28 @@ namespace obos
 		uintptr_t* PageMap::getL3PageMapEntryAt(uintptr_t at)
 		{
 			at &= ~0xfff;
-			uintptr_t* pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)getL4PageMapEntryAt(at) & 0xFFFFFFFFFF000));
+			uintptr_t rawPtr = (uintptr_t)getL4PageMapEntryAt(at) & 0xFFFFFFFFFF000;
+			if (!rawPtr)
+				return nullptr;
+			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
 			return (uintptr_t*)pageMap[addressToIndex(at, 2)];
 		}
 		uintptr_t* PageMap::getL2PageMapEntryAt(uintptr_t at) 
 		{
 			at &= ~0xfff;
-			uintptr_t* pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)getL3PageMapEntryAt(at) & 0xFFFFFFFFFF000));
+			uintptr_t rawPtr = (uintptr_t)getL3PageMapEntryAt(at) & 0xFFFFFFFFFF000;
+			if (!rawPtr)
+				return nullptr;
+			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
 			return (uintptr_t*)pageMap[addressToIndex(at, 1)];
 		}
 		uintptr_t* PageMap::getL1PageMapEntryAt(uintptr_t at) 
 		{
 			at &= ~0xfff;
-			uintptr_t* pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)getL2PageMapEntryAt(at) & 0xFFFFFFFFFF000));
+			uintptr_t rawPtr = (uintptr_t)getL2PageMapEntryAt(at) & 0xFFFFFFFFFF000;
+			if (!rawPtr)
+				return nullptr;
+			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
 			return (uintptr_t*)pageMap[addressToIndex(at, 0)];
 		}
 

@@ -9,6 +9,8 @@
 #include <limine.h>
 #include <memory_manipulation.h>
 
+#include <arch/x86_64/memory_manager/virtual/allocate.h>
+
 namespace obos
 {
 	extern volatile limine_module_request module_request;
@@ -171,7 +173,22 @@ namespace obos
 				warning("Map file could not be found in the module list. Did you load it in the limine.cfg file?\n");
 			printf("Stack trace:\n");
 			int nFrames = -1;
-			for (; frame; nFrames++) frame = frame->down;
+			for (; frame; nFrames++) 
+			{
+				frame = frame->down;
+				if(frame)
+				{
+					if (!frame->down)
+						continue;
+					uintptr_t attrib = 0;
+					memory::VirtualGetProtection((void*)frame->down, 1, &attrib);
+					if (!attrib)
+					{
+						nFrames++;
+						break;
+					}
+				}
+			}
 			frame = (volatile stack_frame*)__builtin_frame_address(0);
 			for (int i = nFrames; i != -1; i--)
 			{
@@ -181,7 +198,8 @@ namespace obos
 				{
 					char* functionName = nullptr;
 					uintptr_t functionStart = 0;
-					addr2func(frame->rip, functionName, functionStart, mapFileStart, mapFileStart + mapFileSize);
+					if (frame->rip > (void*)0xffffffff80000000)
+						addr2func(frame->rip, functionName, functionStart, mapFileStart, mapFileStart + mapFileSize);
 					if(functionName)
 					{
 						printf("\t%p: %s+%d\n", frame->rip, functionName, (uintptr_t)frame->rip - functionStart);

@@ -22,6 +22,7 @@ namespace obos
 		{
 		public:
 			Mutex() = default;
+			Mutex(bool canUseMultitasking) : m_canUseMultitasking{ canUseMultitasking } {};
 
 			/// <summary>
 			/// Locks the mutex.
@@ -48,6 +49,7 @@ namespace obos
 			static bool LockBlockCallback(thread::Thread* thread, void* data);
 			bool m_wake;
 			bool m_locked;
+			bool m_canUseMultitasking = true;
 			thread::Thread* m_ownerThread;
 			struct LockQueueNode
 			{

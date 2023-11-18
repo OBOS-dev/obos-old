@@ -232,6 +232,8 @@ namespace obos
 			uintptr_t ret = 0;
 			if (entry & 1)
 				ret |= PROT_IS_PRESENT;
+			else
+				return 0;
 			if (!(entry & ((uintptr_t)1 << 1)))
 				ret |= PROT_READ_ONLY;
 			if (entry & ((uintptr_t)1 << 4))

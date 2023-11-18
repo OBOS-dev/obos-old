@@ -98,10 +98,6 @@ namespace obos
 		if(frame->intNumber != 0xff)
 			SendEOI();
 	}
-	void PanicIPI(interrupt_frame*)
-	{
-		while (true);
-	}
 	void InitializeAPIC(acpi::MADTTable* madtTable, bool isBSP)
 	{
 		// Disable both PICs, and remap them, just in case a spurious interrupt happens.
@@ -126,8 +122,16 @@ namespace obos
 
 		g_localAPICAddr->errorStatus = 0;
 
-		g_localAPICAddr->lvtLINT0 |= 0xf8;
-		g_localAPICAddr->lvtLINT1 |= 0xf9;
+		if (isBSP)
+		{
+			g_localAPICAddr->lvtLINT0 |= 0xf8;
+			g_localAPICAddr->lvtLINT1 |= 0xf9;
+		}
+		else
+		{
+			g_localAPICAddr->lvtLINT0 = 0xf8;
+			g_localAPICAddr->lvtLINT1 = 0xf9;
+		}
 		g_localAPICAddr->lvtError = 0xfa;
 		g_localAPICAddr->lvtCMCI = 0xfb;
 		g_localAPICAddr->lvtPerformanceMonitoringCounters = 0xfc;
@@ -135,7 +139,6 @@ namespace obos
 		g_localAPICAddr->lvtTimer = 0xfe;
 		g_localAPICAddr->spuriousInterruptVector = 0xff;
 
-		RegisterInterruptHandler(0x2f, PanicIPI);
 		for(byte i = 0xf8; i > 0; i++)
 			RegisterInterruptHandler(i, DefaultInterruptHandler);
 		g_localAPICAddr->spuriousInterruptVector |= (1 << 8);

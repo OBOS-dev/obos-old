@@ -25,11 +25,5 @@ namespace obos
 		/// <param name="addr">The address of the page to free</param>
 		/// <returns>true on success, otherwise false.</returns>
 		bool freePhysicalPage(uintptr_t addr);
-		/// <summary>
-		/// Gets the status of a page.
-		/// </summary>
-		/// <param name="address">The address of the page to check.</param>
-		/// <returns>Whether the page is allocated (true) or not (false).</returns>
-		bool getPageStatus(uintptr_t address);
 	}
 }

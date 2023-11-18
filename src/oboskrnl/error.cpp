@@ -20,11 +20,11 @@ namespace obos
 {
 	void SetLastError(uint32_t err) 
 	{
+		if (!getCPULocal())
+			return;
+		if (!getCPULocal()->currentThread)
+			return;
 		getCPULocal()->currentThread->lastError = err;
-#ifdef OBOS_DEBUG
-		if (((process::Process*)getCPULocal()->currentThread->owner)->pid == 0)
-			logger::warning("\nSetLastError called from a function called by the kernel, error code: %d.\n", err);
-#endif
 	}
 	uint32_t GetLastError() 
 	{

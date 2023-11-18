@@ -1,6 +1,11 @@
 set(CMAKE_SYSTEM_NAME "Generic")
 set(CMAKE_SYSTEM_PROCESSOR "x86-64")
 
+find_program(HAS_CROSS_COMPILER "x86_64-elf-g++")
+if (NOT HAS_CROSS_COMPILER)
+	message(FATAL_ERROR "No x86_64-elf cross compiler in the PATH!")
+endif()
+
 set(CMAKE_C_COMPILER "x86_64-elf-gcc")
 set(CMAKE_CXX_COMPILER "x86_64-elf-g++")
 set(CMAKE_ASM-ATT_COMPILER "x86_64-elf-gcc")
@@ -21,6 +26,18 @@ execute_process(COMMAND x86_64-elf-gcc --print-file-name=libgcc.a OUTPUT_VARIABL
 
 string(STRIP "${LIBGCC}" LIBGCC)
 
+find_program(HAS_x86_64_elf_objcopy "x86_64-elf-objcopy")
+find_program(HAS_x86_64_elf_nm "x86_64-elf-nm")
+if (HAS_x86_64_elf_objcopy)
+	set(OBJCOPY "x86_64-elf-objcopy")
+else()
+	set(OBJCOPY "objcopy")
+endif()
+if (HAS_x86_64_elf_nm)
+	set(NM "x86_64-elf-nm")
+else()
+	set(NM "nm")
+endif()
 set(TARGET_COMPILE_OPTIONS_CPP -mno-red-zone  -mcmodel=kernel -fno-omit-frame-pointer -mgeneral-regs-only)
 set(TARGET_COMPILE_OPTIONS_C ${TARGET_COMPILE_OPTIONS_CPP})
 set(TARGET_LINKER_OPTIONS -mcmodel=kernel)

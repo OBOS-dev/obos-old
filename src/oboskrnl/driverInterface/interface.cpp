@@ -78,7 +78,7 @@ namespace obos
 					};
 				currentThread->blockCallback.userdata = buffer;
 				currentThread->wakeUpTime = ticksToWait;
-				currentThread->status |= thread::THREAD_STATUS_BLOCKED;
+				currentThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;
 				thread::callScheduler();
 			}
 			if (buffer->szBuf < size)
@@ -228,7 +228,7 @@ namespace obos
 						return identity->listening || (thread::g_timerTicks >= thr->wakeUpTime);
 					};
 				currentThread->blockCallback.userdata = identity;
-				currentThread->status |= thread::THREAD_STATUS_BLOCKED;
+				currentThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;
 				thread::callScheduler();
 			}
 			if (!identity->listening)
@@ -298,7 +298,7 @@ namespace obos
 			currentThread->wakeUpTime = timeoutTicks ? thread::g_timerTicks + timeoutTicks : 0xffffffffffffffff;
 			currentThread->blockCallback.callback = ListenCallback;
 			currentThread->blockCallback.userdata = data;
-			currentThread->status |= thread::THREAD_STATUS_BLOCKED;
+			currentThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;
 			thread::callScheduler();
 			if (!m_rawCon)
 				return false;

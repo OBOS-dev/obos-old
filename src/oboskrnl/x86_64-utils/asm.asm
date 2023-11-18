@@ -13,6 +13,7 @@ global _ZN4obos3indEt
 global _ZN4obos3cliEv
 global _ZN4obos3stiEv
 global _ZN4obos3hltEv
+global _ZN4obos5pauseEv
 global _ZN4obos6getCR2Ev
 global _ZN4obos6memory17getCurrentPageMapEv
 global _ZN4obos6memory7PageMap12switchToThisEv
@@ -65,6 +66,9 @@ _ZN4obos3stiEv:
 	ret
 _ZN4obos3hltEv:
 	hlt
+	ret
+_ZN4obos5pauseEv:
+	pause
 	ret
 _ZN4obos6getCR2Ev:
 	mov rax, cr2

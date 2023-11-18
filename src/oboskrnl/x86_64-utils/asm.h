@@ -20,6 +20,8 @@ namespace obos
 	void cli();
 	void sti();
 	void hlt();
+
+	void pause();
 	
 	uintptr_t saveFlagsAndCLI();
 	void restorePreviousInterruptStatus(uintptr_t flags);

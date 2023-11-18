@@ -9,6 +9,7 @@ add_executable(initrdDriver "main.cpp"
 target_compile_options(initrdDriver
 	PUBLIC "-ffreestanding"
 	PUBLIC "-nostdlib"
+	PUBLIC "${DEBUG_SYMBOLS_OPT}"
 )
 
 set_target_properties(initrdDriver PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")

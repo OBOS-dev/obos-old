@@ -40,7 +40,6 @@ namespace obos
 	extern volatile limine_module_request module_request;
 	void kmain_common()
 	{
-		thread::g_initialized = true;
 		logger::log("Multitasking initialized! In \"%s\" now.\n", __func__);
 		
 		process::Process* kernelProc = new process::Process;

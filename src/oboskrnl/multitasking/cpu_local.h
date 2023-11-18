@@ -21,6 +21,7 @@ namespace obos
 			volatile bool schedulerLock;
 			uint32_t cpuId;
 			bool initialized;
+			Thread::StackInfo temp_stack;
 		};
 		extern cpu_local* g_cpuInfo;
 		extern size_t g_nCPUs;

@@ -177,7 +177,7 @@ namespace obos
 		}
 		size_t FileHandle::GetFileSize()
 		{
-			if (m_flags & FLAGS_CLOSED)
+			if (m_flags & FLAGS_CLOSED || !m_node)
 			{
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return 0;
