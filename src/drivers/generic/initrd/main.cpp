@@ -19,7 +19,13 @@
 
 using namespace obos;
 
-driverInterface::driverHeader __attribute__((section(OBOS_DRIVER_HEADER_SECTION_NAME))) g_driverHeader = {
+#ifdef __GNUC__
+#define DEFINE_IN_SECTION __attribute__((section(OBOS_DRIVER_HEADER_SECTION_NAME)))
+#else
+#define DEFINE_IN_SECTION
+#endif
+
+driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 	.magicNumber = obos::driverInterface::OBOS_DRIVER_HEADER_MAGIC,
 	.driverId = 0,
 	.driverType = obos::driverInterface::OBOS_SERVICE_TYPE_INITRD_FILESYSTEM,
@@ -52,7 +58,7 @@ extern "C" void _start()
 {
 	if (!g_driverHeader.initrdLocationResponse.addr)
 		kpanic("[DRIVER 0, FATAL] No initrd image received from the kernel.\n");
-	printf("[DRIVER 0, LOG] Initializing filesystem cache.\n");
+	//printf("[DRIVER 0, LOG] Initializing filesystem cache.\n");
 	InitializeFilesystemCache();
 	// Listen for connections.
 	driverInterface::DriverServer* currentClient = nullptr;

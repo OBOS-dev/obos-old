@@ -28,7 +28,9 @@
 extern "C" void fpuInit();
 extern "C" char _strampoline;
 extern "C" char _etrampoline;
-extern "C" char GDT_Ptr;
+extern "C" struct {
+	uint16_t limit; uint64_t base;
+} __attribute__((packed)) GDT_Ptr;
 
 namespace obos
 {
@@ -80,9 +82,9 @@ namespace obos
 				if (g_lapicIDs[i] == g_localAPICAddr->lapicID)
 				{
 					g_cpuInfo[i].temp_stack.addr = (void*)temp_stacks_base;
+					g_cpuInfo[i].temp_stack.size = 0x2000;
 					continue;
 				}
-				// Assert the INIT# pin of the AP.
 				(*(void**)0xFD8) = &g_cpuInfo[i];
 				if (i != 1)
 					g_cpuInfo[i].startup_stack.addr = (char*)g_cpuInfo[i - 1].startup_stack.addr + 0x2000;
@@ -92,11 +94,13 @@ namespace obos
 				g_cpuInfo[i].cpuId = i;
 				g_cpuInfo[i].startup_stack.size = 0x2000;
 				g_cpuInfo[i].temp_stack.size = 0x2000;
+				// Assert the INIT# pin of the AP.
 				g_localAPICAddr->interruptCommand32_63 = g_lapicIDs[i] << (56 - 32);
 				g_localAPICAddr->interruptCommand0_31 = 0xC500;
 				// Wait for the IPI to finish being sent
 				while (g_localAPICAddr->interruptCommand0_31 & (1 << 12))
 					pause();
+				// Send a Startup IPI to the AP.
 				g_localAPICAddr->interruptCommand32_63 = g_lapicIDs[i] << (56 - 32);
 				g_localAPICAddr->interruptCommand0_31 = 0x600;
 				// Wait for the IPI to finish being sent

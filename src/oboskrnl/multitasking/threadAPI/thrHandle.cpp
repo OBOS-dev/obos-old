@@ -338,7 +338,7 @@ namespace obos
 
 			return true;
 		}
-
+		extern void schedule();
 		bool ExitThreadImpl(void* _exitCode, void*)
 		{
 			volatile Thread*& currentThread = getCPULocal()->currentThread;
@@ -358,7 +358,7 @@ namespace obos
 			if(!currentThread->references)
 				delete currentThread;
 			startTimer(0);
-			callScheduler();
+			schedule();
 			return false;
 		}
 		uint32_t GetTID()

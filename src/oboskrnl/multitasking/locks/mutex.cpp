@@ -14,8 +14,14 @@
 
 #include <multitasking/locks/mutex.h>
 
+extern obos::locks::Mutex g_allocatorMutex;
+
 namespace obos
 {
+	namespace thread
+	{
+		extern locks::Mutex g_coreGlobalSchedulerLock;
+	}
 	namespace locks
 	{
 		bool Mutex::LockBlockCallback(thread::Thread* thread, void* data)
@@ -44,7 +50,12 @@ namespace obos
 				auto currentThread = thread::GetCurrentCpuLocalPtr()->currentThread;
 				if (m_ownerThread == currentThread)
 					return true;
-				LockQueueNode* queue_node = new LockQueueNode;
+				LockQueueNode* queue_node = nullptr;
+				LockQueueNode node = {};
+				if (this == &g_allocatorMutex || this == &thread::g_coreGlobalSchedulerLock)
+					queue_node = &node;
+				else
+					queue_node = new LockQueueNode;
 				utils::memzero(queue_node, sizeof(queue_node));
 				queue_node->thread = (thread::Thread*)currentThread;
 				if (m_queue.tail)
@@ -79,11 +90,13 @@ namespace obos
 					queue_node->next->prev = queue_node->prev;
 				if (queue_node->prev)
 					queue_node->prev->next = queue_node->next;
-				delete queue_node;
+				if (this != &g_allocatorMutex && this != &thread::g_coreGlobalSchedulerLock)
+					delete queue_node;
 				atomic_dec(m_queue.size);
 			}
 			atomic_set(&m_locked);
-			m_ownerThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
+			if (m_canUseMultitasking)
+				m_ownerThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
 			return true;
 		}
 		bool Mutex::Unlock()

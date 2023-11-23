@@ -21,7 +21,7 @@ namespace obos
 		class Mutex final
 		{
 		public:
-			Mutex() = default;
+			Mutex() : m_canUseMultitasking{ true } {};
 			Mutex(bool canUseMultitasking) : m_canUseMultitasking{ canUseMultitasking } {};
 
 			/// <summary>
@@ -41,7 +41,9 @@ namespace obos
 			/// Returns whether the mutex is locked.
 			/// </summary>
 			/// <returns>Whether the mutex is locked..</returns>
-			bool Locked() { return m_locked; }
+			bool Locked() const { return m_locked; }
+
+			bool IsInitialized() const { return m_initialized; }
 			
 			~Mutex();
 
@@ -50,6 +52,7 @@ namespace obos
 			bool m_wake;
 			bool m_locked;
 			bool m_canUseMultitasking = true;
+			bool m_initialized;
 			thread::Thread* m_ownerThread;
 			struct LockQueueNode
 			{

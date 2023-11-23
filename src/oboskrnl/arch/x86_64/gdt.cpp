@@ -29,9 +29,8 @@ namespace obos
 		uint16_t iopb;
 	} __attribute__((packed));
 
-	extern "C" char TSS[sizeof(gdtEntry)];
-	extern "C" char GDT;
-
+	extern "C" gdtEntry TSS[sizeof(gdtEntry)];
+	
 	tssEntry s_tssEntry alignas(8);
 
 	static_assert(sizeof(tssEntry) == 104, "sizeof(tssEntry) != 104");
@@ -54,17 +53,6 @@ namespace obos
 		tss->baseHigh = base >> 32;
 		s_tssEntry.iopb = 103;
 		
-		gdtEntry* userCodeSeg = (gdtEntry*)((&GDT) + 0x18);
-		gdtEntry* userDataSeg = (gdtEntry*)((&GDT) + 0x20);
-
-		userCodeSeg->access = 0xFA;
-		userCodeSeg->granularity = 0xAF;
-		userCodeSeg->limitLow = 0xFFFF;
-
-		userDataSeg->access = 0xF2;
-		userDataSeg->granularity = 0xCF;
-		userDataSeg->limitLow = 0xFFFF;
-
 		InitializeGDTASM();
 	}
 	void SetTSSStack(void* rsp)

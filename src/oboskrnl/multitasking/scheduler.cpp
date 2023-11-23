@@ -43,7 +43,7 @@ namespace obos
 			{
 				bool clearTimeSliceIndex = currentThread->status & THREAD_STATUS_CLEAR_TIME_SLICE_INDEX;
 				
-				if (currentThread->priority == currentThread->timeSliceIndex)
+				if (currentThread->timeSliceIndex >= currentThread->priority)
 					currentThread->status |= THREAD_STATUS_CLEAR_TIME_SLICE_INDEX;
 				
 				bool canRun = currentThread->status == THREAD_STATUS_CAN_RUN;
@@ -60,8 +60,6 @@ namespace obos
 					currentThread->timeSliceIndex = 0;
 				}
 				
-				if (!currentThread)
-					break;
 				currentThread = currentThread->prev_run;
 			}
 
@@ -128,7 +126,8 @@ namespace obos
 			if(getCPULocal()->cpuId == 0)
 				g_timerTicks++;
 			volatile Thread* currentThread = getCPULocal()->currentThread;
-			currentThread->lastTimePreempted = g_timerTicks;
+			if (currentThread)
+				currentThread->lastTimePreempted = g_timerTicks;
 			if (getCPULocal()->schedulerLock)
 				return;
 
@@ -156,6 +155,7 @@ namespace obos
 				newThread = g_priorityLists[0].head;
 			if (newThread == currentThread)
 			{
+				currentThread->status &= ~THREAD_STATUS_CAN_RUN;
 				currentThread->status |= THREAD_STATUS_RUNNING;
 				g_coreGlobalSchedulerLock.Unlock();
 				atomic_clear((bool*)&getCPULocal()->schedulerLock);
@@ -163,13 +163,18 @@ namespace obos
 			}
 			if (!newThread)
 				newThread = g_priorityLists[0].head;
-			currentThread->status |= THREAD_STATUS_CAN_RUN;
+			if (currentThread)
+			{
+				currentThread->status |= THREAD_STATUS_CAN_RUN;
+				currentThread->status &= ~THREAD_STATUS_RUNNING;
+			}
 			getCPULocal()->currentThread = newThread;
-			newThread->timeSliceIndex = currentThread->timeSliceIndex + 1;
-			newThread->status = THREAD_STATUS_RUNNING;
+			newThread->timeSliceIndex = newThread->timeSliceIndex + 1;
+			newThread->status &= ~THREAD_STATUS_CAN_RUN;
+			newThread->status |= THREAD_STATUS_RUNNING;
 			g_coreGlobalSchedulerLock.Unlock();
 			atomic_clear((bool*)&getCPULocal()->schedulerLock);
-			switchToThreadImpl((taskSwitchInfo*)&currentThread->context);
+			switchToThreadImpl((taskSwitchInfo*)&newThread->context);
 		}
 #pragma GCC pop_options
 
@@ -225,13 +230,6 @@ namespace obos
 
 			volatile Thread*& currentThread = getCPULocal()->currentThread;
 			currentThread = (volatile Thread*)kernelMainThread;
-
-			for (size_t i = 0; i < g_nCPUs; i++)
-			{
-				if (getCPULocal()->cpuId == i)
-					continue;
-				g_cpuInfo[i].currentThread = idleThread;
-			}
 
 			setupTimerInterrupt();
 			thread::g_initialized = true;

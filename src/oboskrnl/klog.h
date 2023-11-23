@@ -24,6 +24,18 @@ namespace obos
 			ERROR_RED = 0xcc3300,
 			PANIC_RED = 0xac1616,
 		};
+		// Format specifiers:
+		// %e: Change padding for %x and %X
+		// %d: Print a signed integer.
+		// %i: Same as %d
+		// %u: Print an unsigned int.
+		// %x: Print hex number (lowercase, unsigned).
+		// %X: Print hex number (uppercase, unsigned).
+		// %c: Print character.
+		// %s: Print string
+		// %p: Print pointer as a hex number with a padding of sizeof(uintptr_t) * 2
+		// %%: Prints a '%'
+		size_t printf_impl(void(*printCallback)(char ch, void* userdata), void* userdata, const char* format, va_list list);
 
 		size_t printf(const char* format, ...);
 		size_t vprintf(const char* format, va_list list);

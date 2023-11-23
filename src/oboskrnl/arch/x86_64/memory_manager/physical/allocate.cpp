@@ -19,6 +19,8 @@
 
 #include <multitasking/locks/mutex.h>
 
+#include <new>
+
 namespace obos
 {
 	static volatile limine_memmap_request mmap_request = {
@@ -32,12 +34,15 @@ namespace obos
 			MemoryNode *next, *prev;
 		};
 		MemoryNode *g_memoryHead, *g_memoryTail;
+		size_t g_avaliableMemoryNodes;
+		size_t g_totalMemoryNodes;
 		locks::Mutex g_pmmLock;
 
 #pragma GCC push_options
 #pragma GCC optimize("O1")
 		void InitializePhysicalMemoryManager()
 		{
+			new (&g_pmmLock) locks::Mutex{ false };
 			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
 			{
 				if (mmap_request.response->entries[i]->type != LIMINE_MEMMAP_USABLE)
@@ -48,6 +53,7 @@ namespace obos
 				if (base & 0xfff)
 					base = (base + 0xfff) & 0xfff;
 				size_t size = mmap_request.response->entries[i]->length & ~0xfff;
+				g_totalMemoryNodes += g_avaliableMemoryNodes += size / 0x1000;
 				for (uintptr_t addr = base; addr < (base + size); addr += 0x1000)
 				{
 					MemoryNode* newNode = (MemoryNode*)addr;
@@ -65,28 +71,34 @@ namespace obos
 
 		uintptr_t allocatePhysicalPage()
 		{
-			if (!g_memoryTail)
+			if (!g_memoryHead)
 				logger::panic("No more available physical memory left.\n");
-			uintptr_t ret = (uintptr_t)g_memoryTail;
+			g_pmmLock.Lock();
+			uintptr_t ret = (uintptr_t)g_memoryHead;
 			MemoryNode* node = (MemoryNode*)memory::mapPageTable((uintptr_t*)ret);
 			MemoryNode* next = node->next;
 			MemoryNode* prev = node->prev;
-			if (prev)
-				((MemoryNode*)memory::mapPageTable((uintptr_t*)prev))->next = next;
-			g_memoryTail = prev;
+			if (next)
+				((MemoryNode*)memory::mapPageTable((uintptr_t*)next))->prev = prev;
+			g_memoryHead = next;
 			memory::mapPageTable((uintptr_t*)ret);
 			node->next = nullptr;
 			node->prev = nullptr;
+			g_avaliableMemoryNodes--;
+			g_pmmLock.Unlock();
 			return ret;
 		}
 		bool freePhysicalPage(uintptr_t addr)
 		{
+			g_pmmLock.Lock();
 			MemoryNode* node = (MemoryNode*)memory::mapPageTable((uintptr_t*)addr);
 			node->prev = g_memoryTail;
 			node->next = nullptr;
 			MemoryNode* lastNode = (MemoryNode*)memory::mapPageTable((uintptr_t*)g_memoryTail);
 			g_memoryTail = (MemoryNode*)addr;
 			lastNode->next = g_memoryTail;
+			g_avaliableMemoryNodes++;
+			g_pmmLock.Unlock();
 			return true;
 		}
 	}

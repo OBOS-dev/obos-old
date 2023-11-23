@@ -132,9 +132,9 @@ private:
 	obos::locks::Mutex* m_mutex = nullptr;
 };
 
-static obos::locks::Mutex s_allocatorMutex;
+obos::locks::Mutex g_allocatorMutex;
 
-#define makeSafeLock(vName) safe_lock vName{ &s_allocatorMutex }; vName.Lock();
+#define makeSafeLock(vName) if(!g_allocatorMutex.IsInitialized()) { new (&g_allocatorMutex) obos::locks::Mutex{ true }; } safe_lock vName{ &g_allocatorMutex }; vName.Lock();
 
 #ifdef __cplusplus
 extern "C" {

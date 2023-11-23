@@ -55,9 +55,7 @@ namespace obos
 			if (!g_initialized)
 				return;
 			volatile Thread*& currentThread = getCPULocal()->currentThread;
-			if (!currentThread)
-				return;
-			if (!getCPULocal()->schedulerLock)
+			if (!getCPULocal()->schedulerLock && currentThread)
 			{
 				utils::dwMemcpy((uint32_t*)&currentThread->context.frame, (uint32_t*)frame, sizeof(interrupt_frame) / 4); // save the interrupt frame
 				asm volatile("fxsave (%0)" : : "r"(currentThread->context.fpuState) : "memory"); // save the fpu state.

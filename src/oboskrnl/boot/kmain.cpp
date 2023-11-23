@@ -33,7 +33,12 @@
 #include <vfs/vfsNode.h>
 #include <vfs/fileManip/fileHandle.h>
 
+// TODO: Remove this line.
+#include <arch/x86_64/gdbstub/stub.h>
+
 #define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
+
+#define LITERAL(str) (char*)(str), sizeof((str))
 
 namespace obos
 {
@@ -81,24 +86,33 @@ namespace obos
 		driverInterface::RegisterSyscall(6, (uintptr_t)driverInterface::SyscallMapPhysToVirt);
 		driverInterface::RegisterSyscall(7, (uintptr_t)driverInterface::SyscallGetInitrdLocation);
 		
-		driverInterface::LoadModule(procExecutable, module_request.response->modules[moduleIndex]->size, nullptr);
+		//driverInterface::LoadModule(procExecutable, module_request.response->modules[moduleIndex]->size, nullptr);
 
 		new (&vfs::g_mountPoints) Vector<vfs::MountPoint*>{};
 
-		uint64_t val = thread::stopTimer();
-		logger::log("Mounting the initrd.\n");
-		thread::startTimer(val);
-		uint32_t point = 0;
-		vfs::mount(point, 0); // Mount the initrd.
+		gdbstub::InitDefaultConnection();
+		gdbstub::Connection gdb{
+			gdbstub::DefaultSendByteOnRawConnection,
+			gdbstub::DefaultRecvByteOnRawConnection,
+			gdbstub::DefaultLockConnection,
+			gdbstub::DefaultUnlockConnection,
+			gdbstub::DefaultByteInConnBuffer };
 
-		vfs::FileHandle handle;
-		handle.Open("0:/directory/subdirectory/other_subdirectory/you_guessed_it_another_test.txt");
-		char* data = new char[handle.GetFileSize() + 1];
-		handle.Read(data, handle.GetFileSize());
-		logger::printf("0:/directory/subdirectory/other_subdirectory/you_guessed_it_another_test.txt: %s\n", data);
-		delete[] data;
+		gdbstub::InititalizeGDBStub(&gdb);
+
+		//logger::log("Mounting the initrd.\n");
+		//uint32_t point = 0;
+		//// Mount the initrd.
+		//if (!vfs::mount(point, 0))
+		//	logger::panic("Could not mount the initrd!\n");
+
+		//vfs::FileHandle handle;
+		//handle.Open("0:/directory/subdirectory/other_subdirectory/you_guessed_it_another_test.txt");
+		//char* data = new char[handle.GetFileSize() + 1];
+		//handle.Read(data, handle.GetFileSize());
+		//logger::printf("0:/directory/subdirectory/other_subdirectory/you_guessed_it_another_test.txt: %s\n", data);
+		//delete[] data;
 
 		thread::ExitThread(0);
 	}
-
 }

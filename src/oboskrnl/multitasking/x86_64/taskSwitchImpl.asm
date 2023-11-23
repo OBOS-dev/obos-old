@@ -6,13 +6,6 @@
 
 segment .bss
 
-; blockCallbackStackBottom:
-; RESB 8192
-; blockCallbackStack:
-; switcherStackBottom:
-; RESB 8192
-; switcherStack:
-
 segment .text
 
 %macro popaq 0
@@ -44,14 +37,14 @@ global _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_
 global idleTask
 
 _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE:
-; rsp = GetCurrentCpuLocalPtr()->temp_stack.addr + 0x2000
+; rsp = GetCurrentCpuLocalPtr()->temp_stack.addr + GetCurrentCpuLocalPtr()->temp_stack.size
 	push rdi
 	mov rdi, 0xC0000101
 	call _ZN4obos5rdmsrEj
 	pop rdi
 	add rax, 0x28
 	mov rsp, [rax]
-	add rsp, 0x2000
+	add rsp, qword [rax+8]
 
 	call _ZN4obos7SendEOIEv
 	
@@ -83,7 +76,7 @@ _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 	mov rbp, rsp
 	push r15
 
-; rsp = GetCurrentCpuLocalPtr()->temp_stack.addr + 0x2000
+; rsp = GetCurrentCpuLocalPtr()->temp_stack.addr + GetCurrentCpuLocalPtr()->temp_stack.size
 	push rdi
 	push rcx
 	push rdx
@@ -94,7 +87,7 @@ _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 	pop rdi
 	add rax, 0x28
 	mov rsp, [rax]
-	add rsp, 0x2000
+	add rsp, qword [rax+8]
 
 	mov rax, cr3
 	push rax

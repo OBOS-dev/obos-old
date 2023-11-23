@@ -47,4 +47,7 @@ namespace obos
 
 	[[noreturn]] void haltCPU(); // cli(); while(1) hlt();
 	[[noreturn]] void infiniteHLT(); // sti(); while(1) hlt();
+
+	void int1();
+	void int3();
 }

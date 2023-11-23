@@ -20,8 +20,7 @@ namespace obos
 	public:
 		Vector() 
 		{ 
-			m_capacity = m_capacityIncrement;
-			m_ptr = new T[m_capacity];
+			m_capacity = 0;
 		}
 		
 		T& push_back()
@@ -41,15 +40,14 @@ namespace obos
 			if ((m_sz + 1) >= m_capacity)
 			{
 				m_capacity += m_capacityIncrement;
-				if(m_ptr)
-					m_ptr = (T*)krealloc(m_ptr, m_capacity * sizeof(T));
-				else
-					m_ptr = new T[m_capacity];
+				m_ptr = (T*)krealloc(m_ptr, m_capacity * sizeof(T));
 			}
 			return m_ptr[m_sz++] = val;
 		}
 		void pop_back()
 		{
+			if (!m_sz)
+				return;
 			if (--m_sz < m_capacity)
 			{
 				m_capacity -= m_capacityIncrement;
@@ -68,7 +66,7 @@ namespace obos
 			return &val == &m_invalidValue;
 		}
 
-		T& at(size_t i)
+		T& at(size_t i) const
 		{
 			if (i >= m_sz)
 				return m_invalidValue;
@@ -83,6 +81,24 @@ namespace obos
 		{
 			return m_ptr + offset;
 		}
+		
+		void clear()
+		{
+			if (m_ptr)
+				delete[] m_ptr;
+			m_ptr = nullptr;
+			m_sz = 0;
+			m_capacity = 0;
+		}
+
+		const T* data() const
+		{ return m_ptr; }
+
+		T& front() const
+		{ return at(0); }
+		T& back() const
+		{ return at(m_sz - 1); }
+
 
 		~Vector()
 		{

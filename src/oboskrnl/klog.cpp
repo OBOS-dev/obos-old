@@ -7,6 +7,7 @@
 #include <int.h>
 #include <klog.h>
 #include <atomic.h>
+#include <memory_manipulation.h>
 
 #include <stdarg.h>
 
@@ -14,7 +15,7 @@
 
 #include <multitasking/locks/mutex.h>
 
-#ifdef __x86_64__
+#if defined(__x86_64__) && defined(E9_HACK)
 #include <x86_64-utils/asm.h>
 #endif
 
@@ -35,6 +36,7 @@ namespace obos
 		size_t printf_impl(void(*printCallback)(char ch, void* userdata), void* userdata, const char* format, va_list list)
 		{
 			size_t ret = 0;
+			int32_t currentPadding = 0; // No character-padding by default for hex printing.
 			for (size_t i = 0; format[i]; i++)
 			{
 				char ch = format[i];
@@ -45,6 +47,9 @@ namespace obos
 						break;
 					switch (format_character)
 					{
+					case 'e':
+						currentPadding = va_arg(list, intptr_t);
+						break;
 					case 'd':
 					case 'i':
 					{
@@ -64,17 +69,29 @@ namespace obos
 					}
 					case 'x':
 					{
-						char str[17] = {};
+						char str[sizeof(uintptr_t) * 2 + 1] = {};
 						itoa_unsigned(va_arg(list, uintptr_t), str, 16);
-						for (int i = 0; str[i]; i++, ret++)
+						size_t size = utils::strlen(str);
+						if ((intptr_t)(currentPadding - size) > 0)
+						{
+							for (size_t i = 0; i < (currentPadding - size); i++, ret++)
+								printCallback('0', userdata);
+						}
+						for (size_t i = 0; i < size; i++, ret++)
 							printCallback(str[i], userdata);
 						break;
 					}
 					case 'X':
 					{
-						char str[17] = {};
+						char str[sizeof(uintptr_t) * 2 + 1] = {};
 						itoa_unsigned(va_arg(list, uintptr_t), str, 16);
-						for (int i = 0; str[i]; i++, ret++)
+						size_t size = utils::strlen(str);
+						if ((intptr_t)(currentPadding - size) > 0)
+						{
+							for (size_t i = 0; i < (currentPadding - size); i++, ret++)
+								printCallback('0', userdata);
+						}
+						for (size_t i = 0; i < size; i++, ret++)
 							printCallback(toupper(str[i]), userdata);
 						break;
 					}
@@ -99,19 +116,20 @@ namespace obos
 						printCallback('x', userdata);
 						size_t size = 0;
 						for (; str[size]; size++);
-						for (size_t i = 0; i < ((sizeof(uintptr_t) * 2) - size); i++)
+						for (size_t i = 0; i < (sizeof(uintptr_t) * 2 - size); i++)
 							printCallback('0', userdata);
-						for (size_t i = 0; i < size; i++, ret++)
+						for (size_t i = 0; i < size; i++)
 							printCallback(str[i], userdata);
 						ret += sizeof(uintptr_t) * 2 + 2;
 						break;
 					}
-					case 'n':
+					// Do we really need this?
+					/*case 'n':
 					{
 						signed int* ptr = va_arg(list, signed int*);
 						*ptr = (signed int)ret;
 						break;
-					}
+					}*/
 					case '%':
 					{
 						printCallback('%', userdata);
@@ -153,6 +171,30 @@ namespace obos
 			printf_lock.Lock();
 			size_t ret = printf_impl(consoleOutputCallback, nullptr, format, list);
 			printf_lock.Unlock();
+			return ret;
+		}
+
+		void sprintf_callback(char ch, void* userdata)
+		{
+			struct _data
+			{
+				char* str;
+				size_t index;
+			} *data = (_data*)userdata;
+			if (data->str)
+				data->str[data->index++] = ch;
+		}
+		size_t sprintf(char* dest, const char* format, ...)
+		{
+			struct _data
+			{
+				char* str;
+				size_t index;
+			} data = { dest, 0 };
+			va_list list;
+			va_start(list, format);
+			size_t ret = printf_impl(sprintf_callback, &data, format, list);
+			va_end(list);
 			return ret;
 		}
 
