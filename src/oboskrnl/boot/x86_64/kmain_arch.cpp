@@ -100,7 +100,7 @@ namespace obos
 		fpuInit();
 		logger::info("%s: Initializing SSE.\n", __func__);
 		initSSE();
-		uint64_t unused = 0, rbx = 0;
+		uint32_t unused = 0, rbx = 0;
 		__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
 		if (rbx & CPUID_FSGSBASE)
 		{

@@ -42,13 +42,13 @@ namespace obos
 			while (currentThread)
 			{
 				bool clearTimeSliceIndex = currentThread->status & THREAD_STATUS_CLEAR_TIME_SLICE_INDEX;
-				
+
 				if (currentThread->timeSliceIndex >= currentThread->priority)
 					currentThread->status |= THREAD_STATUS_CLEAR_TIME_SLICE_INDEX;
-				
+
 				bool canRun = currentThread->status == THREAD_STATUS_CAN_RUN;
 				if (!canRun)
-					canRun = currentThread == currentRunningThread && (currentThread->status & THREAD_STATUS_RUNNING);
+					canRun = (currentThread == currentRunningThread && (currentThread->status & THREAD_STATUS_RUNNING)) || currentThread->status & (THREAD_STATUS_CAN_RUN | THREAD_STATUS_SINGLE_STEPPING);
 
 				if (canRun && (currentThread->timeSliceIndex < currentThread->priority))
 					if (!ret || currentThread->lastTimePreempted < ret->lastTimePreempted)
@@ -191,7 +191,7 @@ namespace obos
 			kernelMainThread->lastError = 0;
 			kernelMainThread->priorityList = g_priorityLists + 2;
 			kernelMainThread->threadList = new Thread::ThreadList;
-			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 0x8000, false);
+			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 0x10000, false);
 
 			Thread* idleThread = new Thread{};
 

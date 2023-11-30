@@ -27,9 +27,11 @@ global _ZN4obos15saveFlagsAndCLIEv
 global _ZN4obos30restorePreviousInterruptStatusEm
 global _ZN4obos7haltCPUEv
 global _ZN4obos11infiniteHLTEv
-global _ZN4obos9__cpuid__EmmPmS0_S0_S0_
+global _ZN4obos9__cpuid__EmmPjS0_S0_S0_
 global _ZN4obos5rdtscEv
 global _ZN4obos11set_if_zeroEPmm
+global _ZN4obos7bswap64Em
+global _ZN4obos7bswap32Ej
 
 _ZN4obos4outbEth:
 	mov dx, di
@@ -148,7 +150,7 @@ _ZN4obos11infiniteHLTEv:
 .loop:
 	hlt
 	jmp .loop
-_ZN4obos9__cpuid__EmmPmS0_S0_S0_:
+_ZN4obos9__cpuid__EmmPjS0_S0_S0_:
 	push rbp
 	mov rbp, rsp
 	push rdx
@@ -160,10 +162,10 @@ _ZN4obos9__cpuid__EmmPmS0_S0_S0_:
 	mov ecx, esi
 	cpuid
 
-	mov [r11], rax
-	mov [r10], rbx
-	mov [r8], rcx
-	mov [r9], rdx
+	mov [r11], eax
+	mov [r10], ebx
+	mov [r8], ecx
+	mov [r9], edx
 
 	pop rdx
 	leave
@@ -221,4 +223,61 @@ _ZN4obos11set_if_zeroEPmm:
 	test rax, rax
 	cmovz rax, rsi
 	mov [rdi], rax
+	ret
+_ZN4obos7bswap64Em:
+	bswap rdi
+	mov rax, rdi
+	ret
+_ZN4obos7bswap32Ej:
+	bswap edi
+	mov eax, edi
+	ret
+
+global _ZN4obos6getDR0Ev
+global _ZN4obos6getDR1Ev
+global _ZN4obos6getDR2Ev
+global _ZN4obos6getDR3Ev
+global _ZN4obos6getDR6Ev
+global _ZN4obos6getDR7Ev
+_ZN4obos6getDR0Ev:
+	mov rax, dr0
+	ret
+_ZN4obos6getDR1Ev:
+	mov rax, dr1
+	ret
+_ZN4obos6getDR2Ev:
+	mov rax, dr2
+	ret
+_ZN4obos6getDR3Ev:
+	mov rax, dr3
+	ret
+_ZN4obos6getDR6Ev:
+	mov rax, dr6
+	ret
+_ZN4obos6getDR7Ev:
+	mov rax, dr7
+	ret
+global _ZN4obos6setDR1Em
+_ZN4obos6setDR1Em:
+	mov dr0, rdi
+	ret
+global _ZN4obos6setDR2Em
+_ZN4obos6setDR2Em:
+	mov dr1, rdi
+	ret
+global _ZN4obos6setDR3Em
+_ZN4obos6setDR3Em:
+	mov dr2, rdi
+	ret
+global _ZN4obos6setDR4Em
+_ZN4obos6setDR4Em:
+	mov dr3, rdi
+	ret
+global _ZN4obos6setDR6Em
+_ZN4obos6setDR6Em:
+	mov dr6, rdi
+	ret
+global _ZN4obos6setDR7Em
+_ZN4obos6setDR7Em:
+	mov dr7, rdi
 	ret

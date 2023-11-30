@@ -28,6 +28,7 @@
 extern "C" void fpuInit();
 extern "C" char _strampoline;
 extern "C" char _etrampoline;
+extern "C" void loadGDT(uint64_t);
 extern "C" struct {
 	uint16_t limit; uint64_t base;
 } __attribute__((packed)) GDT_Ptr;
@@ -41,20 +42,54 @@ namespace obos
 	extern uint8_t g_lapicIDs[256];
 	extern uint8_t g_nCores;
 	extern bool g_halt;
+	extern void SetIST(void* rsp);
 	namespace thread
 	{
 		static memory::PageMap* kernel_cr3;
 		cpu_local* g_cpuInfo = nullptr;
 		size_t g_nCPUs = 0;
+		static void InitializeGDTCpu(cpu_local* info)
+		{
+			struct gdtEntry
+			{
+				uint16_t limitLow;
+				uint16_t baseLow;
+				uint8_t  baseMiddle1;
+				uint8_t  access;
+				uint8_t  granularity;
+				uint8_t  baseMiddle2;
+				uint64_t baseHigh;
+			} __attribute__((packed));
+			info->arch_specific.gdt[0] = 0;
+			info->arch_specific.gdt[1] = 0x00209A0000000000;
+			info->arch_specific.gdt[2] = 0x0000920000000000;
+			info->arch_specific.gdt[3] = 0x00affb000000ffff;
+			info->arch_specific.gdt[4] = 0x00aff3000000ffff;
+			gdtEntry* tss = (gdtEntry*)&info->arch_specific.gdt[5];
+			uintptr_t base = (uintptr_t)&info->arch_specific.tss;
+			tss->access = 0x89;
+			tss->granularity = 0x40;
+			tss->limitLow = sizeof(cpu_local_arch::tssEntry) - 1;
+			tss->baseLow = base & 0xFFFF;
+			tss->baseMiddle1 = (base >> 16) & 0xFF;
+			tss->baseMiddle2 = (base >> 24) & 0xFF;
+			tss->baseHigh = base >> 32;
+			info->arch_specific.tss.iopb = 103;
+			info->arch_specific.gdtPtr.base = (uint64_t)&info->arch_specific.gdt;
+			info->arch_specific.gdtPtr.limit = sizeof(info->arch_specific.gdt) - 1;
+			SetIST((byte*)info->temp_stack.addr + info->temp_stack.size);
+			loadGDT((uint64_t)&info->arch_specific.gdtPtr);
+		}
 		[[noreturn]] void ProcessorInit(cpu_local* info)
 		{
 			kernel_cr3->switchToThis();
+			InitializeGDTCpu(info);
 			InitializeIDT_CPU();
 			wrmsr(GS_BASE, (uintptr_t)info);
 			InitializeIrq(false);
 			fpuInit();
 			initSSE();
-			uint64_t unused = 0, rbx = 0;
+			uint32_t unused = 0, rbx = 0;
 			__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
 			if (rbx & CPUID_FSGSBASE)
 				setCR4(getCR4() & ~CR4_FSGSBASE);
@@ -74,26 +109,27 @@ namespace obos
 			(*(void**)0xFA8) = (void*)ProcessorInit;
 			utils::memcpy(memory::mapPageTable(nullptr), &_strampoline, ((uintptr_t)&_etrampoline - (uintptr_t)&_strampoline)-0x58);
 			uintptr_t flags = saveFlagsAndCLI();
-			memory::VirtualAlloc((void*)0xFFFFFFFF90008000, (g_nCPUs - 1) * 2, memory::PROT_NO_COW_ON_ALLOCATE);
-			uintptr_t temp_stacks_base = (0xFFFFFFFF90008000 + ((g_nCPUs - 1) * 2) * 4096);
-			memory::VirtualAlloc((void*)temp_stacks_base, g_nCPUs * 2, memory::PROT_NO_COW_ON_ALLOCATE);
+			memory::VirtualAlloc((void*)0xFFFFFFFF90010000, (g_nCPUs - 1) * 4, memory::PROT_NO_COW_ON_ALLOCATE);
+			uintptr_t temp_stacks_base = (0xFFFFFFFF90010000 + ((g_nCPUs - 1) * 4) * 4096);
+			memory::VirtualAlloc((void*)temp_stacks_base, g_nCPUs * 4, memory::PROT_NO_COW_ON_ALLOCATE);
 			for (size_t i = 0; i < g_nCPUs; i++)
 			{
 				if (g_lapicIDs[i] == g_localAPICAddr->lapicID)
 				{
+					InitializeGDTCpu(&g_cpuInfo[i]);
 					g_cpuInfo[i].temp_stack.addr = (void*)temp_stacks_base;
-					g_cpuInfo[i].temp_stack.size = 0x2000;
+					g_cpuInfo[i].temp_stack.size = 0x4000;
 					continue;
 				}
 				(*(void**)0xFD8) = &g_cpuInfo[i];
 				if (i != 1)
-					g_cpuInfo[i].startup_stack.addr = (char*)g_cpuInfo[i - 1].startup_stack.addr + 0x2000;
+					g_cpuInfo[i].startup_stack.addr = (char*)g_cpuInfo[i - 1].startup_stack.addr + 0x4000;
 				else
 					g_cpuInfo[i].startup_stack.addr = (void*)0xFFFFFFFF90008000;
-				g_cpuInfo[i].temp_stack.addr = (char*)g_cpuInfo[i - 1].temp_stack.addr + 0x2000;
+				g_cpuInfo[i].temp_stack.addr = (char*)g_cpuInfo[i - 1].temp_stack.addr + 0x4000;
 				g_cpuInfo[i].cpuId = i;
-				g_cpuInfo[i].startup_stack.size = 0x2000;
-				g_cpuInfo[i].temp_stack.size = 0x2000;
+				g_cpuInfo[i].startup_stack.size = 0x4000;
+				g_cpuInfo[i].temp_stack.size = 0x4000;
 				// Assert the INIT# pin of the AP.
 				g_localAPICAddr->interruptCommand32_63 = g_lapicIDs[i] << (56 - 32);
 				g_localAPICAddr->interruptCommand0_31 = 0xC500;

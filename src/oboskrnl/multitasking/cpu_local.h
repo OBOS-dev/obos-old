@@ -9,6 +9,7 @@
 #include <int.h>
 
 #include <multitasking/thread.h>
+#include <multitasking/arch.h>
 
 namespace obos
 {
@@ -22,6 +23,7 @@ namespace obos
 			uint32_t cpuId;
 			bool initialized;
 			Thread::StackInfo temp_stack;
+			cpu_local_arch arch_specific;
 		};
 		extern cpu_local* g_cpuInfo;
 		extern size_t g_nCPUs;

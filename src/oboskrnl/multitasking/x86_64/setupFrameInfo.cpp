@@ -54,8 +54,7 @@ namespace obos
 
 
 			info->cr3 = memory::getCurrentPageMap();
-			if(isUsermodeProgram)
-				info->tssStackBottom = memory::VirtualAlloc(nullptr, 4, memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE);
+			info->tssStackBottom = memory::VirtualAlloc(nullptr, 4, memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE);
 		}
 		void freeThreadStackInfo(void* _stackInfo)
 		{

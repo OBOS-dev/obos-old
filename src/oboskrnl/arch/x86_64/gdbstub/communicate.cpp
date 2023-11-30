@@ -50,11 +50,9 @@ namespace obos
 		{
 			return inb(COM1 + 5) & (1 << 0);
 		}
-		byte hex2bin(const char* str, unsigned size)
+		uintptr_t hex2bin(const char* str, unsigned size)
 		{
 			uintptr_t ret = 0;
-			if (size > sizeof(byte) * 2)
-				return 0;
 			str += *str == '\n';
 			//unsigned size = utils::strlen(str);
 			for (int i = size - 1, j = 0; i > -1; i--, j++)
@@ -163,14 +161,17 @@ namespace obos
 			size_t tries = 0;
 		retry:
 			for (size_t i = 0; i < len; m_sendByteOnRawConnection(data[i++]));
-			if (m_recvByteOnRawConnection() == '-')
+			if (m_sendingACK)
 			{
-				if (++tries == 5)
+				if (m_recvByteOnRawConnection() == '-')
 				{
-					delete[] data;
-					return false;
+					if (++tries == 5)
+					{
+						delete[] data;
+						return false;
+					}
+					goto retry;
 				}
-				goto retry;
 			}
 			m_unlockConnection();
 			delete[] data;
@@ -210,7 +211,7 @@ namespace obos
 			_receivedChecksum[1] = m_recvByteOnRawConnection();
 			byte receivedChecksum = hex2bin(_receivedChecksum, 2);
 			byte ourChecksum = mod256((char*)&rawPacket[0], rawPacket.length());
-			if (receivedChecksum != ourChecksum)
+			if (receivedChecksum != ourChecksum && m_sendingACK)
 			{
 				if (++tries == 5)
 				{
@@ -222,7 +223,8 @@ namespace obos
 				m_sendByteOnRawConnection('-');
 				goto begin;
 			}
-			m_sendByteOnRawConnection('+');
+			if (m_sendingACK)
+				m_sendByteOnRawConnection('+');
 			m_unlockConnection();
 			packet.data = (char*)utils::memcpy(new char[rawPacket.length() + 1], &rawPacket[0], rawPacket.length());
 			packet.len = rawPacket.length();

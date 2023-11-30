@@ -167,7 +167,7 @@ extern "C" {
 			pageBlock* current = pageBlockHead;
 
 			// We need to look for pageBlock structures.
-			do
+			while (current)
 			{
 				//if (((current->nPagesAllocated * 4096) - current->nBytesUsed) >= amountNeeded)
 				if ((GET_FUNC_ADDR(current->lastBlock->allocAddr) + current->lastBlock->size + sizeof(memBlock) + amountNeeded) <
@@ -178,7 +178,7 @@ extern "C" {
 				}
 
 				current = current->next;
-			} while (current);
+			};
 		}
 
 		foundPageBlock:

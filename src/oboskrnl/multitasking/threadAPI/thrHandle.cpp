@@ -138,7 +138,8 @@ namespace obos
 				return false;
 			}
 
-			obj->status |= THREAD_STATUS_PAUSED;
+			obj->status = THREAD_STATUS_CAN_RUN | THREAD_STATUS_PAUSED;
+			callScheduler(true);
 
 			return true;
 		}

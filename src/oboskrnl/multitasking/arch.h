@@ -10,7 +10,7 @@
 
 #include <int.h>
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(_WIN64)
 #include <multitasking/x86_64/arch_structs.h>
 #endif
 
@@ -30,7 +30,7 @@ namespace obos
 		uintptr_t stopTimer();
 		void startTimer(uintptr_t);
 		
-		void callScheduler();
+		void callScheduler(bool allCores);
 
 		void* getCurrentCpuLocalPtr();
 		bool StartCPUs();

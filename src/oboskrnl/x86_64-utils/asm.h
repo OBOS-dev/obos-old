@@ -35,7 +35,7 @@ namespace obos
 	uint64_t rdmsr(uint32_t addr);
 	void wrmsr(uint32_t addr, uint64_t val);
 
-	void __cpuid__(uint64_t initialEax, uint64_t initialEcx, uint64_t* eax, uint64_t* ebx, uint64_t* ecx, uint64_t* edx);
+	void __cpuid__(uint64_t initialEax, uint64_t initialEcx, uint32_t* eax, uint32_t* ebx, uint32_t* ecx, uint32_t* edx);
 
 	uint64_t rdtsc();
 
@@ -50,4 +50,21 @@ namespace obos
 
 	void int1();
 	void int3();
+
+	uint64_t bswap64(uint64_t val);
+	uint32_t bswap32(uint32_t val);
+
+	uint64_t getDR0(void);
+	uint64_t getDR1(void);
+	uint64_t getDR2(void);
+	uint64_t getDR3(void);
+	uint64_t getDR6(void);
+	uint64_t getDR7(void);
+
+	void setDR0(uint64_t val);
+	void setDR1(uint64_t val);
+	void setDR2(uint64_t val);
+	void setDR3(uint64_t val);
+	void setDR6(uint64_t val);
+	void setDR7(uint64_t val);
 }

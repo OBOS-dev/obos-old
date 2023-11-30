@@ -301,7 +301,7 @@ namespace obos
 	void _RegisterInterruptInIDT(int n, void(*handler)(), uint8_t typeAttributes)
 	{
 		utils::memzero(&g_idtEntries[n], sizeof(g_idtEntries[n]));
-		g_idtEntries[n].ist = 0;
+		g_idtEntries[n].ist = n == 14 || n == 8 || n == 2 || n == 1;
 		g_idtEntries[n].typeAttributes = typeAttributes;
 		g_idtEntries[n].selector = 0x08; // Kernel-Mode Code Segment
 		

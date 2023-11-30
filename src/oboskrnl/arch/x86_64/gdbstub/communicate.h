@@ -45,6 +45,9 @@ namespace obos
 			bool SendRawPacket(const Packet& packet);
 			bool RecvRawPacket(Packet& packet);
 
+			void SetSendingACK(bool val) { m_sendingACK = val; };
+			bool IsSendingACK() const { return m_sendingACK; };
+
 			bool CanReadByte() { return m_isByteInConnBuffer(); }
 		private:
 			void(*m_sendByteOnRawConnection)(byte);
@@ -52,6 +55,7 @@ namespace obos
 			void(*m_lockConnection)();
 			void(*m_unlockConnection)();
 			bool(*m_isByteInConnBuffer)();
+			bool m_sendingACK = true;
 		};
 	}
 }

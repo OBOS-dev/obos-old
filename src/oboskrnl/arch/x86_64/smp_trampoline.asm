@@ -8,6 +8,7 @@ segment .data
 
 global _strampoline
 global _etrampoline
+global loadGDT
 
 extern GDT_Ptr
 
@@ -153,3 +154,22 @@ align 1
 
 _etrampoline:
 align 1
+segment .text
+loadGDT:
+	lgdt [rdi]
+
+	mov ax, 0x10
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	mov ss, ax
+	
+	push 0x8
+	push .flush_tss
+	retfq
+.flush_tss:
+	mov ax, 0x28
+	ltr ax
+
+	ret

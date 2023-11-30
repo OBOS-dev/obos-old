@@ -71,7 +71,7 @@ namespace obos
 					currentThread->blockCallback.callback = LockBlockCallback;
 					currentThread->blockCallback.userdata = userdata;
 					currentThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;
-					thread::callScheduler();
+					thread::callScheduler(false);
 				}
 				else
 					while (!LockBlockCallback((thread::Thread*)currentThread, userdata));
@@ -117,7 +117,7 @@ namespace obos
 		Mutex::~Mutex()
 		{
 			atomic_set(&m_wake);
-			thread::callScheduler();
+			thread::callScheduler(false);
 			m_ownerThread = nullptr;
 			atomic_clear(&m_locked);
 		}

@@ -33,8 +33,9 @@
 #include <vfs/vfsNode.h>
 #include <vfs/fileManip/fileHandle.h>
 
-// TODO: Remove this line.
+#ifdef __x86_64__
 #include <arch/x86_64/gdbstub/stub.h>
+#endif
 
 #define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 
@@ -58,7 +59,8 @@ namespace obos
 		process::g_processes.tail = process::g_processes.head = kernelProc;
 		process::g_processes.size++;
 		getCPULocal()->currentThread->owner = kernelProc;
-
+		getCPULocal()->currentThread->next_list->owner = kernelProc;
+		
 		byte* procExecutable = nullptr;
 		size_t moduleIndex = 0;
 
@@ -90,6 +92,7 @@ namespace obos
 
 		new (&vfs::g_mountPoints) Vector<vfs::MountPoint*>{};
 
+#ifdef __x86_64__
 		gdbstub::InitDefaultConnection();
 		gdbstub::Connection gdb{
 			gdbstub::DefaultSendByteOnRawConnection,
@@ -99,6 +102,7 @@ namespace obos
 			gdbstub::DefaultByteInConnBuffer };
 
 		gdbstub::InititalizeGDBStub(&gdb);
+#endif
 
 		//logger::log("Mounting the initrd.\n");
 		//uint32_t point = 0;

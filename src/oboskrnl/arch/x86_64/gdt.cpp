@@ -8,6 +8,9 @@
 
 #include <memory_manipulation.h>
 
+#include <multitasking/cpu_local.h>
+#include <multitasking/arch.h>
+
 namespace obos
 {
 	struct gdtEntry
@@ -25,7 +28,11 @@ namespace obos
 	{
 		uint32_t resv1;
 		uint64_t rsp0;
-		uint8_t unused1[0x5A];
+		uint64_t rsp1;
+		uint64_t rsp2;
+		uint64_t resv2;
+		uint64_t ist0;
+		uint8_t unused1[0x3a];
 		uint16_t iopb;
 	} __attribute__((packed));
 
@@ -52,11 +59,23 @@ namespace obos
 		tss->baseMiddle2 = (base >> 24) & 0xFF;
 		tss->baseHigh = base >> 32;
 		s_tssEntry.iopb = 103;
+		static char ist0_tstack[0x1800];
+		s_tssEntry.ist0 = (uint64_t)(ist0_tstack + 0x1800);
 		
 		InitializeGDTASM();
 	}
 	void SetTSSStack(void* rsp)
 	{
-		s_tssEntry.rsp0 = (uintptr_t)rsp;
+		if (thread::GetCurrentCpuLocalPtr())
+			thread::GetCurrentCpuLocalPtr()->arch_specific.tss.rsp0 = (uintptr_t)rsp;
+		else
+			s_tssEntry.rsp0 = (uintptr_t)rsp;
+	}
+	void SetIST(void* rsp)
+	{
+		if(thread::GetCurrentCpuLocalPtr())
+			thread::GetCurrentCpuLocalPtr()->arch_specific.tss.ist0 = (uint64_t)rsp;
+		else
+			s_tssEntry.ist0 = (uintptr_t)rsp;
 	}
 }

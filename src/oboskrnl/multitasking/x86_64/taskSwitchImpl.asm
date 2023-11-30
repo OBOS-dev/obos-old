@@ -29,6 +29,7 @@ pop rax
 %endmacro
 
 extern _ZN4obos11SetTSSStackEPv
+extern _ZN4obos6SetISTEPv
 extern _ZN4obos7SendEOIEv
 extern _ZN4obos5rdmsrEj
 
@@ -53,7 +54,10 @@ _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE:
 	push rdi
 	mov rdi, [rdi+8]
 	add rdi, 4096*4
+	mov rbx, rdi
 	call _ZN4obos11SetTSSStackEPv
+	mov rdi, rbx
+	call _ZN4obos6SetISTEPv
 	pop rdi
 	add rdi, 16
 

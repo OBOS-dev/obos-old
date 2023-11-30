@@ -83,9 +83,12 @@ namespace obos
 				MaskTimer(true);
 			restorePreviousInterruptStatus(flags);
 		}
-		void callScheduler()
+		void callScheduler(bool allCores)
 		{
-			asm volatile("int $0x30");
+			if (allCores)
+				g_localAPICAddr->interruptCommand0_31 = 0x80020; // Call the scheduler on all cores.
+			else
+				asm volatile("int $0x30");
 		}
 	
 		void* getCurrentCpuLocalPtr()
