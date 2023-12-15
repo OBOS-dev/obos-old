@@ -19,6 +19,8 @@ target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 
 target_compile_definitions(oboskrnl PUBLIC E9_HACK=${E9_HACK})
 
+set_property (TARGET oboskrnl PROPERTY CXX_STANDARD 20)
+
 target_compile_options(oboskrnl 
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wall>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wextra>
@@ -89,6 +91,7 @@ endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_definitions(oboskrnl PUBLIC "OBOS_DEBUG")
 	target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:ASM_NASM>:-g -F dwarf>)
+	target_compile_options(oboskrnl PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:-fstack-protector-all>)
 else (CMAKE_BUILD_TYPE STREQUAL "Release")
 	target_compile_definitions(oboskrnl PUBLIC "OBOS_RELEASE")
 endif()

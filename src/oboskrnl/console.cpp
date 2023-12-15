@@ -16,67 +16,49 @@
 
 namespace obos
 {	
-	Console::Console(void* font, con_framebuffer output)
+	Console::Console(void* font, con_framebuffer output, bool lockCanUseMultitasking)
 	{
-		Initialize(font, output);
+		Initialize(font, output, lockCanUseMultitasking);
 	}
 
-	void Console::Initialize(void* font, con_framebuffer output)
+	void Console::Initialize(void* font, con_framebuffer output, bool lockCanUseMultitasking)
 	{
 		m_font = (uint8_t*)font;
 		m_framebuffer = output;
 		m_nCharsHorizontal = output.width / 8;
 		m_nCharsVertical = output.height / 16;
+		m_lock.CanUseMultitasking(lockCanUseMultitasking);
 	}
 
 	void Console::ConsoleOutput(const char* string)
 	{
-		uintptr_t val = thread::stopTimer();
-		for(size_t i = 0; string[i]; ConsoleOutput(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
-		thread::startTimer(val);
+		m_lock.Lock();
+		for(size_t i = 0; string[i]; __ImplConsoleOutputChar(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
+		m_lock.Unlock();
 	}
 	void Console::ConsoleOutput(const char* string, size_t size)
 	{
-		uintptr_t val = thread::stopTimer();
-		for (size_t i = 0; i < size; ConsoleOutput(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
-		thread::startTimer(val);
+		m_lock.Lock();
+		for (size_t i = 0; i < size; __ImplConsoleOutputChar(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
+		m_lock.Unlock();
 	}
 	void Console::ConsoleOutput(char ch)
 	{
-		ConsoleOutput(ch, m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY);
+		m_lock.Lock();
+		__ImplConsoleOutputChar(ch, m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY);
+		m_lock.Unlock();
 	}
 	void Console::ConsoleOutput(char ch, uint32_t& x, uint32_t& y)
 	{
-		ConsoleOutput(ch, m_foregroundColour, m_backgroundColour, x, y);
+		m_lock.Lock();
+		__ImplConsoleOutputChar(ch, m_foregroundColour, m_backgroundColour, x, y);
+		m_lock.Unlock();
 	}
 
 	void Console::ConsoleOutput(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y)
 	{
-		if (!m_framebuffer.addr)
-			return;
 		m_lock.Lock();
-		uintptr_t val = thread::stopTimer();
-		switch (ch)
-		{
-		case '\n':
-			newlineHandler(x,y);
-			break;
-		case '\r':
-			x = 0;
-			break;
-		case '\t':
-			x += 4 - (x % 4);
-			break;
-		case '\b':
-			putChar(' ', --x, y, foregroundColour, backgroundColour);
-			break;
-		default:
-			if (x >= m_nCharsHorizontal)
-				newlineHandler(x,y);
-			putChar(ch, x++, y, foregroundColour, backgroundColour);
-			break;
-		}
-		thread::startTimer(val);
+		__ImplConsoleOutputChar(ch, foregroundColour, backgroundColour, x, y);
 		m_lock.Unlock();
 	}
 
@@ -101,12 +83,14 @@ namespace obos
 
 	void Console::SetColour(uint32_t foregroundColour, uint32_t backgroundColour, bool clearConsole)
 	{
+		if (clearConsole)
+			utils::dwMemset(m_framebuffer.addr, backgroundColour, static_cast<size_t>(m_framebuffer.height) * m_framebuffer.width);
 		if (backgroundColour != m_backgroundColour)
 			if (!clearConsole)
 				fillBackgroundTransparent(m_framebuffer, backgroundColour, m_backgroundColour);
-			else
-				utils::dwMemset(m_framebuffer.addr, backgroundColour, static_cast<size_t>(m_framebuffer.height) * m_framebuffer.width);
+			else {}
 		else {}
+				
 		m_foregroundColour = foregroundColour;
 		m_backgroundColour = backgroundColour;
 	}
@@ -202,6 +186,31 @@ namespace obos
 			utils::dwMemset((uint32_t*)(reinterpret_cast<uintptr_t>(m_framebuffer.addr) + (m_framebuffer.pitch * m_framebuffer.height) - m_framebuffer.pitch * 16),
 				m_backgroundColour, m_framebuffer.pitch * 16 / 4);
 			y--;
+		}
+	}
+	void Console::__ImplConsoleOutputChar(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y)
+	{
+		if (!m_framebuffer.addr)
+			return;
+		switch (ch)
+		{
+		case '\n':
+			newlineHandler(x, y);
+			break;
+		case '\r':
+			x = 0;
+			break;
+		case '\t':
+			x += 4 - (x % 4);
+			break;
+		case '\b':
+			putChar(' ', --x, y, foregroundColour, backgroundColour);
+			break;
+		default:
+			if (x >= m_nCharsHorizontal)
+				newlineHandler(x, y);
+			putChar(ch, x++, y, foregroundColour, backgroundColour);
+			break;
 		}
 	}
 }

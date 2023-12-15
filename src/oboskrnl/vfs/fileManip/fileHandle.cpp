@@ -95,8 +95,8 @@ namespace obos
 			const char* realPath = path;
 			realPath += utils::strCountToChar(path, ':');
 			realPath += utils::strCountToChar(path, '/');
+			// If a file is in the root, the file size is zero, whether it actually is or not? TODO: Fix.
 			DirectoryEntry* entry = SearchForNode(point->children.head, (void*)realPath, [](DirectoryEntry* current, void* userdata)->bool {
-				logger::printf("%s\n", current->path.str);
 				return utils::strcmp(current->path.str, (const char*)userdata);
 				});
 			if (!entry)
@@ -117,14 +117,14 @@ namespace obos
 				entry->fileHandlesReferencing.head = node;
 			node->prev = entry->fileHandlesReferencing.tail;
 			entry->fileHandlesReferencing.size++;
-
+			
 			if (options & OPTIONS_APPEND)
 				SeekTo(0, SEEKPLACE_END);
 			if (!(options & OPTIONS_READ_ONLY))
 				m_flags |= FLAGS_ALLOW_WRITE;
 			return true;
 		}
-		bool ReadFile(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, void** data, size_t* filesize, size_t nToSkip, size_t nToRead);
+		bool ReadFile(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, void** data, size_t* nRead, size_t nToSkip, size_t nToRead);
 
 		bool FileHandle::Read(char* data, size_t nToRead, bool peek)
 		{
@@ -141,33 +141,46 @@ namespace obos
 			}
 			if (!nToRead)
 				return true;
-			if (nToRead == 1)
-			{
-				// Read one character.
-				
-				process::Process* proc = (process::Process*)node->mountPoint->filesystemDriver->process;
-
-				uint32_t pid = proc->pid;
-
-				if(data)
+			driverInterface::DriverClient driver;
+			bool(*ReadCharacter)(driverInterface::DriverClient&, char*, FileHandle*) =
+				[](driverInterface::DriverClient& driver, char* dest, FileHandle* _this)->bool
 				{
-					driverInterface::DriverClient driver;
-					driver.OpenConnection(pid, 15000);
-				
-					char* fdata = nullptr;
-					ReadFile(driver, node->path.str, node->mountPoint->partitionId, (void**)&fdata, nullptr, m_currentFilePos, 1);
-					SeekTo(!peek, SEEKPLACE_CUR);
-					*data = *fdata;
-					delete[] fdata;
+					char* tempDest = nullptr;
+					DirectoryEntry* node = (DirectoryEntry*)_this->m_node;
+					if (_this->Eof())
+					{
+						SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
+						return false;
+					}
+					bool ret = ReadFile(driver, node->path.str, node->mountPoint->partitionId, (void**)&tempDest, nullptr, _this->m_currentFilePos++, 1);
+					*dest = *tempDest;
+					delete[] tempDest;
+					return ret;
+				};
+			process::Process* proc = (process::Process*)node->mountPoint->filesystemDriver->process;
 
-					driver.CloseConnection();
-				}
-
-				return true;
-			}
+			uint32_t pid = proc->pid;
 			bool ret = true;
-			for (size_t i = 0; i < nToRead && ret && data; ret = Read(data + i++, 1));
-			return true;
+
+			if (data)
+			{
+				driver.OpenConnection(pid, 15000);
+
+				volatile auto originalFilePos = m_currentFilePos;
+
+				for (size_t i = 0; i < nToRead && ret; ret = ReadCharacter(driver, &data[i++], this));
+
+				if (peek)
+					m_currentFilePos = originalFilePos;
+
+				driver.CloseConnection();
+			}
+			return ret;
+		}
+		bool FileHandle::Write()
+		{
+			SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
+			return false;
 		}
 
 		bool FileHandle::Eof() const
@@ -175,7 +188,7 @@ namespace obos
 			const DirectoryEntry* node = (DirectoryEntry*)m_node;
 			return m_currentFilePos + 1 >= node->filesize;
 		}
-		size_t FileHandle::GetFileSize()
+		size_t FileHandle::GetFileSize() const
 		{
 			if (m_flags & FLAGS_CLOSED || !m_node)
 			{
@@ -225,11 +238,12 @@ namespace obos
 			default:
 				break;
 			}
-			if (((off_t)m_currentFilePos) < 0)
-				m_currentFilePos = 0;
-			if (m_currentFilePos >= node->filesize)
-				m_currentFilePos = node->filesize - 1;
 			return ret;
+		}
+
+		bool FileHandle::Close()
+		{
+			return false;
 		}
 
 	}

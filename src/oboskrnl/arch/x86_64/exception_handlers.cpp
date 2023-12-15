@@ -22,6 +22,8 @@
 
 #include <arch/x86_64/memory_manager/physical/allocate.h>
 
+#include <arch/x86_64/irq/irq.h>
+
 namespace obos
 {
 	bool g_halt;
@@ -62,7 +64,13 @@ namespace obos
 				}
 			}
 		}
-		logger::panic("Page fault in %s-mode at %p (cpu %d, pid %d, tid %d) while trying to %s a %s page. The address of this page is %p. Error code: %d.\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\nDumping registers:\n"
+		// Bug mitigation.
+		// Sometimes we page fault while accessing the lapic, even though that's impossible.
+		if ((faultAddress >= (uintptr_t)g_localAPICAddr && faultAddress <= 0xfffffffffffff000) && !(frame->errorCode >> 4))
+			return;
+		logger::panic(
+			(void*)frame->rbp,
+			"Page fault in %s-mode at %p (cpu %d, pid %d, tid %d) while trying to %s a %s page. The address of this page is %p. Error code: %d.\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\nDumping registers:\n"
 			"\tRDI: %p, RSI: %p, RBP: %p\n"
 			"\tRSP: %p, RBX: %p, RDX: %p\n"
 			"\tRCX: %p, RAX: %p, RIP: %p\n"
@@ -113,7 +121,9 @@ namespace obos
 			else
 				tid = (uint32_t)-1;
 		}
-		logger::panic("Exception %d at %p (cpu %d, pid %d, tid %d). Error code: %d.\nDumping registers:\n"
+		logger::panic(
+			(void*)frame->rbp,
+			"Exception %d at %p (cpu %d, pid %d, tid %d). Error code: %d.\nDumping registers:\n"
 			"\tRDI: %p, RSI: %p, RBP: %p\n"
 			"\tRSP: %p, RBX: %p, RDX: %p\n"
 			"\tRCX: %p, RAX: %p, RIP: %p\n"
@@ -139,7 +149,7 @@ namespace obos
 	{
 		if (g_halt)
 			haltCPU();
-		logger::panic("NMI thrown by the hardware. System control port: %d.\n", inb(0x92) | (inb(0x61) << 8));
+		logger::panic(nullptr, "NMI thrown by the hardware. System control port: %d.\n", inb(0x92) | (inb(0x61) << 8));
 	}
 	void RegisterExceptionHandlers()
 	{

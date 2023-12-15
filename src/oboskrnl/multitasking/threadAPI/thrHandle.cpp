@@ -40,6 +40,12 @@ namespace obos
 		
 		bool ThreadHandle::OpenThread(uint32_t tid)
 		{
+			if (tid == 1)
+			{
+				// The idle task is protected.
+				SetLastError(OBOS_ERROR_ACCESS_DENIED);
+				return false;
+			}
 			void* obj = nullptr;
 			obj = lookForThreadInList(g_priorityLists[0], tid);
 			if(!obj)
@@ -100,22 +106,18 @@ namespace obos
 			uintptr_t val = stopTimer();
 
 			if(priorityList->tail)
-			{
 				priorityList->tail->next_run = thread;
-				thread->prev_run = priorityList->tail;
-			}
 			if (!priorityList->head)
 				priorityList->head = thread;
+			thread->prev_run = priorityList->tail;
 			priorityList->tail = thread;
 			priorityList->size++;
 			
 			if(thread->threadList->tail)
-			{
-				thread->threadList->tail->next_run = thread;
-				thread->prev_run = thread->threadList->tail;
-			}
+				thread->threadList->tail->next_list = thread;
 			if (!thread->threadList->head)
 				thread->threadList->head = thread;
+			thread->prev_list = thread->threadList->tail;
 			thread->threadList->tail = thread;
 			thread->threadList->size++;
 
@@ -335,7 +337,7 @@ namespace obos
 				return true;
 			}
 
-			obj = nullptr;
+			m_obj = nullptr;
 
 			return true;
 		}

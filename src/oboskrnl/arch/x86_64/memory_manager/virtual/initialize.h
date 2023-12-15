@@ -41,5 +41,7 @@ namespace obos
 		void InitializeVirtualMemoryManager();
 
 		bool CPUSupportsExecuteDisable();
+
+		extern bool g_initialized;
 	}
 }

@@ -14,6 +14,8 @@
 
 using namespace obos;
 
+
+
 extern driverInterface::driverHeader g_driverHeader;
 
 int oct2bin(char* str, int size)
@@ -28,11 +30,15 @@ int oct2bin(char* str, int size)
 	return n;
 }
 
+[[noreturn]] extern void kpanic(const char* format, ...);
+
 filesystemCache g_filesystemCache = {};
 
 void InitializeFilesystemCache()
 {
 	ustarEntry* entry = (ustarEntry*)g_driverHeader.initrdLocationResponse.addr;
+	if (!g_driverHeader.memoryManipFunctionsResponse.memcmp(&entry->indication, "ustar", 6))
+		kpanic("[DRIVER 0, FATAL] %s: Invalid or empty initrd image!\n", __func__);
 	while (g_driverHeader.memoryManipFunctionsResponse.memcmp(&entry->indication, "ustar", 6))
 	{
 		size_t filesize = oct2bin(entry->filesizeOctal, 11);
@@ -51,6 +57,7 @@ void InitializeFilesystemCache()
 		{
 		case ustarEntry::NORMAL_FILE:
 			cache->entryAttributes = driverInterface::FILE_ATTRIBUTES_FILE | driverInterface::FILE_ATTRIBUTES_READ_ONLY;
+			cache->entryFilesize++; // Add one to the filesize.
 			break;
 		case ustarEntry::DIRECTORY:
 			cache->entryAttributes = driverInterface::FILE_ATTRIBUTES_DIRECTORY;

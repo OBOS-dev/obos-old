@@ -72,8 +72,9 @@ namespace obos
 		uintptr_t allocatePhysicalPage()
 		{
 			if (!g_memoryHead)
-				logger::panic("No more available physical memory left.\n");
+				logger::panic(nullptr, "No more available physical memory left.\n");
 			g_pmmLock.Lock();
+			uintptr_t flags = saveFlagsAndCLI();
 			uintptr_t ret = (uintptr_t)g_memoryHead;
 			MemoryNode* node = (MemoryNode*)memory::mapPageTable((uintptr_t*)ret);
 			MemoryNode* next = node->next;
@@ -81,10 +82,11 @@ namespace obos
 			if (next)
 				((MemoryNode*)memory::mapPageTable((uintptr_t*)next))->prev = prev;
 			g_memoryHead = next;
-			memory::mapPageTable((uintptr_t*)ret);
+			node = (MemoryNode*)memory::mapPageTable((uintptr_t*)ret);
 			node->next = nullptr;
 			node->prev = nullptr;
 			g_avaliableMemoryNodes--;
+			restorePreviousInterruptStatus(flags);
 			g_pmmLock.Unlock();
 			return ret;
 		}

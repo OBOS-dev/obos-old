@@ -42,6 +42,7 @@ namespace obos
 				uint64_t base;
 			} __attribute__((packed));
 			gdtptr gdtPtr;
+			uintptr_t mapPageTableBase;
 		};
 	}
 }

@@ -67,4 +67,6 @@ namespace obos
 	void setDR3(uint64_t val);
 	void setDR6(uint64_t val);
 	void setDR7(uint64_t val);
+	
+	void *getRBP();
 }

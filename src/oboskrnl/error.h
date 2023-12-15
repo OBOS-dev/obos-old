@@ -81,12 +81,24 @@ namespace obos
 		/// </summary>
 		OBOS_ERROR_VFS_ALREADY_MOUNTED,
 		/// <summary>
-		/// 
+		/// The partition is already mounted.
 		/// </summary>
 		OBOS_ERROR_VFS_PARTITION_ALREADY_MOUNTED,
+		/// <summary>
+		/// The driver for a mount point does not report to be a filesystem driver.
+		/// </summary>
 		OBOS_ERROR_VFS_NOT_A_FILESYSTEM_DRIVER,
+		/// <summary>
+		/// The file was not found.
+		/// </summary>
 		OBOS_ERROR_VFS_FILE_NOT_FOUND,
+		/// <summary>
+		/// The read was aborted.
+		/// </summary>
 		OBOS_ERROR_VFS_READ_ABORTED,
+		/// <summary>
+		/// The feature hasn't been implemented (yet).
+		/// </summary>
 		OBOS_ERROR_UNIMPLEMENTED_FEATURE,
 
 		OBOS_ERROR_HIGHEST_VALUE,

@@ -13,6 +13,8 @@
 #include <arch/x86_64/irq/timer.h>
 #include <arch/x86_64/irq/irq.h>
 
+#include <arch/x86_64/memory_manager/virtual/allocate.h>
+
 #include <multitasking/scheduler.h>
 #include <multitasking/arch.h>
 #include <multitasking/cpu_local.h>
@@ -24,6 +26,7 @@
 #define getCPULocal() GetCurrentCpuLocalPtr()
 
 extern "C" uint64_t calibrateTimer(uint64_t femtoseconds);
+extern "C" void _fxsave(byte(*context)[512]);
 
 namespace obos
 {
@@ -54,11 +57,11 @@ namespace obos
 		{
 			if (!g_initialized)
 				return;
-			volatile Thread*& currentThread = getCPULocal()->currentThread;
+			volatile Thread* currentThread = getCPULocal()->currentThread;
 			if (!getCPULocal()->schedulerLock && currentThread)
 			{
 				utils::dwMemcpy((uint32_t*)&currentThread->context.frame, (uint32_t*)frame, sizeof(interrupt_frame) / 4); // save the interrupt frame
-				asm volatile("fxsave (%0)" : : "r"(currentThread->context.fpuState) : "memory"); // save the fpu state.
+				_fxsave((byte(*)[512])currentThread->context.fpuState);
 			}
 			schedule();
 		}
@@ -86,7 +89,7 @@ namespace obos
 		void callScheduler(bool allCores)
 		{
 			if (allCores)
-				g_localAPICAddr->interruptCommand0_31 = 0x80020; // Call the scheduler on all cores.
+				SendIPI(DestinationShorthand::All, DeliveryMode::Default, 0x30);
 			else
 				asm volatile("int $0x30");
 		}

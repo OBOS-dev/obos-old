@@ -10,7 +10,7 @@
 
 #include <multitasking/thread.h>
 
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(_WIN64)
 #include <multitasking/process/x86_64/procInfo.h>
 #endif
 

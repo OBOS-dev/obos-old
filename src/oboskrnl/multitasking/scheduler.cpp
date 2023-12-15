@@ -17,6 +17,8 @@
 
 #include <multitasking/locks/mutex.h>
 
+#include <memory_manipulation.h>
+
 #define getCPULocal() GetCurrentCpuLocalPtr()
 
 namespace obos
@@ -27,12 +29,17 @@ namespace obos
 		Thread::ThreadList g_priorityLists[4];
 		uint64_t g_schedulerFrequency = 1000;
 		uint64_t g_timerTicks = 0;
+		uint64_t g_defaultAffinity = 0;
 		locks::Mutex g_coreGlobalSchedulerLock;
 
 		bool g_initialized = false;
 
 #pragma GCC push_options
 #pragma GCC optimize("O0")
+		static bool checkThreadAffinity(Thread* thr)
+		{
+			return (thr->affinity >> GetCurrentCpuLocalPtr()->cpuId) & 1;
+		}
 		Thread* findRunnableThreadInList(Thread::ThreadList& list)
 		{
 			Thread* currentThread = list.tail;
@@ -49,10 +56,18 @@ namespace obos
 				bool canRun = currentThread->status == THREAD_STATUS_CAN_RUN;
 				if (!canRun)
 					canRun = (currentThread == currentRunningThread && (currentThread->status & THREAD_STATUS_RUNNING)) || currentThread->status & (THREAD_STATUS_CAN_RUN | THREAD_STATUS_SINGLE_STEPPING);
+				if (canRun && ((currentThread->status & THREAD_STATUS_PAUSED) || (currentThread->status & THREAD_STATUS_BLOCKED)))
+					canRun = false;
+				canRun = canRun && checkThreadAffinity(currentThread);
 
 				if (canRun && (currentThread->timeSliceIndex < currentThread->priority))
-					if (!ret || currentThread->lastTimePreempted < ret->lastTimePreempted)
+				{
+					if (!ret)
 						ret = currentThread;
+					else
+						if (currentThread->lastTimePreempted < ret->lastTimePreempted)
+							ret = currentThread;
+				}
 
 				if (clearTimeSliceIndex)
 				{
@@ -110,6 +125,7 @@ namespace obos
 				if (thread->status & THREAD_STATUS_BLOCKED)
 				{
 					while (thread->status & THREAD_STATUS_CALLING_BLOCK_CALLBACK);
+					OBOS_ASSERTP(!(thread->status & THREAD_STATUS_RUNNING), "Thread (tid %d) is both blocked and running (status 0x%e%X)!\n","", thread->tid, 4, thread->status);
 					thread->status |= THREAD_STATUS_CALLING_BLOCK_CALLBACK;
 					bool ret = callBlockCallbackOnThread(&thread->context, (bool(*)(void*,void*))thread->blockCallback.callback, thread, thread->blockCallback.userdata);
 					thread->status &= ~THREAD_STATUS_CALLING_BLOCK_CALLBACK;
@@ -131,7 +147,8 @@ namespace obos
 			if (getCPULocal()->schedulerLock)
 				return;
 
-			g_coreGlobalSchedulerLock.Lock();
+			if (!g_coreGlobalSchedulerLock.Lock())
+				return;
 
 			atomic_set((bool*)&getCPULocal()->schedulerLock);
 
@@ -152,7 +169,9 @@ namespace obos
 					goto find;
 			}
 			if (foundHighPriority == 2)
-				newThread = g_priorityLists[0].head;
+				newThread = getCPULocal()->idleThread;
+			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_BLOCKED), "Thread (tid %d) is both blocked and is trying to be run (status 0x%e%X)!\n", "", newThread->tid, 4, newThread->status);
+			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_PAUSED), "Thread (tid %d) is both paused and is trying to be run (status 0x%e%X)!\n", "", newThread->tid, 4, newThread->status);
 			if (newThread == currentThread)
 			{
 				currentThread->status &= ~THREAD_STATUS_CAN_RUN;
@@ -174,7 +193,7 @@ namespace obos
 			newThread->status |= THREAD_STATUS_RUNNING;
 			g_coreGlobalSchedulerLock.Unlock();
 			atomic_clear((bool*)&getCPULocal()->schedulerLock);
-			switchToThreadImpl((taskSwitchInfo*)&newThread->context);
+			switchToThreadImpl((taskSwitchInfo*)&newThread->context, newThread);
 		}
 #pragma GCC pop_options
 
@@ -182,39 +201,23 @@ namespace obos
 		{
 			new (&g_coreGlobalSchedulerLock) locks::Mutex{ false };
 
-			Thread* kernelMainThread  = new Thread{};
+			Thread* kernelMainThread = new Thread{};
 
 			kernelMainThread->tid = g_nextTid++;
 			kernelMainThread->status = THREAD_STATUS_RUNNING;
 			kernelMainThread->priority = THREAD_PRIORITY_NORMAL;
-			kernelMainThread->exitCode = 0;
-			kernelMainThread->lastError = 0;
 			kernelMainThread->priorityList = g_priorityLists + 2;
 			kernelMainThread->threadList = new Thread::ThreadList;
+			
 			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 0x10000, false);
 
-			Thread* idleThread = new Thread{};
-
-			idleThread->tid = g_nextTid++;
-			idleThread->status = THREAD_STATUS_CAN_RUN;
-			idleThread->priority = THREAD_PRIORITY_IDLE;
-			idleThread->exitCode = 0;
-			idleThread->lastError = 0;
-			idleThread->priorityList = g_priorityLists + 0;
-			idleThread->threadList = kernelMainThread->threadList;
-			setupThreadContext(&idleThread->context, &idleThread->stackInfo, (uintptr_t)idleTask, 0, 4096, false);
-			
 			kernelMainThread->threadList->head = kernelMainThread;
-			kernelMainThread->threadList->tail = idleThread;
-			kernelMainThread->threadList->size = 2;
-			kernelMainThread->next_list = idleThread;
-			idleThread->prev_list = kernelMainThread;
+			kernelMainThread->threadList->tail = kernelMainThread;
+			kernelMainThread->threadList->size = 1;
 
 			g_priorityLists[2].head = g_priorityLists[2].tail = kernelMainThread;
 			g_priorityLists[2].size++;
-			g_priorityLists[0].head = g_priorityLists[0].tail = idleThread;
-			g_priorityLists[0].size++;
-
+			
 			g_priorityLists[3].prevThreadList = g_priorityLists + 2;
 			g_priorityLists[2].prevThreadList = g_priorityLists + 1;
 			g_priorityLists[1].prevThreadList = g_priorityLists + 0;
@@ -226,14 +229,46 @@ namespace obos
 			g_priorityLists[0].nextThreadList = g_priorityLists + 1;
 
 			if (!StartCPUs())
-				logger::panic("Could not start the other cores.");
+				logger::panic(nullptr, "Could not start the other cores.");
+
+			for (size_t i = 0; i < g_nCPUs; i++)
+				g_defaultAffinity |= (uint64_t)1 << g_cpuInfo[i].cpuId;
+			kernelMainThread->affinity = g_defaultAffinity;
+
+			for (size_t i = 0; i < g_nCPUs; i++)
+			{
+				auto &idleThread = g_cpuInfo[i].idleThread;
+				idleThread = new Thread{};
+				idleThread->tid = g_nextTid++;
+				idleThread->priorityList = g_priorityLists + 0;
+				idleThread->status = THREAD_STATUS_CAN_RUN;
+				idleThread->priority = THREAD_PRIORITY_IDLE;
+				idleThread->affinity = (uint64_t)1 << g_cpuInfo[i].cpuId;
+				auto threadListProc = kernelMainThread->threadList;
+				if (threadListProc->tail)
+					threadListProc->tail->next_list = idleThread;
+				if(!threadListProc->head)
+					threadListProc->head = idleThread;
+				idleThread->prev_list = threadListProc->tail;
+				threadListProc->tail = idleThread;
+				threadListProc->size++;
+				auto &priorityList = g_priorityLists[0];
+				if (priorityList.tail)
+					priorityList.tail->next_list = idleThread;
+				if(!priorityList.head)
+					priorityList.head = idleThread;
+				idleThread->next_run = priorityList.tail;
+				priorityList.tail = idleThread;
+				priorityList.size++;
+				setupThreadContext(&idleThread->context, &idleThread->stackInfo, (uintptr_t)idleTask, 0, 0x2000, false);
+			}
 
 			volatile Thread*& currentThread = getCPULocal()->currentThread;
 			currentThread = (volatile Thread*)kernelMainThread;
 
 			setupTimerInterrupt();
 			thread::g_initialized = true;
-			switchToThreadImpl((taskSwitchInfo*)&currentThread->context);
+			switchToThreadImpl((taskSwitchInfo*)&currentThread->context, (Thread*)currentThread);
 			kmain_common(); // just in case
 		}
 

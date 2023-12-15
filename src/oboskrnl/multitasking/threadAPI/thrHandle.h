@@ -12,6 +12,7 @@ namespace obos
 {
 	namespace thread
 	{
+		extern uint64_t g_defaultAffinity;
 		class ThreadHandle
 		{
 		public:
@@ -41,7 +42,7 @@ namespace obos
 			/// <param name="startPaused">Whether the thread should be paused when it starts.</param>
 			/// <param name="isUsermode">Whether to start the thread in user mode. This parameter does not exist in the syscall.</param>
 			/// <returns>Whether the function succeeded or not.</returns>
-			bool CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, void* threadList = nullptr, bool startPaused = false, bool isUsermode = false);
+			bool CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity = g_defaultAffinity, void* threadList = nullptr, bool startPaused = false, bool isUsermode = false);
 
 			/// <summary>
 			/// Pauses the thread.

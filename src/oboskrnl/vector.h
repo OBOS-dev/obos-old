@@ -7,6 +7,9 @@
 #pragma once
 
 #include <int.h>
+#ifdef OBOS_DEBUG
+#include <klog.h>
+#endif
 
 #include <memory_manipulation.h>
 
@@ -42,6 +45,9 @@ namespace obos
 				m_capacity += m_capacityIncrement;
 				m_ptr = (T*)krealloc(m_ptr, m_capacity * sizeof(T));
 			}
+#ifdef OBOS_DEBUG
+			OBOS_ASSERTP(m_ptr > (void*)0xfffffffff0000000, "");
+#endif
 			return m_ptr[m_sz++] = val;
 		}
 		void pop_back()

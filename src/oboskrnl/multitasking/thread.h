@@ -12,6 +12,12 @@
 
 #define MULTIASKING_THREAD_H_INCLUDED
 
+#if defined(_GNUC_)
+#define OBOS_ALIGN(n) __attribute__((aligned(n))
+#else
+#define OBOS_ALIGN(n)
+#endif
+
 namespace obos
 {
 	namespace thread
@@ -65,7 +71,6 @@ namespace obos
 				void* addr;
 				size_t size;
 			} stackInfo;
-			taskSwitchInfo context;
 			void* owner; // a Process*
 			Thread* next_run; // The next in the priority list.
 			Thread* prev_run; // The previous in the priority list.
@@ -73,6 +78,10 @@ namespace obos
 			Thread* prev_list;  // The previous in the process thread list.
 			ThreadList* priorityList; // A pointer to the priority list.
 			ThreadList* threadList; // A pointer to the process' thread list.
-		};
+			taskSwitchInfo context;
+			// If a bit is set, the cpu corresponding to that bit number can run the thread.
+			// This limits the kernel to 64 core machines.
+			uint64_t affinity;
+		} OBOS_ALIGN(4);
 	}
 }

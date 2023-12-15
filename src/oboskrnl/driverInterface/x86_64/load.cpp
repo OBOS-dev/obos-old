@@ -119,7 +119,7 @@ namespace obos
 				thread::THREAD_PRIORITY_NORMAL, 
 				(header->requests & driverHeader::SET_STACK_SIZE_REQUEST) ? header->stackSize : 0,
 				(void(*)(uintptr_t))entryPoint,
-				0x0B00B1E5B16B00B5 /* as a surprise for any drivers */,
+				0,
 				&driverProc->threads);
 			((thread::Thread*)thread->GetUnderlyingObject())->owner = driverProc;
 

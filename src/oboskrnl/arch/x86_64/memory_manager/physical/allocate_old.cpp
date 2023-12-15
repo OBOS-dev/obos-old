@@ -85,7 +85,7 @@ namespace obos
 			}
 			g_memEnd = mmap_request.response->entries[mmap_request.response->entry_count - 1]->base + mmap_request.response->entries[mmap_request.response->entry_count - 1]->length;
 			if (!foundSpace)
-				logger::panic("Couldn't find enough space to allocate the bitmap for the physical memory manager.\n");
+				logger::panic(nullptr, "Couldn't find enough space to allocate the bitmap for the physical memory manager.\n");
 			utils::memzero(g_bitmaps, g_bitmapSize);
 			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
 			{
@@ -130,7 +130,7 @@ namespace obos
 			{
 				for (ret = 0x1000; ret < g_memEnd && getPageStatus(ret); ret += 0x1000);
 				if (ret == g_memEnd)
-					logger::panic("No more avaliable system memory!\n");
+					logger::panic(nullptr, "No more avaliable system memory!\n");
 			}
 			markPageAs(ret, true);
 			g_lastPageAllocated = ret;

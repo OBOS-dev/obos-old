@@ -36,6 +36,7 @@ namespace obos
 				alignas(0x08) thread::ThreadHandle* _this; 
 				alignas(0x08) uint32_t priority; 
 				alignas(0x08) size_t stackSize; 
+				alignas(0x08) uint64_t affinity; 
 				alignas(0x08) void(*entry)(uintptr_t);
 				alignas(0x08) uintptr_t userdata;
 				alignas(0x08) bool startPaused;
@@ -55,7 +56,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			return par->_this->CreateThread(par->priority, par->stackSize, par->entry, par->userdata, nullptr, par->startPaused, ((process::Process*)getCPULocal()->currentThread->owner)->isUsermode);
+			return par->_this->CreateThread(par->priority, par->stackSize, par->entry, par->userdata, par->affinity, nullptr, par->startPaused, ((process::Process*)getCPULocal()->currentThread->owner)->isUsermode);
 		}
 		bool SyscallOpenThread(void* pars)
 		{

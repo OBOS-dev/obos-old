@@ -40,7 +40,7 @@ EXTERN_C void ConsoleGetFramebuffer(con_framebuffer* framebuffer);
 EXTERN_C void ConsoleGetConsoleBounds(uint32_t* horizontal, uint32_t* vertical);
 EXTERN_C void FreeConsole();
 EXTERN_C uintptr_t MakeThreadObject();
-EXTERN_C bool CreateThread(uintptr_t _this, uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, bool startPaused);
+EXTERN_C bool CreateThread(uintptr_t _this, uint32_t priority, size_t stackSize, uint64_t affinity, void(*entry)(uintptr_t), uintptr_t userdata, bool startPaused);
 EXTERN_C bool OpenThread(uintptr_t _this, uint32_t tid);
 EXTERN_C bool PauseThread(uintptr_t _this);
 EXTERN_C bool ResumeThread(uintptr_t _this);

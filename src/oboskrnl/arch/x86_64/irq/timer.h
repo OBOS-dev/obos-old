@@ -19,12 +19,12 @@ namespace obos
 	{
 		TIMER_DIVISOR_TWO = 0b0000,
 		TIMER_DIVISOR_FOUR = 0b0001,
-		TIMER_DIVISOR_EIGHT = 0b0100,
-		TIMER_DIVISOR_SIXTEEN = 0b0101,
+		TIMER_DIVISOR_EIGHT = 0b0010,
+		TIMER_DIVISOR_SIXTEEN = 0b0011,
 		TIMER_DIVISOR_THIRTY_TWO = 0b1000,
 		TIMER_DIVISOR_SIXTY_FOUR = 0b1001,
-		TIMER_DIVISOR_ONE_HUNDERED_TWENTY_EIGHT = 0b1100,
-		TIMER_DIVISOR_ONE = 0b1101,
+		TIMER_DIVISOR_ONE_HUNDERED_TWENTY_EIGHT = 0b1010,
+		TIMER_DIVISOR_ONE = 0b1011,
 	};
 	void ConfigureAPICTimer(void(*handler)(interrupt_frame* frame), byte isr, uint32_t initialCount, TimerConfig timerConfig, TimerDivisor divisor, bool maskIrq = true);
 	void MaskTimer(bool mask); // Masks the timer interrupt. If !mask, the timer interrupt is disabled.

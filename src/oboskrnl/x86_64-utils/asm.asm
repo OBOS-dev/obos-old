@@ -4,6 +4,10 @@
 
 [BITS 64]
 
+section .rodata
+panic_format_atomic_set: db "obos::atomic_set: Assertion failed: val != 0xfffffff759738000.", 0x0A, 0x00
+section .text
+
 global _ZN4obos4outbEth
 global _ZN4obos4outwEtt
 global _ZN4obos4outdEtj
@@ -182,7 +186,18 @@ _ZN4obos5rdtscEv:
 	leave
 	ret
 global _ZN4obos10atomic_setEPb
+extern _ZN4obos6logger5panicEPvPKcz
 _ZN4obos10atomic_setEPb:
+	mov rax, 0xfffffff759738000
+	cmp rdi, rax
+	jne .run
+	mov rax, 0xfffffff759738ff8
+	cmp rdi, rax
+	jne .run
+	mov rdi, 0
+	mov rsi, panic_format_atomic_set
+	call _ZN4obos6logger5panicEPvPKcz
+.run:
 	mov al, [rdi]
 	mov sil, 1
 	lock cmpxchg byte [rdi], sil
@@ -280,4 +295,14 @@ _ZN4obos6setDR6Em:
 global _ZN4obos6setDR7Em
 _ZN4obos6setDR7Em:
 	mov dr7, rdi
+	ret
+global _ZN4obos6getRBPEv
+_ZN4obos6getRBPEv:
+	mov rax, rbp
+	ret
+global _ZN4obos14atomic_cmpxchgEPbbb
+_ZN4obos14atomic_cmpxchgEPbbb:
+	mov al, sil
+	lock cmpxchg byte [rdi], dl
+	setz al
 	ret

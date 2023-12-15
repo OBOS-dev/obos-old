@@ -17,7 +17,7 @@ struct ustarEntry
 	char filesizeOctal[12];
 	byte unused2[12];
 	uint64_t unused3;
-	enum
+	enum __type
 	{
 		NORMAL_FILE = '0',
 		HARD_LINK = '1',
@@ -26,7 +26,8 @@ struct ustarEntry
 		BLOCK_DEVICE = '4',
 		DIRECTORY = '5',
 		NAMED_PIPE = '6',
-	} __attribute__((packed)) type;
+	} __attribute__((packed));
+	__type type;
 	char linkedFile[100];
 	char indication[6]; // should be "ustar\0"
 	char version[2];

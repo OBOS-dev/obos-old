@@ -221,7 +221,7 @@ namespace obos
 			if (!identity->listening && timeoutTicks)
 			{
 				volatile thread::Thread*& currentThread = getCPULocal()->currentThread;
-				currentThread->wakeUpTime = thread::g_timerTicks + timeoutTicks;
+				currentThread->wakeUpTime = timeoutTicks == (uint64_t)-1 ? timeoutTicks : thread::g_timerTicks + timeoutTicks;
 				currentThread->blockCallback.callback = [](thread::Thread* thr, void* _data)->bool
 					{
 						driverIdentity* identity = (driverIdentity*)_data;
@@ -294,12 +294,16 @@ namespace obos
 				SetLastError(OBOS_ERROR_NOT_A_DRIVER);
 				return false;
 			}
-			uintptr_t data[2] = { (uintptr_t)this, identity->connections.size };
+			uintptr_t *data = new uintptr_t[3];
+			data[0] = (uintptr_t)this;
+			data[1] = identity->connections.size;
+			data[2] = (uintptr_t)identity->connections.tail;
 			currentThread->wakeUpTime = timeoutTicks ? thread::g_timerTicks + timeoutTicks : 0xffffffffffffffff;
 			currentThread->blockCallback.callback = ListenCallback;
 			currentThread->blockCallback.userdata = data;
 			currentThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;
 			thread::callScheduler(false);
+			delete[] data;
 			if (!m_rawCon)
 				return false;
 			m_rawCon->references++;
@@ -338,8 +342,11 @@ namespace obos
 			driverIdentity* identity = (driverIdentity*)((process::Process*)thr->owner)->_driverIdentity;
 			uintptr_t* data = (uintptr_t*)userdata;
 			DriverServer* _this = (DriverServer*)data[0];
+			if (!_this)
+				return true; // The block was freed, sooooo
 			uintptr_t previousCount = data[1];
-			if ((previousCount + 1) == identity->connections.size)
+			DriverConnectionNode* lastNode = (DriverConnectionNode*)data[2];
+			if (((previousCount + 1) == identity->connections.size) || (previousCount == identity->connections.size && lastNode != identity->connections.tail))
 			{
 				DriverConnectionList& list = identity->connections;
 				_this->m_rawCon = list.tail->val;

@@ -45,6 +45,9 @@ namespace obos
 
 			bool IsInitialized() const { return m_initialized; }
 			
+			void CanUseMultitasking(bool val) { m_canUseMultitasking = val; };
+			bool CanUseMultitasking() const { return m_canUseMultitasking; };
+
 			~Mutex();
 
 		private:

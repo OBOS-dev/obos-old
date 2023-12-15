@@ -6,13 +6,15 @@
 
 #include <int.h>
 #include <error.h>
-#include <atomic.h>
 #include <memory_manipulation.h>
+#include <atomic.h>
 
 #include <multitasking/scheduler.h>
 #include <multitasking/cpu_local.h>
 
 #include <multitasking/locks/mutex.h>
+
+#include <liballoc/liballoc.h>
 
 extern obos::locks::Mutex g_allocatorMutex;
 
@@ -38,64 +40,12 @@ namespace obos
 				SetLastError(OBOS_ERROR_MUTEX_LOCKED);
 				return false;
 			}
-			if (!m_locked || !thread::g_initialized)
-			{
-				atomic_set(&m_locked);
-				if (thread::g_initialized && m_canUseMultitasking)
-					m_ownerThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
-				return true;
-			}
-			if (m_locked)
-			{
-				auto currentThread = thread::GetCurrentCpuLocalPtr()->currentThread;
-				if (m_ownerThread == currentThread)
-					return true;
-				LockQueueNode* queue_node = nullptr;
-				LockQueueNode node = {};
-				if (this == &g_allocatorMutex || this == &thread::g_coreGlobalSchedulerLock)
-					queue_node = &node;
-				else
-					queue_node = new LockQueueNode;
-				utils::memzero(queue_node, sizeof(queue_node));
-				queue_node->thread = (thread::Thread*)currentThread;
-				if (m_queue.tail)
-					m_queue.tail->next = queue_node;
-				if (!m_queue.head)
-					m_queue.head = queue_node;
-				m_queue.tail = queue_node;
-				m_queue.size++;
-				uintptr_t userdata[2] = { (uintptr_t)this, (uintptr_t)queue_node };
-				if (m_canUseMultitasking)
-				{
-					currentThread->wakeUpTime = timeout ? thread::g_timerTicks + timeout : 0xffffffffffffffff;
-					currentThread->blockCallback.callback = LockBlockCallback;
-					currentThread->blockCallback.userdata = userdata;
-					currentThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;
-					thread::callScheduler(false);
-				}
-				else
-					while (!LockBlockCallback((thread::Thread*)currentThread, userdata));
-				if (m_locked || m_wake)
-				{
-					SetLastError(OBOS_ERROR_TIMEOUT);
-					if (queue_node->next)
-						queue_node->next->prev = queue_node->prev;
-					if (queue_node->prev)
-						queue_node->prev->next = queue_node->next;
-					delete queue_node;
-					atomic_dec(m_queue.size);
-					return false;
-				}
-				if (queue_node->next)
-					queue_node->next->prev = queue_node->prev;
-				if (queue_node->prev)
-					queue_node->prev->next = queue_node->next;
-				if (this != &g_allocatorMutex && this != &thread::g_coreGlobalSchedulerLock)
-					delete queue_node;
-				atomic_dec(m_queue.size);
-			}
-			atomic_set(&m_locked);
-			if (m_canUseMultitasking)
+			// Compare m_locked with zero, and if it is zero, then set it to true and return true, otherwise return false and keep m_locked intact.
+			uint64_t wakeupTime = thread::g_timerTicks + timeout;
+			if (timeout == 0)
+				wakeupTime = UINT64_MAX;
+			while ((atomic_cmpxchg(&m_locked, 0, true) || m_wake) && thread::g_timerTicks < wakeupTime);
+			if (thread::g_initialized && m_canUseMultitasking)
 				m_ownerThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
 			return true;
 		}

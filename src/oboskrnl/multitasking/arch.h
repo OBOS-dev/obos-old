@@ -20,7 +20,7 @@ namespace obos
 {
 	namespace thread
 	{
-		void switchToThreadImpl(taskSwitchInfo* info);
+		void switchToThreadImpl(taskSwitchInfo* info, struct Thread* thread);
 		bool callBlockCallbackOnThread(taskSwitchInfo* info, bool(*callback)(void* thread, void* userdata), void* par1, void* par2);
 		void setupThreadContext(taskSwitchInfo* info, void* stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, bool isUsermodeProgram);
 		void freeThreadStackInfo(void* stackInfo);

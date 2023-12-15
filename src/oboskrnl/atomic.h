@@ -16,4 +16,5 @@ namespace obos
 
 	void atomic_inc(uint64_t& val);
 	void atomic_dec(uint64_t& val);
+	bool atomic_cmpxchg(bool* dest, bool val, bool src);
 }

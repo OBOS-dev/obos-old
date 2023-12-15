@@ -148,10 +148,18 @@ extern void ConnectionHandler(uintptr_t _conn)
 					break;
 				}
 			}
-			iter->next->prev = iter->prev;
-			iter->prev->next = iter->next;
+			if (iter->next)
+				iter->next->prev = iter->prev;
+			if (iter->prev)
+				iter->prev->next = iter->next;
+			if (g_iterators.head == iter)
+				g_iterators.head = iter->next;
+			if (g_iterators.tail == iter)
+				g_iterators.tail = iter->prev;
 			g_iterators.size--;
 			Free(iter);
+			conn->SendData(&errCode, sizeof(errCode));
+			errCode = 0;
 			break;
 		}
 		case obos::driverInterface::OBOS_SERVICE_READ_FILE:
@@ -170,26 +178,33 @@ extern void ConnectionHandler(uintptr_t _conn)
 				break;
 			}
 			conn->RecvData(nullptr, 9);
+			uint64_t nToSkip = 0;
+			size_t nToRead = 0;
+			conn->RecvData(&nToSkip, sizeof(nToSkip));
+			conn->RecvData(&nToRead, sizeof(nToRead));
 			if (!FileExists(filepath))
 			{
 				conn->SendData(nullptr, sizeof(size_t));
 				Free(filepath);
 				break;
 			}
-			size_t filesize = 0;
-			ReadFile(filepath, filepathSize, &filesize, nullptr);
-			char* data = (char*)Malloc(filesize + 1);
-			ReadFile(filepath, filepathSize, nullptr, (char*)data);
-			if (!conn->SendData(&filesize, sizeof(filesize))) 
+			auto cache = GetCacheForPath(filepath);
+			byte* data = cache->dataStart + nToSkip;
+			size_t filesize = nToRead > cache->entryFilesize ? cache->entryFilesize : nToRead;
+			if (data > cache->dataEnd)
 			{
+				conn->SendData(nullptr, sizeof(size_t));
 				Free(filepath);
-				Free(data);
 				break;
 			}
-			if (!conn->SendData(data, filesize)) 
+			if (!conn->SendData(&filesize, sizeof(filesize)))
 			{
 				Free(filepath);
-				Free(data);
+				break;
+			}
+			if (!conn->SendData(data, filesize))
+			{
+				Free(filepath);
 				break;
 			}
 			break;

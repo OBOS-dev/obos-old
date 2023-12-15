@@ -115,7 +115,7 @@ namespace obos
 				struct bitfield128 progIf;
 			} pciInfo;
 			size_t(*vprintfFunctionResponse)(const char* format, va_list list); // VPRINTF_FUNCTION_REQUEST
-			void(*panicFunctionResponse)(const char* format, va_list list); // PANIC_FUNCTION_REQUEST
+			void(*panicFunctionResponse)(void* stackTraceParameter, const char* format, va_list list); // PANIC_FUNCTION_REQUEST
 			struct {
 				void* addr;
 				size_t size;

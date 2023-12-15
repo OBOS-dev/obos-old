@@ -1,9 +1,10 @@
-/*790
+/*
 	oboskrnl/arch/x86_64/gdbstub/communicate.cpp
 
 	Copyright (c) 2023 Omar Berrow
 */
 
+#if 0
 #include <new>
 
 #include <int.h>
@@ -38,7 +39,6 @@ namespace obos
 			// Wait for com1.lineStatusRegister->transmitterHoldingRegisterEmpty
 			while (!(inb(COM1 + 5) & (1 << 5)));
 			outb(COM1, ch);
-			outb(0xE9, ch);
 		}
 		byte DefaultRecvByteOnRawConnection()
 		{
@@ -147,6 +147,8 @@ namespace obos
 						*(iter++) = 0x7d;
 						ch ^= 0x20;
 					}
+					if (iter == (void*)0xfffffffff0008000)
+						asm("nop");
 					*(iter++) = ch;
 				}
 			}
@@ -250,3 +252,4 @@ namespace obos
 		}
 	}
 }
+#endif

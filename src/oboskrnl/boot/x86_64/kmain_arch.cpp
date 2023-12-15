@@ -8,6 +8,8 @@
 #error Invalid architecture.
 #endif
 
+#include <new>
+
 #include <int.h>
 #include <console.h>
 #include <klog.h>
@@ -37,12 +39,14 @@
 #define CR4_FSGSBASE ((uintptr_t)1<<16)
 
 extern "C" void fpuInit();
+extern "C" void initialize_syscall_instruction();
 
 namespace obos
-{
-	void InitializeGdt();
-	void InitializeIdt();
-	void RegisterExceptionHandlers();
+{	
+	extern void InitializeGdt();
+	extern void InitializeIdt();
+	extern void RegisterExceptionHandlers();
+	extern void initSSE();
 	Console g_kernelConsole{};
 	volatile limine_framebuffer_request framebuffer_request = {
 		.id = LIMINE_FRAMEBUFFER_REQUEST,
@@ -58,7 +62,6 @@ namespace obos
 		.stack_size = (4 * 4096)
 	};
 	void EarlyKPanic();
-	extern void initSSE();
 
 	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console. This also must enable the scheduler.
 	void arch_kmain()
@@ -82,7 +85,7 @@ namespace obos
 				break;
 			}
 		}
-		g_kernelConsole.Initialize(font, framebuffer);
+		new (&g_kernelConsole) Console { font, framebuffer, false };
 		g_kernelConsole.SetColour(0xffffffff, 0);
 		logger::info("%s: Initializing GDT.\n", __func__);
 		InitializeGdt();
@@ -100,18 +103,22 @@ namespace obos
 		fpuInit();
 		logger::info("%s: Initializing SSE.\n", __func__);
 		initSSE();
-		uint32_t unused = 0, rbx = 0;
-		__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
-		if (rbx & CPUID_FSGSBASE)
-		{
-			logger::info("%s: Disabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
-			setCR4(getCR4() & ~CR4_FSGSBASE);
-		}
+		logger::info("%s: Enabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
+		setCR4(getCR4() | CR4_FSGSBASE);
+		logger::info("%s: Initializing \"syscall/sysret\" instructions.\n", __func__);
+		initialize_syscall_instruction();
+		//uint32_t unused = 0, rbx = 0;
+		//__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
+		//if (rbx & CPUID_FSGSBASE)
+		//{
+		//	logger::info("%s: Disabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
+		//	setCR4(getCR4() & ~CR4_FSGSBASE);
+		//}
 		logger::info("%s: Registering all syscalls.\n", __func__);
 		syscalls::RegisterSyscalls();
 		logger::info("%s: Initializing the scheduler.\n", __func__);
 		thread::InitializeScheduler();
-		logger::panic("Failed to initialize the scheduler.");
+		logger::panic(nullptr, "Failed to initialize the scheduler.");
 	}
 	void EarlyKPanic()
 	{

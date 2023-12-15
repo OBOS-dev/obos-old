@@ -16,6 +16,8 @@
 
 #include <arch/x86_64/irq/irq.h>
 
+#include <multitasking/cpu_local.h>
+
 namespace obos
 {
 	namespace memory
@@ -31,7 +33,10 @@ namespace obos
 		{
 			if(!g_initialized)
 				return phys;
-			constexpr uintptr_t ret = 0xfffffffffffff000;
+			uintptr_t ret = 0xfffffffffffff000;
+			auto cpu_local_ptr = thread::GetCurrentCpuLocalPtr();
+			if (cpu_local_ptr)
+				ret = cpu_local_ptr->arch_specific.mapPageTableBase;
 			phys = reinterpret_cast<uintptr_t*>((uintptr_t)phys & (~0xfff));
 			s_pageDirectory[PageMap::addressToIndex(ret, 1)] = 0;
 			s_pageTable[PageMap::addressToIndex(ret, 0)] = 0;
@@ -44,9 +49,12 @@ namespace obos
 
 		uintptr_t* PageMap::getL4PageMapEntryAt(uintptr_t at)
 		{
+			uintptr_t flags = saveFlagsAndCLI();
 			at &= ~0xfff;
 			uintptr_t* pageMap = mapPageTable(getPageMap());
-			return (uintptr_t*)pageMap[addressToIndex(at, 3)];
+			uintptr_t* ret = (uintptr_t*)pageMap[addressToIndex(at, 3)];
+			restorePreviousInterruptStatus(flags);
+			return ret;
 		}
 		uintptr_t* PageMap::getL3PageMapEntryAt(uintptr_t at)
 		{
@@ -54,8 +62,11 @@ namespace obos
 			uintptr_t rawPtr = (uintptr_t)getL4PageMapEntryAt(at) & 0xFFFFFFFFFF000;
 			if (!rawPtr)
 				return nullptr;
+			uintptr_t flags = saveFlagsAndCLI();
 			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
-			return (uintptr_t*)pageMap[addressToIndex(at, 2)];
+			uintptr_t* ret = (uintptr_t*)pageMap[addressToIndex(at, 2)];
+			restorePreviousInterruptStatus(flags);
+			return ret;
 		}
 		uintptr_t* PageMap::getL2PageMapEntryAt(uintptr_t at) 
 		{
@@ -63,8 +74,11 @@ namespace obos
 			uintptr_t rawPtr = (uintptr_t)getL3PageMapEntryAt(at) & 0xFFFFFFFFFF000;
 			if (!rawPtr)
 				return nullptr;
+			uintptr_t flags = saveFlagsAndCLI();
 			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
-			return (uintptr_t*)pageMap[addressToIndex(at, 1)];
+			uintptr_t *ret = (uintptr_t*)pageMap[addressToIndex(at, 1)];
+			restorePreviousInterruptStatus(flags);
+			return ret;
 		}
 		uintptr_t* PageMap::getL1PageMapEntryAt(uintptr_t at) 
 		{
@@ -72,8 +86,11 @@ namespace obos
 			uintptr_t rawPtr = (uintptr_t)getL2PageMapEntryAt(at) & 0xFFFFFFFFFF000;
 			if (!rawPtr)
 				return nullptr;
+			uintptr_t flags = saveFlagsAndCLI();
 			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
-			return (uintptr_t*)pageMap[addressToIndex(at, 0)];
+			uintptr_t* ret = (uintptr_t*)pageMap[addressToIndex(at, 0)];
+			restorePreviousInterruptStatus(flags);
+			return ret;
 		}
 
 		void InitializeVirtualMemoryManager()
@@ -96,6 +113,7 @@ namespace obos
 			MapVirtualPageToPhysical((void*)0xffffffffffffd000, (void*)g_HPETAddr, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
 			g_localAPICAddr = (volatile LAPIC*)0xffffffffffffe000;
 			g_HPETAddr = (volatile HPET*)0xffffffffffffd000;
+			g_initialized = true;
 		}
 		bool CPUSupportsExecuteDisable()
 		{

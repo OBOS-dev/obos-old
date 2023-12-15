@@ -47,7 +47,7 @@ size_t printf(const char* format, ...)
 {
 	va_list list;
 	va_start(list, format);
-	g_driverHeader.panicFunctionResponse(format, list);
+	g_driverHeader.panicFunctionResponse(nullptr, format, list);
 	va_end(list); // shouldn't get hit.
 	while (1);
 }
@@ -67,14 +67,14 @@ extern "C" void _start()
 		currentClient = AllocDriverServer();
 		if (!currentClient->Listen())
 		{
-			printf("[DRIVER 0, ERROR] Listen: Error code: %d.\nTrying again...\n", g_driverHeader.driverId, GetLastError());
+			//printf("[DRIVER 0, ERROR] Listen: Error code: %d.\nTrying again...\n", g_driverHeader.driverId, GetLastError());
 			FreeDriverServer(currentClient);
 			continue;
 		}
 		uintptr_t thread = MakeThreadObject();
-		if (!CreateThread(thread, thread::THREAD_PRIORITY_NORMAL, 0x4000, ConnectionHandler, (uintptr_t)currentClient, false))
+		if (!CreateThread(thread, thread::THREAD_PRIORITY_NORMAL, 0x8000, ConnectionHandler, (uintptr_t)currentClient, false))
 		{
-			printf("[DRIVER 0, ERROR] CreateThread: Error code: %d.\n", g_driverHeader.driverId, GetLastError());
+			//printf("[DRIVER 0, ERROR] CreateThread: Error code: %d.\n", g_driverHeader.driverId, GetLastError());
 			currentClient->CloseConnection();
 			FreeDriverServer(currentClient);
 			CloseThread(thread);

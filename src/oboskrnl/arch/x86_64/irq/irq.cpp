@@ -28,6 +28,7 @@ namespace obos
 	uint8_t g_processorIDs[256];
 	uint8_t g_lapicIDs[256];
 	uint8_t g_nCores = 0;
+	static bool is32BitTables = false;
 
 	void RemapPIC()
 	{
@@ -48,7 +49,7 @@ namespace obos
 	volatile HPET* g_HPETAddr = nullptr;
 	uint64_t g_hpetFrequency = 0;
 
-	size_t ProcessEntryHeader(acpi::MADT_EntryHeader* entryHeader, void*& lapicAddressOut, void*& ioapicAddressOut, uint8_t& nCores, uint8_t* processorIDs, uint8_t* lapicIDs)
+	static size_t ProcessEntryHeader(acpi::MADT_EntryHeader* entryHeader, void*& lapicAddressOut, void*& ioapicAddressOut, uint8_t& nCores, uint8_t* processorIDs, uint8_t* lapicIDs)
 	{
 		size_t ret = 0;
 		switch (entryHeader->type)
@@ -56,9 +57,12 @@ namespace obos
 		case 0:
 		{
 			acpi::MADT_EntryType0* entry = (acpi::MADT_EntryType0*)entryHeader;
-			processorIDs[nCores] = entry->processorID;
-			lapicIDs[nCores] = entry->apicID;
-			nCores++;
+			if ((entry->flags >> 1) & 1 || (entry->flags >> 0) & 1)
+			{
+				processorIDs[nCores] = entry->processorID;
+				lapicIDs[nCores] = entry->apicID;
+				nCores++;
+			}
 			ret = sizeof(acpi::MADT_EntryType0);
 			break;
 		}
@@ -66,6 +70,8 @@ namespace obos
 		{
 			acpi::MADT_EntryType1* entry = (acpi::MADT_EntryType1*)entryHeader;
 			ioapicAddressOut = (void*)(uintptr_t)entry->ioapicAddress;
+			if (is32BitTables)
+				ioapicAddressOut = (void*)((uintptr_t)ioapicAddressOut & 0xffffffff);
 			ret = sizeof(acpi::MADT_EntryType1);
 			break;
 		}
@@ -82,6 +88,8 @@ namespace obos
 		{
 			acpi::MADT_EntryType5* entry = (acpi::MADT_EntryType5*)entryHeader;
 			lapicAddressOut = (void*)entry->lapic_address;
+			if (is32BitTables)
+				lapicAddressOut = (void*)((uintptr_t)lapicAddressOut & 0xffffffff);
 			ret = sizeof(acpi::MADT_EntryType5);
 			break;
 		}
@@ -144,14 +152,64 @@ namespace obos
 		g_localAPICAddr->spuriousInterruptVector |= (1 << 8);
 		if (isBSP)
 			logger::log("%s: Initialized the APIC.\n", __func__);
+		// The BSP should always be the first cpu in the list.
+		if (g_lapicIDs[0] != g_localAPICAddr->lapicID)
+		{
+			for (size_t i = 0; i < g_nCores; i++)
+			{
+				if (g_lapicIDs[i] == g_localAPICAddr->lapicID)
+				{
+					uint32_t temp = g_lapicIDs[0];
+					g_lapicIDs[0] = g_lapicIDs[i];
+					g_lapicIDs[i] = temp;
+					break;
+				}
+			}
+		}
 	}
 	void SendEOI()
 	{
 		g_localAPICAddr->eoi = 0;
 	}
+	void SendIPI(DestinationShorthand shorthand, DeliveryMode deliveryMode, uint8_t vector, uint8_t _destination)
+	{
+		if (!g_localAPICAddr)
+			return; // If the kernel panics before InitializeIrq(), we are in trouble.
+		while ((g_localAPICAddr->interruptCommand0_31 >> 12 & 0b1)) pause();
+		uint32_t icr1 = 0;
+		uint32_t icr2 = 0;
+		switch (shorthand)
+		{
+		case obos::DestinationShorthand::None:
+			icr2 |= _destination << (56-32);
+			break;
+		default:
+			break;
+		}
+		switch (deliveryMode)
+		{
+		case obos::DeliveryMode::SMI:
+			vector = 0;
+			break;
+		case obos::DeliveryMode::NMI:
+			vector = 0;
+			break;
+		case obos::DeliveryMode::INIT:
+			vector = 0;
+			break;
+		default:
+			break;
+		}
+		icr1 |= vector;
+		icr1 |= ((uint32_t)deliveryMode & 0b111) << 8;
+		icr1 |= (uint32_t)shorthand << 18;
+		g_localAPICAddr->interruptCommand32_63 = icr2;
+		g_localAPICAddr->interruptCommand0_31 = icr1;
+		while ((g_localAPICAddr->interruptCommand0_31 >> 12 & 0b1)) pause();
+	}
 	void InitializeIrq(bool isBSP)
 	{
-		if (!isBSP)
+ 		if (!isBSP)
 		{
 			InitializeAPIC(nullptr, false);
 			return;
@@ -159,19 +217,29 @@ namespace obos
 		acpi::ACPIRSDPHeader* rsdp = (acpi::ACPIRSDPHeader*)rsdp_request.response->address;
 		if (!rsdp)
 		{
-			logger::panic("No RSDP table from bootloader.\n");
+			logger::panic(nullptr, "No RSDP table from bootloader.\n");
 			RemapPIC();
 			return;
 		}
 		if (isBSP)
 			logger::log("%s: System OEM: %c%c%c%c%c\n", __func__, rsdp->OEMID[0], rsdp->OEMID[1], rsdp->OEMID[2], rsdp->OEMID[3], rsdp->OEMID[4]);
 		acpi::ACPISDTHeader* xsdt = (acpi::ACPISDTHeader*)rsdp->XsdtAddress;
-		acpi::ACPISDTHeader** tableAddresses = reinterpret_cast<acpi::ACPISDTHeader**>(xsdt + 1);
+		if ((is32BitTables = !xsdt))
+			xsdt = (acpi::ACPISDTHeader*)(uintptr_t)rsdp->RsdtAddress;
+		if (!xsdt)
+			logger::panic(nullptr, "Buggy ACPI tables. There is neither a xsdt nor an rsdt.\n");
+		uint64_t* tableAddresses64 = reinterpret_cast<uint64_t*>(xsdt + 1);
+		uint32_t* tableAddresses32 = reinterpret_cast<uint32_t*>(xsdt + 1);
 		acpi::MADTTable* madtTable = nullptr;
 		acpi::HPET_Table* hpetTable = nullptr;
-		for (uint32_t i = 0; i < (xsdt->Length - sizeof(*xsdt)) / 8; i++)
+		// The purpose of "(((uintptr_t)!is32BitTables + 1) * 4)" is to determine whether to use sizeof(uint32_t) or sizeof(uint64_t)
+		for (uint32_t i = 0; i < (xsdt->Length - sizeof(*xsdt)) / (((uintptr_t)!is32BitTables + 1) * 4); i++)
 		{
-			acpi::ACPISDTHeader* currentSDT = tableAddresses[i];
+			acpi::ACPISDTHeader* currentSDT = nullptr;
+			if (is32BitTables)
+				currentSDT = (acpi::ACPISDTHeader*)(uintptr_t)tableAddresses32[i];
+			else
+				currentSDT = (acpi::ACPISDTHeader*)tableAddresses64[i];
 			if (utils::memcmp(currentSDT->Signature, "APIC", 4))
 				madtTable = (acpi::MADTTable*)currentSDT;
 			if (utils::memcmp(currentSDT->Signature, "HPET", 4))
@@ -181,7 +249,7 @@ namespace obos
 				break;
 		}
 		if (!hpetTable)
-			logger::panic("The HPET is not supported on your computer!\n");
+			logger::panic(nullptr, "The HPET is not supported on your computer!\n");
 		if (isBSP)
 		{
 			g_HPETAddr = (HPET*)hpetTable->baseAddress.address;
@@ -194,6 +262,6 @@ namespace obos
 			InitializeAPIC(madtTable, isBSP);
 			return;
 		}
-		logger::panic("No MADT Table found in the acpi tables.\n");
+		logger::panic(nullptr, "No MADT Table found in the acpi tables.\n");
 	}
 }

@@ -24,8 +24,8 @@ namespace obos
 	{
 	public:
 		Console() = default;
-		Console(void* font, con_framebuffer output);
-		void Initialize(void* font, con_framebuffer output);
+		Console(void* font, con_framebuffer output, bool lockCanUseMultitasking = true);
+		void Initialize(void* font, con_framebuffer output, bool lockCanUseMultitasking = true);
 
 		/// <summary>
 		/// Prints a string.
@@ -112,12 +112,15 @@ namespace obos
 		/// <param name="vertical">A pointer to where the vertical bounds should be stored.</param>
 		void GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical);
 
+		void Unlock() { m_lock.Unlock(); };
+
 		// Copies from the framebuffer specified in the parameter to the this->m_framebuffer.
 		// This function can be used for back buffering.
 		void CopyFrom(con_framebuffer* buffer);
 	private:
 		void putChar(char ch, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
 		void newlineHandler(uint32_t& x, uint32_t& y);
+		void __ImplConsoleOutputChar(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y);
 		con_framebuffer m_framebuffer;
 		uint32_t m_terminalX = 0;
 		uint32_t m_terminalY = 0;

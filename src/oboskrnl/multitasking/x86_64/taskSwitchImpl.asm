@@ -33,11 +33,11 @@ extern _ZN4obos6SetISTEPv
 extern _ZN4obos7SendEOIEv
 extern _ZN4obos5rdmsrEj
 
-global _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE
+global _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoEPNS0_6ThreadE
 global _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 global idleTask
 
-_ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoE:
+_ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoEPNS0_6ThreadE:
 ; rsp = GetCurrentCpuLocalPtr()->temp_stack.addr + GetCurrentCpuLocalPtr()->temp_stack.size
 	push rdi
 	mov rdi, 0xC0000101

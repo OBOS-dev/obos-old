@@ -5,7 +5,6 @@
 [BITS 64]
 
 global calibrateTimer
-global fpuInit
 extern _ZN4obos15g_localAPICAddrE
 extern _ZN4obos10g_HPETAddrE
 ; extern _ZN4obos24RegisterInterruptHandlerEhPFvPNS_15interrupt_frameEE
@@ -14,10 +13,6 @@ extern _ZN4obos6thread13configureHPETEm
 segment .bss
 
 segment .text
-
-fpuInit:
-	fninit
-	ret
 
 calibrateTimer:
 	push rbp

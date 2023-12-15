@@ -67,7 +67,12 @@ namespace obos
 
 			virtual bool CloseConnection();
 			
-			virtual ~DriverConnectionBase() { CloseConnection(); }
+			virtual ~DriverConnectionBase() 
+			{ 
+				if (!m_rawCon || !m_rawCon->connectionOpen)
+					return;
+				CloseConnection();
+			}
 		protected:
 			DriverConnection* m_rawCon = nullptr;
 			bool m_didWeCloseConnection = false;

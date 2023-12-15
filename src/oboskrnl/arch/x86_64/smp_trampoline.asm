@@ -91,7 +91,8 @@ align 1
 	mov cr0, eax
 
 	mov esp, 0xFC8
-	db 0xE8, 0x00,0x00,0x00,0x00 ; call REL16
+	call .jmp
+.jmp:
 	pop edi ; The address of .set_cs needs to be in a register that won't be modified by a) cpuid b) the rest of the code.
 	add edi, 8
 	db 0x6A, 0x08, 0x57, 0xCB ; push 0x08; push edi; retfd
@@ -134,8 +135,6 @@ align 1
 	retfq
 
 .call_procInit:
-; Set "trampoline_done_jumping" to true
-	mov qword [0xFE8], 1
 ; Set "trampoline_has_gdt" to false for the next AP.
 	mov qword [0xFB0], 0
 
@@ -165,11 +164,10 @@ loadGDT:
 	mov gs, ax
 	mov ss, ax
 	
-	push 0x8
-	push .flush_tss
-	retfq
-.flush_tss:
 	mov ax, 0x28
 	ltr ax
 
-	ret
+	pop rax
+	push 0x8
+	push rax
+	retfq

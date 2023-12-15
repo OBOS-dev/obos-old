@@ -139,4 +139,24 @@ namespace obos
 	extern volatile LAPIC* g_localAPICAddr; 
 	extern volatile HPET* g_HPETAddr;
 	extern uint64_t g_hpetFrequency;
+
+	enum class DestinationShorthand
+	{
+		None,
+		Self,
+		All,
+		All_Except_Self,
+		HighestValue = All_Except_Self
+	};
+	enum class DeliveryMode
+	{
+		Fixed, Default = Fixed,
+		Fixed_LowestPriority,
+		SMI,
+		NMI = 4,
+		INIT,
+		SIPI,
+	};
+
+	void SendIPI(DestinationShorthand shorthand, DeliveryMode deliveryMode, uint8_t vector = 0, uint8_t _destination = 0);
 }

@@ -20,4 +20,8 @@ void kfree(void* ptr);
 
 #ifdef __cplusplus
 }
+namespace obos
+{
+	bool CanAllocateMemory();
+}
 #endif

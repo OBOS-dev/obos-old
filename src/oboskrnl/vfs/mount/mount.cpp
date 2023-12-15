@@ -94,7 +94,7 @@ namespace obos
 			}
 			return true;
 		}
-		bool ReadFile(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, void** data, size_t* filesize, size_t nToSkip, size_t nToRead)
+		bool ReadFile(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, void** data, size_t* nRead, size_t nToSkip, size_t nToRead)
 		{
 			if (!SendCommand(client, driverInterface::OBOS_SERVICE_READ_FILE))
 				return false;
@@ -115,45 +115,47 @@ namespace obos
 				client.CloseConnection();
 				return false;
 			}
-			byte driverPartitionId = partitionId & 0xff;
+			uint8_t driverPartitionId = partitionId & 0xff;
 			if (!client.SendData(&driverPartitionId, sizeof(driverPartitionId)))
 			{
 				client.CloseConnection();
 				return false;
 			}
-			size_t _filesize = 0;
-			if (!client.RecvData(&_filesize, sizeof(_filesize), 15000))
+			// sizeof(size_t) is not guarenteed to be sizeof(uint64_t) (see driver_communications.md->OBOS_SERVICE_READ_FILE)
+			uint64_t _nToSkip = nToSkip;
+			if (!client.SendData(&_nToSkip, sizeof(_nToSkip)))
 			{
 				client.CloseConnection();
 				return false;
 			}
-			if (filesize)
-				*filesize = _filesize;
+			if (!client.SendData(&nToRead, sizeof(nToRead)))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			size_t _nRead = 0;
+			if (!client.RecvData(&_nRead, sizeof(_nRead), 15000))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			if (nRead)
+				*nRead = _nRead;
 			void* _data = nullptr;
 			if (data)
 			{
-				_data = new char[nToRead + 1];
-				utils::memzero(_data, nToRead + 1);
+				_data = new char[_nRead + 1];
+				utils::memzero(_data, _nRead + 1);
 				*data = _data;
 			}
-			if (!client.RecvData(nullptr, nToSkip, 15000))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			if (!client.RecvData(data ? _data : nullptr, nToRead, 15000))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			if (!client.RecvData(nullptr, _filesize - nToSkip - nToRead, 15000))
+			if (!client.RecvData(data ? _data : nullptr, _nRead, 15000))
 			{
 				client.CloseConnection();
 				return false;
 			}
 			return true;
 		}
-		void dividePathToTokens(const char* filepath, const char**& tokens, size_t& nTokens, bool useOffset = true)
+		static void dividePathToTokens(const char* filepath, const char**& tokens, size_t& nTokens, bool useOffset = true)
 		{
 			for (; filepath[0] == '/'; filepath++);
 			nTokens = 1;
@@ -174,11 +176,11 @@ namespace obos
 				}
 			}
 		}
-		bool setupMountPointEntries(MountPoint* point)
+		static bool setupMountPointEntries(MountPoint* point)
 		{
 			process::Process* proc = (process::Process*)point->filesystemDriver->process;
 			driverInterface::DriverClient client{};
-			if (!client.OpenConnection(proc->pid, 15000)) // Connect to the driver.
+			if (!client.OpenConnection(proc->pid, /*60000*/(uintptr_t)-1)) // Connect to the driver.
 				return false;
 			// Check if the driver is a filesystem (or initrd filesystem if pid == 1) driver.
 			{
@@ -200,7 +202,18 @@ namespace obos
 			// Make a file iterator.
 			if (!SendCommand(client, driverInterface::OBOS_SERVICE_MAKE_FILE_ITERATOR))
 				return false;
-			client.SendData(nullptr, 9);
+			uint64_t driveId = point->partitionId >> 24;
+			if (!client.SendData(&driveId, sizeof(driveId)))
+			{
+				client.CloseConnection();
+				return false;
+			}
+			uint8_t driverPartitionId = point->partitionId & 0xff;
+			if (!client.SendData(&driverPartitionId, sizeof(driverPartitionId)))
+			{
+				client.CloseConnection();
+				return false;
+			}
 			uintptr_t fileIterator = 0;
 			if (!client.RecvData(&fileIterator, sizeof(fileIterator), 15000))
 			{
@@ -267,6 +280,7 @@ namespace obos
 							directoryEntry = new DirectoryEntry{};
 						directoryEntry->path = (char*)utils::memcpy(new char[utils::strlen(sTokens[i]) + 1], sTokens[i], utils::strlen(sTokens[i]));
 						directoryEntry->fileAttrib = attribs[2];
+						directoryEntry->filesize = attribs[0];
 						if (point->children.tail)
 							point->children.tail->next = directoryEntry;
 						if (!point->children.head)
@@ -353,7 +367,6 @@ namespace obos
 					newDirectoryEntry->fileAttrib = attribs[2];
 					newDirectoryEntry->filesize = attribs[0];
 
-
 					directoryEntry = newDirectoryEntry;
 				}
 
@@ -368,6 +381,9 @@ namespace obos
 			// Close the file iterator.
 			if (!SendCommand(client, driverInterface::OBOS_SERVICE_CLOSE_FILE_ITERATOR))
 				return false;
+			if (!client.SendData(&fileIterator, sizeof(fileIterator)))
+				return false;
+			client.RecvData(nullptr, sizeof(uint8_t));
 
 			return true;
 		}
@@ -433,14 +449,38 @@ namespace obos
 
 		uint32_t getPartitionIDForMountPoint(uint32_t mountPoint)
 		{
-			if (mountPoint > g_mountPoints.length())
+			MountPoint* _mountPoint = nullptr;
+			for (size_t i = 0; i < g_mountPoints.length(); i++)
+			{
+				if (g_mountPoints[i])
+				{
+					if (g_mountPoints[i]->id == mountPoint)
+					{
+						_mountPoint = g_mountPoints[i];
+						break;
+					}
+				}
+			}
+			if (!_mountPoint)
 				return 0;
-			return g_mountPoints[mountPoint]->partitionId;
+			return _mountPoint->partitionId;
 		}
 
-		void getMountPointsForPartitionID(uint32_t /*partitionId*/, uint32_t** /*oMountPoints*/)
+		void getMountPointsForPartitionID(uint32_t partitionId, uint32_t** oMountPoints)
 		{
-
+			if (!oMountPoints)
+				return;
+			Vector<uint32_t> mPoints;
+			for (size_t i = 0; i < g_mountPoints.length(); i++)
+			{
+				auto mountPoint = g_mountPoints[i];
+				if (mountPoint->partitionId == partitionId)
+					mPoints.push_back(mountPoint->id);
+			}
+			if (mPoints.length() == 0)
+				return;
+			*oMountPoints = new uint32_t[mPoints.length()];
+			utils::dwMemcpy(*oMountPoints, mPoints.data(), mPoints.length());
 		}
 	}
 }

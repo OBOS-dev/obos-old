@@ -15,6 +15,8 @@
 
 #include <multitasking/locks/mutex.h>
 
+#include <liballoc/liballoc.h>
+
 #if defined(__x86_64__) && defined(E9_HACK)
 #include <x86_64-utils/asm.h>
 #endif
@@ -104,6 +106,8 @@ namespace obos
 					case 's':
 					{
 						const char* str = va_arg(list, const char*);
+						if (!str)
+							break;
 						for (int i = 0; str[i]; i++, ret++)
 							printCallback(str[i], userdata);
 						break;
@@ -234,22 +238,26 @@ namespace obos
 			__impl_log(ERROR_RED, ERROR_PREFIX_MESSAGE, error_lock);
 
 		}
-		void panic(const char* format, ...)
+		void panic(void* stackTraceParameter, const char* format, ...)
 		{
 			va_list list;
 			va_start(list, format);
-			panicVariadic(format, list);
+			panicVariadic(stackTraceParameter, format, list);
 			va_end(list); // shouldn't get hit
 		}
-		void panicVariadic(const char* format, va_list list)
+		void panicVariadic(void* stackTraceParameter, const char* format, va_list list)
 		{
 			thread::StopCPUs(false);
 			printf_lock.Unlock();
+			g_kernelConsole.Unlock();
 			thread::stopTimer();
 			g_kernelConsole.SetPosition(0, 0);
 			g_kernelConsole.SetColour(GREY, PANIC_RED, true);
 			vprintf(format, list);
-			stackTrace();
+			if (CanAllocateMemory())
+				stackTrace(stackTraceParameter);
+			else
+				warning("No stack trace avaliable.");
 			thread::StopCPUs(true);
 			while (1);
 		}
@@ -293,7 +301,7 @@ static char* itoa(intptr_t value, char* result, int base) {
 	}
 	return result;
 }
-void strreverse(char* begin, int size)
+static void strreverse(char* begin, int size)
 {
 	int i = 0;
 	char tmp = 0;

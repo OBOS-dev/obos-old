@@ -11,6 +11,7 @@ target_compile_options(initrdDriver
 	PUBLIC "-nostdlib"
 	PUBLIC "${DEBUG_SYMBOLS_OPT}"
 )
+set_property (TARGET initrdDriver PROPERTY CXX_STANDARD 20)
 
 set_target_properties(initrdDriver PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 

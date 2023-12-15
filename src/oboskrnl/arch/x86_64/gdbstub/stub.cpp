@@ -4,6 +4,7 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
+#if 0
 #include <int.h>
 #include <klog.h>
 #include <memory_manipulation.h>
@@ -217,6 +218,55 @@ namespace obos
 				frame->rflags.setBit((uintptr_t)1 << 8);
 			notifyGdbOfException(frame);
 		}
+		static void foreachThreadDebugging(bool(*callback)(thread::Thread*, void* data), void* data)
+		{
+			bool stop = false;
+			auto scanThreadList =
+				[&](thread::Thread::ThreadList& list) {
+				thread::Thread* currentThread = list.head;
+				while (currentThread && !stop)
+				{
+					if (currentThread->context.frame.cs == 0x08 && currentThread->context.frame.ds == 0x10)
+						if (!(stop = callback(currentThread, data)))
+							break;
+					currentThread = currentThread->next_run;
+				}
+				};
+			scanThreadList(thread::g_priorityLists[0]);
+			scanThreadList(thread::g_priorityLists[1]);
+			scanThreadList(thread::g_priorityLists[2]);
+			scanThreadList(thread::g_priorityLists[3]);
+		}
+		// Returns nullptr if there is no thread with that tid.
+		static thread::Thread* getThreadFromTid(uint32_t tid)
+		{
+			const thread::Thread* currentThread = getCurrentThread();
+			if (tid == currentThread->tid)
+				return const_cast<thread::Thread*>(currentThread);
+			struct _par
+			{
+				thread::Thread* ret;
+				uint32_t tid;
+			} par = { nullptr, tid };
+			foreachThreadDebugging([](thread::Thread* _thread, void* data) {
+				_par* par = (_par*)data;
+				if (_thread->tid == par->tid)
+				{
+					par->ret = _thread;
+					return false;
+				}
+				return true;
+				}, &par);
+			return par.ret;
+		}
+		static thread::cpu_local* getCPURunningThread(thread::Thread* _thread)
+		{
+			thread::cpu_local* cpuRunning = nullptr;
+			for (size_t i = 0; i < thread::g_nCPUs && !cpuRunning; i++)
+				if (thread::g_cpuInfo[i].currentThread == _thread)
+					cpuRunning = thread::g_cpuInfo + i;
+			return cpuRunning;
+		}
 		static HandlePacketStatus HandlePacket(interrupt_frame* frame)
 		{
 			Packet currentPacket{};
@@ -272,31 +322,20 @@ namespace obos
 						tid = hex2bin(_tid, _sizeTid) - 1;
 					else
 						tid = getTID();
-					thread::Thread* _thread = nullptr;
+					thread::Thread* _thread = getThreadFromTid(tid);
 					if (tid != getTID())
 					{
-						_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[0], tid);
-						if (!_thread)
-							_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[1], tid);
-						if (!_thread)
-							_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[2], tid);
-						if (!_thread)
-							_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[3], tid);
-						thread::cpu_local* cpuRunning = nullptr;
-						for (size_t i = 0; i < thread::g_nCPUs && !cpuRunning; i++)
-							if (thread::g_cpuInfo[i].currentThread == _thread)
-								cpuRunning = thread::g_cpuInfo + i;
+						uint32_t oldStatus = _thread->status;
 						_thread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_PAUSED;
-						if (cpuRunning)
+						if (oldStatus == thread::THREAD_STATUS_RUNNING)
 						{
+							thread::cpu_local* cpuRunning = getCPURunningThread(_thread);
 							// Stop the thread from running.
 							uint64_t localAPICId = cpuRunning->cpuId;
 							g_localAPICAddr->interruptCommand0_31 = 0x30;
 							g_localAPICAddr->interruptCommand32_63 = localAPICId << 56;
 						}
 					}
-					else
-						_thread = const_cast<thread::Thread*>(getCurrentThread());
 					switch (operation)
 					{
 					case 'g':
@@ -479,22 +518,20 @@ namespace obos
 					bool shouldFree = false;
 					if (utils::strcmp(command, "Cont?"))
 					{
-						_response = (char*)"vCont;c;s;t";
-						_responseLen = 9;
+						_response = (char*)"c;s;t";
+						_responseLen = 5;
 					}
 					else if (utils::strcmp(command, "Cont"))
 					{
-						_response = (char*)"";
-						_responseLen = 1;
 						while (packetData < (currentPacket.data + currentPacket.len))
 						{
+							packetData += utils::strCountToChar(packetData, ';') + 1;
 							uint32_t tid = -1;
 							bool chooseAllThreads = false;
-							char action = packetData[utils::strCountToChar(packetData, ';') + 1];
-							packetData++;
-							if (packetData[utils::strCountToChar(packetData, ';')] != ';')
+							char action = *packetData;
+							if (*(packetData + 1) != ';' && *(packetData + 1) != '\0')
 							{
-								char* _tid = packetData + utils::strCountToChar(packetData, ':') + 1;
+								char* _tid = packetData + 2;
 								size_t _sizeTid = utils::strCountToChar(_tid, ';');
 								chooseAllThreads = utils::memcmp(_tid, "-1", 2);
 								if (utils::strCountToChar(_tid, '.') < _sizeTid)
@@ -503,60 +540,67 @@ namespace obos
 									_tid += utils::strCountToChar(_tid, '.') + 1;
 								}
 								if (*_tid != '0')
-									tid = hex2bin(_tid, _sizeTid);
+									tid = hex2bin(_tid, _sizeTid) - 1;
 								else
 									tid = getTID();
-								packetData = _tid + _sizeTid + 1;
 							}
+							else
+								chooseAllThreads = true;
 							if (!chooseAllThreads && tid == (uint32_t)-1)
 								tid = getTID(); // Choose the current thread.
-							else
-								tid--;
-							thread::Thread* _thread = nullptr;
-							if (tid != getTID())
+							thread::Thread* _thread = getThreadFromTid(tid);
+							if (tid != getTID() && _thread)
 							{
-								_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[0], tid);
-								if (!_thread)
-									_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[1], tid);
-								if (!_thread)
-									_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[2], tid);
-								if (!_thread)
-									_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[3], tid);
-								thread::cpu_local* cpuRunning = nullptr;
-								for (size_t i = 0; i < thread::g_nCPUs && !cpuRunning; i++)
-									if (thread::g_cpuInfo[i].currentThread == _thread)
-										cpuRunning = thread::g_cpuInfo + i;
+								uint32_t oldStatus = _thread->status;
 								_thread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_PAUSED;
-								if (cpuRunning)
+								if (oldStatus == thread::THREAD_STATUS_RUNNING)
 								{
+									thread::cpu_local* cpuRunning = getCPURunningThread(_thread);
 									// Stop the thread from running.
 									uint64_t localAPICId = cpuRunning->cpuId;
 									g_localAPICAddr->interruptCommand0_31 = 0x30;
 									g_localAPICAddr->interruptCommand32_63 = localAPICId << 56;
 								}
 							}
-							else
-								_thread = const_cast<thread::Thread*>(getCurrentThread());
-							switch (action)
+							struct _par
 							{
-							case 'c':
-								_thread->status &= ~thread::THREAD_STATUS_PAUSED;
-								if (_thread == getCurrentThread())
-									status = HandlePacketStatus::CONTINUE_PROGRAM;
-								_continue(_thread, frame);
-								break;
-							case 's':
-								_thread->status &= ~thread::THREAD_STATUS_PAUSED;
-								step(_thread, frame);
-								if (_thread == getCurrentThread())
-									status = HandlePacketStatus::CONTINUE_PROGRAM;
-								break;
-							case 't':
-								stopThr(_thread, frame);
-								break;
-							default:
-								break;
-							}
+								interrupt_frame* frame;
+								char action;
+								thread::Thread* _thread;
+								HandlePacketStatus& status;
+								bool chooseAllThreads;
+							} par = { frame, action, _thread, status, chooseAllThreads };
+							bool (*actionHandler)(thread::Thread* _thread, void* data) = [](thread::Thread* _thread, void* data)->bool
+								{
+									_par* par = (_par*)data;
+									if (par->chooseAllThreads && _thread == par->_thread)
+										return true;
+									switch (par->action)
+									{
+									case 'c':
+										_thread->status &= ~thread::THREAD_STATUS_PAUSED;
+										if (_thread == getCurrentThread())
+											par->status = HandlePacketStatus::CONTINUE_PROGRAM;
+										_continue(_thread, par->frame);
+										break;
+									case 's':
+										_thread->status &= ~thread::THREAD_STATUS_PAUSED;
+										step(_thread, par->frame);
+										if (_thread == getCurrentThread())
+											par->status = HandlePacketStatus::CONTINUE_PROGRAM;
+										break;
+									case 't':
+										stopThr(_thread, par->frame);
+										break;
+									default:
+										break;
+									}
+									return true;
+								};
+							if (chooseAllThreads)
+								foreachThreadDebugging(actionHandler, &par);
+							else
+								actionHandler(_thread, &par);
 						}
 					}
 					for (size_t i = 0; i < _responseLen; i++)
@@ -685,31 +729,20 @@ namespace obos
 							tid = hex2bin(_tid, _sizeTid) - 1;
 						else
 							tid = getTID();
-						thread::Thread* _thread = nullptr;
+						thread::Thread* _thread = getThreadFromTid(tid);
 						if (tid != getTID())
 						{
-							_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[0], tid);
-							if (!_thread)
-								_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[1], tid);
-							if (!_thread)
-								_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[2], tid);
-							if (!_thread)
-								_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[3], tid);
-							thread::cpu_local* cpuRunning = nullptr;
-							for (size_t i = 0; i < thread::g_nCPUs && !cpuRunning; i++)
-								if (thread::g_cpuInfo[i].currentThread == _thread)
-									cpuRunning = thread::g_cpuInfo + i;
+							uint32_t oldStatus = _thread->status;
 							_thread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_PAUSED;
-							if (cpuRunning)
+							if (oldStatus == thread::THREAD_STATUS_RUNNING)
 							{
+								thread::cpu_local* cpuRunning = getCPURunningThread(_thread);
 								// Stop the thread from running.
 								uint64_t localAPICId = cpuRunning->cpuId;
 								g_localAPICAddr->interruptCommand0_31 = 0x30;
 								g_localAPICAddr->interruptCommand32_63 = localAPICId << 56;
 							}
 						}
-						else
-							_thread = const_cast<thread::Thread*>(getCurrentThread());
 						constexpr const char* const statusStrTable[] = {
 							"THREAD_STATUS_DEAD (0b1) | ",
 							"THREAD_STATUS_CAN_RUN (0b10) | ",
@@ -767,7 +800,7 @@ namespace obos
 							_response = (char*)utils::memcpy(krealloc(_response, newSize + 1), statusStrTable[7], newSize - _responseLen);
 						}
 						if (_responseLen)
-							_responseLen -= 3; // Remove the trailing " | " from the string.
+							_responseLen -= 3; // Remove the trailing " | " from the response.
 					end:
 						(void)0;
 					}
@@ -796,31 +829,20 @@ namespace obos
 						tid = hex2bin(_tid, _sizeTid) - 1;
 					else
 						tid = getTID();
-					thread::Thread* _thread = nullptr;
+					thread::Thread* _thread = getThreadFromTid(tid);
 					if (tid != getTID())
 					{
-						_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[0], tid);
-						if (!_thread)
-							_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[1], tid);
-						if (!_thread)
-							_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[2], tid);
-						if (!_thread)
-							_thread = (thread::Thread*)thread::lookForThreadInList(thread::g_priorityLists[3], tid);
-						thread::cpu_local* cpuRunning = nullptr;
-						for (size_t i = 0; i < thread::g_nCPUs && !cpuRunning; i++)
-							if (thread::g_cpuInfo[i].currentThread == _thread)
-								cpuRunning = thread::g_cpuInfo + i;
+						uint32_t oldStatus = _thread->status;
 						_thread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_PAUSED;
-						if (cpuRunning)
+						if (oldStatus == thread::THREAD_STATUS_RUNNING)
 						{
+							thread::cpu_local* cpuRunning = getCPURunningThread(_thread);
 							// Stop the thread from running.
 							uint64_t localAPICId = cpuRunning->cpuId;
 							g_localAPICAddr->interruptCommand0_31 = 0x30;
 							g_localAPICAddr->interruptCommand32_63 = localAPICId << 56;
 						}
 					}
-					else
-						_thread = const_cast<thread::Thread*>(getCurrentThread());
 					if (_thread && _thread->status != thread::THREAD_STATUS_DEAD)
 					{
 						response.push_back('O');
@@ -987,7 +1009,7 @@ namespace obos
 		}
 		static void pageFault(interrupt_frame* frame)
 		{
-			if (frame->cs != 0x1f && frame->ds != 0x23 && g_stubInitialized && false)
+			if (frame->cs != 0x1f && frame->ds != 0x23 && g_stubInitialized)
 			{
 				if (frame->errorCode & 1 && ((uintptr_t)memory::getCurrentPageMap()->getL1PageMapEntryAt((uintptr_t)getCR2()) & ((uintptr_t)1 << 9)))
 					goto done;
@@ -1043,11 +1065,12 @@ namespace obos
 			RegisterInterruptHandler(14, pageFault);
 			RegisterInterruptHandler(16, mathException);
 			RegisterInterruptHandler(21, mathException);
-			logger::info("Connecting to gdb...");
+			logger::info("Connecting to gdb...\n");
 			while (!g_gdbConnection->CanReadByte());
 			int3();
-			logger::info("Connected to gdb!");
+			logger::info("Connected to gdb!\n");
 			while (1);
 		}
 	}
 }
+#endif

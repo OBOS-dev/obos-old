@@ -162,16 +162,21 @@ namespace obos
 			stack_frame* down;
 			void* rip;
 		};
-		void stackTrace()
+		void stackTrace(void* parameter)
 		{
-			volatile stack_frame* frame = (volatile stack_frame*)__builtin_frame_address(0);
+			volatile stack_frame* frame = parameter ? (volatile stack_frame*)parameter : (volatile stack_frame*)__builtin_frame_address(0);
+			{
+				uintptr_t attrib = 0;
+				memory::VirtualGetProtection((void*)frame, 1, &attrib);
+				if (!attrib)
+					frame = (void*)frame == parameter ? (volatile stack_frame*)__builtin_frame_address(0) : (volatile stack_frame*)parameter;
+			}
 			size_t mapFileSize = 0;
 			const char* mapFileStart = nullptr;
 			if (!g_mapFileError)
 				mapFileStart = getKernelMapFile(&mapFileSize);
 			if (g_mapFileError || !mapFileStart)
 				warning("Map file could not be found in the module list. Did you load it in the limine.cfg file?\n");
-			printf("Stack trace:\n");
 			int nFrames = -1;
 			for (; frame; nFrames++) 
 			{
@@ -188,8 +193,17 @@ namespace obos
 						break;
 					}
 				}
+				else
+					break;
 			}
-			frame = (volatile stack_frame*)__builtin_frame_address(0);
+			{
+				frame = parameter ? (volatile stack_frame*)parameter : (volatile stack_frame*)__builtin_frame_address(0);
+				uintptr_t attrib = 0;
+				memory::VirtualGetProtection((void*)frame, 1, &attrib);
+				if (!attrib)
+					frame = (void*)frame == parameter ? (volatile stack_frame*)__builtin_frame_address(0) : (volatile stack_frame*)parameter;
+			}
+			printf("Stack trace:\n");
 			for (int i = nFrames; i != -1; i--)
 			{
 				if(!mapFileStart)

@@ -11,6 +11,14 @@
 
 #include <console.h>
 
+#ifdef OBOS_DEBUG
+#define OBOS_ASSERTP(expr, msg, ...) if (!(expr)) { obos::logger::panic(nullptr, "Function %s, File %s, Line %d: Assertion failed, \"%s\". " msg "\n", __func__, __FILE__, __LINE__, #expr __VA_ARGS__); }
+#define OBOS_ASSERT(expr, msg, ...) if (!(expr)) { obos::logger::error("Function %s, File %s, Line %d: Assertion failed, \"%s\". " msg "\n", __func__, __FILE__, __LINE__, #expr __VA_ARGS__); }
+#else
+#define OBOS_ASSERTP(expr, msg){}
+#define OBOS_ASSERT(expr, msg)
+#endif
+
 namespace obos
 {
 	extern Console g_kernelConsole;
@@ -50,10 +58,10 @@ namespace obos
 		size_t info(const char* format, ...);
 		size_t warning(const char* format, ...);
 		size_t error(const char* format, ...);
-		[[noreturn]] void panic(const char* format, ...);
-		[[noreturn]] void panicVariadic(const char* format, va_list list);
+		[[noreturn]] void panic(void* stackTraceParameter, const char* format, ...);
+		[[noreturn]] void panicVariadic(void* stackTraceParameter, const char* format, va_list list);
 
-		void stackTrace();
+		void stackTrace(void* stackTraceParameter);
 		void dumpAddr(uint32_t* addr);
 	}
 }

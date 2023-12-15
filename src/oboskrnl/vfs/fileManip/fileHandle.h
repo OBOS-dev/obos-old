@@ -55,12 +55,12 @@ namespace obos
 			/// <returns>Whether the file could be read (true) or not (false). If it fails, use GetLastError for an error code.</returns>
 			bool Read(char* data, size_t nToRead, bool peek = false);
 
-			bool Write() { return false; } // Not implemented.
+			bool Write(); // Not implemented.
 
 			bool Eof() const;
-			uoff_t GetPos() { return m_currentFilePos; }
-			uint32_t GetFlags() { return m_flags; }
-			size_t GetFileSize();
+			uoff_t GetPos() const { return m_currentFilePos; }
+			uint32_t GetFlags() const { return m_flags; }
+			size_t GetFileSize() const;
 			void GetParent(char* path, size_t* sizePath);
 
 			/// <summary>

@@ -27,23 +27,29 @@ namespace obos
 			if (!pageMap->getL4PageMapEntryAt(address))
 			{
 				uintptr_t entry = allocatePhysicalPage();
+				uintptr_t _flags = saveFlagsAndCLI();
 				uintptr_t* _pageMap = mapPageTable(pageMap->getPageMap());
 				_pageMap[PageMap::addressToIndex(address, 3)] = entry | flags;
 				utils::memzero(mapPageTable((uintptr_t*)entry), 4096);
+				restorePreviousInterruptStatus(_flags);
 			}
 			if (!pageMap->getL3PageMapEntryAt(address))
 			{
 				uintptr_t entry = allocatePhysicalPage();
+				uintptr_t _flags = saveFlagsAndCLI();
 				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL4PageMapEntryAt(address) & 0xFFFFFFFFFF000));
 				_pageMap[PageMap::addressToIndex(address, 2)] = entry | flags;
 				utils::memzero(mapPageTable((uintptr_t*)entry), 4096);
+				restorePreviousInterruptStatus(_flags);
 			}
 			if (!pageMap->getL2PageMapEntryAt(address))
 			{
 				uintptr_t entry = allocatePhysicalPage();
+				uintptr_t _flags = saveFlagsAndCLI();
 				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL3PageMapEntryAt(address) & 0xFFFFFFFFFF000));
 				_pageMap[PageMap::addressToIndex(address, 1)] = entry | flags;
 				utils::memzero(mapPageTable((uintptr_t*)entry), 4096);
+				restorePreviousInterruptStatus(_flags);
 			}
 			uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL2PageMapEntryAt(address) & 0xFFFFFFFFFF000));
 			return _pageMap;
@@ -148,6 +154,7 @@ namespace obos
 			{
 				freePhysicalPage(_pageMapPhys);
 				uintptr_t _pageMap2Phys = (uintptr_t)pageMap->getL3PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
+				uintptr_t flags = saveFlagsAndCLI();
 				uintptr_t* _pageMap2 = mapPageTable((uintptr_t*)_pageMap2Phys);
 				_pageMap2[PageMap::addressToIndex(addr, 1)] = 0;
 				if (utils::memcmp(_pageMap2, (uint32_t)0, 4096))
@@ -163,6 +170,7 @@ namespace obos
 						freePhysicalPage((uintptr_t)_pageMap3Phys);
 					}
 				}
+				restorePreviousInterruptStatus(flags);
 			}
 		}
 

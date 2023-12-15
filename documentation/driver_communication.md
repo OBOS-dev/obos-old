@@ -48,7 +48,9 @@
 &nbsp;&nbsp;&nbsp;filepath - char\*<br>
 &nbsp;&nbsp;&nbsp;driveId - uint64\_t<br>
 &nbsp;&nbsp;&nbsp;partitionId - uint8\_t<br>
-- Returns the size of the data read, and the file data.
+&nbsp;&nbsp;&nbsp;nToSkip - uint64\_t<br>
+&nbsp;&nbsp;&nbsp;nToRead - size\_t<br>
+- Returns the size of the data read (this can be greater/less than nToRead), and the file data.
 - Can only be accessed by the kernel.
 ### OBOS\_SERVICE\_TYPE\_INITRD\_FILESYSTEM <- OBOS\_SERVICE\_TYPE\_FILESYSTEM (No unique commands yet)
 ### OBOS\_SERVICE\_TYPE\_STORAGE\_DEVICE, SERVICE\_TYPE\_VIRTUAL\_STORAGE\_DEVICE

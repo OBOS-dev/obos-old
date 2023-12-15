@@ -7,18 +7,19 @@
 #include <int.h>
 #include <klog.h>
 
-#include <x86_64-utils/asm.h>
-
 #include <new>
 
 #include <liballoc/liballoc.h>
 
 #include <multitasking/locks/mutex.h>
 
+#include <multitasking/thread.h>
+
 #include <memory_manipulation.h>
 
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(_WIN64)
 #include <arch/x86_64/memory_manager/virtual/allocate.h>
+#include <arch/x86_64/memory_manager/virtual/initialize.h>
 #endif
 
 #define GET_FUNC_ADDR(addr) reinterpret_cast<uintptr_t>(addr)
@@ -26,6 +27,7 @@
 #define MIN_PAGES_ALLOCATED 8
 #define MEMBLOCK_MAGIC  0x6AB450AA
 #define PAGEBLOCK_MAGIC	0x768AADFC
+#define MEMBLOCK_DEAD  0x3D793CCD
 #define PTR_ALIGNMENT 16
 #define ROUND_PTR_UP(ptr) (((ptr) + PTR_ALIGNMENT) & ~(PTR_ALIGNMENT - 1))
 #define ROUND_PTR_DOWN(ptr) ((ptr) & ~(PTR_ALIGNMENT - 1))
@@ -62,24 +64,29 @@ size_t totalPagesAllocated = 0;
 
 using AllocFlags = obos::memory::PageProtectionFlags;
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) || defined(_WIN64)
 static uintptr_t liballoc_base = 0xFFFFFFFFF0000000;
 #endif
 
 pageBlock* allocateNewPageBlock(size_t nPages)
 {
 	nPages += (MIN_PAGES_ALLOCATED - (nPages % MIN_PAGES_ALLOCATED));
-	pageBlock* blk = (pageBlock*)obos::memory::VirtualAlloc((void*)(liballoc_base + totalPagesAllocated * 4096), nPages, 0);
-	if(!blk)
-		obos::logger::panic("Could not allocate a pageBlock at %p.", liballoc_base + totalPagesAllocated * 4096);
-	totalPagesAllocated += nPages;
-	if (!pageBlockHead)
-		pageBlockHead = blk;
+	uintptr_t blockAddr = (uintptr_t)pageBlockTail;
+	if (!blockAddr)
+		blockAddr = liballoc_base;
 	else
-		pageBlockHead->next = blk;
-	blk->prev = pageBlockTail;
+		blockAddr = blockAddr + pageBlockTail->nPagesAllocated * 4096;
+	pageBlock* blk = (pageBlock*)obos::memory::VirtualAlloc((void*)blockAddr, nPages, 0);
+	if(!blk)
+		obos::logger::panic(nullptr, "Could not allocate a pageBlock at %p.", liballoc_base + totalPagesAllocated * 4096);
 	blk->magic = PAGEBLOCK_MAGIC;
 	blk->nPagesAllocated = nPages;
+	totalPagesAllocated += nPages;
+	if (pageBlockTail)
+		pageBlockTail->next = blk;
+	if(!pageBlockHead)
+		pageBlockHead = blk;
+	blk->prev = pageBlockTail;
 	pageBlockTail = blk;
 	nPageBlocks++;
 	return blk;
@@ -93,6 +100,7 @@ void freePageBlock(pageBlock* block)
 	if (pageBlockTail == block)
 		pageBlockTail = block->prev;
 	nPageBlocks--;
+	totalPagesAllocated -= block->nPagesAllocated;
 	obos::memory::VirtualFree(block, block->nPagesAllocated);
 }
 
@@ -109,6 +117,7 @@ struct safe_lock
 		if (m_mutex)
 		{
 			m_mutex->Lock();
+			previousInterruptStatus = obos::thread::stopTimer();
 			return true;
 		}
 		return false;
@@ -122,7 +131,11 @@ struct safe_lock
 	void Unlock()
 	{
 		if (m_mutex)
+		{
 			m_mutex->Unlock();
+			obos::thread::startTimer(previousInterruptStatus);
+			previousInterruptStatus = 0;
+		}
 	}
 	~safe_lock()
 	{
@@ -130,20 +143,18 @@ struct safe_lock
 	}
 private:
 	obos::locks::Mutex* m_mutex = nullptr;
+	uint64_t previousInterruptStatus;
 };
 
 obos::locks::Mutex g_allocatorMutex;
 
 #define makeSafeLock(vName) if(!g_allocatorMutex.IsInitialized()) { new (&g_allocatorMutex) obos::locks::Mutex{ true }; } safe_lock vName{ &g_allocatorMutex }; vName.Lock();
 
-#ifdef __cplusplus
 extern "C" {
-#endif
-
 	void* kmalloc(size_t amount)
 	{
 		makeSafeLock(lock);
-		
+
 		if (!amount)
 			return nullptr;
 
@@ -152,7 +163,7 @@ extern "C" {
 		pageBlock* currentPageBlock = nullptr;
 
 		// Choose a pageBlock that fits a block with "amount"
-		
+
 		size_t amountNeeded = amount + sizeof(memBlock);
 
 		if (nPageBlocks == 0)
@@ -170,18 +181,25 @@ extern "C" {
 			while (current)
 			{
 				//if (((current->nPagesAllocated * 4096) - current->nBytesUsed) >= amountNeeded)
-				if ((GET_FUNC_ADDR(current->lastBlock->allocAddr) + current->lastBlock->size + sizeof(memBlock) + amountNeeded) <
-					(GET_FUNC_ADDR(current) + current->nPagesAllocated * 4096))
+				/*if ((GET_FUNC_ADDR(current->lastBlock->allocAddr) + current->lastBlock->size + sizeof(memBlock) + amountNeeded) <
+					(GET_FUNC_ADDR(current) + current->nPagesAllocated * 4096))*/
+				if ((GET_FUNC_ADDR(current->lastBlock->allocAddr) + current->lastBlock->size + amountNeeded) <=
+					(GET_FUNC_ADDR(current) + current->nPagesAllocated * 4096)
+					)
 				{
 					currentPageBlock = current;
 					break;
 				}
+#ifdef OBOS_DEBUG
+				else
+					asm("nop");
+#endif
 
 				current = current->next;
 			};
 		}
 
-		foundPageBlock:
+	foundPageBlock:
 
 		// We couldn't find a page block big enough :(
 		if (!currentPageBlock)
@@ -200,22 +218,45 @@ extern "C" {
 		}
 		else
 		{
-			uintptr_t addr = (uintptr_t)currentPageBlock->lastBlock->allocAddr;
-			addr += currentPageBlock->lastBlock->size;
-			block = (memBlock*)addr;
+			// Look for a free address.
+			memBlock* current = (memBlock*)(currentPageBlock + 1);
+			while (current != nullptr && current < currentPageBlock->lastBlock)
+			{
+				if (current->magic != MEMBLOCK_DEAD)
+				{
+					current = current->next;
+					continue;
+				}
+				if (current->size >= (amountNeeded - sizeof(memBlock)))
+				{
+					block = current;
+					break;
+				}
+				current = current->next;
+			}
+			if (!block)
+			{
+				uintptr_t addr = (uintptr_t)currentPageBlock->lastBlock->allocAddr;
+				addr += currentPageBlock->lastBlock->size;
+				block = (memBlock*)addr;
+			}
 		}
 
 		block->magic = MEMBLOCK_MAGIC;
 		block->allocAddr = (void*)((uintptr_t)block + sizeof(memBlock));
 		block->size = amount;
 		block->pageBlock = currentPageBlock;
-		block->prev = currentPageBlock->lastBlock;
+		
 		if (currentPageBlock->lastBlock)
 			currentPageBlock->lastBlock->next = block;
-		currentPageBlock->nBytesUsed += amountNeeded;
+		if(!currentPageBlock->firstBlock)
+			currentPageBlock->firstBlock = block;
+		block->prev = currentPageBlock->lastBlock;
 		currentPageBlock->lastBlock = block;
 		currentPageBlock->nMemBlocks++;
-			
+
+		currentPageBlock->nBytesUsed += amountNeeded;
+		currentPageBlock->lastBlock = block;
 		return block->allocAddr;
 	}
 	void* kcalloc(size_t nobj, size_t szObj)
@@ -226,9 +267,9 @@ extern "C" {
 	{
 		if (!ptr)
 			return kcalloc(newSize, 1);
-	
+
 		size_t oldSize = 0;
-		
+
 		memBlock* block = (memBlock*)ptr;
 		block--;
 		if (block->magic != MEMBLOCK_MAGIC)
@@ -248,7 +289,7 @@ extern "C" {
 		block--;
 		if (block->magic != MEMBLOCK_MAGIC)
 			return;
-	
+
 		pageBlock* currentPageBlock = (pageBlock*)block->pageBlock;
 
 		const size_t totalSize = sizeof(memBlock) + block->size;
@@ -257,21 +298,49 @@ extern "C" {
 
 		if (--currentPageBlock->nMemBlocks)
 		{
-			if(block->next)
+			if (block->next)
+			{
+				if (currentPageBlock->lastBlock == block)
+				{
+					block->next = nullptr;
+					goto next1;
+				}
+				OBOS_ASSERTP(block->next > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
 				block->next->prev = block->prev;
-			if(block->prev)
+			}
+		next1:
+			if (block->prev)
+			{
+				if (currentPageBlock->firstBlock == block)
+				{
+					block->prev = nullptr;
+					goto next2;
+				}
+				OBOS_ASSERTP(block->prev > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
 				block->prev->next = block->next;
+			}
+		next2:
 			if (currentPageBlock->lastBlock == block)
 				currentPageBlock->lastBlock = block->prev;
-			obos::utils::memzero(block, totalSize);
+			if (currentPageBlock->firstBlock == block)
+				currentPageBlock->firstBlock = block->next;
+			obos::utils::memzero(block->allocAddr, block->size);
+			block->magic = MEMBLOCK_DEAD;
 		}
 		else
 			freePageBlock(currentPageBlock);
 	}
-
-#ifdef __cplusplus
 }
+
+namespace obos
+{
+	bool CanAllocateMemory()
+	{
+#if defined(__x86_64__) || defined(_WIN64)
+		return obos::memory::g_initialized;
 #endif
+	}
+}
 
 [[nodiscard]] void* operator new(size_t count) noexcept
 {
