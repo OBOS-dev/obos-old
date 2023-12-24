@@ -17,14 +17,12 @@ namespace obos
 {
 	namespace process
 	{
-		uint32_t g_nextPID = 1;
 		Process::ProcessList g_processes;
 		Process* CreateProcess(bool isUsermode)
 		{
 			Process* ret = new Process{};
 
 			setupContextInfo(&ret->context);
-			ret->pid = g_nextPID++;
 			ret->isUsermode = isUsermode;
 			ret->parent = (process::Process*)((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->currentThread->owner;
 			if (g_processes.tail)
@@ -35,7 +33,7 @@ namespace obos
 			if (!g_processes.head)
 				g_processes.head = ret;
 			g_processes.tail = ret;
-			g_processes.size++;
+			ret->pid = g_processes.size++;
 			
 			if (ret->parent->children.tail)
 			{

@@ -12,11 +12,16 @@
 
 #include <driverInterface/call.h>
 
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
+#include <arch/x86_64/memory_manager/virtual/initialize.h>
 
 namespace obos
 {
 	extern volatile limine_module_request module_request;
+	namespace memory
+	{
+		void* MapPhysicalAddress(PageMap* pageMap, uintptr_t phys, void* to, uintptr_t cpuFlags);
+		uintptr_t DecodeProtectionFlags(uintptr_t _flags);
+	}
 	namespace driverInterface
 	{
 		uintptr_t g_syscallTable[256];
@@ -49,9 +54,9 @@ namespace obos
 		void* SyscallMapPhysToVirt(void** pars)
 		{
 			void* virt = pars[0];
-			void* phys = pars[1];
+			uintptr_t phys = (uintptr_t)pars[1];
 			uintptr_t protFlags = (uintptr_t)pars[2];
-			memory::MapVirtualPageToPhysical(virt,phys, memory::DecodeProtectionFlags(protFlags));
+			memory::MapPhysicalAddress(memory::getCurrentPageMap(), phys, virt, memory::DecodeProtectionFlags(protFlags));
 			return virt;
 		}
 		void* SyscallGetInitrdLocation(size_t** oSize)

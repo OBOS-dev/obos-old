@@ -7,7 +7,7 @@
 #include <int.h>
 #include <klog.h>
 
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
+#include <allocators/vmm/vmm.h>
 
 #include <x86_64-utils/asm.h>
 
@@ -30,7 +30,8 @@ extern "C" [[noreturn]] void __stack_chk_fail(void)
 		size_t nPages = 0;
 		uintptr_t _current = (uintptr_t)current;
 		nPages = 1llu + (((_current + sizeof(*current)) & ~0xfff) > (_current & ~0xfff));
-		if (!obos::memory::VirtualGetProtection(current, nPages, &attrib))
+		obos::memory::VirtualAllocator vallocator{ nullptr };
+		if (!vallocator.VirtualGetProtection(current, nPages, &attrib))
 			goto skip;
 		if (!(attrib & obos::memory::PROT_IS_PRESENT))
 			goto skip;

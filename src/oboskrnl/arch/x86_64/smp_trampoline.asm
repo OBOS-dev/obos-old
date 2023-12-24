@@ -81,8 +81,14 @@ align 1
 	mov cr3, eax
 
 ; Enter long mode.
-    mov ecx, 0xC0000080
-    rdmsr
+	mov eax, 0x80000001
+	xor ecx,ecx
+	cpuid
+	xor eax, eax
+	mov esi, (1<<11)
+	and edx, (1<<20)
+	cmovnz eax, esi ; If bit 20 is set
+	mov ecx, 0xC0000080
     or eax, (1 << 8) | (1 << 10)
     wrmsr
 
@@ -111,21 +117,7 @@ align 1
 	test al,al
 	jnz .call_procInit
 
-.enable_xd:
-	mov eax, 0x80000001
-	xor ecx,ecx
-	cpuid
-	test edx, (1<<20)
-	jz .no_xd
-
-; Enable the XD bit.
-	mov ecx, 0xC0000080
-    rdmsr
-    or eax, (1 << 11)
-    wrmsr
-.no_xd:
-	lgdt [GDT_Ptr]
-	
+	lgdt [GDT_Ptr]	
 
 ; Set "trampoline_has_gdt" to true
 	mov qword [0xFB0], 1

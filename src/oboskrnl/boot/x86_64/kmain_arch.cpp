@@ -21,7 +21,6 @@
 #include <arch/x86_64/memory_manager/physical/allocate.h>
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
 
 #include <arch/x86_64/irq/irq.h>
 #include <arch/x86_64/irq/timer.h>

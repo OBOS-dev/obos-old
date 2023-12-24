@@ -76,7 +76,7 @@ namespace obos
 			g_pmmLock.Lock();
 			uintptr_t flags = saveFlagsAndCLI();
 			uintptr_t ret = (uintptr_t)g_memoryHead;
-			MemoryNode* node = (MemoryNode*)memory::mapPageTable((uintptr_t*)ret);
+			MemoryNode* node = (MemoryNode*)mapPageTable((uintptr_t*)ret);
 			MemoryNode* next = node->next;
 			MemoryNode* prev = node->prev;
 			if (next)

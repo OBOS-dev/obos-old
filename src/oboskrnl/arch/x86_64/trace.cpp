@@ -9,7 +9,7 @@
 #include <limine.h>
 #include <memory_manipulation.h>
 
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
+#include <allocators/vmm/vmm.h>
 
 namespace obos
 {
@@ -164,10 +164,11 @@ namespace obos
 		};
 		void stackTrace(void* parameter)
 		{
+			memory::VirtualAllocator valloc{ nullptr };
 			volatile stack_frame* frame = parameter ? (volatile stack_frame*)parameter : (volatile stack_frame*)__builtin_frame_address(0);
 			{
 				uintptr_t attrib = 0;
-				memory::VirtualGetProtection((void*)frame, 1, &attrib);
+				valloc.VirtualGetProtection((void*)frame, 1, &attrib);
 				if (!attrib)
 					frame = (void*)frame == parameter ? (volatile stack_frame*)__builtin_frame_address(0) : (volatile stack_frame*)parameter;
 			}
@@ -186,7 +187,7 @@ namespace obos
 					if (!frame->down)
 						continue;
 					uintptr_t attrib = 0;
-					memory::VirtualGetProtection((void*)frame->down, 1, &attrib);
+					valloc.VirtualGetProtection((void*)frame->down, 1, &attrib);
 					if (!attrib)
 					{
 						nFrames++;
@@ -199,7 +200,7 @@ namespace obos
 			{
 				frame = parameter ? (volatile stack_frame*)parameter : (volatile stack_frame*)__builtin_frame_address(0);
 				uintptr_t attrib = 0;
-				memory::VirtualGetProtection((void*)frame, 1, &attrib);
+				valloc.VirtualGetProtection((void*)frame, 1, &attrib);
 				if (!attrib)
 					frame = (void*)frame == parameter ? (volatile stack_frame*)__builtin_frame_address(0) : (volatile stack_frame*)parameter;
 			}

@@ -48,7 +48,7 @@ namespace obos
 			memory::PageMap* cr3 = (memory::PageMap*)info->cr3;
 			thread::cpu_local* _info = thread::GetCurrentCpuLocalPtr();
 			SetIST((byte*)_info->temp_stack.addr + _info->temp_stack.size);
-			cr3->switchToThis();
+			cr3->switchToThis(); // Warning: May page fault because of the stack being unmapped in the other process' context.
 		}
 	}
 }

@@ -26,5 +26,7 @@ else()
 	set(DEBUG_SYMBOLS_OPT)
 endif()
 
+set (CXX_STANDARD 20)
+
 add_subdirectory("src/oboskrnl")
 add_subdirectory("src/drivers/generic/initrd")

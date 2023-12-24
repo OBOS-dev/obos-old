@@ -2,9 +2,10 @@
 
 # Copyright (c) 2023 Omar Berrow
 
-set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "liballoc/liballoc.cpp" 
+set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "allocators/liballoc.cpp" 
 					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp"
 				      "driverInterface/interface.cpp" "vfs/mount/mount.cpp" "vfs/fileManip/fileHandle.cpp" "multitasking/locks/mutex.cpp"
+					  "allocators/vmm/vmm.cpp"
 )
 
 add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
@@ -18,8 +19,6 @@ target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/limine")
 target_include_directories(oboskrnl PUBLIC "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 
 target_compile_definitions(oboskrnl PUBLIC E9_HACK=${E9_HACK})
-
-set_property (TARGET oboskrnl PROPERTY CXX_STANDARD 20)
 
 target_compile_options(oboskrnl 
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wall>

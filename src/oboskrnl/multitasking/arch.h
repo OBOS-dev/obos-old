@@ -18,12 +18,18 @@ extern "C" void idleTask();
 
 namespace obos
 {
+#ifndef ALLOCATORS_VMM_VMM_H_INCLUDED
+	namespace memory
+	{
+		class VirtualAllocator;
+	}
+#endif
 	namespace thread
 	{
 		void switchToThreadImpl(taskSwitchInfo* info, struct Thread* thread);
 		bool callBlockCallbackOnThread(taskSwitchInfo* info, bool(*callback)(void* thread, void* userdata), void* par1, void* par2);
-		void setupThreadContext(taskSwitchInfo* info, void* stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, bool isUsermodeProgram);
-		void freeThreadStackInfo(void* stackInfo);
+		void setupThreadContext(taskSwitchInfo* info, void* stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, memory::VirtualAllocator* vallocator, bool isUsermodeProgram);
+		void freeThreadStackInfo(void* stackInfo, memory::VirtualAllocator* vallocator);
 		void setupTimerInterrupt();
 
 
@@ -35,5 +41,7 @@ namespace obos
 		void* getCurrentCpuLocalPtr();
 		bool StartCPUs();
 		void StopCPUs(bool includingSelf);
+
+		bool inSchedulerFunction(struct Thread* thr);
 	}
 }

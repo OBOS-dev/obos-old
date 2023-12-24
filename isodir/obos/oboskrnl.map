@@ -1,10 +1,10 @@
-ffffffff80000000 T obos::arch_kmain()	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:67
-ffffffff80000301 T obos::EarlyKPanic()	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:123
-ffffffff80000331 T obos::utils::strcmp(char const*, char const*)	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:132
-ffffffff800003e0 t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:142
-ffffffff80000430 t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:142
-ffffffff80000466 t _GLOBAL__sub_I__ZN4obos15g_kernelConsoleE	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:142
-ffffffff80000494 t _GLOBAL__sub_D__ZN4obos15g_kernelConsoleE	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:142
+ffffffff80000000 T obos::arch_kmain()	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:66
+ffffffff80000301 T obos::EarlyKPanic()	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:122
+ffffffff80000331 T obos::utils::strcmp(char const*, char const*)	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:131
+ffffffff800003e0 t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:141
+ffffffff80000430 t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:141
+ffffffff80000466 t _GLOBAL__sub_I__ZN4obos15g_kernelConsoleE	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:141
+ffffffff80000494 t _GLOBAL__sub_D__ZN4obos15g_kernelConsoleE	C:/Code/obos/src/oboskrnl/boot/x86_64/kmain_arch.cpp:141
 ffffffff800005d0 T obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long)	C:/Code/obos/src/oboskrnl/x86_64-utils/memory_manipulation.asm:13
 ffffffff800005e7 t obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long) [clone .loop]	C:/Code/obos/src/oboskrnl/x86_64-utils/memory_manipulation.asm:27
 ffffffff800005f7 t obos::utils::dwMemcpy(unsigned int*, unsigned int const*, unsigned long) [clone .finish]	C:/Code/obos/src/oboskrnl/x86_64-utils/memory_manipulation.asm:36
@@ -356,292 +356,309 @@ ffffffff80002efb t syscall_instruction_handler.finish	C:/Code/obos/src/oboskrnl/
 ffffffff80002f29 t _rdmsr	C:/Code/obos/src/oboskrnl/arch/x86_64/int_handlers.asm:311
 ffffffff80002f3f t _wrmsr	C:/Code/obos/src/oboskrnl/arch/x86_64/int_handlers.asm:326
 ffffffff80002f5d T initialize_syscall_instruction	C:/Code/obos/src/oboskrnl/arch/x86_64/int_handlers.asm:346
-ffffffff80002fb5 T obos::logger::countTo(char const*, char)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:20
-ffffffff80003037 T obos::logger::hex2bin(char const*, unsigned int)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:29
-ffffffff80003140 T obos::logger::addr2func(void*, char*&, unsigned long&, char const*, char const*)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:83
-ffffffff800032e5 T obos::logger::addr2file(void*, char*&, char const*, char const*)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:111
-ffffffff8000345a T obos::logger::getKernelMapFile(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:135
-ffffffff8000356a T obos::logger::stackTrace(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:165
-ffffffff80003813 T obos::RemapPIC()	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:33
-ffffffff800038b5 t obos::ProcessEntryHeader(obos::acpi::MADT_EntryHeader*, void*&, void*&, unsigned char&, unsigned char*, unsigned char*)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:52
-ffffffff80003a46 T obos::DefaultInterruptHandler(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:104
-ffffffff80003a8c T obos::InitializeAPIC(obos::acpi::MADTTable*, bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:109
-ffffffff80003d9f T obos::SendEOI()	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:170
-ffffffff80003dda T obos::SendIPI(obos::DestinationShorthand, obos::DeliveryMode, unsigned char, unsigned char)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:174
-ffffffff80003ef4 T obos::InitializeIrq(bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:210
-ffffffff800041da T obos::exception14(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/exception_handlers.cpp:30
-ffffffff800046cf T obos::defaultExceptionHandler(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/exception_handlers.cpp:102
-ffffffff8000493e T obos::nmiHandler(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/exception_handlers.cpp:148
-ffffffff8000499f T obos::RegisterExceptionHandlers()	C:/Code/obos/src/oboskrnl/arch/x86_64/exception_handlers.cpp:154
-ffffffff80004a5c T obos::memory::InitializePhysicalMemoryManager()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:43
-ffffffff80004bb1 T obos::memory::allocatePhysicalPage()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:72
-ffffffff80004ccd T obos::memory::freePhysicalPage(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:93
-ffffffff80004d89 t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:107
-ffffffff80004dbf t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:107
-ffffffff80004df5 t _GLOBAL__sub_I__ZN4obos6memory12g_memoryHeadE
-ffffffff80004e23 t _GLOBAL__sub_D__ZN4obos6memory12g_memoryHeadE
-ffffffff80004e90 T obos::memory::mapPageTable(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:32
-ffffffff80004fb0 T obos::memory::PageMap::getL4PageMapEntryAt(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:50
-ffffffff80005042 T obos::memory::PageMap::getL3PageMapEntryAt(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:59
-ffffffff80005102 T obos::memory::PageMap::getL2PageMapEntryAt(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:71
-ffffffff800051c2 T obos::memory::PageMap::getL1PageMapEntryAt(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:83
-ffffffff80005281 T obos::memory::InitializeVirtualMemoryManager()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:96
-ffffffff80005484 T obos::memory::CPUSupportsExecuteDisable()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:118
-ffffffff80005540 t obos::memory::allocatePagingStructures(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:22
-ffffffff800057e6 t obos::memory::PagesAllocated(void*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:58
-ffffffff800058f1 t obos::memory::CanAllocatePages(void*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:75
-ffffffff80005975 T obos::memory::DecodeProtectionFlags(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:86
-ffffffff80005a2a T obos::memory::VirtualAlloc(void*, unsigned long, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:103
-ffffffff80005bac t obos::memory::freePagingStructures(unsigned long*, unsigned long, obos::memory::PageMap*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:151
-ffffffff80005d69 T obos::memory::VirtualFree(void*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:177
-ffffffff80005f07 T obos::memory::VirtualProtect(void*, unsigned long, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:206
-ffffffff800060b9 t obos::memory::EncodeProtectionFlags(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:237
-ffffffff8000615b T obos::memory::VirtualGetProtection(void*, unsigned long, unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:256
-ffffffff800062bb T obos::memory::MapVirtualPageToPhysical(void*, void*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:280
-ffffffff8000630b T obos::memory::MapVirtualPageToEntry(void*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:284
-ffffffff8000638e t obos::IntermediateTimerIntHandler(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/timer.cpp:19
-ffffffff800063dd T obos::ConfigureAPICTimer(void (*)(obos::interrupt_frame*), unsigned char, unsigned int, obos::TimerConfig, obos::TimerDivisor, bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/timer.cpp:25
-ffffffff800064b4 T obos::MaskTimer(bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/timer.cpp:39
-ffffffff80006530 T obos::thread::switchToThreadImpl(obos::thread::taskSwitchInfo*, obos::thread::Thread*)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/taskSwitchImpl.asm:42
-ffffffff800065a9 T obos::thread::callBlockCallbackOnThread(obos::thread::taskSwitchInfo*, bool (*)(void*, void*), void*, void*)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/taskSwitchImpl.asm:79
-ffffffff800065f0 T idleTask	C:/Code/obos/src/oboskrnl/multitasking/x86_64/taskSwitchImpl.asm:118
-ffffffff800065f4 T obos::thread::setupThreadContext(obos::thread::taskSwitchInfo*, void*, unsigned long, unsigned long, unsigned long, bool)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/setupFrameInfo.cpp:25
-ffffffff80006803 T obos::thread::freeThreadStackInfo(void*)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/setupFrameInfo.cpp:59
-ffffffff800068be T obos::thread::configureHPET(unsigned long)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:37
-ffffffff80006995 T obos::thread::FindCounterValueFromFrequency(unsigned long)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:48
-ffffffff80006a28 T obos::thread::scheduler_bootstrap(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:56
-ffffffff80006ad0 T obos::thread::setupTimerInterrupt()	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:70
-ffffffff80006b46 T obos::thread::stopTimer()	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:76
-ffffffff80006b92 T obos::thread::startTimer(unsigned long)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:83
-ffffffff80006be2 T obos::thread::callScheduler(bool)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:89
-ffffffff80006c34 T obos::thread::getCurrentCpuLocalPtr()	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:97
-ffffffff80006c67 T obos::process::setupContextInfo(obos::process::procContextInfo*)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/procInfo.cpp:30
-ffffffff80006dca T obos::process::switchToProcessContext(obos::process::procContextInfo*)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/procInfo.cpp:46
-ffffffff80006e33 t obos::process::loader::load(unsigned char*, unsigned long, unsigned long&, bool)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/loader/elf.cpp:23
-ffffffff8000701d T obos::process::loader::LoadElfFile(unsigned char*, unsigned long, unsigned long&, unsigned long&, bool)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/loader/elf.cpp:62
-ffffffff800070b2 T obos::process::loader::CheckElfFile(unsigned char*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/loader/elf.cpp:70
-ffffffff800071ae t obos::driverInterface::getElfString(obos::process::loader::Elf64_Ehdr*, unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/load.cpp:35
-ffffffff80007223 T obos::driverInterface::LoadModule(unsigned char*, unsigned long, obos::thread::ThreadHandle**)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/load.cpp:43
-ffffffff800076a0 T obos::driverInterface::RegisterSyscall(unsigned char, unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:24
-ffffffff800076fa T obos::driverInterface::SyscallVPrintf(void*)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:31
-ffffffff80007749 T obos::driverInterface::SyscallMalloc(unsigned long*)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:41
-ffffffff80007785 T obos::driverInterface::SyscallFree(void**)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:45
-ffffffff800077ce T obos::driverInterface::SyscallMapPhysToVirt(void**)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:49
-ffffffff80007847 T obos::driverInterface::SyscallGetInitrdLocation(unsigned long**)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:57
-ffffffff80007930 T isr49	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/driver_call.asm:12
-ffffffff80007941 t isr49.finish	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/driver_call.asm:20
-ffffffff80007950 T calibrateTimer	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:18
-ffffffff80007979 t calibrateTimer.hasCpuid21	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:34
-ffffffff80007989 t calibrateTimer.noCpuid21	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:42
-ffffffff800079ad t calibrateTimer.loop	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:52
-ffffffff800079d0 t calibrateTimer.finish	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:63
-ffffffff800079d7 T obos::syscalls::SyscallGetLastError()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/register.cpp:21
-ffffffff80007a05 T obos::syscalls::SyscallSetLastError(unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/register.cpp:25
-ffffffff80007a6d T obos::syscalls::RegisterSyscalls()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/register.cpp:36
-ffffffff80007ebb T obos::syscalls::RegisterSyscall(unsigned short, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/register.cpp:74
-ffffffff80007f27 T obos::syscalls::SyscallVirtualAlloc(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/memory_syscalls.cpp:19
-ffffffff80007fbd T obos::syscalls::SyscallVirtualFree(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/memory_syscalls.cpp:34
-ffffffff80008040 T obos::syscalls::SyscallVirtualProtect(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/memory_syscalls.cpp:48
-ffffffff800080d2 T obos::syscalls::SyscallVirtualGetProtection(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/memory_syscalls.cpp:63
-ffffffff80008194 T obos::syscalls::canAccessUserMemory(void*, unsigned long, bool, bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/verify_pars.cpp:25
-ffffffff80008311 T obos::syscalls::SyscallAllocConsole()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:29
-ffffffff80008495 T obos::syscalls::SyscallConsoleOutputCharacter(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:54
-ffffffff80008532 T obos::syscalls::SyscallConsoleOutputCharacterAt(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:66
-ffffffff800085de T obos::syscalls::SyscallConsoleOutputCharacterAtWithColour(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:83
-ffffffff8000869e T obos::syscalls::SyscallConsoleOutputString(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:102
-ffffffff8000876a T obos::syscalls::SyscallConsoleOutputStringSz(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:119
-ffffffff8000880d T obos::syscalls::SyscallConsoleSetPosition(unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:135
-ffffffff800088a8 T obos::syscalls::SyscallConsoleGetPosition(unsigned int**)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:146
-ffffffff800089af T obos::syscalls::SyscallConsoleSetColour(unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:167
-ffffffff80008a5a T obos::syscalls::SyscallConsoleGetColour(unsigned int**)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:178
-ffffffff80008b61 T obos::syscalls::SyscallConsoleSetFont(unsigned char**)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:199
-ffffffff80008c25 T obos::syscalls::SyscallConsoleGetFont(unsigned char***)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:215
-ffffffff80008d85 T obos::syscalls::SyscallConsoleSetFramebuffer(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:241
-ffffffff80008e2a T obos::syscalls::SyscallConsoleGetFramebuffer(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:253
-ffffffff80008ef6 T obos::syscalls::SyscallConsoleGetConsoleBounds(unsigned int**)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:270
-ffffffff80008ffd T obos::syscalls::SyscallFreeConsole()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:292
-ffffffff80009078 T obos::syscalls::SyscallMakeThreadObject()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:27
-ffffffff800090be T obos::syscalls::SyscallCreateThread(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:32
-ffffffff800091e1 T obos::syscalls::SyscallOpenThread(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:60
-ffffffff800092c6 T obos::syscalls::SyscallPauseThread(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:84
-ffffffff80009374 T obos::syscalls::SyscallResumeThread(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:99
-ffffffff80009422 T obos::syscalls::SyscallSetThreadPriority(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:114
-ffffffff800094d9 T obos::syscalls::SyscallTerminateThread(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:133
-ffffffff80009590 T obos::syscalls::SyscallGetThreadStatus(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:153
-ffffffff8000963e T obos::syscalls::SyscallGetThreadExitCode(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:168
-ffffffff800096ec T obos::syscalls::SyscallGetThreadLastError(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:183
-ffffffff8000979a T obos::syscalls::SyscallCloseThread(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:199
-ffffffff80009848 T obos::syscalls::SyscallFreeThread(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:214
-ffffffff80009940 T obos::initSSE()	C:/Code/obos/src/oboskrnl/arch/x86_64/sse.asm:10
-ffffffff80009959 t obos::thread::InitializeGDTCpu(obos::thread::cpu_local*)	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_start.cpp:53
-ffffffff80009aac T obos::thread::ProcessorInit(obos::thread::cpu_local*)	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_start.cpp:85
-ffffffff80009b55 T obos::thread::StartCPUs()	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_start.cpp:107
-ffffffff8000a0e4 T obos::thread::StopCPUs(bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_start.cpp:169
-ffffffff8000a1f0 T loadGDT	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_trampoline.asm:158
-ffffffff8000a20e T __stack_chk_fail	C:/Code/obos/src/oboskrnl/arch/x86_64/stack_canary.cpp:21
-ffffffff8000a2e0 T fpuInit	C:/Code/obos/src/oboskrnl/arch/x86_64/fpu.asm:5
-ffffffff8000a2e3 T _fxsave	C:/Code/obos/src/oboskrnl/arch/x86_64/fpu.asm:9
-ffffffff8000a2e8 t obos::kmain_common()::{lambda(unsigned int const*)#1}::operator()(unsigned int const*) const	C:/Code/obos/src/oboskrnl/boot/kmain.cpp:72
-ffffffff8000a312 t obos::kmain_common()::{lambda(unsigned int const*)#1}::_FUN(unsigned int const*)	C:/Code/obos/src/oboskrnl/boot/kmain.cpp:72
-ffffffff8000a350 t obos::kmain_common()::{lambda(unsigned int const*)#1}::operator void (*)(unsigned int const*)() const	C:/Code/obos/src/oboskrnl/boot/kmain.cpp:72
-ffffffff8000a384 T obos::kmain_common()	C:/Code/obos/src/oboskrnl/boot/kmain.cpp:36
-ffffffff8000a7f0 T obos::Console::Console(void*, obos::con_framebuffer, bool)	C:/Code/obos/src/oboskrnl/console.cpp:19
-ffffffff8000a7f0 T obos::Console::Console(void*, obos::con_framebuffer, bool)	C:/Code/obos/src/oboskrnl/console.cpp:19
-ffffffff8000a8c6 T obos::Console::Initialize(void*, obos::con_framebuffer, bool)	C:/Code/obos/src/oboskrnl/console.cpp:24
-ffffffff8000a970 T obos::Console::ConsoleOutput(char const*)	C:/Code/obos/src/oboskrnl/console.cpp:33
-ffffffff8000aa2c T obos::Console::ConsoleOutput(char const*, unsigned long)	C:/Code/obos/src/oboskrnl/console.cpp:39
-ffffffff8000aae4 T obos::Console::ConsoleOutput(char)	C:/Code/obos/src/oboskrnl/console.cpp:45
-ffffffff8000ab76 T obos::Console::ConsoleOutput(char, unsigned int&, unsigned int&)	C:/Code/obos/src/oboskrnl/console.cpp:51
-ffffffff8000ac08 T obos::Console::ConsoleOutput(char, unsigned int, unsigned int, unsigned int&, unsigned int&)	C:/Code/obos/src/oboskrnl/console.cpp:58
-ffffffff8000ac98 T obos::Console::SetPosition(unsigned int, unsigned int)	C:/Code/obos/src/oboskrnl/console.cpp:65
-ffffffff8000ace0 T obos::Console::GetPosition(unsigned int*, unsigned int*)	C:/Code/obos/src/oboskrnl/console.cpp:70
-ffffffff8000ad3e T obos::fillBackgroundTransparent(obos::con_framebuffer&, unsigned int, unsigned int)	C:/Code/obos/src/oboskrnl/console.cpp:78
-ffffffff8000add8 T obos::Console::SetColour(unsigned int, unsigned int, bool)	C:/Code/obos/src/oboskrnl/console.cpp:84
-ffffffff8000ae84 T obos::Console::GetColour(unsigned int*, unsigned int*)	C:/Code/obos/src/oboskrnl/console.cpp:97
-ffffffff8000aee2 T obos::Console::SetFont(unsigned char*)	C:/Code/obos/src/oboskrnl/console.cpp:105
-ffffffff8000af20 T obos::Console::GetFont(unsigned char**)	C:/Code/obos/src/oboskrnl/console.cpp:109
-ffffffff8000af68 T obos::Console::SetFramebuffer(obos::con_framebuffer)	C:/Code/obos/src/oboskrnl/console.cpp:115
-ffffffff8000aff6 T obos::Console::GetFramebuffer(obos::con_framebuffer*)	C:/Code/obos/src/oboskrnl/console.cpp:124
-ffffffff8000b06a T obos::Console::GetConsoleBounds(unsigned int*, unsigned int*)	C:/Code/obos/src/oboskrnl/console.cpp:134
-ffffffff8000b0c8 T obos::Console::CopyFrom(obos::con_framebuffer*)	C:/Code/obos/src/oboskrnl/console.cpp:143
-ffffffff8000b150 T obos::Console::putChar(char, unsigned int, unsigned int, unsigned int, unsigned int)	C:/Code/obos/src/oboskrnl/console.cpp:152
-ffffffff8000b31e T obos::Console::newlineHandler(unsigned int&, unsigned int&)	C:/Code/obos/src/oboskrnl/console.cpp:179
-ffffffff8000b478 T obos::Console::__ImplConsoleOutputChar(char, unsigned int, unsigned int, unsigned int&, unsigned int&)	C:/Code/obos/src/oboskrnl/console.cpp:191
-ffffffff8000b60c t toupper(char)	C:/Code/obos/src/oboskrnl/klog.cpp:26
-ffffffff8000b65d T obos::logger::printf_impl(void (*)(char, void*), void*, char const*, __va_list_tag*)	C:/Code/obos/src/oboskrnl/klog.cpp:38
-ffffffff8000befb t obos::logger::consoleOutputCallback(char, void*)	C:/Code/obos/src/oboskrnl/klog.cpp:154
-ffffffff8000bf53 T obos::logger::printf(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:163
-ffffffff8000bff4 T obos::logger::vprintf(char const*, __va_list_tag*)	C:/Code/obos/src/oboskrnl/klog.cpp:173
-ffffffff8000c06e T obos::logger::sprintf_callback(char, void*)	C:/Code/obos/src/oboskrnl/klog.cpp:181
-ffffffff8000c0d9 T obos::logger::sprintf(char*, char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:191
-ffffffff8000c16c T obos::logger::log(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:224
-ffffffff8000c292 T obos::logger::info(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:228
-ffffffff8000c3b8 T obos::logger::warning(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:232
-ffffffff8000c4de T obos::logger::error(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:236
-ffffffff8000c604 T obos::logger::panic(void*, char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:241
-ffffffff8000c65f T obos::logger::panicVariadic(void*, char const*, __va_list_tag*)	C:/Code/obos/src/oboskrnl/klog.cpp:248
-ffffffff8000c720 t obos::logger::dumpAddr_impl(int, ...)::{lambda(char, void*)#1}::operator()(char, void*) const	C:/Code/obos/src/oboskrnl/klog.cpp:269
-ffffffff8000c76a t obos::logger::dumpAddr_impl(int, ...)::{lambda(char, void*)#1}::_FUN(char, void*)	C:/Code/obos/src/oboskrnl/klog.cpp:269
-ffffffff8000c7b0 t obos::logger::dumpAddr_impl(int, ...)::{lambda(char, void*)#1}::operator void (*)(char, void*)() const	C:/Code/obos/src/oboskrnl/klog.cpp:269
-ffffffff8000c7e4 t obos::logger::dumpAddr_impl(int, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:264
-ffffffff8000c863 T obos::logger::dumpAddr(unsigned int*)	C:/Code/obos/src/oboskrnl/klog.cpp:273
-ffffffff8000c8ad t itoa(long, char*, int)	C:/Code/obos/src/oboskrnl/klog.cpp:281
-ffffffff8000c9bf t strreverse(char*, int)	C:/Code/obos/src/oboskrnl/klog.cpp:304
-ffffffff8000ca6a t itoa_unsigned(unsigned long, char*, int)	C:/Code/obos/src/oboskrnl/klog.cpp:317
-ffffffff8000cb2e t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/klog.cpp:348
-ffffffff8000cb88 t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/klog.cpp:348
-ffffffff8000cbe2 t _GLOBAL__sub_I__ZN4obos6logger11printf_implEPFvcPvES1_PKcP13__va_list_tag
-ffffffff8000cc10 t _GLOBAL__sub_D__ZN4obos6logger11printf_implEPFvcPvES1_PKcP13__va_list_tag
-ffffffff8000cc7c T allocateNewPageBlock(unsigned long)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:71
-ffffffff8000cdcc T freePageBlock(pageBlock*)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:94
-ffffffff8000ce9a T kmalloc	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:154
-ffffffff8000d1ca T kcalloc	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:262
-ffffffff8000d228 T krealloc	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:266
-ffffffff8000d2e4 T kfree	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:284
-ffffffff8000d5a9 T obos::CanAllocateMemory()	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:337
-ffffffff8000d5d9 T operator new(unsigned long)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:345
-ffffffff8000d624 T operator new[](unsigned long)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:353
-ffffffff8000d65d T operator delete(void*)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:357
-ffffffff8000d697 T operator delete[](void*)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:361
-ffffffff8000d6d1 T operator delete(void*, unsigned long)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:365
-ffffffff8000d70f T operator delete[](void*, unsigned long)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:369
-ffffffff8000d74d T operator new(unsigned long, void*)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:374
-ffffffff8000d782 T operator new[](unsigned long, void*)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:378
-ffffffff8000d7b7 T operator delete(void*, void*)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:382
-ffffffff8000d7e9 T operator delete[](void*, void*)	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:384
-ffffffff8000d81b t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:385
-ffffffff8000d851 t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/liballoc/liballoc.cpp:385
-ffffffff8000d887 t _GLOBAL__sub_I_pageBlockHead
-ffffffff8000d8b5 t _GLOBAL__sub_D_pageBlockHead
-ffffffff8000da6e t obos::thread::checkThreadAffinity(obos::thread::Thread*)	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:39
-ffffffff8000dac4 T obos::thread::findRunnableThreadInList(obos::thread::Thread::ThreadList&)	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:43
-ffffffff8000dc70 T obos::thread::findThreadPriorityList()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:83
-ffffffff8000deba T obos::thread::callBlockCallbacksOnList(obos::thread::Thread::ThreadList&)	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:120
-ffffffff8000dfed T obos::thread::schedule()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:140
-ffffffff8000e2f0 T obos::thread::InitializeScheduler()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:200
-ffffffff8000e7a5 T obos::thread::GetCurrentCpuLocalPtr()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:275
-ffffffff8000e7d3 t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:280
-ffffffff8000e809 t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:280
-ffffffff8000e83f t _GLOBAL__sub_I__ZN4obos6thread15g_priorityListsE
-ffffffff8000e86d t _GLOBAL__sub_D__ZN4obos6thread15g_priorityListsE
-ffffffff8000e89b T obos::SetLastError(unsigned int)	C:/Code/obos/src/oboskrnl/error.cpp:21
-ffffffff8000e903 T obos::GetLastError()	C:/Code/obos/src/oboskrnl/error.cpp:29
-ffffffff8000e938 T obos::thread::lookForThreadInList(obos::thread::Thread::ThreadList&, unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:25
-ffffffff8000e99e T obos::thread::ThreadHandle::ThreadHandle()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:37
-ffffffff8000e99e T obos::thread::ThreadHandle::ThreadHandle()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:37
-ffffffff8000e9d8 T obos::thread::ThreadHandle::OpenThread(unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:41
-ffffffff8000eab0 T obos::thread::ThreadHandle::CreateThread(unsigned int, unsigned long, void (*)(unsigned long), unsigned long, void*, bool, bool)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:65
-ffffffff8000ed8c T obos::thread::ThreadHandle::PauseThread()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:129
-ffffffff8000ee18 T obos::thread::ThreadHandle::ResumeThread()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:148
-ffffffff8000eea2 T obos::thread::ThreadHandle::SetThreadPriority(unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:166
-ffffffff8000f0ce T obos::thread::ThreadHandle::TerminateThread(unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:233
-ffffffff8000f24e T obos::thread::ThreadHandle::GetThreadStatus()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:272
-ffffffff8000f2aa T obos::thread::ThreadHandle::GetThreadExitCode()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:282
-ffffffff8000f306 T obos::thread::ThreadHandle::GetThreadLastError()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:292
-ffffffff8000f362 T obos::thread::ThreadHandle::GetThreadTID()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:302
-ffffffff8000f3be T obos::thread::ThreadHandle::CloseHandle()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:313
-ffffffff8000f541 T obos::thread::ExitThreadImpl(void*, void*)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:345
-ffffffff8000f6dd T obos::thread::GetTID()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:367
-ffffffff8000f711 T obos::thread::ExitThread(unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:372
-ffffffff8000f75e T obos::process::CreateProcess(bool)	C:/Code/obos/src/oboskrnl/multitasking/process/process.cpp:22
-ffffffff8000f8f2 T obos::driverInterface::DriverConnection::SendDataOnBuffer(void const*, unsigned long, obos::driverInterface::con_buffer*, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:29
-ffffffff8000fa90 t obos::driverInterface::DriverConnection::RecvDataOnBuffer(void*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)::{lambda(obos::thread::Thread*, void*)#1}::operator()(obos::thread::Thread*, void*) const	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:74
-ffffffff8000fb0e t obos::driverInterface::DriverConnection::RecvDataOnBuffer(void*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)::{lambda(obos::thread::Thread*, void*)#1}::_FUN(obos::thread::Thread*, void*)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:74
-ffffffff8000fb54 t obos::driverInterface::DriverConnection::RecvDataOnBuffer(void*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)::{lambda(obos::thread::Thread*, void*)#1}::operator bool (*)(obos::thread::Thread*, void*)() const	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:74
-ffffffff8000fb88 T obos::driverInterface::DriverConnection::RecvDataOnBuffer(void*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:59
-ffffffff8000fdd8 T obos::driverInterface::DriverConnectionBase::SendData(void const*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:120
-ffffffff8000fe4c T obos::driverInterface::DriverConnectionBase::RecvData(void*, unsigned long, unsigned int, bool, bool, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:131
-ffffffff8000fed2 T obos::driverInterface::DriverConnectionBase::CloseConnection()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:145
-ffffffff80010118 t obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)::{lambda(obos::thread::Thread*, void*)#1}::operator()(obos::thread::Thread*, void*) const	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:225
-ffffffff80010181 t obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)::{lambda(obos::thread::Thread*, void*)#1}::_FUN(obos::thread::Thread*, void*)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:225
-ffffffff800101c8 t obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)::{lambda(obos::thread::Thread*, void*)#1}::operator bool (*)(obos::thread::Thread*, void*)() const	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:225
-ffffffff800101fc T obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:190
-ffffffff800104a8 T obos::driverInterface::DriverClient::SendData(void const*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:261
-ffffffff80010558 T obos::driverInterface::DriverClient::RecvData(void*, unsigned long, unsigned int, bool, bool, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:270
-ffffffff80010606 T obos::driverInterface::DriverServer::Listen(unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:282
-ffffffff80010780 T obos::driverInterface::DriverServer::SendData(void const*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:313
-ffffffff80010832 T obos::driverInterface::DriverServer::RecvData(void*, unsigned long, unsigned int, bool, bool, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:322
-ffffffff800108d8 T obos::driverInterface::DriverServer::CloseConnection()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:332
-ffffffff80010912 T obos::driverInterface::DriverClient::CloseConnection()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:333
-ffffffff8001094c T obos::driverInterface::DriverServer::ListenCallback(obos::thread::Thread*, void*)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:335
-ffffffff80010af7 T obos::driverInterface::SyscallAllocDriverServer()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:377
-ffffffff80010b3d T obos::driverInterface::SyscallFreeDriverServer(obos::driverInterface::DriverServer**)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:381
-ffffffff80010b86 T obos::driverInterface::DummyClass1::Listen(unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:386
-ffffffff80010bbc T obos::driverInterface::DummyClass1::IsConnectionClosed()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:390
-ffffffff80010bee T obos::driverInterface::DummyClass2::OpenConnection(unsigned int, unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:392
-ffffffff80010c28 T obos::driverInterface::DummyClass2::IsConnectionClosed()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:396
-ffffffff800111a2 T obos::vfs::SendCommand(obos::driverInterface::DriverClient&, unsigned int)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:26
-ffffffff8001121e T obos::vfs::NextFile(obos::driverInterface::DriverClient&, unsigned long, unsigned long*&, char*&)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:35
-ffffffff80011418 T obos::vfs::GetFileAttributes(obos::driverInterface::DriverClient&, char const*, unsigned int, unsigned long*)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:63
-ffffffff8001161e T obos::vfs::ReadFile(obos::driverInterface::DriverClient&, char const*, unsigned int, void**, unsigned long*, unsigned long, unsigned long)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:97
-ffffffff800119a3 t obos::vfs::dividePathToTokens(char const*, char const**&, unsigned long&, bool)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:158
-ffffffff80011c14 t obos::vfs::setupMountPointEntries(obos::vfs::MountPoint*)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:179
-ffffffff800129d1 T obos::vfs::mount(unsigned int&, unsigned int, bool)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:390
-ffffffff80012c31 T obos::vfs::unmount(unsigned int)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:445
-ffffffff80012c62 T obos::vfs::getPartitionIDForMountPoint(unsigned int)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:450
-ffffffff80012d30 T obos::vfs::getMountPointsForPartitionID(unsigned int, unsigned int**)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:469
-ffffffff80012e80 t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:486
-ffffffff80012eb6 t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:486
-ffffffff80012eec t _GLOBAL__sub_I__ZN4obos3vfs13g_mountPointsE
-ffffffff80012f1a t _GLOBAL__sub_D__ZN4obos3vfs13g_mountPointsE
-ffffffff80013548 T obos::vfs::strContains(char const*, char)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:24
-ffffffff800135c2 T obos::vfs::getMountId(char const*)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:30
-ffffffff8001366a T obos::vfs::SearchForNode(obos::vfs::DirectoryEntry*, void*, bool (*)(obos::vfs::DirectoryEntry*, void*))	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:42
-ffffffff80013738 t obos::vfs::FileHandle::Open(char const*, obos::vfs::OpenOptions)::{lambda(obos::vfs::DirectoryEntry*, void*)#1}::operator()(obos::vfs::DirectoryEntry*, void*) const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:99
-ffffffff80013784 t obos::vfs::FileHandle::Open(char const*, obos::vfs::OpenOptions)::{lambda(obos::vfs::DirectoryEntry*, void*)#1}::_FUN(obos::vfs::DirectoryEntry*, void*)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:99
-ffffffff800137ca t obos::vfs::FileHandle::Open(char const*, obos::vfs::OpenOptions)::{lambda(obos::vfs::DirectoryEntry*, void*)#1}::operator bool (*)(obos::vfs::DirectoryEntry*, void*)() const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:99
-ffffffff800137fe T obos::vfs::FileHandle::Open(char const*, obos::vfs::OpenOptions)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:66
-ffffffff80013aae t obos::vfs::FileHandle::Read(char*, unsigned long, bool)::{lambda(obos::driverInterface::DriverClient&, char*, obos::vfs::FileHandle*)#1}::operator()(obos::driverInterface::DriverClient&, char*, obos::vfs::FileHandle*) const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:146
-ffffffff80013b8c t obos::vfs::FileHandle::Read(char*, unsigned long, bool)::{lambda(obos::driverInterface::DriverClient&, char*, obos::vfs::FileHandle*)#1}::_FUN(obos::driverInterface::DriverClient&, char*, obos::vfs::FileHandle*)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:146
-ffffffff80013bda T obos::vfs::FileHandle::Read(char*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:129
-ffffffff80013d5a T obos::vfs::FileHandle::Write()	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:180
-ffffffff80013d96 T obos::vfs::FileHandle::Eof() const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:186
-ffffffff80013dea T obos::vfs::FileHandle::GetFileSize() const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:191
-ffffffff80013e50 T obos::vfs::FileHandle::GetParent(char*, unsigned long*)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:200
-ffffffff80013f00 T obos::vfs::FileHandle::SeekTo(long, obos::vfs::SeekPlace)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:218
-ffffffff80013fcc T obos::vfs::FileHandle::Close()	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:244
-ffffffff80014034 T obos::locks::Mutex::LockBlockCallback(obos::thread::Thread*, void*)	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:29
-ffffffff800140d0 T obos::locks::Mutex::Lock(unsigned long, bool)	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:36
-ffffffff800141da T obos::locks::Mutex::Unlock()	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:52
-ffffffff8001426c T obos::locks::Mutex::~Mutex()	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:67
-ffffffff8001426c T obos::locks::Mutex::~Mutex()	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:67
+ffffffff80002fb5 T obos::memory::InitializePhysicalMemoryManager()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:43
+ffffffff8000310a T obos::memory::allocatePhysicalPage()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:72
+ffffffff80003226 T obos::memory::freePhysicalPage(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:93
+ffffffff800032e2 t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:107
+ffffffff80003318 t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/physical/allocate.cpp:107
+ffffffff8000334e t _GLOBAL__sub_I__ZN4obos6memory12g_memoryHeadE
+ffffffff8000337c t _GLOBAL__sub_D__ZN4obos6memory12g_memoryHeadE
+ffffffff800033e8 T obos::RemapPIC()	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:33
+ffffffff8000348a t obos::ProcessEntryHeader(obos::acpi::MADT_EntryHeader*, void*&, void*&, unsigned char&, unsigned char*, unsigned char*)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:52
+ffffffff8000361b T obos::DefaultInterruptHandler(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:104
+ffffffff80003661 T obos::InitializeAPIC(obos::acpi::MADTTable*, bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:109
+ffffffff80003974 T obos::SendEOI()	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:170
+ffffffff800039af T obos::SendIPI(obos::DestinationShorthand, obos::DeliveryMode, unsigned char, unsigned char)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:174
+ffffffff80003ac9 T obos::InitializeIrq(bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/irq.cpp:210
+ffffffff80003daf T obos::exception14(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/exception_handlers.cpp:36
+ffffffff80004291 T obos::defaultExceptionHandler(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/exception_handlers.cpp:109
+ffffffff80004500 T obos::nmiHandler(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/exception_handlers.cpp:155
+ffffffff80004561 T obos::RegisterExceptionHandlers()	C:/Code/obos/src/oboskrnl/arch/x86_64/exception_handlers.cpp:161
+ffffffff8000461e T obos::logger::countTo(char const*, char)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:20
+ffffffff800046a0 T obos::logger::hex2bin(char const*, unsigned int)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:29
+ffffffff800047a9 T obos::logger::addr2func(void*, char*&, unsigned long&, char const*, char const*)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:83
+ffffffff8000494e T obos::logger::addr2file(void*, char*&, char const*, char const*)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:111
+ffffffff80004ac3 T obos::logger::getKernelMapFile(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:135
+ffffffff80004bd3 T obos::logger::stackTrace(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/trace.cpp:165
+ffffffff80004ee8 T obos::memory::mapPageTable(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:41
+ffffffff80004f28 T obos::memory::PageMap::getL4PageMapEntryAt(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:61
+ffffffff80004fba T obos::memory::PageMap::getL3PageMapEntryAt(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:70
+ffffffff8000507a T obos::memory::PageMap::getL2PageMapEntryAt(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:82
+ffffffff8000513a T obos::memory::PageMap::getL1PageMapEntryAt(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:94
+ffffffff800051f9 T obos::memory::InitializeVirtualMemoryManager()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:108
+ffffffff8000543d T obos::memory::CPUSupportsExecuteDisable()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/initialize.cpp:132
+ffffffff800054f8 T obos::memory::DecodeProtectionFlags(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:29
+ffffffff800055ad t obos::memory::allocatePagingStructures(unsigned long, obos::memory::PageMap*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:45
+ffffffff80005b85 t obos::memory::PagesAllocated(void*, unsigned long, obos::memory::PageMap*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:123
+ffffffff80005c91 t obos::memory::CanAllocatePages(void*, unsigned long, obos::memory::PageMap*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:139
+ffffffff80005ce0 t obos::memory::EncodeProtectionFlags(unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:143
+ffffffff80005d82 t obos::memory::freePagingStructures(unsigned long*, unsigned long, obos::memory::PageMap*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:161
+ffffffff80005f3f t obos::memory::GetPageMapFromProcess(obos::process::Process*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:188
+ffffffff80006063 T obos::memory::_Impl_FindUsableAddress(obos::process::Process*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:223
+ffffffff8000617c T obos::memory::_Impl_ProcVirtualAlloc(obos::process::Process*, void*, unsigned long, unsigned long, unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:242
+ffffffff800063c8 T obos::memory::_Impl_ProcVirtualFree(obos::process::Process*, void*, unsigned long, unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:284
+ffffffff8000660c T obos::memory::_Impl_ProcVirtualProtect(obos::process::Process*, void*, unsigned long, unsigned long, unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:323
+ffffffff8000687d T obos::memory::_Impl_ProcVirtualGetProtection(obos::process::Process*, void*, unsigned long, unsigned long*, unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:361
+ffffffff80006a13 T obos::memory::_Impl_GetPageSize()	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:390
+ffffffff80006a41 T obos::memory::_Impl_IsValidAddress(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:394
+ffffffff80006a97 T obos::memory::MapPhysicalAddress(obos::memory::PageMap*, unsigned long, void*, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:400
+ffffffff80006b2f T obos::memory::MapEntry(obos::memory::PageMap*, unsigned long, void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:407
+ffffffff80006bc9 T obos::memory::UnmapAddress(obos::memory::PageMap*, void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:414
+ffffffff80006cab T obos::memory::_Impl_Memcpy(obos::process::Process*, void*, void*, unsigned long, unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/memory_manager/virtual/allocate.cpp:426
+ffffffff80007235 t obos::IntermediateTimerIntHandler(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/timer.cpp:19
+ffffffff80007284 T obos::ConfigureAPICTimer(void (*)(obos::interrupt_frame*), unsigned char, unsigned int, obos::TimerConfig, obos::TimerDivisor, bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/timer.cpp:25
+ffffffff8000735b T obos::MaskTimer(bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/irq/timer.cpp:39
+ffffffff800073e0 T obos::thread::switchToThreadImpl(obos::thread::taskSwitchInfo*, obos::thread::Thread*)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/taskSwitchImpl.asm:42
+ffffffff80007459 T obos::thread::callBlockCallbackOnThread(obos::thread::taskSwitchInfo*, bool (*)(void*, void*), void*, void*)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/taskSwitchImpl.asm:79
+ffffffff800074a0 T idleTask	C:/Code/obos/src/oboskrnl/multitasking/x86_64/taskSwitchImpl.asm:118
+ffffffff800074a4 T obos::thread::setupThreadContext(obos::thread::taskSwitchInfo*, void*, unsigned long, unsigned long, unsigned long, obos::memory::VirtualAllocator*, bool)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/setupFrameInfo.cpp:29
+ffffffff800077a5 T obos::thread::freeThreadStackInfo(void*, obos::memory::VirtualAllocator*)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/setupFrameInfo.cpp:78
+ffffffff80007860 T obos::thread::configureHPET(unsigned long)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:38
+ffffffff80007937 T obos::thread::FindCounterValueFromFrequency(unsigned long)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:49
+ffffffff800079ca T obos::thread::scheduler_bootstrap(obos::interrupt_frame*)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:57
+ffffffff80007a72 T obos::thread::setupTimerInterrupt()	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:71
+ffffffff80007ae8 T obos::thread::stopTimer()	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:77
+ffffffff80007b34 T obos::thread::startTimer(unsigned long)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:84
+ffffffff80007b84 T obos::thread::callScheduler(bool)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:90
+ffffffff80007bd6 T obos::thread::getCurrentCpuLocalPtr()	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:98
+ffffffff80007c09 T obos::thread::inSchedulerFunction(obos::thread::Thread*)	C:/Code/obos/src/oboskrnl/multitasking/x86_64/scheduler_bootstrapper.cpp:103
+ffffffff80007c70 T obos::process::setupContextInfo(obos::process::procContextInfo*)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/procInfo.cpp:30
+ffffffff80007dd3 T obos::process::switchToProcessContext(obos::process::procContextInfo*)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/procInfo.cpp:46
+ffffffff80007e3c t obos::process::loader::load(unsigned char*, unsigned long, unsigned long&, obos::memory::VirtualAllocator&, bool)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/loader/elf.cpp:23
+ffffffff80008050 T obos::process::loader::LoadElfFile(unsigned char*, unsigned long, unsigned long&, unsigned long&, obos::memory::VirtualAllocator&, bool)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/loader/elf.cpp:62
+ffffffff800080f0 T obos::process::loader::CheckElfFile(unsigned char*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/multitasking/process/x86_64/loader/elf.cpp:70
+ffffffff800081ec t obos::driverInterface::getElfString(obos::process::loader::Elf64_Ehdr*, unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/load.cpp:35
+ffffffff80008261 T obos::driverInterface::LoadModule(unsigned char*, unsigned long, obos::thread::ThreadHandle**)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/load.cpp:43
+ffffffff800086cc T obos::driverInterface::RegisterSyscall(unsigned char, unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:29
+ffffffff80008726 T obos::driverInterface::SyscallVPrintf(void*)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:36
+ffffffff80008775 T obos::driverInterface::SyscallMalloc(unsigned long*)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:46
+ffffffff800087b1 T obos::driverInterface::SyscallFree(void**)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:50
+ffffffff800087fa T obos::driverInterface::SyscallMapPhysToVirt(void**)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:54
+ffffffff80008883 T obos::driverInterface::SyscallGetInitrdLocation(unsigned long**)	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/call.cpp:62
+ffffffff80008970 T isr49	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/driver_call.asm:12
+ffffffff80008981 t isr49.finish	C:/Code/obos/src/oboskrnl/driverInterface/x86_64/driver_call.asm:20
+ffffffff80008990 T calibrateTimer	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:18
+ffffffff800089b9 t calibrateTimer.hasCpuid21	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:34
+ffffffff800089c9 t calibrateTimer.noCpuid21	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:42
+ffffffff800089ed t calibrateTimer.loop	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:52
+ffffffff80008a10 t calibrateTimer.finish	C:/Code/obos/src/oboskrnl/multitasking/x86_64/calibrate_timer.asm:63
+ffffffff80008a17 T obos::syscalls::SyscallGetLastError()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/register.cpp:21
+ffffffff80008a45 T obos::syscalls::SyscallSetLastError(unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/register.cpp:25
+ffffffff80008aad T obos::syscalls::RegisterSyscalls()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/register.cpp:36
+ffffffff80008efb T obos::syscalls::RegisterSyscall(unsigned short, unsigned long)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/register.cpp:74
+ffffffff80008f67 T obos::syscalls::SyscallVirtualAlloc(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/memory_syscalls.cpp:23
+ffffffff80009015 T obos::syscalls::SyscallVirtualFree(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/memory_syscalls.cpp:39
+ffffffff800090b3 T obos::syscalls::SyscallVirtualProtect(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/memory_syscalls.cpp:54
+ffffffff8000915d T obos::syscalls::SyscallVirtualGetProtection(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/memory_syscalls.cpp:70
+ffffffff80009237 T obos::syscalls::canAccessUserMemory(void*, unsigned long, bool, bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/verify_pars.cpp:23
+ffffffff800093cc T obos::syscalls::SyscallAllocConsole()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:29
+ffffffff80009550 T obos::syscalls::SyscallConsoleOutputCharacter(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:54
+ffffffff800095ed T obos::syscalls::SyscallConsoleOutputCharacterAt(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:66
+ffffffff80009699 T obos::syscalls::SyscallConsoleOutputCharacterAtWithColour(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:83
+ffffffff80009759 T obos::syscalls::SyscallConsoleOutputString(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:102
+ffffffff80009825 T obos::syscalls::SyscallConsoleOutputStringSz(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:119
+ffffffff800098c8 T obos::syscalls::SyscallConsoleSetPosition(unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:135
+ffffffff80009963 T obos::syscalls::SyscallConsoleGetPosition(unsigned int**)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:146
+ffffffff80009a6a T obos::syscalls::SyscallConsoleSetColour(unsigned int*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:167
+ffffffff80009b15 T obos::syscalls::SyscallConsoleGetColour(unsigned int**)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:178
+ffffffff80009c1c T obos::syscalls::SyscallConsoleSetFont(unsigned char**)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:199
+ffffffff80009ce0 T obos::syscalls::SyscallConsoleGetFont(unsigned char***)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:215
+ffffffff80009e64 T obos::syscalls::SyscallConsoleSetFramebuffer(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:241
+ffffffff80009f09 T obos::syscalls::SyscallConsoleGetFramebuffer(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:253
+ffffffff80009fd5 T obos::syscalls::SyscallConsoleGetConsoleBounds(unsigned int**)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:270
+ffffffff8000a0dc T obos::syscalls::SyscallFreeConsole()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/console_syscalls.cpp:292
+ffffffff8000a157 T obos::syscalls::SyscallMakeThreadObject()	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:27
+ffffffff8000a19d T obos::syscalls::SyscallCreateThread(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:32
+ffffffff8000a2cb T obos::syscalls::SyscallOpenThread(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:61
+ffffffff8000a3b0 T obos::syscalls::SyscallPauseThread(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:85
+ffffffff8000a45e T obos::syscalls::SyscallResumeThread(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:100
+ffffffff8000a50c T obos::syscalls::SyscallSetThreadPriority(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:115
+ffffffff8000a5c3 T obos::syscalls::SyscallTerminateThread(void*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:134
+ffffffff8000a67a T obos::syscalls::SyscallGetThreadStatus(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:154
+ffffffff8000a728 T obos::syscalls::SyscallGetThreadExitCode(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:169
+ffffffff8000a7d6 T obos::syscalls::SyscallGetThreadLastError(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:184
+ffffffff8000a884 T obos::syscalls::SyscallCloseThread(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:200
+ffffffff8000a932 T obos::syscalls::SyscallFreeThread(unsigned long*)	C:/Code/obos/src/oboskrnl/arch/x86_64/syscall/thread_syscalls.cpp:215
+ffffffff8000aa30 T obos::initSSE()	C:/Code/obos/src/oboskrnl/arch/x86_64/sse.asm:10
+ffffffff8000aa49 t obos::thread::InitializeGDTCpu(obos::thread::cpu_local*)	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_start.cpp:60
+ffffffff8000aba2 T obos::thread::ProcessorInit(obos::thread::cpu_local*)	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_start.cpp:92
+ffffffff8000ac4b T obos::thread::StartCPUs()	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_start.cpp:114
+ffffffff8000b20a T obos::thread::StopCPUs(bool)	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_start.cpp:177
+ffffffff8000b310 T loadGDT	C:/Code/obos/src/oboskrnl/arch/x86_64/smp_trampoline.asm:150
+ffffffff8000b32e T __stack_chk_fail	C:/Code/obos/src/oboskrnl/arch/x86_64/stack_canary.cpp:21
+ffffffff8000b430 T fpuInit	C:/Code/obos/src/oboskrnl/arch/x86_64/fpu.asm:5
+ffffffff8000b433 T _fxsave	C:/Code/obos/src/oboskrnl/arch/x86_64/fpu.asm:9
+ffffffff8000b438 t obos::kmain_common(unsigned char*, unsigned long)::{lambda(unsigned int const*)#1}::operator()(unsigned int const*) const	C:/Code/obos/src/oboskrnl/boot/kmain.cpp:72
+ffffffff8000b462 t obos::kmain_common(unsigned char*, unsigned long)::{lambda(unsigned int const*)#1}::_FUN(unsigned int const*)	C:/Code/obos/src/oboskrnl/boot/kmain.cpp:72
+ffffffff8000b4a0 t obos::kmain_common(unsigned char*, unsigned long)::{lambda(unsigned int const*)#1}::operator void (*)(unsigned int const*)() const	C:/Code/obos/src/oboskrnl/boot/kmain.cpp:72
+ffffffff8000b4d4 T obos::kmain_common(unsigned char*, unsigned long)	C:/Code/obos/src/oboskrnl/boot/kmain.cpp:38
+ffffffff8000b990 T obos::Console::Console(void*, obos::con_framebuffer, bool)	C:/Code/obos/src/oboskrnl/console.cpp:19
+ffffffff8000b990 T obos::Console::Console(void*, obos::con_framebuffer, bool)	C:/Code/obos/src/oboskrnl/console.cpp:19
+ffffffff8000ba66 T obos::Console::Initialize(void*, obos::con_framebuffer, bool)	C:/Code/obos/src/oboskrnl/console.cpp:24
+ffffffff8000bb10 T obos::Console::ConsoleOutput(char const*)	C:/Code/obos/src/oboskrnl/console.cpp:33
+ffffffff8000bbcc T obos::Console::ConsoleOutput(char const*, unsigned long)	C:/Code/obos/src/oboskrnl/console.cpp:39
+ffffffff8000bc84 T obos::Console::ConsoleOutput(char)	C:/Code/obos/src/oboskrnl/console.cpp:45
+ffffffff8000bd16 T obos::Console::ConsoleOutput(char, unsigned int&, unsigned int&)	C:/Code/obos/src/oboskrnl/console.cpp:51
+ffffffff8000bda8 T obos::Console::ConsoleOutput(char, unsigned int, unsigned int, unsigned int&, unsigned int&)	C:/Code/obos/src/oboskrnl/console.cpp:58
+ffffffff8000be38 T obos::Console::SetPosition(unsigned int, unsigned int)	C:/Code/obos/src/oboskrnl/console.cpp:65
+ffffffff8000be80 T obos::Console::GetPosition(unsigned int*, unsigned int*)	C:/Code/obos/src/oboskrnl/console.cpp:70
+ffffffff8000bede T obos::fillBackgroundTransparent(obos::con_framebuffer&, unsigned int, unsigned int)	C:/Code/obos/src/oboskrnl/console.cpp:78
+ffffffff8000bf78 T obos::Console::SetColour(unsigned int, unsigned int, bool)	C:/Code/obos/src/oboskrnl/console.cpp:84
+ffffffff8000c024 T obos::Console::GetColour(unsigned int*, unsigned int*)	C:/Code/obos/src/oboskrnl/console.cpp:97
+ffffffff8000c082 T obos::Console::SetFont(unsigned char*)	C:/Code/obos/src/oboskrnl/console.cpp:105
+ffffffff8000c0c0 T obos::Console::GetFont(unsigned char**)	C:/Code/obos/src/oboskrnl/console.cpp:109
+ffffffff8000c108 T obos::Console::SetFramebuffer(obos::con_framebuffer)	C:/Code/obos/src/oboskrnl/console.cpp:115
+ffffffff8000c196 T obos::Console::GetFramebuffer(obos::con_framebuffer*)	C:/Code/obos/src/oboskrnl/console.cpp:124
+ffffffff8000c20a T obos::Console::GetConsoleBounds(unsigned int*, unsigned int*)	C:/Code/obos/src/oboskrnl/console.cpp:134
+ffffffff8000c268 T obos::Console::CopyFrom(obos::con_framebuffer*)	C:/Code/obos/src/oboskrnl/console.cpp:143
+ffffffff8000c2f0 T obos::Console::putChar(char, unsigned int, unsigned int, unsigned int, unsigned int)	C:/Code/obos/src/oboskrnl/console.cpp:152
+ffffffff8000c4be T obos::Console::newlineHandler(unsigned int&, unsigned int&)	C:/Code/obos/src/oboskrnl/console.cpp:179
+ffffffff8000c618 T obos::Console::__ImplConsoleOutputChar(char, unsigned int, unsigned int, unsigned int&, unsigned int&)	C:/Code/obos/src/oboskrnl/console.cpp:191
+ffffffff8000c7ac t toupper(char)	C:/Code/obos/src/oboskrnl/klog.cpp:26
+ffffffff8000c7fd T obos::logger::printf_impl(void (*)(char, void*), void*, char const*, __va_list_tag*)	C:/Code/obos/src/oboskrnl/klog.cpp:38
+ffffffff8000d09b t obos::logger::consoleOutputCallback(char, void*)	C:/Code/obos/src/oboskrnl/klog.cpp:154
+ffffffff8000d0f3 T obos::logger::printf(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:163
+ffffffff8000d194 T obos::logger::vprintf(char const*, __va_list_tag*)	C:/Code/obos/src/oboskrnl/klog.cpp:173
+ffffffff8000d20e T obos::logger::sprintf_callback(char, void*)	C:/Code/obos/src/oboskrnl/klog.cpp:181
+ffffffff8000d279 T obos::logger::sprintf(char*, char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:191
+ffffffff8000d30c T obos::logger::log(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:224
+ffffffff8000d432 T obos::logger::info(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:228
+ffffffff8000d558 T obos::logger::warning(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:232
+ffffffff8000d67e T obos::logger::error(char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:236
+ffffffff8000d7a4 T obos::logger::panic(void*, char const*, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:241
+ffffffff8000d7ff T obos::logger::panicVariadic(void*, char const*, __va_list_tag*)	C:/Code/obos/src/oboskrnl/klog.cpp:248
+ffffffff8000d8c0 t obos::logger::dumpAddr_impl(int, ...)::{lambda(char, void*)#1}::operator()(char, void*) const	C:/Code/obos/src/oboskrnl/klog.cpp:269
+ffffffff8000d90a t obos::logger::dumpAddr_impl(int, ...)::{lambda(char, void*)#1}::_FUN(char, void*)	C:/Code/obos/src/oboskrnl/klog.cpp:269
+ffffffff8000d950 t obos::logger::dumpAddr_impl(int, ...)::{lambda(char, void*)#1}::operator void (*)(char, void*)() const	C:/Code/obos/src/oboskrnl/klog.cpp:269
+ffffffff8000d984 t obos::logger::dumpAddr_impl(int, ...)	C:/Code/obos/src/oboskrnl/klog.cpp:264
+ffffffff8000da03 T obos::logger::dumpAddr(unsigned int*)	C:/Code/obos/src/oboskrnl/klog.cpp:273
+ffffffff8000da4d t itoa(long, char*, int)	C:/Code/obos/src/oboskrnl/klog.cpp:281
+ffffffff8000db5f t strreverse(char*, int)	C:/Code/obos/src/oboskrnl/klog.cpp:304
+ffffffff8000dc0a t itoa_unsigned(unsigned long, char*, int)	C:/Code/obos/src/oboskrnl/klog.cpp:317
+ffffffff8000dcce t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/klog.cpp:348
+ffffffff8000dd28 t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/klog.cpp:348
+ffffffff8000dd82 t _GLOBAL__sub_I__ZN4obos6logger11printf_implEPFvcPvES1_PKcP13__va_list_tag
+ffffffff8000ddb0 t _GLOBAL__sub_D__ZN4obos6logger11printf_implEPFvcPvES1_PKcP13__va_list_tag
+ffffffff8000de1c T allocateNewPageBlock(unsigned long)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:73
+ffffffff8000df79 T freePageBlock(pageBlock*)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:96
+ffffffff8000e04b T kmalloc	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:156
+ffffffff8000e37b T kcalloc	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:264
+ffffffff8000e3d9 T krealloc	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:268
+ffffffff8000e495 T kfree	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:286
+ffffffff8000e75a T obos::CanAllocateMemory()	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:339
+ffffffff8000e78a T operator new(unsigned long)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:347
+ffffffff8000e7d5 T operator new[](unsigned long)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:355
+ffffffff8000e80e T operator delete(void*)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:359
+ffffffff8000e848 T operator delete[](void*)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:363
+ffffffff8000e882 T operator delete(void*, unsigned long)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:367
+ffffffff8000e8c0 T operator delete[](void*, unsigned long)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:371
+ffffffff8000e8fe T operator new(unsigned long, void*)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:376
+ffffffff8000e933 T operator new[](unsigned long, void*)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:380
+ffffffff8000e968 T operator delete(void*, void*)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:384
+ffffffff8000e99a T operator delete[](void*, void*)	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:386
+ffffffff8000e9cc t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:387
+ffffffff8000ea13 t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/allocators/liballoc.cpp:387
+ffffffff8000ea55 t _GLOBAL__sub_I_pageBlockHead
+ffffffff8000ea83 t _GLOBAL__sub_D_pageBlockHead
+ffffffff8000ec6c T obos::thread::InitializeScheduler()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:208
+ffffffff8000f14a T obos::thread::GetCurrentCpuLocalPtr()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:285
+ffffffff8000f178 t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:290
+ffffffff8000f1ae t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:290
+ffffffff8000f1e4 t _GLOBAL__sub_I__ZN4obos6thread15g_priorityListsE
+ffffffff8000f212 t _GLOBAL__sub_D__ZN4obos6thread15g_priorityListsE
+ffffffff8000f240 T obos::SetLastError(unsigned int)	C:/Code/obos/src/oboskrnl/error.cpp:21
+ffffffff8000f2a8 T obos::GetLastError()	C:/Code/obos/src/oboskrnl/error.cpp:29
+ffffffff8000f2de T obos::thread::lookForThreadInList(obos::thread::Thread::ThreadList&, unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:28
+ffffffff8000f344 T obos::thread::ThreadHandle::ThreadHandle()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:40
+ffffffff8000f344 T obos::thread::ThreadHandle::ThreadHandle()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:40
+ffffffff8000f37e T obos::thread::ThreadHandle::OpenThread(unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:44
+ffffffff8000f456 T obos::thread::ThreadHandle::CreateThread(unsigned int, unsigned long, void (*)(unsigned long), unsigned long, unsigned long, void*, bool, bool)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:68
+ffffffff8000f770 T obos::thread::ThreadHandle::PauseThread()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:134
+ffffffff8000f7fc T obos::thread::ThreadHandle::ResumeThread()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:153
+ffffffff8000f886 T obos::thread::ThreadHandle::SetThreadPriority(unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:171
+ffffffff8000fab2 T obos::thread::ThreadHandle::TerminateThread(unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:238
+ffffffff8000fc66 T obos::thread::ThreadHandle::GetThreadStatus()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:280
+ffffffff8000fcc2 T obos::thread::ThreadHandle::GetThreadExitCode()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:290
+ffffffff8000fd1e T obos::thread::ThreadHandle::GetThreadLastError()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:300
+ffffffff8000fd7a T obos::thread::ThreadHandle::GetThreadTID()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:310
+ffffffff8000fdd6 T obos::thread::ThreadHandle::CloseHandle()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:321
+ffffffff8000ff59 T obos::thread::ExitThreadImpl(void*, void*)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:353
+ffffffff80010111 T obos::thread::GetTID()	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:376
+ffffffff80010145 T obos::thread::ExitThread(unsigned int)	C:/Code/obos/src/oboskrnl/multitasking/threadAPI/thrHandle.cpp:381
+ffffffff80010192 T obos::process::CreateProcess(bool)	C:/Code/obos/src/oboskrnl/multitasking/process/process.cpp:21
+ffffffff80010318 T obos::driverInterface::DriverConnection::SendDataOnBuffer(void const*, unsigned long, obos::driverInterface::con_buffer*, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:29
+ffffffff800104b6 t obos::driverInterface::DriverConnection::RecvDataOnBuffer(void*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)::{lambda(obos::thread::Thread*, void*)#1}::operator()(obos::thread::Thread*, void*) const	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:74
+ffffffff80010534 t obos::driverInterface::DriverConnection::RecvDataOnBuffer(void*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)::{lambda(obos::thread::Thread*, void*)#1}::_FUN(obos::thread::Thread*, void*)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:74
+ffffffff8001057a t obos::driverInterface::DriverConnection::RecvDataOnBuffer(void*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)::{lambda(obos::thread::Thread*, void*)#1}::operator bool (*)(obos::thread::Thread*, void*)() const	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:74
+ffffffff800105ae T obos::driverInterface::DriverConnection::RecvDataOnBuffer(void*, unsigned long, obos::driverInterface::con_buffer*, bool, bool, unsigned int, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:59
+ffffffff800107fe T obos::driverInterface::DriverConnectionBase::SendData(void const*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:120
+ffffffff80010872 T obos::driverInterface::DriverConnectionBase::RecvData(void*, unsigned long, unsigned int, bool, bool, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:131
+ffffffff800108f8 T obos::driverInterface::DriverConnectionBase::CloseConnection()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:145
+ffffffff80010b3e t obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)::{lambda(obos::thread::Thread*, void*)#1}::operator()(obos::thread::Thread*, void*) const	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:225
+ffffffff80010ba7 t obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)::{lambda(obos::thread::Thread*, void*)#1}::_FUN(obos::thread::Thread*, void*)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:225
+ffffffff80010bee t obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)::{lambda(obos::thread::Thread*, void*)#1}::operator bool (*)(obos::thread::Thread*, void*)() const	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:225
+ffffffff80010c22 T obos::driverInterface::DriverClient::OpenConnection(unsigned int, unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:190
+ffffffff80010ece T obos::driverInterface::DriverClient::SendData(void const*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:261
+ffffffff80010f7e T obos::driverInterface::DriverClient::RecvData(void*, unsigned long, unsigned int, bool, bool, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:270
+ffffffff8001102c T obos::driverInterface::DriverServer::Listen(unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:282
+ffffffff800111a6 T obos::driverInterface::DriverServer::SendData(void const*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:313
+ffffffff80011258 T obos::driverInterface::DriverServer::RecvData(void*, unsigned long, unsigned int, bool, bool, bool)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:322
+ffffffff800112fe T obos::driverInterface::DriverServer::CloseConnection()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:332
+ffffffff80011338 T obos::driverInterface::DriverClient::CloseConnection()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:333
+ffffffff80011372 T obos::driverInterface::DriverServer::ListenCallback(obos::thread::Thread*, void*)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:335
+ffffffff8001151d T obos::driverInterface::SyscallAllocDriverServer()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:377
+ffffffff80011563 T obos::driverInterface::SyscallFreeDriverServer(obos::driverInterface::DriverServer**)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:381
+ffffffff800115ac T obos::driverInterface::DummyClass1::Listen(unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:386
+ffffffff800115e2 T obos::driverInterface::DummyClass1::IsConnectionClosed()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:390
+ffffffff80011614 T obos::driverInterface::DummyClass2::OpenConnection(unsigned int, unsigned long)	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:392
+ffffffff8001164e T obos::driverInterface::DummyClass2::IsConnectionClosed()	C:/Code/obos/src/oboskrnl/driverInterface/interface.cpp:396
+ffffffff80011bc8 T obos::vfs::SendCommand(obos::driverInterface::DriverClient&, unsigned int)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:26
+ffffffff80011c44 T obos::vfs::NextFile(obos::driverInterface::DriverClient&, unsigned long, unsigned long*&, char*&)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:35
+ffffffff80011e3e T obos::vfs::GetFileAttributes(obos::driverInterface::DriverClient&, char const*, unsigned int, unsigned long*)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:63
+ffffffff80012044 T obos::vfs::ReadFile(obos::driverInterface::DriverClient&, char const*, unsigned int, void**, unsigned long*, unsigned long, unsigned long)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:97
+ffffffff800123c9 t obos::vfs::dividePathToTokens(char const*, char const**&, unsigned long&, bool)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:158
+ffffffff8001263a t obos::vfs::setupMountPointEntries(obos::vfs::MountPoint*)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:179
+ffffffff800133f7 T obos::vfs::mount(unsigned int&, unsigned int, bool)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:390
+ffffffff80013657 T obos::vfs::unmount(unsigned int)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:445
+ffffffff80013688 T obos::vfs::getPartitionIDForMountPoint(unsigned int)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:450
+ffffffff80013756 T obos::vfs::getMountPointsForPartitionID(unsigned int, unsigned int**)	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:469
+ffffffff800138a6 t __static_initialization_and_destruction_0()	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:486
+ffffffff800138dc t __static_initialization_and_destruction_1()	C:/Code/obos/src/oboskrnl/vfs/mount/mount.cpp:486
+ffffffff80013912 t _GLOBAL__sub_I__ZN4obos3vfs13g_mountPointsE
+ffffffff80013940 t _GLOBAL__sub_D__ZN4obos3vfs13g_mountPointsE
+ffffffff80013f6e T obos::vfs::strContains(char const*, char)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:24
+ffffffff80013fe8 T obos::vfs::getMountId(char const*)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:30
+ffffffff80014090 T obos::vfs::SearchForNode(obos::vfs::DirectoryEntry*, void*, bool (*)(obos::vfs::DirectoryEntry*, void*))	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:42
+ffffffff8001415e t obos::vfs::FileHandle::Open(char const*, obos::vfs::OpenOptions)::{lambda(obos::vfs::DirectoryEntry*, void*)#1}::operator()(obos::vfs::DirectoryEntry*, void*) const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:99
+ffffffff800141aa t obos::vfs::FileHandle::Open(char const*, obos::vfs::OpenOptions)::{lambda(obos::vfs::DirectoryEntry*, void*)#1}::_FUN(obos::vfs::DirectoryEntry*, void*)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:99
+ffffffff800141f0 t obos::vfs::FileHandle::Open(char const*, obos::vfs::OpenOptions)::{lambda(obos::vfs::DirectoryEntry*, void*)#1}::operator bool (*)(obos::vfs::DirectoryEntry*, void*)() const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:99
+ffffffff80014224 T obos::vfs::FileHandle::Open(char const*, obos::vfs::OpenOptions)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:66
+ffffffff800144d4 t obos::vfs::FileHandle::Read(char*, unsigned long, bool)::{lambda(obos::driverInterface::DriverClient&, char*, obos::vfs::FileHandle*)#1}::operator()(obos::driverInterface::DriverClient&, char*, obos::vfs::FileHandle*) const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:146
+ffffffff800145b2 t obos::vfs::FileHandle::Read(char*, unsigned long, bool)::{lambda(obos::driverInterface::DriverClient&, char*, obos::vfs::FileHandle*)#1}::_FUN(obos::driverInterface::DriverClient&, char*, obos::vfs::FileHandle*)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:146
+ffffffff80014600 T obos::vfs::FileHandle::Read(char*, unsigned long, bool)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:129
+ffffffff80014780 T obos::vfs::FileHandle::Write()	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:180
+ffffffff800147bc T obos::vfs::FileHandle::Eof() const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:186
+ffffffff80014810 T obos::vfs::FileHandle::GetFileSize() const	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:191
+ffffffff80014876 T obos::vfs::FileHandle::GetParent(char*, unsigned long*)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:200
+ffffffff80014926 T obos::vfs::FileHandle::SeekTo(long, obos::vfs::SeekPlace)	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:218
+ffffffff800149f2 T obos::vfs::FileHandle::Close()	C:/Code/obos/src/oboskrnl/vfs/fileManip/fileHandle.cpp:244
+ffffffff80014a5a T obos::locks::Mutex::LockBlockCallback(obos::thread::Thread*, void*)	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:29
+ffffffff80014af6 T obos::locks::Mutex::Lock(unsigned long, bool)	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:36
+ffffffff80014c42 T obos::locks::Mutex::Unlock()	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:55
+ffffffff80014cd4 T obos::locks::Mutex::~Mutex()	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:70
+ffffffff80014cd4 T obos::locks::Mutex::~Mutex()	C:/Code/obos/src/oboskrnl/multitasking/locks/mutex.cpp:70
+ffffffff80014d6a T obos::memory::VirtualAllocator::VirtualAllocator(obos::process::Process*)	C:/Code/obos/src/oboskrnl/allocators/vmm/vmm.cpp:23
+ffffffff80014d6a T obos::memory::VirtualAllocator::VirtualAllocator(obos::process::Process*)	C:/Code/obos/src/oboskrnl/allocators/vmm/vmm.cpp:23
+ffffffff80014dc0 T obos::memory::VirtualAllocator::Initialize(obos::process::Process*)	C:/Code/obos/src/oboskrnl/allocators/vmm/vmm.cpp:30
+ffffffff80014e16 T obos::memory::VirtualAllocator::VirtualAlloc(void*, unsigned long, unsigned long)	C:/Code/obos/src/oboskrnl/allocators/vmm/vmm.cpp:37
+ffffffff80014fce T obos::memory::VirtualAllocator::VirtualFree(void*, unsigned long)	C:/Code/obos/src/oboskrnl/allocators/vmm/vmm.cpp:80
+ffffffff8001511e T obos::memory::VirtualAllocator::VirtualProtect(void*, unsigned long, unsigned long)	C:/Code/obos/src/oboskrnl/allocators/vmm/vmm.cpp:113
+ffffffff80015278 T obos::memory::VirtualAllocator::VirtualGetProtection(void*, unsigned long, unsigned long*)	C:/Code/obos/src/oboskrnl/allocators/vmm/vmm.cpp:146
+ffffffff800153bc T obos::memory::VirtualAllocator::Memcpy(void*, void*, unsigned long)	C:/Code/obos/src/oboskrnl/allocators/vmm/vmm.cpp:177
+ffffffff80015487 T _sched_text_start	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:47
+ffffffff80015487 t obos::thread::checkThreadAffinity(obos::thread::Thread*)	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:46
+ffffffff800154dd T obos::thread::findRunnableThreadInList(obos::thread::Thread::ThreadList&)	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:50
+ffffffff80015689 T obos::thread::findThreadPriorityList()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:90
+ffffffff800158d3 T obos::thread::callBlockCallbacksOnList(obos::thread::Thread::ThreadList&)	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:127
+ffffffff80015a06 T obos::thread::schedule()	C:/Code/obos/src/oboskrnl/multitasking/scheduler.cpp:147
+ffffffff80015d55 T _sched_text_end

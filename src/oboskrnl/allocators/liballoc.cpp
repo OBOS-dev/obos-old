@@ -1,5 +1,5 @@
 /*
-	oboskrnl/liballoc/liballoc.cpp
+	oboskrnl/allocators/liballoc.cpp
 
 	Copyright (c) 2023 Omar Berrow
 */
@@ -9,7 +9,7 @@
 
 #include <new>
 
-#include <liballoc/liballoc.h>
+#include <allocators/liballoc.h>
 
 #include <multitasking/locks/mutex.h>
 
@@ -17,8 +17,9 @@
 
 #include <memory_manipulation.h>
 
+#include <allocators/vmm/vmm.h>
+
 #if defined(__x86_64__) || defined(_WIN64)
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 #endif
 
@@ -27,8 +28,8 @@
 #define MIN_PAGES_ALLOCATED 8
 #define MEMBLOCK_MAGIC  0x6AB450AA
 #define PAGEBLOCK_MAGIC	0x768AADFC
-#define MEMBLOCK_DEAD  0x3D793CCD
-#define PTR_ALIGNMENT 16
+#define MEMBLOCK_DEAD   0x3D793CCD
+#define PTR_ALIGNMENT   16
 #define ROUND_PTR_UP(ptr) (((ptr) + PTR_ALIGNMENT) & ~(PTR_ALIGNMENT - 1))
 #define ROUND_PTR_DOWN(ptr) ((ptr) & ~(PTR_ALIGNMENT - 1))
 
@@ -67,6 +68,7 @@ using AllocFlags = obos::memory::PageProtectionFlags;
 #if defined(__x86_64__) || defined(_WIN64)
 static uintptr_t liballoc_base = 0xFFFFFFFFF0000000;
 #endif
+obos::memory::VirtualAllocator g_liballocVirtualAllocator{ nullptr };
 
 pageBlock* allocateNewPageBlock(size_t nPages)
 {
@@ -76,7 +78,7 @@ pageBlock* allocateNewPageBlock(size_t nPages)
 		blockAddr = liballoc_base;
 	else
 		blockAddr = blockAddr + pageBlockTail->nPagesAllocated * 4096;
-	pageBlock* blk = (pageBlock*)obos::memory::VirtualAlloc((void*)blockAddr, nPages, 0);
+	pageBlock* blk = (pageBlock*)g_liballocVirtualAllocator.VirtualAlloc((void*)blockAddr, nPages * obos::memory::VirtualAllocator::GetPageSize(), 0);
 	if(!blk)
 		obos::logger::panic(nullptr, "Could not allocate a pageBlock at %p.", liballoc_base + totalPagesAllocated * 4096);
 	blk->magic = PAGEBLOCK_MAGIC;
@@ -101,7 +103,7 @@ void freePageBlock(pageBlock* block)
 		pageBlockTail = block->prev;
 	nPageBlocks--;
 	totalPagesAllocated -= block->nPagesAllocated;
-	obos::memory::VirtualFree(block, block->nPagesAllocated);
+	g_liballocVirtualAllocator.VirtualFree(block, block->nPagesAllocated);
 }
 
 // A wrapper for Mutex that unlocks the mutex on destruction.

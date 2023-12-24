@@ -12,7 +12,7 @@
 #include <error.h>
 #include <memory_manipulation.h>
 
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
+#include <allocators/vmm/vmm.h>
 
 namespace obos
 {
@@ -20,7 +20,7 @@ namespace obos
 	{
 		namespace loader
 		{
-			static uint32_t load(byte* startAddress, size_t, uintptr_t& baseAddress, bool lazyLoad)
+			static uint32_t load(byte* startAddress, size_t, uintptr_t& baseAddress, memory::VirtualAllocator& allocator, bool lazyLoad)
 			{
 				baseAddress = 0;
 				Elf64_Ehdr* elfHeader = (Elf64_Ehdr*)startAddress;
@@ -34,7 +34,7 @@ namespace obos
 						allocFlags |= memory::PROT_CAN_EXECUTE;
 					if (!(programHeader->p_flags & PF_W))
 						allocFlags |= memory::PROT_READ_ONLY;
-					if (programHeader->p_vaddr > 0xFFFFFFFF80000000 || !programHeader->p_vaddr)
+					if (programHeader->p_vaddr > 0xFFFF800000000000 || !programHeader->p_vaddr)
 					{
 						SetLastError(OBOS_ERROR_BASE_ADDRESS_USED);
 						return OBOS_ERROR_BASE_ADDRESS_USED;
@@ -44,14 +44,14 @@ namespace obos
 						uint32_t nPages = programHeader->p_memsz >> 12;
 						if ((programHeader->p_memsz % 4096) != 0)
 							nPages++;
-						byte* addr = (byte*)memory::VirtualAlloc((void*)programHeader->p_vaddr, nPages, memory::PROT_USER_MODE_ACCESS);
+						byte* addr = (byte*)allocator.VirtualAlloc((void*)programHeader->p_vaddr, (size_t)nPages * 4096, memory::PROT_USER_MODE_ACCESS);
 						if (programHeader->p_filesz)
 						{
 							uintptr_t offset = programHeader->p_vaddr - (uintptr_t)addr;
 							addr += offset;
-							utils::memcpy(addr, startAddress + programHeader->p_offset, programHeader->p_filesz);
+							allocator.Memcpy(addr, startAddress + programHeader->p_offset, programHeader->p_filesz);
 						}
-						memory::VirtualProtect(addr, nPages, allocFlags);
+						allocator.VirtualProtect(addr, static_cast<size_t>(nPages) * 4096, allocFlags);
 					}
 					if (baseAddress > programHeader->p_vaddr || elfHeader->e_phnum == 1)
 						baseAddress = programHeader->p_vaddr;
@@ -59,13 +59,13 @@ namespace obos
 				return OBOS_SUCCESS;
 			}
 
-			uint32_t LoadElfFile(byte* startAddress, size_t size, uintptr_t& entry, uintptr_t& baseAddress, bool lazyLoad)
+			uint32_t LoadElfFile(byte* startAddress, size_t size, uintptr_t& entry, uintptr_t& baseAddress, memory::VirtualAllocator& allocator, bool lazyLoad)
 			{
 				if (uint32_t err = CheckElfFile(startAddress, size, true); err != 0)
 					return err;
 				Elf64_Ehdr* elfHeader = (Elf64_Ehdr*)startAddress;
 				entry = elfHeader->e_entry;
-				return load(startAddress, size, baseAddress, lazyLoad);
+				return load(startAddress, size, baseAddress, allocator, lazyLoad);
 			}
 			uint32_t CheckElfFile(byte* startAddress, size_t size, bool setLastError)
 			{

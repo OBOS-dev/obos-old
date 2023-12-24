@@ -8,6 +8,8 @@
 
 #include <int.h>
 
+#include <allocators/vmm/vmm.h>
+
 namespace obos
 {
 	namespace process
@@ -23,7 +25,7 @@ namespace obos
 			/// <param name="baseAddress">A reference to a variable to store the base address in.</param>
 			/// <param name="lazyLoad">Whether to allocate and copy any of the program header data.</param>
 			/// <returns>An error code.</returns>
-			uint32_t LoadElfFile(byte* startAddress, size_t size, uintptr_t& entry, uintptr_t& baseAddress, bool lazyLoad = false);
+			uint32_t LoadElfFile(byte* startAddress, size_t size, uintptr_t& entry, uintptr_t& baseAddress, memory::VirtualAllocator& allocator, bool lazyLoad = false);
 			uint32_t CheckElfFile(byte* startAddress, size_t size, bool setLastError = false);
 		}
 	}

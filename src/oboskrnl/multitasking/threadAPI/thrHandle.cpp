@@ -8,6 +8,9 @@
 #include <error.h>
 
 #include <multitasking/threadAPI/thrHandle.h>
+
+#include <multitasking/process/process.h>
+
 #include <multitasking/scheduler.h>
 #include <multitasking/thread.h>
 #include <multitasking/arch.h>
@@ -62,13 +65,15 @@ namespace obos
 			return true;
 		}
 
-		bool ThreadHandle::CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, void* threadList, bool startPaused, bool isUsermode)
+		bool ThreadHandle::CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity, void* threadList, bool startPaused, bool isUsermode)
 		{
 			if (m_obj)
 			{
 				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
 				return false;
 			}
+			if (!affinity)
+				affinity = thread::g_defaultAffinity;
 			Thread::ThreadList* priorityList;
 			switch (priority)
 			{
@@ -101,8 +106,8 @@ namespace obos
 			thread->priorityList = priorityList;
 			thread->threadList = threadList ? (thread::Thread::ThreadList*)threadList : getCPULocal()->currentThread->threadList;
 			thread->owner = getCPULocal()->currentThread->owner;
-			setupThreadContext(&thread->context, &thread->stackInfo, (uintptr_t)entry, userdata, stackSize, isUsermode);
-
+			thread->affinity = affinity;
+			setupThreadContext(&thread->context, &thread->stackInfo, (uintptr_t)entry, userdata, stackSize, &((process::Process*)thread->owner)->vallocator, isUsermode);
 			uintptr_t val = stopTimer();
 
 			if(priorityList->tail)
@@ -249,9 +254,12 @@ namespace obos
 				return false;
 			}
 
+			bool isRunning = obj->status & THREAD_STATUS_RUNNING;
 			obj->status = THREAD_STATUS_DEAD;
 			obj->exitCode = exitCode;
-			freeThreadStackInfo(&obj->stackInfo);
+			if (isRunning)
+				callScheduler(true);
+			freeThreadStackInfo(&obj->stackInfo, &((process::Process*)obj->owner)->vallocator);
 
 			uint32_t val = stopTimer();
 			
@@ -357,7 +365,8 @@ namespace obos
 			if (currentThread->priorityList->tail == currentThread)
 				currentThread->priorityList->tail = currentThread->prev_run;
 			currentThread->priorityList->size--;
-			freeThreadStackInfo((void*)&currentThread->stackInfo);
+			memory::VirtualAllocator* valloc = &((process::Process*)currentThread->owner)->vallocator;
+			freeThreadStackInfo((void*)&currentThread->stackInfo, valloc);
 			if(!currentThread->references)
 				delete currentThread;
 			startTimer(0);

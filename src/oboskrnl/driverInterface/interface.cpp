@@ -14,7 +14,7 @@
 #include <multitasking/scheduler.h>
 #include <multitasking/cpu_local.h>
 
-#include <liballoc/liballoc.h>
+#include <allocators/liballoc.h>
 
 #include <multitasking/process/process.h>
 

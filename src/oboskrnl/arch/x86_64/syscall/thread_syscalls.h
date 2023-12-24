@@ -13,7 +13,7 @@ namespace obos
 	namespace syscalls
 	{
 
-		// bool CreateThread(uintptr_t _this, uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, bool startPaused);
+		// bool CreateThread(uintptr_t _this, uint32_t priority, size_t stackSize, uint64_t affinity, void(*entry)(uintptr_t), uintptr_t userdata, bool startPaused);
 		// bool OpenThread(uintptr_t _this, uint32_t tid);
 		// bool PauseThread(uintptr_t _this);
 		// bool ResumeThread(uintptr_t _this);

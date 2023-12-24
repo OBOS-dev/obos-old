@@ -15,7 +15,7 @@
 
 #include <multitasking/locks/mutex.h>
 
-#include <liballoc/liballoc.h>
+#include <allocators/liballoc.h>
 
 #if defined(__x86_64__) && defined(E9_HACK)
 #include <x86_64-utils/asm.h>

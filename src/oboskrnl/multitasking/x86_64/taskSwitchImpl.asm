@@ -117,4 +117,4 @@ _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 idleTask:
 	sti
 	hlt
-	jmp idleTask
+ 	jmp idleTask

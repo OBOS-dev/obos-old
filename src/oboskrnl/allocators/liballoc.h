@@ -1,5 +1,5 @@
 /*
-	oboskrnl/liballoc/liballoc.h
+	oboskrnl/allocators/liballoc.h
 
 	Copyright (c) 2023 Omar Berrow
 */

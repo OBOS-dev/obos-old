@@ -7,10 +7,14 @@
 #include <int.h>
 #include <error.h>
 
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
+#include <allocators/vmm/vmm.h>
 
 #include <arch/x86_64/syscall/verify_pars.h>
 #include <arch/x86_64/syscall/memory_syscalls.h>
+
+#include <multitasking/cpu_local.h>
+
+#include <multitasking/process/process.h>
 
 namespace obos
 {
@@ -29,7 +33,8 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return nullptr;
 			}
-			return memory::VirtualAlloc(pars->base, pars->nPages, (pars->flags | memory::PROT_USER_MODE_ACCESS) & ~memory::PROT_NO_COW_ON_ALLOCATE);
+			memory::VirtualAllocator* vallocator = &((process::Process*)thread::GetCurrentCpuLocalPtr()->currentThread->owner)->vallocator;
+			return vallocator->VirtualAlloc(pars->base, pars->nPages, (pars->flags | memory::PROT_USER_MODE_ACCESS) & ~memory::PROT_NO_COW_ON_ALLOCATE);
 		}
 		bool SyscallVirtualFree(void* _pars)
 		{
@@ -43,7 +48,8 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			return memory::VirtualFree(pars->base, pars->nPages);
+			memory::VirtualAllocator* vallocator = &((process::Process*)thread::GetCurrentCpuLocalPtr()->currentThread->owner)->vallocator;
+			return vallocator->VirtualFree(pars->base, pars->nPages);
 		}
 		bool SyscallVirtualProtect(void* _pars)
 		{
@@ -58,7 +64,8 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			return memory::VirtualProtect(pars->base, pars->nPages, pars->flags | memory::PROT_USER_MODE_ACCESS);
+			memory::VirtualAllocator* vallocator = &((process::Process*)thread::GetCurrentCpuLocalPtr()->currentThread->owner)->vallocator;
+			return vallocator->VirtualProtect(pars->base, pars->nPages, pars->flags | memory::PROT_USER_MODE_ACCESS);
 		}
 		bool SyscallVirtualGetProtection(void* _pars)
 		{
@@ -78,7 +85,8 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			return memory::VirtualGetProtection(pars->base, pars->nPages, pars->flags);
+			memory::VirtualAllocator* vallocator = &((process::Process*)thread::GetCurrentCpuLocalPtr()->currentThread->owner)->vallocator;
+			return vallocator->VirtualGetProtection(pars->base, pars->nPages, pars->flags);
 		}
 	}
 }

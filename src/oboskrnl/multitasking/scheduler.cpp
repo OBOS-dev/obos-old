@@ -19,11 +19,13 @@
 
 #include <memory_manipulation.h>
 
+#include <allocators/vmm/vmm.h>
+
 #define getCPULocal() GetCurrentCpuLocalPtr()
 
 namespace obos
 {
-	extern void kmain_common();
+	extern void kmain_common(byte* initrdDriverData, size_t initrdDriverSize);
 	namespace thread
 	{
 		Thread::ThreadList g_priorityLists[4];
@@ -36,11 +38,16 @@ namespace obos
 
 #pragma GCC push_options
 #pragma GCC optimize("O0")
-		static bool checkThreadAffinity(Thread* thr)
+#ifdef __GNUC__
+#define DEFINE_IN_SECTION __attribute__((section(".sched_text")))
+#else
+#define DEFINE_IN_SECTION
+#endif
+		static bool DEFINE_IN_SECTION checkThreadAffinity(Thread* thr)
 		{
 			return (thr->affinity >> GetCurrentCpuLocalPtr()->cpuId) & 1;
 		}
-		Thread* findRunnableThreadInList(Thread::ThreadList& list)
+		Thread* DEFINE_IN_SECTION findRunnableThreadInList(Thread::ThreadList& list)
 		{
 			Thread* currentThread = list.tail;
 			volatile Thread* currentRunningThread = getCPULocal()->currentThread;
@@ -80,7 +87,7 @@ namespace obos
 
 			return ret;
 		}
-		Thread::ThreadList& findThreadPriorityList()
+		Thread::ThreadList& DEFINE_IN_SECTION findThreadPriorityList()
 		{
 			Thread::ThreadList* list = nullptr;
 			int i;
@@ -117,7 +124,7 @@ namespace obos
 			atomic_clear(&g_priorityLists[i].lock);
 			return *list;
 		}
-		void callBlockCallbacksOnList(Thread::ThreadList& list)
+		void DEFINE_IN_SECTION callBlockCallbacksOnList(Thread::ThreadList& list)
 		{
 			Thread* thread = list.head;
 			while(thread)
@@ -137,7 +144,7 @@ namespace obos
 			}
 		}
 
-		void schedule()
+		void DEFINE_IN_SECTION schedule()
 		{
 			if(getCPULocal()->cpuId == 0)
 				g_timerTicks++;
@@ -172,6 +179,7 @@ namespace obos
 				newThread = getCPULocal()->idleThread;
 			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_BLOCKED), "Thread (tid %d) is both blocked and is trying to be run (status 0x%e%X)!\n", "", newThread->tid, 4, newThread->status);
 			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_PAUSED), "Thread (tid %d) is both paused and is trying to be run (status 0x%e%X)!\n", "", newThread->tid, 4, newThread->status);
+			OBOS_ASSERTP(!inSchedulerFunction(newThread), "Thread (tid %d) was preempted while in the scheduler!\n", "", newThread->tid);
 			if (newThread == currentThread)
 			{
 				currentThread->status &= ~THREAD_STATUS_CAN_RUN;
@@ -200,6 +208,8 @@ namespace obos
 		void InitializeScheduler()
 		{
 			new (&g_coreGlobalSchedulerLock) locks::Mutex{ false };
+		
+			memory::VirtualAllocator valloc{ nullptr };
 
 			Thread* kernelMainThread = new Thread{};
 
@@ -209,7 +219,7 @@ namespace obos
 			kernelMainThread->priorityList = g_priorityLists + 2;
 			kernelMainThread->threadList = new Thread::ThreadList;
 			
-			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 0x10000, false);
+			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 0x10000, &valloc, false);
 
 			kernelMainThread->threadList->head = kernelMainThread;
 			kernelMainThread->threadList->tail = kernelMainThread;
@@ -260,7 +270,7 @@ namespace obos
 				idleThread->next_run = priorityList.tail;
 				priorityList.tail = idleThread;
 				priorityList.size++;
-				setupThreadContext(&idleThread->context, &idleThread->stackInfo, (uintptr_t)idleTask, 0, 0x2000, false);
+				setupThreadContext(&idleThread->context, &idleThread->stackInfo, (uintptr_t)idleTask, 0, 0x2000, &valloc, false);
 			}
 
 			volatile Thread*& currentThread = getCPULocal()->currentThread;
@@ -269,7 +279,7 @@ namespace obos
 			setupTimerInterrupt();
 			thread::g_initialized = true;
 			switchToThreadImpl((taskSwitchInfo*)&currentThread->context, (Thread*)currentThread);
-			kmain_common(); // just in case
+			logger::panic(nullptr, "Could not switch to thread context for the kernel main thread while initializing the scheduler.");
 		}
 
 		cpu_local* GetCurrentCpuLocalPtr()

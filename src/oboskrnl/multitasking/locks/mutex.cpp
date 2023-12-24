@@ -14,7 +14,7 @@
 
 #include <multitasking/locks/mutex.h>
 
-#include <liballoc/liballoc.h>
+#include <allocators/liballoc.h>
 
 extern obos::locks::Mutex g_allocatorMutex;
 
@@ -40,10 +40,13 @@ namespace obos
 				SetLastError(OBOS_ERROR_MUTEX_LOCKED);
 				return false;
 			}
+			if (thread::g_initialized && m_canUseMultitasking)
+				if (m_ownerThread == thread::GetCurrentCpuLocalPtr()->currentThread)
+					return true;
 			// Compare m_locked with zero, and if it is zero, then set it to true and return true, otherwise return false and keep m_locked intact.
 			uint64_t wakeupTime = thread::g_timerTicks + timeout;
 			if (timeout == 0)
-				wakeupTime = UINT64_MAX;
+				wakeupTime = 0xffffffffffffffff /* UINT64_MAX */;
 			while ((atomic_cmpxchg(&m_locked, 0, true) || m_wake) && thread::g_timerTicks < wakeupTime);
 			if (thread::g_initialized && m_canUseMultitasking)
 				m_ownerThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;

@@ -69,11 +69,11 @@ namespace obos
 		/// </summary>
 		OBOS_ERROR_ACCESS_DENIED,
 		/// <summary>
-		/// The block was already freed.
+		/// The block wasn't mapped.
 		/// </summary>
-		OBOS_ERROR_ADDRESS_ALREADY_FREED,
+		OBOS_ERROR_ADDRESS_UNMAPPED,
 		/// <summary>
-		/// A free region was not found while allocated.
+		/// A free region was not found while allocating.
 		/// </summary>
 		OBOS_ERROR_NO_FREE_REGION,
 		/// <summary>
@@ -100,6 +100,10 @@ namespace obos
 		/// The feature hasn't been implemented (yet).
 		/// </summary>
 		OBOS_ERROR_UNIMPLEMENTED_FEATURE,
+		/// <summary>
+		/// A page fault occurred.
+		/// </summary>
+		OBOS_ERROR_PAGE_FAULT,
 
 		OBOS_ERROR_HIGHEST_VALUE,
 	};

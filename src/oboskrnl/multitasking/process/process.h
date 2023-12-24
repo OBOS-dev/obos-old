@@ -13,6 +13,10 @@
 
 #include <multitasking/process/arch.h>
 
+#include <allocators/vmm/vmm.h>
+
+#define MULTIASKING_PROCESS_PROCESS_H_INCLUDED
+
 namespace obos
 {
 	namespace process
@@ -43,6 +47,7 @@ namespace obos
 			Process* next;
 			Process* prev_child;
 			Process* next_child;
+			memory::VirtualAllocator vallocator{ this };
 		};
 		extern Process::ProcessList g_processes;
 		Process* CreateProcess(bool isUsermode);

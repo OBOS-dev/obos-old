@@ -72,7 +72,7 @@ extern "C" void _start()
 			continue;
 		}
 		uintptr_t thread = MakeThreadObject();
-		if (!CreateThread(thread, thread::THREAD_PRIORITY_NORMAL, 0x8000, ConnectionHandler, (uintptr_t)currentClient, false))
+		if (!CreateThread(thread, thread::THREAD_PRIORITY_NORMAL, 0x8000, 0, ConnectionHandler, (uintptr_t)currentClient, false))
 		{
 			//printf("[DRIVER 0, ERROR] CreateThread: Error code: %d.\n", g_driverHeader.driverId, GetLastError());
 			currentClient->CloseConnection();

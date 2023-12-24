@@ -18,7 +18,6 @@
 #include <multitasking/process/process.h>
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
 
 #include <arch/x86_64/memory_manager/physical/allocate.h>
 
@@ -26,6 +25,13 @@
 
 namespace obos
 {
+	namespace memory
+	{
+		uintptr_t DecodeProtectionFlags(uintptr_t _flags);
+		uintptr_t* allocatePagingStructures(uintptr_t address, PageMap* pageMap);
+		void* MapEntry(PageMap* pageMap, uintptr_t entry, void* to);
+		void UnmapAddress(PageMap* pageMap, void* _addr);
+	}
 	bool g_halt;
 	void exception14(interrupt_frame* frame)
 	{
@@ -41,7 +47,8 @@ namespace obos
 				uintptr_t newEntry = memory::allocatePhysicalPage();
 				utils::memcpy(memory::mapPageTable((uintptr_t*)newEntry), (void*)faultAddress, 4096);
 				newEntry |= flags;
-				memory::MapVirtualPageToEntry((void*)faultAddress, newEntry);
+				memory::UnmapAddress(pageMap, (void*)faultAddress);
+				memory::MapEntry(pageMap, newEntry, (void*)faultAddress);
 				return;
 			}
 		}
@@ -66,7 +73,7 @@ namespace obos
 		}
 		// Bug mitigation.
 		// Sometimes we page fault while accessing the lapic, even though that's impossible.
-		if ((faultAddress >= (uintptr_t)g_localAPICAddr && faultAddress <= 0xfffffffffffff000) && !(frame->errorCode >> 4))
+		if ((faultAddress >= (uintptr_t)g_localAPICAddr && faultAddress <= 0xfffffffffffff000) && !(frame->errorCode >> 4) && !(((uintptr_t)1 << 2)))
 			return;
 		logger::panic(
 			(void*)frame->rbp,

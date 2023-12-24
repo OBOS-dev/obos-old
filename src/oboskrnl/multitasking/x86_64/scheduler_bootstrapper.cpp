@@ -13,8 +13,6 @@
 #include <arch/x86_64/irq/timer.h>
 #include <arch/x86_64/irq/irq.h>
 
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
-
 #include <multitasking/scheduler.h>
 #include <multitasking/arch.h>
 #include <multitasking/cpu_local.h>
@@ -27,6 +25,9 @@
 
 extern "C" uint64_t calibrateTimer(uint64_t femtoseconds);
 extern "C" void _fxsave(byte(*context)[512]);
+
+extern "C" char _sched_text_start;
+extern "C" char _sched_text_end;
 
 namespace obos
 {
@@ -97,6 +98,11 @@ namespace obos
 		void* getCurrentCpuLocalPtr()
 		{
 			return (void*)rdmsr(GS_BASE);
+		}
+
+		bool inSchedulerFunction(struct Thread* thr)
+		{
+			return thr->context.frame.rip >= (uintptr_t)&_sched_text_start && thr->context.frame.rip < (uintptr_t)&_sched_text_end;
 		}
 	}
 }

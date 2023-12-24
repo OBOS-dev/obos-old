@@ -31,42 +31,42 @@
 
 #define LITERAL(str) (char*)(str), sizeof((str))
 
+extern obos::memory::VirtualAllocator g_liballocVirtualAllocator;
+
 namespace obos
 {
-	void kmain_common()
+	void kmain_common(byte* initrdDriverData, size_t initrdDriverSize)
 	{
 		logger::log("Multitasking initialized! In \"%s\" now.\n", __func__);
 
-		process::Process* kernelProc = new process::Process;
-		kernelProc->pid = 0;
+		process::Process* kernelProc = new process::Process{};
+		auto currentThread = thread::GetCurrentCpuLocalPtr()->currentThread;
 		kernelProc->console = &g_kernelConsole;
 		kernelProc->isUsermode = false;
 		kernelProc->parent = nullptr;
-#ifdef __x86_64__
-		kernelProc->context.cr3 = thread::GetCurrentCpuLocalPtr()->currentThread->context.cr3; // Only this time... (reference to line 7)
-#endif
-		process::g_processes.tail = process::g_processes.head = kernelProc;
-		process::g_processes.size++;
-		thread::GetCurrentCpuLocalPtr()->currentThread->owner = kernelProc;
-		thread::GetCurrentCpuLocalPtr()->currentThread->next_list->owner = kernelProc;
-
-		byte* procExecutable = nullptr;
-		size_t moduleIndex = 0;
-#if defined(__x86_64__) || defined(_WIN64)
-		extern volatile limine_module_request module_request;
-		for (; moduleIndex < module_request.response->module_count; moduleIndex++)
+		kernelProc->threads.head = currentThread->threadList->head;
+		kernelProc->threads.tail = currentThread->threadList->tail;
+		kernelProc->threads.size = currentThread->threadList->size;
+		thread::Thread* thread = currentThread->next_list;
+		while (thread)
 		{
-			if (utils::strcmp(module_request.response->modules[moduleIndex]->path, "/obos/initrdDriver"))
-			{
-				procExecutable = (byte*)module_request.response->modules[moduleIndex]->address;
-				break;
-			}
+			thread->owner = kernelProc;
+			thread->threadList = &kernelProc->threads;
+		
+			thread = thread->next_list;
 		}
-
-		if (!procExecutable)
-			logger::panic(nullptr, "Couldn't find the initrd driver.\n");
+		delete currentThread->threadList;
+		currentThread->threadList = &kernelProc->threads;
+		currentThread->owner = kernelProc;	
+#if defined(__x86_64__) || defined(_WIN64)
+		kernelProc->context.cr3 = currentThread->context.cr3; // Only this time... (reference to line 7)
 #endif
-
+		// Reconstruct the liballoc's allocator with the kernel process, to avoid future problems with liballoc in user mode.
+		g_liballocVirtualAllocator.~VirtualAllocator();
+		new (&g_liballocVirtualAllocator) memory::VirtualAllocator{ kernelProc };
+		process::g_processes.tail = process::g_processes.head = kernelProc;
+		kernelProc->pid = process::g_processes.size++;
+		
 		logger::log("Initializing driver syscalls.\n");
 		driverInterface::RegisterSyscall(0, (uintptr_t)driverInterface::SyscallVPrintf);
 		driverInterface::RegisterSyscall(1, (uintptr_t)(void(*)(const uint32_t*))[](const uint32_t* exitCode) {
@@ -81,7 +81,7 @@ namespace obos
 
 		logger::log("Loading the initrd driver.\n");
 		SetLastError(0);
-		if (!driverInterface::LoadModule(procExecutable, module_request.response->modules[moduleIndex]->size, nullptr))
+		if (!driverInterface::LoadModule(initrdDriverData, initrdDriverSize, nullptr))
 			logger::panic(nullptr, "Could not load the initrd driver. GetLastError: %d", GetLastError());
 		SetLastError(0);
 

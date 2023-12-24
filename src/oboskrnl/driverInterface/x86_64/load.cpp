@@ -76,9 +76,6 @@ namespace obos
 			identity->process = driverProc;
 			driverProc->_driverIdentity = identity;
 
-			uintptr_t val = thread::stopTimer();
-			process::switchToProcessContext(&driverProc->context);
-
 			uintptr_t entryPoint = 0, baseAddress = 0;
 			
 			if (header->requests & driverHeader::VPRINTF_FUNCTION_REQUEST)
@@ -111,7 +108,7 @@ namespace obos
 			if (mainThread)
 				*mainThread = thread;
 
-			uint32_t ret = process::loader::LoadElfFile(file, size, entryPoint, baseAddress);
+			uint32_t ret = process::loader::LoadElfFile(file, size, entryPoint, baseAddress, driverProc->vallocator);
 			if (ret)
 				return 0;
 
@@ -120,11 +117,12 @@ namespace obos
 				(header->requests & driverHeader::SET_STACK_SIZE_REQUEST) ? header->stackSize : 0,
 				(void(*)(uintptr_t))entryPoint,
 				0,
-				&driverProc->threads);
+				thread::g_defaultAffinity,
+				&driverProc->threads,
+				true);
 			((thread::Thread*)thread->GetUnderlyingObject())->owner = driverProc;
-
-			process::switchToProcessContext(&((process::Process*)getCPULocal()->currentThread->owner)->context);
-			thread::startTimer(val);
+			((thread::Thread*)thread->GetUnderlyingObject())->context.cr3 = driverProc->context.cr3;
+			thread->ResumeThread();
 
 			return driverProc->pid;
 		}

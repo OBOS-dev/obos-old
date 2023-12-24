@@ -9,7 +9,7 @@
 #include <klog.h>
 #include <error.h>
 
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
+#include <allocators/vmm/vmm.h>
 
 #include <arch/x86_64/syscall/verify_pars.h>
 #include <arch/x86_64/syscall/console_syscalls.h>
@@ -233,7 +233,7 @@ namespace obos
 			uint8_t* _font = nullptr;
 			if (proc->console)
 				proc->console->GetFont(&_font);
-			uint8_t* ret = (uint8_t*)memory::VirtualAlloc(nullptr, 1, memory::PROT_USER_MODE_ACCESS);
+			uint8_t* ret = (uint8_t*)memory::VirtualAllocator{ nullptr }.VirtualAlloc(nullptr, 1, memory::PROT_USER_MODE_ACCESS);
 			**font = ret;
 			for (int i = 0; i < 4096; i++)
 				ret[i] = _font[i];

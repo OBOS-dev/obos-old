@@ -14,12 +14,13 @@
 #include <arch/x86_64/interrupt.h>
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
-#include <arch/x86_64/memory_manager/virtual/allocate.h>
 
 #include <multitasking/arch.h>
 #include <multitasking/cpu_local.h>
 
 #include <limine.h>
+
+#include <allocators/vmm/vmm.h>
 
 #define GS_BASE 0xC0000101
 #define KERNELGS_BASE 0xC0000102
@@ -45,6 +46,12 @@ namespace obos
 	extern uint8_t g_nCores;
 	extern bool g_halt;
 	extern void SetIST(void* rsp);
+	namespace memory
+	{
+		void* MapPhysicalAddress(PageMap* pageMap, uintptr_t phys, void* to, uintptr_t cpuFlags);
+		void UnmapAddress(PageMap* pageMap, void* _addr);
+		uintptr_t DecodeProtectionFlags(uintptr_t _flags);
+	}
 	namespace thread
 	{
 		static memory::PageMap* kernel_cr3;
@@ -79,7 +86,7 @@ namespace obos
 			info->arch_specific.tss.iopb = 103;
 			info->arch_specific.gdtPtr.base = (uint64_t)&info->arch_specific.gdt;
 			info->arch_specific.gdtPtr.limit = sizeof(info->arch_specific.gdt) - 1;
-			SetIST((byte*)info->temp_stack.addr + info->temp_stack.size);
+			info->arch_specific.tss.ist0 = ((uintptr_t)info->temp_stack.addr + info->temp_stack.size);
 			loadGDT((uint64_t)&info->arch_specific.gdtPtr);
 		}
 		[[noreturn]] void ProcessorInit(cpu_local* info)
@@ -109,15 +116,16 @@ namespace obos
 			g_nCPUs = g_nCores;
 			g_cpuInfo = new cpu_local[g_nCPUs];
 			kernel_cr3 = memory::getCurrentPageMap();
-			memory::MapVirtualPageToPhysical(nullptr, nullptr, 3);
+			memory::VirtualAllocator vallocator{ nullptr };
+			memory::MapPhysicalAddress(kernel_cr3, 0, nullptr, 3);
 			(*(void**)0xFC8) = (void*)(uintptr_t)*((uint16_t*)&GDT_Ptr);
 			(*(void**)0xFF0) = *((void**)((&GDT_Ptr) + 2));
 			(*(void**)0xFF8) = kernel_cr3;
 			(*(void**)0xFA8) = (void*)ProcessorInit;
 			uintptr_t flags = saveFlagsAndCLI();
-			memory::VirtualAlloc((void*)0xFFFFFFFF90010000, (g_nCPUs - 1) * 4, memory::PROT_NO_COW_ON_ALLOCATE);
-			uintptr_t temp_stacks_base = (0xFFFFFFFF90010000 + ((g_nCPUs - 1) * 4) * 4096);
-			memory::VirtualAlloc((void*)temp_stacks_base, g_nCPUs * 4, memory::PROT_NO_COW_ON_ALLOCATE);
+			vallocator.VirtualAlloc((void*)0xFFFFFFFF90010000, (g_nCPUs - 1) * 16384, memory::PROT_NO_COW_ON_ALLOCATE);
+			uintptr_t temp_stacks_base = (0xFFFFFFFF90010000 + (g_nCPUs - 1) * 16384);
+			vallocator.VirtualAlloc((void*)temp_stacks_base, g_nCPUs * 16384, memory::PROT_NO_COW_ON_ALLOCATE);
 			for (size_t i = 0; i < g_nCPUs; i++)
 			{
 				if (g_lapicIDs[i] == g_localAPICAddr->lapicID)
@@ -159,7 +167,7 @@ namespace obos
 						break;
 				}
 			}
-			memory::MapVirtualPageToPhysical(nullptr, nullptr, 0);
+			memory::UnmapAddress(kernel_cr3, nullptr);
 			utils::memzero(memory::mapPageTable(nullptr), 0x1000);
 			restorePreviousInterruptStatus(flags);
 			wrmsr(GS_BASE, (uintptr_t)g_cpuInfo);

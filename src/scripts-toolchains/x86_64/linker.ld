@@ -19,6 +19,9 @@ SECTIONS
 
     .text : {
         *(.text .text.*)
+        _sched_text_start = .;
+        *(.sched_text)
+        _sched_text_end = .;
     } :text
 
     . += CONSTANT(MAXPAGESIZE);

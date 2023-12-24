@@ -217,7 +217,7 @@ bool CreateThread(uintptr_t _this, uint32_t priority, size_t stackSize, uint64_t
 		ALIGNAS(8) void(*entry)(uintptr_t);
 		ALIGNAS(8) uintptr_t userdata;
 		ALIGNAS(8) bool startPaused;
-	} par = { _this,priority,stackSize,entry,userdata,startPaused };
+	} par = { _this,priority,stackSize,affinity,entry,userdata,startPaused };
 	return Syscall(21, &par);
 }
 bool OpenThread(uintptr_t _this, uint32_t tid)
