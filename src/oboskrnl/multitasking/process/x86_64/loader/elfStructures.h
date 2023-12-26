@@ -106,6 +106,16 @@ namespace obos
 				Elf64_Qword sh_addralign;
 				Elf64_Qword sh_entsize;
 			};
+
+			struct Elf64_Sym 
+			{
+				Elf64_Word      st_name;
+				unsigned char   st_info;
+				unsigned char   st_other;
+				Elf64_Half      st_shndx;
+				Elf64_Addr      st_value;
+				Elf64_Qword     st_size;
+			};
 		}
 	}
 }

@@ -81,7 +81,7 @@ namespace obos
 			taskSwitchInfo context;
 			// If a bit is set, the cpu corresponding to that bit number can run the thread.
 			// This limits the kernel to 64 core machines.
-			uint64_t affinity;
+			uint64_t affinity, ogAffinity;
 		} OBOS_ALIGN(4);
 	}
 }

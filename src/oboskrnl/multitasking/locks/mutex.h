@@ -41,7 +41,7 @@ namespace obos
 			/// Returns whether the mutex is locked.
 			/// </summary>
 			/// <returns>Whether the mutex is locked..</returns>
-			bool Locked() const { return m_locked; }
+			bool Locked() const;
 
 			bool IsInitialized() const { return m_initialized; }
 			
@@ -51,23 +51,11 @@ namespace obos
 			~Mutex();
 
 		private:
-			static bool LockBlockCallback(thread::Thread* thread, void* data);
 			bool m_wake;
 			bool m_locked;
 			bool m_canUseMultitasking = true;
 			bool m_initialized;
 			thread::Thread* m_ownerThread;
-			struct LockQueueNode
-			{
-				LockQueueNode *next, *prev;
-				thread::Thread* thread;
-			};
-			struct LockQueue
-			{
-				LockQueueNode *head, *tail;
-				size_t size;
-			};
-			LockQueue m_queue;
 		};
 	}
 }

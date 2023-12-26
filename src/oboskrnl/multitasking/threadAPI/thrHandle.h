@@ -38,11 +38,10 @@ namespace obos
 			/// <param name="stackSize">The stack's size in bytes.</param>
 			/// <param name="entry">The thread's entry point.</param>
 			/// <param name="userdata">The parameter to pass to the thread.</param>
-			/// <param name="threadList">Which thread list to use. This parameter does not exist in the syscall.</param>
+			/// <param name="process">Which process to create the thread as.</param>
 			/// <param name="startPaused">Whether the thread should be paused when it starts.</param>
-			/// <param name="isUsermode">Whether to start the thread in user mode. This parameter does not exist in the syscall.</param>
 			/// <returns>Whether the function succeeded or not.</returns>
-			bool CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity = g_defaultAffinity, void* threadList = nullptr, bool startPaused = false, bool isUsermode = false);
+			bool CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity = g_defaultAffinity, void* process = nullptr, bool startPaused = false);
 
 			/// <summary>
 			/// Pauses the thread.

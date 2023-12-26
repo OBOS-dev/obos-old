@@ -12,8 +12,9 @@
 
 #include <x86_64-utils/asm.h>
 
-#include <multitasking/arch.h>
 #include <multitasking/cpu_local.h>
+
+#include <multitasking/locks/mutex.h>
 
 #include <multitasking/process/process.h>
 
@@ -23,6 +24,9 @@
 
 #include <arch/x86_64/irq/irq.h>
 
+extern "C" char _sched_text_start;
+extern "C" char _sched_text_end;
+
 namespace obos
 {
 	namespace memory
@@ -31,6 +35,10 @@ namespace obos
 		uintptr_t* allocatePagingStructures(uintptr_t address, PageMap* pageMap);
 		void* MapEntry(PageMap* pageMap, uintptr_t entry, void* to);
 		void UnmapAddress(PageMap* pageMap, void* _addr);
+	}
+	namespace thread
+	{
+		extern locks::Mutex g_coreGlobalSchedulerLock;
 	}
 	bool g_halt;
 	void exception14(interrupt_frame* frame)
@@ -52,39 +60,48 @@ namespace obos
 				return;
 			}
 		}
-		thread::StopCPUs(false);
 		const char* action = (frame->errorCode & ((uintptr_t)1 << 1)) ? "write" : "read";
 		if (frame->errorCode & ((uintptr_t)1 << 4))
 			action = "execute";
 		uint32_t cpuId = 0, pid = -1, tid = -1;
-		if ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
+		bool whileInScheduler = (frame->rip >= (uintptr_t)&_sched_text_start && frame->rip < (uintptr_t)&_sched_text_end);
+		thread::Thread* currentThread = nullptr;
+		if (thread::getCurrentCpuLocalPtr())
 		{
-			cpuId = ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->cpuId;
-			volatile thread::Thread* currentThread = ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->currentThread;
-			if (currentThread)
+			cpuId = thread::GetCurrentCpuLocalPtr()->cpuId;
+			whileInScheduler = whileInScheduler || thread::GetCurrentCpuLocalPtr()->schedulerLock;
+			currentThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
+			if (!whileInScheduler)
 			{
-				tid = currentThread->tid;
-				if (currentThread->owner)
+				if (currentThread)
 				{
-					process::Process* proc = (process::Process*)currentThread->owner;
-					pid = proc->pid;
+					tid = currentThread->tid;
+					if (currentThread->owner)
+					{
+						process::Process* proc = (process::Process*)currentThread->owner;
+						pid = proc->pid;
+					}
 				}
 			}
 		}
+		if (whileInScheduler)
+			tid = pid = (uint32_t)-1;
 		// Bug mitigation.
 		// Sometimes we page fault while accessing the lapic, even though that's impossible.
-		if ((faultAddress >= (uintptr_t)g_localAPICAddr && faultAddress <= 0xfffffffffffff000) && !(frame->errorCode >> 4) && !(((uintptr_t)1 << 2)))
+		if ((faultAddress >= (uintptr_t)g_localAPICAddr && faultAddress <= 0xfffffffffffff000) && !(frame->errorCode >> 4) && !((frame->errorCode << 2)))
 			return;
 		logger::panic(
-			(void*)frame->rbp,
-			"Page fault in %s-mode at %p (cpu %d, pid %d, tid %d) while trying to %s a %s page. The address of this page is %p. Error code: %d.\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\nDumping registers:\n"
+			nullptr,
+			"Page fault in %s-mode at %p (cpu %d, pid %d, tid %d) while trying to %s a %s page. The address of this page is %p. Error code: %d. whileInScheduler = %s\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\nDumping registers:\n"
 			"\tRDI: %p, RSI: %p, RBP: %p\n"
 			"\tRSP: %p, RBX: %p, RDX: %p\n"
 			"\tRCX: %p, RAX: %p, RIP: %p\n"
 			"\t R8: %p,  R9: %p, R10: %p\n"
 			"\tR11: %p, R12: %p, R13: %p\n"
 			"\tR14: %p, R15: %p, RFL: %p\n"
-			"\t SS: %p,  DS: %p,  CS: %p\n",
+			"\t SS: %p,  DS: %p,  CS: %p\n"
+			"\tCR0: %p, CR2: %p, CR3: %p\n"
+			"\tCR4: %p, CR8: %p, EFER: %p\n",
 			(frame->errorCode & ((uintptr_t)1 << 2)) ? "user" : "kernel",
 			frame->rip,
 			cpuId,
@@ -93,6 +110,7 @@ namespace obos
 			(frame->errorCode & ((uintptr_t)1 << 0)) ? "present" : "non-present",
 			getCR2(),
 			frame->errorCode,
+			whileInScheduler ? "true" : "false",
 			entry,
 			pageMap->getL2PageMapEntryAt(faultAddress),
 			pageMap->getL3PageMapEntryAt(faultAddress),
@@ -103,8 +121,10 @@ namespace obos
 			frame->r8, frame->r9, frame->r10,
 			frame->r11, frame->r12, frame->r13,
 			frame->r14, frame->r15, frame->rflags,
-			frame->ss, frame->ds, frame->cs
-		);
+			frame->ss, frame->ds, frame->cs,
+			getCR0(), getCR2(), memory::getCurrentPageMap(),
+			getCR4(), getCR8(), getEFER()
+			);
 	}
 	void defaultExceptionHandler(interrupt_frame* frame)
 	{
@@ -129,7 +149,7 @@ namespace obos
 				tid = (uint32_t)-1;
 		}
 		logger::panic(
-			(void*)frame->rbp,
+			nullptr,
 			"Exception %d at %p (cpu %d, pid %d, tid %d). Error code: %d.\nDumping registers:\n"
 			"\tRDI: %p, RSI: %p, RBP: %p\n"
 			"\tRSP: %p, RBX: %p, RDX: %p\n"

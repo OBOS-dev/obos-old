@@ -12,6 +12,8 @@
 
 #include <multitasking/process/process.h>
 
+#include <multitasking/cpu_local.h>
+
 #include <memory_manipulation.h>
 
 namespace obos
@@ -193,6 +195,16 @@ namespace obos
 				break;
 			}
 			return ret;
+		}
+		bool VirtualAllocator::IsUsermodeAllocator()
+		{
+			process::Process* proc = m_owner;
+			if (m_owner)
+				proc = m_owner;
+			else
+				if (thread::getCurrentCpuLocalPtr())
+					proc = (process::Process*)thread::GetCurrentCpuLocalPtr()->currentThread->owner;
+			return proc ? proc->isUsermode : false;
 		}
 	}
 }

@@ -8,7 +8,7 @@ qemu-system-x86_64 ^
 -drive file=out/obos.iso,format=raw ^
 -gdb tcp:0.0.0.0:1234 -S ^
 -m 1G ^
--cpu qemu64,+nx,+pdpe1gb,+syscall,+fsgsbase,+rdrand,+rdseed,+rdtscp ^
+-cpu qemu64,+nx,+pdpe1gb,+syscall,+fsgsbase,+rdrand,+rdseed,+rdtscp,+smep,+smap ^
 -monitor stdio ^
 -debugcon file:CON ^
 -serial tcp:0.0.0.0:1534,server,nowait ^
@@ -16,6 +16,7 @@ qemu-system-x86_64 ^
 -M smm=off ^
 -d int ^
 -D qemu_log.txt
+rem  ^
 rem -no-reboot
 rem -no-shutdown
 rem -drive if=pflash,format=raw,unit=0,file=ovmf/OVMF_CODE_4M.fd,readonly=on ^

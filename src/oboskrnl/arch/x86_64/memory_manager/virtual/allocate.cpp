@@ -125,20 +125,29 @@ namespace obos
 			uintptr_t base = (uintptr_t)_base & ~0xfff;
 			for (uintptr_t addr = base; addr != (base + nPages * 4096); addr += 4096)
 			{
-				if (!pageMap->getL4PageMapEntryAt(addr))
+				if (!((uintptr_t)pageMap->getL4PageMapEntryAt(addr) & 1))
 					return false;
-				if (!pageMap->getL3PageMapEntryAt(addr))
+				if (!((uintptr_t)pageMap->getL3PageMapEntryAt(addr) & 1))
 					return false;
-				if (!pageMap->getL2PageMapEntryAt(addr))
+				if (!((uintptr_t)pageMap->getL2PageMapEntryAt(addr) & 1))
 					return false;
-				if (!pageMap->getL1PageMapEntryAt(addr))
+				if (!((uintptr_t)pageMap->getL1PageMapEntryAt(addr) & 1))
 					return false;
 			}
 			return true;
 		}
 		static bool CanAllocatePages(void* _base, size_t nPages, PageMap* pageMap)
 		{
-			return !PagesAllocated(_base, nPages, pageMap);
+			// The reason a loop with PagesAllocated((void*)addr, 1, pageMap) is used and not return !PagesAllocated(_base, nPages, pageMap); is because
+			// if one single page is unallocated, PagesAllocated would return false, even though preceding pages are allocated. So it would be like
+			// if (!page1.present || !page2.present ...) return true, but we want if(!page1.present && !page2.present && ...) return true;
+			uintptr_t base = (uintptr_t)_base & ~0xfff;
+			for (uintptr_t addr = base; addr != (base + nPages * 4096); addr += 4096)
+			{
+				if (PagesAllocated((void*)addr, 1, pageMap))
+					return false;
+			}
+			return true;
 		}
 		static uintptr_t EncodeProtectionFlags(uintptr_t entry)
 		{

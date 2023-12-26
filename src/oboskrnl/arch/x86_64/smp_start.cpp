@@ -18,6 +18,8 @@
 #include <multitasking/arch.h>
 #include <multitasking/cpu_local.h>
 
+#include <atomic.h>
+
 #include <limine.h>
 
 #include <allocators/vmm/vmm.h>
@@ -42,6 +44,7 @@ namespace obos
 	extern void InitializeIDT_CPU();
 	extern void RegisterExceptionHandlers();
 	extern void initSSE();
+	extern void enableSMEP_SMAP();
 	extern uint8_t g_lapicIDs[256];
 	extern uint8_t g_nCores;
 	extern bool g_halt;
@@ -101,10 +104,7 @@ namespace obos
 			InitializeIrq(false);
 			fpuInit();
 			initSSE();
-			/*uint32_t unused = 0, rbx = 0;
-			__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
-			if (rbx & CPUID_FSGSBASE)
-				setCR4(getCR4() & ~CR4_FSGSBASE);*/
+			enableSMEP_SMAP();
 			setCR4(getCR4() | CR4_FSGSBASE);
 			setupTimerInterrupt();
 			initialize_syscall_instruction();
@@ -176,6 +176,12 @@ namespace obos
 		}
 		void StopCPUs(bool includingSelf)
 		{
+#if OBOS_DEBUG
+			if (!g_halt)
+				logger::log("Stopping all CPUs...\n");
+#endif
+			if (g_halt)
+				return;
 			g_halt = true; // tell the nmi handler to halt the cpu.
 			SendIPI(DestinationShorthand::All_Except_Self, DeliveryMode::NMI);
 			while (includingSelf);

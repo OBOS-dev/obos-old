@@ -27,8 +27,11 @@ namespace obos
 	void restorePreviousInterruptStatus(uintptr_t flags);
 
 	void* getCR2();
+	uintptr_t getCR0();
 	uintptr_t getCR4();
 	void setCR4(uintptr_t val);
+	uintptr_t getCR8();
+	void setCR8(uintptr_t _cr8);
 	uintptr_t getEFER();
 	void invlpg(uintptr_t addr);
 
@@ -38,9 +41,6 @@ namespace obos
 	void __cpuid__(uint64_t initialEax, uint64_t initialEcx, uint32_t* eax, uint32_t* ebx, uint32_t* ecx, uint32_t* edx);
 
 	uint64_t rdtsc();
-
-	void atomic_set(bool* val);
-	bool atomic_test(bool* val);
 
 	// If *val1 == nullptr, val1 = val2.
 	void set_if_zero(uint64_t* val1, uint64_t val2);

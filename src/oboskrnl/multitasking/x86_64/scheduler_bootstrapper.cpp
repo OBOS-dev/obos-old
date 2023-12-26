@@ -25,6 +25,7 @@
 
 extern "C" uint64_t calibrateTimer(uint64_t femtoseconds);
 extern "C" void _fxsave(byte(*context)[512]);
+extern "C" void _callScheduler();
 
 extern "C" char _sched_text_start;
 extern "C" char _sched_text_end;
@@ -64,7 +65,7 @@ namespace obos
 				utils::dwMemcpy((uint32_t*)&currentThread->context.frame, (uint32_t*)frame, sizeof(interrupt_frame) / 4); // save the interrupt frame
 				_fxsave((byte(*)[512])currentThread->context.fpuState);
 			}
-			schedule();
+			_callScheduler();
 		}
 
 
@@ -95,11 +96,6 @@ namespace obos
 				asm volatile("int $0x30");
 		}
 	
-		void* getCurrentCpuLocalPtr()
-		{
-			return (void*)rdmsr(GS_BASE);
-		}
-
 		bool inSchedulerFunction(struct Thread* thr)
 		{
 			return thr->context.frame.rip >= (uintptr_t)&_sched_text_start && thr->context.frame.rip < (uintptr_t)&_sched_text_end;

@@ -18,6 +18,11 @@
 
 extern obos::locks::Mutex g_allocatorMutex;
 
+#ifdef __INTELLISENSE__
+template<class type>
+bool __atomic_compare_exchange_n(type* ptr, type* expected, type desired, bool weak, int success_memorder, int failure_memorder);
+#endif
+
 namespace obos
 {
 	namespace thread
@@ -26,13 +31,6 @@ namespace obos
 	}
 	namespace locks
 	{
-		bool Mutex::LockBlockCallback(thread::Thread* thread, void* data)
-		{
-			uintptr_t* _data = (uintptr_t*)data;
-			Mutex* _this = (Mutex*)_data[0];
-			LockQueueNode* queue_node = (LockQueueNode*)_data[1];
-			return _this->m_wake || (!_this->m_locked && _this->m_queue.tail == queue_node) || thread::g_timerTicks >= thread->wakeUpTime;
-		}
 		bool Mutex::Lock(uint64_t timeout, bool block)
 		{
 			if (!block && Locked())
@@ -47,7 +45,13 @@ namespace obos
 			uint64_t wakeupTime = thread::g_timerTicks + timeout;
 			if (timeout == 0)
 				wakeupTime = 0xffffffffffffffff /* UINT64_MAX */;
-			while ((atomic_cmpxchg(&m_locked, 0, true) || m_wake) && thread::g_timerTicks < wakeupTime);
+			const bool expected = false;
+			while ((__atomic_compare_exchange_n(&m_locked,(bool*)&expected, true, false, 0, 0) || m_wake) && thread::g_timerTicks < wakeupTime);
+			if (thread::g_timerTicks >= wakeupTime)
+			{
+				SetLastError(OBOS_ERROR_TIMEOUT);
+				return false;
+			}
 			if (thread::g_initialized && m_canUseMultitasking)
 				m_ownerThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
 			return true;
@@ -65,7 +69,10 @@ namespace obos
 			atomic_clear(&m_locked);
 			m_ownerThread = nullptr;
 			return true;
-
+		}
+		bool Mutex::Locked() const
+		{
+			return atomic_test(&m_locked);
 		}
 		Mutex::~Mutex()
 		{

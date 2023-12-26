@@ -216,6 +216,7 @@ global isr50
 ; (out) rdx: Upper 64 bits of the return value.
 ; Registers are preserved except for rax and rdx.
 isr50:
+	cld
 	pushaq_syscall
 	mov rbp, rsp
 
@@ -223,6 +224,11 @@ isr50:
 	mov rax, [_ZN4obos8syscalls14g_syscallTableE+rax*8]
 
 	swapgs
+
+	mov r15, cr4
+	test r15, (1<<21) ; cr4.SMAP[bit 21]
+	jz .jump
+	stac
 
 .jump:
 
@@ -247,15 +253,15 @@ isr50:
 ; (out) rdx: Upper 64 bits of the return value.
 ; Registers are preserved except for rax, rdx, rcx, and r9-r11.
 section .rodata
-panic_format_syscall_kernel: db "Kernel thread %d (rip: %p) used syscall!", 0x0A, 0x00
+panic_format_syscall_kernel: db "Kernel mode thread %d (rip: %p) used syscall!", 0x0A, 0x00
 section .text
 extern _ZN4obos6logger5panicEPvPKcz
 syscall_instruction_handler:
 ; We need to load a kernel stack.
 	swapgs
-	; r10 and r9 is the only register we're going to be using before saving all registers.
+	; r10 and r9 is the only register we are going to be using before saving all registers.
 	mov r10, rsp
-	; RSP = GetCurrentCpuLocal()->currentThread->context.tssStackBottom + 0x4000
+	; $RSP = GetCurrentCpuLocal()->currentThread->context.tssStackBottom + 0x4000
 	rdgsbase r9
 	mov r9, [r9+0x10]
 	mov r9, [r9+0x98]
@@ -265,10 +271,16 @@ syscall_instruction_handler:
 .save:
 	pushaq_syscalli
 	mov rbp, rsp
-
+	
 	; if(GetCurrentCpuLocal()->currentThread->context.ss == 0x10)
 	;	obos::logger::panic(nullptr, panic_format_syscall_kernel, GetCurrentCpuLocal()->currentThread->tid, GetCurrentCpuLocal()->currentThread->context.frame.rip);
 	; // ...
+	mov r15, cr4
+	test r15, (1<<21) ; cr4.SMAP[bit 21]
+	jz .check_kmode
+	stac
+
+.check_kmode:
 	rdgsbase r10
 	mov r10, [r10+0x10]
 	mov r9, [r10+0x100]
@@ -356,14 +368,14 @@ initialize_syscall_instruction:
 	
 	; Set the approiate MSRs to the right values to do this when the syscall instruction is invoked:
 	; Set CS to 0x08, and SS to 0x10
-	; Clear IF,TF,AC in RFLAGS
+	; Clear IF,TF,AC, and DF in RFLAGS
 	; Jump to syscall_instruction_handler
 
 	mov rdi, IA32_STAR
 	mov rsi, 0x1B0000800000000 ; CS: 0x08, SS: 0x10, User CS: 0x1b, User SS: 0x23
 	call _wrmsr
 	mov rdi, IA32_FSTAR
-	mov rsi, 0x40300 ; Clear IF,TF,AC
+	mov rsi, 0x40700 ; Clear IF,TF,AC, and DF
 	call _wrmsr
 	mov rdi, IA32_LSTAR
 	mov rsi, syscall_instruction_handler

@@ -36,16 +36,19 @@ extern _ZN4obos5rdmsrEj
 global _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoEPNS0_6ThreadE
 global _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 global idleTask
+global _callScheduler
 
+segment .sched_text
 _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoEPNS0_6ThreadE:
 ; rsp = GetCurrentCpuLocalPtr()->temp_stack.addr + GetCurrentCpuLocalPtr()->temp_stack.size
-	push rdi
-	mov rdi, 0xC0000101
-	call _ZN4obos5rdmsrEj
-	pop rdi
-	add rax, 0x28
-	mov rsp, [rax]
-	add rsp, qword [rax+8]
+; This code is commented because _callScheduler switches to the cpu temporary, so another switch would be unneccessary.
+	; push rdi
+	; mov rdi, 0xC0000101
+	; call _ZN4obos5rdmsrEj
+	; pop rdi
+	; add rax, 0x28
+	; mov rsp, [rax]
+	; add rsp, qword [rax+8]
 
 	call _ZN4obos7SendEOIEv
 	
@@ -78,28 +81,17 @@ _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoEPNS0_6ThreadE:
 _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_:
 	push rbp
 	mov rbp, rsp
-	push r15
-
-; rsp = GetCurrentCpuLocalPtr()->temp_stack.addr + GetCurrentCpuLocalPtr()->temp_stack.size
-	push rdi
-	push rcx
-	push rdx
-	mov rdi, 0xC0000101
-	call _ZN4obos5rdmsrEj
-	pop rdx
-	pop rcx
-	pop rdi
-	add rax, 0x28
-	mov rsp, [rax]
-	add rsp, qword [rax+8]
-
+	
+; rsp = context->tssStackBottom + 0x4000
+	mov rsp, [rdi+8]
+	add rsp, 0x4000
+	
 	mov rax, cr3
 	push rax
 
 	mov rax, [rdi]
 	mov cr3, rax
 
-	mov r15, rsp
 	mov r8, rsi
 
 	mov rdi, rdx
@@ -109,10 +101,29 @@ _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 	pop r11
 	mov cr3, r11
 
-	mov rsp, r15
-	
-	pop r15
-	leave
+	mov rsp, rbp
+	pop rbp
+	ret
+extern _ZN4obos6thread8scheduleEv
+_callScheduler:
+	push rbp
+	mov rbp, rsp
+
+	; Load the temporary stack.
+	mov rdi, 0xC0000101
+	call _ZN4obos5rdmsrEj
+	add rax, 0x28
+	mov rsp, [rax]
+	add rsp, qword [rax+8]
+	call _ZN4obos6thread8scheduleEv
+
+	mov rsp, rbp
+	pop rbp
+	ret
+segment .text
+global _ZN4obos6thread21getCurrentCpuLocalPtrEv
+_ZN4obos6thread21getCurrentCpuLocalPtrEv:
+	rdgsbase rax
 	ret
 idleTask:
 	sti

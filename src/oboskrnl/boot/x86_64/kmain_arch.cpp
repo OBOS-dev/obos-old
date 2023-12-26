@@ -33,9 +33,12 @@
 
 #include <multitasking/scheduler.h>
 
-
 #define CPUID_FSGSBASE (1)
+#define CPUID_SMEP (1<<7)
+#define CPUID_SMAP (1<<20)
 #define CR4_FSGSBASE ((uintptr_t)1<<16)
+#define CR4_SMEP ((uintptr_t)1<<20)
+#define CR4_SMAP ((uintptr_t)1<<21)
 
 extern "C" void fpuInit();
 extern "C" void initialize_syscall_instruction();
@@ -62,6 +65,8 @@ namespace obos
 	};
 	void EarlyKPanic();
 
+	void enableSMEP_SMAP();
+
 	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console. This also must enable the scheduler.
 	void arch_kmain()
 	{
@@ -86,7 +91,7 @@ namespace obos
 		}
 		new (&g_kernelConsole) Console { font, framebuffer, false };
 		g_kernelConsole.SetColour(0xffffffff, 0);
-		logger::info("%s: Initializing GDT.\n", __func__);
+		logger::info("%s: Initializing the boot GDT.\n", __func__);
 		InitializeGdt();
 		logger::info("%s: Initializing IDT.\n", __func__);
 		InitializeIdt();
@@ -102,22 +107,29 @@ namespace obos
 		fpuInit();
 		logger::info("%s: Initializing SSE.\n", __func__);
 		initSSE();
+		uint32_t unused = 0, rbx = 0;
+		__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
+		OBOS_ASSERTP(rbx & CPUID_FSGSBASE, "The current CPU doesn't support wr*sbase/rd*sbase!\n");
+		logger::info("%s: Enabling SMEP/SMAP if supported.\n", __func__);
+		enableSMEP_SMAP();
 		logger::info("%s: Enabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
 		setCR4(getCR4() | CR4_FSGSBASE);
 		logger::info("%s: Initializing \"syscall/sysret\" instructions.\n", __func__);
 		initialize_syscall_instruction();
-		//uint32_t unused = 0, rbx = 0;
-		//__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
-		//if (rbx & CPUID_FSGSBASE)
-		//{
-		//	logger::info("%s: Disabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
-		//	setCR4(getCR4() & ~CR4_FSGSBASE);
-		//}
 		logger::info("%s: Registering all syscalls.\n", __func__);
 		syscalls::RegisterSyscalls();
 		logger::info("%s: Initializing the scheduler.\n", __func__);
 		thread::InitializeScheduler();
 		logger::panic(nullptr, "Failed to initialize the scheduler.");
+	}
+	void enableSMEP_SMAP()
+	{
+		uint32_t unused = 0, ebx = 0;
+		__cpuid__(0x7, 0, &unused, &ebx, &unused, &unused);
+		if (ebx & CPUID_SMEP)
+			setCR4(getCR4() | CR4_SMEP);
+		if (ebx & CPUID_SMAP)
+			setCR4(getCR4() | CR4_SMAP);
 	}
 	void EarlyKPanic()
 	{

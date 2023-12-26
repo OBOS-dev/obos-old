@@ -38,6 +38,9 @@ namespace obos
 
 		PageMap* getCurrentPageMap();
 
+		size_t GetPhysicalAddressBits();
+		size_t GetVirtualAddressBits();
+
 		void InitializeVirtualMemoryManager();
 
 		bool CPUSupportsExecuteDisable();

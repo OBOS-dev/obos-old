@@ -11,150 +11,72 @@
 
 #include <allocators/vmm/vmm.h>
 
+#include <multitasking/process/x86_64/loader/elfStructures.h>
+
 namespace obos
 {
 	extern volatile limine_module_request module_request;
+	volatile limine_kernel_file_request kernel_file = {
+		.id = LIMINE_KERNEL_FILE_REQUEST,
+		.revision = 1,
+	};
 	namespace logger
 	{
-		constexpr size_t npos = 0xffffffffffffffff;
-		size_t countTo(const char* string, char ch)
+		static const char* getElfStringFromSection(process::loader::Elf64_Ehdr* elfHeader, process::loader::Elf64_Shdr* section, uintptr_t index)
 		{
-			size_t i = 0;
-			for (; *string; i++, string++)
-				if (*string == ch)
-					break;
-			return *string ? i : npos;
+			const char* startAddress = reinterpret_cast<const char*>(elfHeader);
+			return startAddress + section->sh_offset + index;
 		}
-
-		uintptr_t hex2bin(const char* str, unsigned size)
+		static const char* getElfString(process::loader::Elf64_Ehdr* elfHeader, uintptr_t index)
 		{
-			uintptr_t ret = 0;
-			if (size > sizeof(uintptr_t) * 2)
-				return 0;
-			str += *str == '\n';
-			//unsigned size = utils::strlen(str);
-			for (int i = size - 1, j = 0; i > -1; i--, j++)
+			process::loader::Elf64_Shdr* stringTable = reinterpret_cast<process::loader::Elf64_Shdr*>(reinterpret_cast<char*>(elfHeader) + elfHeader->e_shoff);
+			stringTable += elfHeader->e_shstrndx;
+			return getElfStringFromSection(elfHeader, stringTable, index);
+		}
+		void addr2func(void* addr, const char*& str, size_t& functionAddress)
+		{
+			uintptr_t kernelFileStart = (uintptr_t)kernel_file.response->kernel_file->address;
+			process::loader::Elf64_Ehdr* eheader = (process::loader::Elf64_Ehdr*)kernelFileStart;
+			process::loader::Elf64_Shdr* iter = reinterpret_cast<process::loader::Elf64_Shdr*>(kernelFileStart + eheader->e_shoff);
+			process::loader::Elf64_Shdr* symtab_section = nullptr;
+			process::loader::Elf64_Shdr* strtab_section = nullptr;
+
+			for (size_t i = 0; i < eheader->e_shnum; i++, iter++)
 			{
-				char c = str[i];
-				uintptr_t digit = 0;
-				switch (c)
+				const char* section_name = getElfString(eheader, iter->sh_name);
+				if (utils::strcmp(".symtab", section_name))
 				{
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-					digit = c - '0';
-					break;
-				case 'A':
-				case 'B':
-				case 'C':
-				case 'D':
-				case 'E':
-				case 'F':
-					digit = (c - 'A') + 10;
-					break;
-				case 'a':
-				case 'b':
-				case 'c':
-				case 'd':
-				case 'e':
-				case 'f':
-					digit = (c - 'a') + 10;
-					break;
-				default:
-					break;
-				}
-				/*if (!j)
-				{
-					ret = digit;
+					symtab_section = iter;
 					continue;
-				}*/
-				ret |= digit << (j * 4);
-			}
-			return ret;
-		}
-
-		void addr2func(void* addr, char*& str, size_t& functionAddress, const char* startAddress, const char* endAddress)
-		{
-			uintptr_t address = reinterpret_cast<uintptr_t>(addr);
-			for (const char* iter = startAddress;
-				iter < endAddress;
-				iter += countTo(iter, '\n') + 1)
-			{
-				const char* nextLine = nullptr;
-				if (countTo(iter, '\n') != npos)
-					nextLine = iter + countTo(iter, '\n') + 1;
-				uintptr_t symbolAddress = hex2bin(iter, countTo(iter, ' '));
-				uintptr_t nextSymbolAddress = 0;
-				if (nextLine)
-					nextSymbolAddress = hex2bin(nextLine, countTo(nextLine, ' '));
-				else
-					nextSymbolAddress = 0xFFFFFFFF;
-				if (address >= symbolAddress && address < nextSymbolAddress)
+				}
+				if (utils::strcmp(".strtab", section_name))
 				{
-					iter += countTo(iter, ' ') + 3;
-					size_t size = countTo(iter, '\t');
-					str = new char[size + 1];
-					utils::memcpy(str, iter, size);
-					functionAddress = symbolAddress;
+					strtab_section = iter;
+					continue;
+				}
+				if (strtab_section != nullptr && symtab_section != nullptr)
+					break;
+			}
+			if (!symtab_section)
+				return;
+			if (!strtab_section)
+				return;
+			uintptr_t _addr = (uintptr_t)addr;
+			process::loader::Elf64_Sym* symbol_table = reinterpret_cast<process::loader::Elf64_Sym*>(kernelFileStart + symtab_section->sh_offset);
+			process::loader::Elf64_Sym* sIter = symbol_table;
+			process::loader::Elf64_Sym* symbol = nullptr;
+			for (; (uintptr_t)sIter < ((uintptr_t)symbol_table + symtab_section->sh_size); sIter++)
+			{
+				if (_addr >= sIter->st_value && _addr < (sIter->st_value + sIter->st_size))
+				{
+					symbol = sIter;
 					break;
 				}
 			}
-		}
-
-		void addr2file(void* addr, char*& str, const char* startAddress, const char* endAddress)
-		{
-			uintptr_t address = reinterpret_cast<uintptr_t>(addr);
-			for (const char* iter = startAddress;
-				iter < endAddress;
-				iter += countTo(iter, '\n') + 1)
-			{
-				const char* nextLine = iter + countTo(iter, '\n') + 1;
-				uintptr_t symbolAddress = hex2bin(iter, countTo(iter, ' '));
-				uintptr_t nextSymbolAddress = hex2bin(nextLine, countTo(nextLine, ' '));
-				if (address >= symbolAddress && address < nextSymbolAddress)
-				{
-					iter += countTo(iter, ' ') + 3;
-					iter += countTo(iter, '\t') + 1;
-					size_t size = countTo(iter, ':');
-					str = new char[size + 1];
-					utils::memcpy(str, iter, size);
-					break;
-				}
-			}
-		}
-
-		bool g_mapFileError = false;
-
-		const char* getKernelMapFile(size_t* size)
-		{
-			if (g_mapFileError)
-				return nullptr;
-			const char* ret = nullptr;
-			size_t moduleIndex = 0;
-
-			for (; moduleIndex < module_request.response->module_count; moduleIndex++)
-			{
-				if (utils::strcmp(module_request.response->modules[moduleIndex]->path, "/obos/oboskrnl.map"))
-				{
-					ret = (char*)module_request.response->modules[moduleIndex]->address;
-					if(size)
-						*size = module_request.response->modules[moduleIndex]->size;
-					break;
-				}
-			}
-			if (!ret)
-			{
-				g_mapFileError = true;
-				return nullptr;
-			}
-			return ret;
+			if (!symbol)
+				return;
+			str = getElfStringFromSection(eheader, strtab_section, symbol->st_name);
+			functionAddress = symbol->st_value;
 		}
 
 		struct stack_frame
@@ -172,12 +94,6 @@ namespace obos
 				if (!attrib)
 					frame = (void*)frame == parameter ? (volatile stack_frame*)__builtin_frame_address(0) : (volatile stack_frame*)parameter;
 			}
-			size_t mapFileSize = 0;
-			const char* mapFileStart = nullptr;
-			if (!g_mapFileError)
-				mapFileStart = getKernelMapFile(&mapFileSize);
-			if (g_mapFileError || !mapFileStart)
-				warning("Map file could not be found in the module list. Did you load it in the limine.cfg file?\n");
 			int nFrames = -1;
 			for (; frame; nFrames++) 
 			{
@@ -207,22 +123,14 @@ namespace obos
 			printf("Stack trace:\n");
 			for (int i = nFrames; i != -1; i--)
 			{
-				if(!mapFileStart)
-					printf("\t%p: No map file.\n", frame->rip);
+				const char* functionName = nullptr;
+				uintptr_t functionStart = 0;
+				if (frame->rip > (void*)0xffffffff80000000)
+					addr2func(frame->rip, functionName, functionStart);
+				if(functionName)
+					printf("\t%p: %s+%d\n", frame->rip, functionName, (uintptr_t)frame->rip - functionStart);
 				else
-				{
-					char* functionName = nullptr;
-					uintptr_t functionStart = 0;
-					if (frame->rip > (void*)0xffffffff80000000)
-						addr2func(frame->rip, functionName, functionStart, mapFileStart, mapFileStart + mapFileSize);
-					if(functionName)
-					{
-						printf("\t%p: %s+%d\n", frame->rip, functionName, (uintptr_t)frame->rip - functionStart);
-						delete[] functionName;
-					}
-					else
-						printf("\t%p: External Code\n", frame->rip);
-				}
+					printf("\t%p: External Code\n", frame->rip);
 				frame = frame->down;
 			}
 		}

@@ -33,7 +33,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			if (!buffer->inUse.Lock(0, spinOnLock))
+			if (!buffer->inUseForWrite.Lock(0, spinOnLock))
 				return false;
 
 			if (!buffer->buf)
@@ -44,7 +44,7 @@ namespace obos
 				if(data)
 					utils::memcpy(buffer->buf, data, size);
 				
-				buffer->inUse.Unlock();
+				buffer->inUseForWrite.Unlock();
 				return true;
 			}
 			buffer->buf = (byte*)krealloc(buffer->buf, buffer->szBuf + size + 1);
@@ -53,7 +53,7 @@ namespace obos
 			else
 				utils::memzero(buffer->buf + buffer->szBuf, size);
 			buffer->szBuf += size;
-			buffer->inUse.Unlock();
+			buffer->inUseForWrite.Unlock();
 			return true;
 		}
 		bool DriverConnection::RecvDataOnBuffer(void* data, size_t size, con_buffer* buffer, bool peek, bool spinOnBuffer, uint32_t ticksToWait, bool spinOnLock)
@@ -65,6 +65,9 @@ namespace obos
 			}
 			if (!size)
 				return true;
+
+			if (!buffer->inUseForRead.Lock(0, spinOnLock))
+				return false;
 
 			if (buffer->szBuf < size && spinOnBuffer)
 			{
@@ -84,11 +87,9 @@ namespace obos
 			if (buffer->szBuf < size)
 			{
 				SetLastError(OBOS_ERROR_TIMEOUT);
+				buffer->inUseForRead.Unlock();
 				return false;
 			}
-
-			if (!buffer->inUse.Lock(0, spinOnLock))
-				return false;
 
 			if(data)
 				utils::memcpy(data, buffer->buf, size);
@@ -111,7 +112,7 @@ namespace obos
 			}
 
 			finish:
-			buffer->inUse.Unlock();
+			buffer->inUseForRead.Unlock();
 			return true;
 		}
 		

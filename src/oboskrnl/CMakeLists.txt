@@ -54,10 +54,9 @@ if (UNIX OR GENERATE_BUILD_FILES_FOR_UNIX)
 	add_custom_command(TARGET oboskrnl POST_BUILD
 	                   COMMAND echo "Generating the iso..."
 					   COMMAND cp -u ${OUTPUT_DIR}/oboskrnl ${CMAKE_SOURCE_DIR}/isodir/obos/oboskrnl
-					   COMMAND ${OBJCOPY} -S isodir/obos/oboskrnl
+					   COMMAND ${OBJCOPY} -g isodir/obos/oboskrnl
 					   COMMAND cp -u ${OUTPUT_DIR}/initrdDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
-					   COMMAND ${OBJCOPY} -S ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
-					   COMMAND ${NM} ${OUTPUT_DIR}/oboskrnl --demangle=gnu-v3 -ln | grep -w --ignore-case T > ${CMAKE_SOURCE_DIR}/isodir/obos/oboskrnl.map
+					   COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
 					   COMMAND cd scripts
 					   COMMAND ./make_initrd.sh
 					   COMMAND cd ..
@@ -73,10 +72,9 @@ else (WIN32)
 	                   COMMAND @echo off
 	                   COMMAND echo Generating the iso...
 					   COMMAND copy /Y "${OUTPUT_DIR}\\oboskrnl" "${SOURCE_DIRECTORY}\\isodir\\obos\\oboskrnl" > NUL 2>&1
-					   COMMAND ${OBJCOPY} -S isodir/obos/oboskrnl > NUL 2>&1
+					   COMMAND ${OBJCOPY} -g isodir/obos/oboskrnl > NUL 2>&1
 					   COMMAND copy /Y "${OUTPUT_DIR}\\initrdDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrdDriver" > NUL 2>&1
-					   COMMAND ${OBJCOPY} -S isodir/obos/initrdDriver > NUL 2>&1
-					   COMMAND ${NM} ${OUTPUT_DIR}/oboskrnl --demangle=gnu-v3 -ln | grep -w --ignore-case T > isodir/obos/oboskrnl.map
+					   COMMAND ${OBJCOPY} -g isodir/obos/initrdDriver > NUL 2>&1
 					   COMMAND cd scripts
 					   COMMAND make_initrd.bat
 					   COMMAND cd ..

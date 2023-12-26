@@ -38,7 +38,6 @@ namespace obos
 	void kmain_common(byte* initrdDriverData, size_t initrdDriverSize)
 	{
 		logger::log("Multitasking initialized! In \"%s\" now.\n", __func__);
-
 		process::Process* kernelProc = new process::Process{};
 		auto currentThread = thread::GetCurrentCpuLocalPtr()->currentThread;
 		kernelProc->console = &g_kernelConsole;
@@ -89,7 +88,7 @@ namespace obos
 
 		logger::log("Mounting the initrd.\n");
 		uint32_t point = 0;
-		// Mount the initrd.
+		// MountB the initrd.
 		if (!vfs::mount(point, 0))
 			logger::panic(nullptr, "Could not mount the initrd, GetLastError: %d!\n", GetLastError());
 

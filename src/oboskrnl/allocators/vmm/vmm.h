@@ -99,6 +99,8 @@ namespace obos
 			/// <returns>remoteDest on success, or nullptr.</returns>
 			void* Memcpy(void* remoteDest, void* localSrc, size_t size);
 
+			bool IsUsermodeAllocator();
+
 			~VirtualAllocator() { m_owner = nullptr; }
 
 			static size_t GetPageSize() { return m_pageSize; }

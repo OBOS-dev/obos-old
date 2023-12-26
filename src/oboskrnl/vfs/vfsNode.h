@@ -21,10 +21,14 @@ namespace obos
 			VFSString() = default;
 			VFSString(const char* str) : str{ (char*)str }
 			{
+				if (!str)
+					return;
 				for (strLen = 0; str[strLen]; strLen++);
 			}
 			VFSString(char* str) : str{ str }
 			{
+				if (!str)
+					return;
 				for (strLen = 0; str[strLen]; strLen++);
 			}
 		};

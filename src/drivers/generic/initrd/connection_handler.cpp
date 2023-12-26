@@ -74,7 +74,7 @@ extern void ConnectionHandler(uintptr_t _conn)
 		}
 		case obos::driverInterface::OBOS_SERVICE_MAKE_FILE_ITERATOR:
 		{
-			fileIterator* iter = (fileIterator*)Malloc(sizeof(fileIterator*));
+			fileIterator* iter = (fileIterator*)Malloc(sizeof(fileIterator));
 			iter->currentNode = g_filesystemCache.head;
 			conn->RecvData(nullptr, 9);
 			conn->SendData(&iter, sizeof(iter));

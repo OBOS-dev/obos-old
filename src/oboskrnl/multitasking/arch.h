@@ -28,7 +28,7 @@ namespace obos
 	{
 		void switchToThreadImpl(taskSwitchInfo* info, struct Thread* thread);
 		bool callBlockCallbackOnThread(taskSwitchInfo* info, bool(*callback)(void* thread, void* userdata), void* par1, void* par2);
-		void setupThreadContext(taskSwitchInfo* info, void* stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, memory::VirtualAllocator* vallocator, bool isUsermodeProgram);
+		void setupThreadContext(taskSwitchInfo* info, void* stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, memory::VirtualAllocator* vallocator, void* asProc);
 		void freeThreadStackInfo(void* stackInfo, memory::VirtualAllocator* vallocator);
 		void setupTimerInterrupt();
 

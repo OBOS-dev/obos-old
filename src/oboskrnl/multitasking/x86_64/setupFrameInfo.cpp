@@ -16,6 +16,8 @@
 #include <multitasking/arch.h>
 #include <multitasking/thread.h>
 
+#include <multitasking/process/process.h>
+
 #include <limine.h>
 
 #define BIT(n) (1<<n)
@@ -26,12 +28,16 @@ namespace obos
 	extern volatile limine_module_request module_request;
 	namespace thread
 	{
-		void setupThreadContext(taskSwitchInfo* info, void* _stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, memory::VirtualAllocator* vallocator, bool isUsermodeProgram)
+		void setupThreadContext(taskSwitchInfo* info, void* _stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, memory::VirtualAllocator* vallocator, void* asProc)
 		{
 			if (stackSize == 0)
 				stackSize = 0x8000;
 
 			stackSize = ((stackSize + 0xfff) & (~0xfff));
+
+			process::Process* _proc = (process::Process*)asProc;
+
+			bool isUsermodeProgram = _proc ? _proc->isUsermode : false;
 
 			info->frame.cs = isUsermodeProgram ? 0x1b : 0x08;
 			info->frame.ds = isUsermodeProgram ? 0x23 : 0x10;
@@ -41,7 +47,7 @@ namespace obos
 			info->frame.rdi = userdata;
 			info->frame.rbp = 0;
 			if (entry != (uintptr_t)kmain_common)
-				info->frame.rsp = ((uintptr_t)vallocator->VirtualAlloc(nullptr, stackSize, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
+				info->frame.rsp = ((uintptr_t)vallocator->VirtualAlloc(nullptr, stackSize, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS)) + (stackSize - 8);
 			else
 			{
 				info->frame.rsp = ((uintptr_t)vallocator->VirtualAlloc((void*)0xFFFFFFFF90000000, stackSize, memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
@@ -72,8 +78,8 @@ namespace obos
 			if(isUsermodeProgram)
 				info->frame.rflags.setBit(BIT(12) | BIT(13)); // IOPL=3
 
-			info->cr3 = memory::getCurrentPageMap();
-			info->tssStackBottom = vallocator->VirtualAlloc(nullptr, 0x4000, memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE);
+			info->cr3 = _proc ? _proc->context.cr3 : memory::getCurrentPageMap();
+			info->tssStackBottom = vallocator->VirtualAlloc(nullptr, 0x4000, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE);
 		}
 		void freeThreadStackInfo(void* _stackInfo, memory::VirtualAllocator* vallocator)
 		{

@@ -118,10 +118,8 @@ namespace obos
 				(void(*)(uintptr_t))entryPoint,
 				0,
 				thread::g_defaultAffinity,
-				&driverProc->threads,
+				driverProc,
 				true);
-			((thread::Thread*)thread->GetUnderlyingObject())->owner = driverProc;
-			((thread::Thread*)thread->GetUnderlyingObject())->context.cr3 = driverProc->context.cr3;
 			thread->ResumeThread();
 
 			return driverProc->pid;

@@ -21,6 +21,8 @@
 
 #include <allocators/vmm/vmm.h>
 
+#include <klog.h>
+
 namespace obos
 {
 	namespace memory
@@ -62,6 +64,7 @@ namespace obos
 		{
 			uintptr_t flags = saveFlagsAndCLI();
 			at &= ~0xfff;
+			OBOS_ASSERTP((uintptr_t)getPageMap() < ((uint64_t)1 << GetPhysicalAddressBits()), "");
 			uintptr_t* pageMap = mapPageTable(getPageMap());
 			uintptr_t* ret = (uintptr_t*)pageMap[addressToIndex(at, 3)];
 			restorePreviousInterruptStatus(flags);
@@ -71,6 +74,7 @@ namespace obos
 		{
 			at &= ~0xfff;
 			uintptr_t rawPtr = (uintptr_t)getL4PageMapEntryAt(at) & 0xFFFFFFFFFF000;
+			OBOS_ASSERTP(rawPtr < ((uint64_t)1 << GetPhysicalAddressBits()), "");
 			if (!rawPtr)
 				return nullptr;
 			uintptr_t flags = saveFlagsAndCLI();
@@ -84,6 +88,7 @@ namespace obos
 			at &= ~0xfff;
 			uintptr_t flags = saveFlagsAndCLI();
 			uintptr_t rawPtr = (uintptr_t)getL3PageMapEntryAt(at) & 0xFFFFFFFFFF000;
+			OBOS_ASSERTP(rawPtr < ((uint64_t)1 << GetPhysicalAddressBits()), "");
 			if (!rawPtr)
 				return nullptr;
 			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
@@ -96,6 +101,7 @@ namespace obos
 			at &= ~0xfff;
 			uintptr_t flags = saveFlagsAndCLI();
 			uintptr_t rawPtr = (uintptr_t)getL2PageMapEntryAt(at) & 0xFFFFFFFFFF000;
+			OBOS_ASSERTP(rawPtr < ((uint64_t)1 << GetPhysicalAddressBits()), "");
 			if (!rawPtr)
 				return nullptr;
 			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
@@ -105,6 +111,18 @@ namespace obos
 		}
 
 		void* MapPhysicalAddress(PageMap* pageMap, uintptr_t phys, void* to, uintptr_t cpuFlags);
+		size_t GetPhysicalAddressBits()
+		{
+			uint32_t eax = 0, unused = 0;
+			__cpuid__(0x80000008, 0, &eax, &unused, &unused, &unused);
+			return eax & 0xff;
+		}
+		size_t GetVirtualAddressBits()
+		{
+			uint32_t eax = 0, unused = 0;
+			__cpuid__(0x8000008, 0, &eax, &unused, &unused, &unused);
+			return (eax >> 8) & 0xff;
+		}
 		void InitializeVirtualMemoryManager()
 		{
 			PageMap* kernelPageMap = getCurrentPageMap();

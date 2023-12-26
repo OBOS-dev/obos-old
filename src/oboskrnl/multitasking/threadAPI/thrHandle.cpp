@@ -65,7 +65,7 @@ namespace obos
 			return true;
 		}
 
-		bool ThreadHandle::CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity, void* threadList, bool startPaused, bool isUsermode)
+		bool ThreadHandle::CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity, void* _process, bool startPaused)
 		{
 			if (m_obj)
 			{
@@ -94,6 +94,9 @@ namespace obos
 				return false;
 				break;
 			}
+
+			process::Process* tproc = _process ? (process::Process*)_process : (process::Process*)getCPULocal()->currentThread->owner;
+
 			Thread* thread = new Thread{};
 			
 			m_obj = thread;
@@ -104,10 +107,10 @@ namespace obos
 			thread->exitCode = 0;
 			thread->lastError = 0;
 			thread->priorityList = priorityList;
-			thread->threadList = threadList ? (thread::Thread::ThreadList*)threadList : getCPULocal()->currentThread->threadList;
-			thread->owner = getCPULocal()->currentThread->owner;
+			thread->owner = tproc;
+			thread->threadList = &tproc->threads;
 			thread->affinity = affinity;
-			setupThreadContext(&thread->context, &thread->stackInfo, (uintptr_t)entry, userdata, stackSize, &((process::Process*)thread->owner)->vallocator, isUsermode);
+			setupThreadContext(&thread->context, &thread->stackInfo, (uintptr_t)entry, userdata, stackSize, &tproc->vallocator, tproc);
 			uintptr_t val = stopTimer();
 
 			if(priorityList->tail)

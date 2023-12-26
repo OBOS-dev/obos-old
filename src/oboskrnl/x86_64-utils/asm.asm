@@ -4,10 +4,6 @@
 
 [BITS 64]
 
-section .rodata
-panic_format_atomic_set: db "obos::atomic_set: Assertion failed: val != 0xfffffff759738000.", 0x0A, 0x00
-section .text
-
 global _ZN4obos4outbEth
 global _ZN4obos4outwEtt
 global _ZN4obos4outdEtj
@@ -86,6 +82,10 @@ _ZN4obos4int1Ev:
 	ret
 _ZN4obos6getCR2Ev:
 	mov rax, cr2
+	ret
+global _ZN4obos6getCR0Ev
+_ZN4obos6getCR0Ev:
+	mov rax, cr0
 	ret
 _ZN4obos6memory17getCurrentPageMapEv:
 	mov rax, cr3
@@ -188,16 +188,6 @@ _ZN4obos5rdtscEv:
 global _ZN4obos10atomic_setEPb
 extern _ZN4obos6logger5panicEPvPKcz
 _ZN4obos10atomic_setEPb:
-	mov rax, 0xfffffff759738000
-	cmp rdi, rax
-	jne .run
-	mov rax, 0xfffffff759738ff8
-	cmp rdi, rax
-	jne .run
-	mov rdi, 0
-	mov rsi, panic_format_atomic_set
-	call _ZN4obos6logger5panicEPvPKcz
-.run:
 	mov al, [rdi]
 	mov sil, 1
 	lock cmpxchg byte [rdi], sil
@@ -208,8 +198,8 @@ _ZN4obos12atomic_clearEPb:
 	mov sil, 0
 	lock cmpxchg byte [rdi], sil
 	ret
-global _ZN4obos11atomic_testEPb
-_ZN4obos11atomic_testEPb:
+global _ZN4obos11atomic_testEPKb
+_ZN4obos11atomic_testEPKb:
 	mov al, byte [rdi]
 	ret
 global _ZN4obos10atomic_incERm
@@ -227,6 +217,14 @@ _ZN4obos6getCR4Ev:
 global _ZN4obos6setCR4Em
 _ZN4obos6setCR4Em:
 	mov cr4, rdi
+	ret
+global _ZN4obos6getCR8Ev
+_ZN4obos6getCR8Ev:
+	mov rax, cr8
+	ret
+global _ZN4obos6setCR8Em
+_ZN4obos6setCR8Em:
+	mov cr8, rdi
 	ret
 _ZN4obos11set_if_zeroEPmm:
 	pushfq
@@ -300,6 +298,11 @@ global _ZN4obos6getRBPEv
 _ZN4obos6getRBPEv:
 	mov rax, rbp
 	ret
+; dest: The value to compare src with, and the destination if the comparision is true, is set to val
+; src:  The value to compare dest with
+; val:  The value to set *dest to if *dest == src
+; Remarks: This function does all this atomically.
+; Returns: *dest == src
 global _ZN4obos14atomic_cmpxchgEPbbb
 _ZN4obos14atomic_cmpxchgEPbbb:
 	mov al, sil

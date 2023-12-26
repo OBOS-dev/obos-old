@@ -38,7 +38,7 @@ namespace obos
 
 #pragma GCC push_options
 #pragma GCC optimize("O0")
-#ifdef __GNUC__
+#ifdef __GNUC__ 
 #define DEFINE_IN_SECTION __attribute__((section(".sched_text")))
 #else
 #define DEFINE_IN_SECTION
@@ -47,10 +47,10 @@ namespace obos
 		{
 			return (thr->affinity >> GetCurrentCpuLocalPtr()->cpuId) & 1;
 		}
-		Thread* DEFINE_IN_SECTION findRunnableThreadInList(Thread::ThreadList& list)
+		static Thread* DEFINE_IN_SECTION findRunnableThreadInList(Thread::ThreadList& list)
 		{
 			Thread* currentThread = list.tail;
-			volatile Thread* currentRunningThread = getCPULocal()->currentThread;
+			//volatile Thread* currentRunningThread = getCPULocal()->currentThread;
 			Thread* ret = nullptr;
 
 			while (currentThread)
@@ -60,14 +60,9 @@ namespace obos
 				if (currentThread->timeSliceIndex >= currentThread->priority)
 					currentThread->status |= THREAD_STATUS_CLEAR_TIME_SLICE_INDEX;
 
-				bool canRun = currentThread->status == THREAD_STATUS_CAN_RUN;
-				if (!canRun)
-					canRun = (currentThread == currentRunningThread && (currentThread->status & THREAD_STATUS_RUNNING)) || currentThread->status & (THREAD_STATUS_CAN_RUN | THREAD_STATUS_SINGLE_STEPPING);
-				if (canRun && ((currentThread->status & THREAD_STATUS_PAUSED) || (currentThread->status & THREAD_STATUS_BLOCKED)))
-					canRun = false;
-				canRun = canRun && checkThreadAffinity(currentThread);
-
-				if (canRun && (currentThread->timeSliceIndex < currentThread->priority))
+				bool canRun = currentThread->status == THREAD_STATUS_CAN_RUN || (currentThread->status & THREAD_STATUS_CAN_RUN && currentThread->status & THREAD_STATUS_SINGLE_STEPPING);
+				
+				if (canRun && (currentThread->timeSliceIndex < currentThread->priority) && checkThreadAffinity(currentThread))
 				{
 					if (!ret)
 						ret = currentThread;
@@ -87,7 +82,7 @@ namespace obos
 
 			return ret;
 		}
-		Thread::ThreadList& DEFINE_IN_SECTION findThreadPriorityList()
+		static Thread::ThreadList& DEFINE_IN_SECTION findThreadPriorityList()
 		{
 			Thread::ThreadList* list = nullptr;
 			int i;
@@ -124,7 +119,7 @@ namespace obos
 			atomic_clear(&g_priorityLists[i].lock);
 			return *list;
 		}
-		void DEFINE_IN_SECTION callBlockCallbacksOnList(Thread::ThreadList& list)
+		static void DEFINE_IN_SECTION callBlockCallbacksOnList(Thread::ThreadList& list)
 		{
 			Thread* thread = list.head;
 			while(thread)
@@ -143,21 +138,35 @@ namespace obos
 				thread = thread->next_run;
 			}
 		}
-
+		static bool DEFINE_IN_SECTION otherCPUsScheduling()
+		{
+			size_t nCpusInScheduler = 0;
+			for (size_t i = 0; i < g_nCPUs; i++)
+				nCpusInScheduler += g_cpuInfo[i].schedulerLock;
+			return nCpusInScheduler > 1;
+		}
 		void DEFINE_IN_SECTION schedule()
 		{
 			if(getCPULocal()->cpuId == 0)
 				g_timerTicks++;
 			volatile Thread* currentThread = getCPULocal()->currentThread;
-			if (currentThread)
-				currentThread->lastTimePreempted = g_timerTicks;
 			if (getCPULocal()->schedulerLock)
 				return;
 
-			if (!g_coreGlobalSchedulerLock.Lock())
+			if (!g_coreGlobalSchedulerLock.Lock(0, true))
 				return;
-
+			
 			atomic_set((bool*)&getCPULocal()->schedulerLock);
+
+			OBOS_ASSERTP(!otherCPUsScheduling(), "");
+
+			if (currentThread)
+			{
+				currentThread->lastTimePreempted = g_timerTicks;
+				currentThread->status |= THREAD_STATUS_CAN_RUN;
+				currentThread->status &= ~THREAD_STATUS_RUNNING;
+				currentThread->affinity = currentThread->ogAffinity;
+			}
 
 			callBlockCallbacksOnList(g_priorityLists[3]);
 			callBlockCallbacksOnList(g_priorityLists[2]);
@@ -165,9 +174,18 @@ namespace obos
 			callBlockCallbacksOnList(g_priorityLists[0]);
 
 			Thread::ThreadList* list = &findThreadPriorityList();
+			Thread* newThread = nullptr;
 			int foundHighPriority = 0;
-			find:
-			Thread* newThread = findRunnableThreadInList(*list);
+		find:
+			if (!list)
+				list = &findThreadPriorityList();
+			if (!list)
+			{
+				newThread = getCPULocal()->idleThread;
+				goto found;
+			}
+			newThread = findRunnableThreadInList(*list);
+			found:
 			if (!newThread)
 			{
 				foundHighPriority += list == &g_priorityLists[3];
@@ -177,28 +195,26 @@ namespace obos
 			}
 			if (foundHighPriority == 2)
 				newThread = getCPULocal()->idleThread;
-			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_BLOCKED), "Thread (tid %d) is both blocked and is trying to be run (status 0x%e%X)!\n", "", newThread->tid, 4, newThread->status);
-			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_PAUSED), "Thread (tid %d) is both paused and is trying to be run (status 0x%e%X)!\n", "", newThread->tid, 4, newThread->status);
+			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_BLOCKED), "Thread (tid %d) is both blocked and is trying to be run! Status 0x%e%X\n", "", newThread->tid, 4, newThread->status);
+			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_PAUSED), "Thread (tid %d) is both paused and is trying to be run! Status 0x%e%X\n", "", newThread->tid, 4, newThread->status);
+			if (newThread != currentThread)
+				if ((newThread->status & THREAD_STATUS_RUNNING))
+					goto find;
 			OBOS_ASSERTP(!inSchedulerFunction(newThread), "Thread (tid %d) was preempted while in the scheduler!\n", "", newThread->tid);
 			if (newThread == currentThread)
 			{
-				currentThread->status &= ~THREAD_STATUS_CAN_RUN;
-				currentThread->status |= THREAD_STATUS_RUNNING;
+				currentThread->affinity = ((uint64_t)1 << getCPULocal()->cpuId);
+				currentThread->status = (currentThread->status & ~THREAD_STATUS_CAN_RUN) | THREAD_STATUS_RUNNING;
 				g_coreGlobalSchedulerLock.Unlock();
 				atomic_clear((bool*)&getCPULocal()->schedulerLock);
 				return;
 			}
 			if (!newThread)
-				newThread = g_priorityLists[0].head;
-			if (currentThread)
-			{
-				currentThread->status |= THREAD_STATUS_CAN_RUN;
-				currentThread->status &= ~THREAD_STATUS_RUNNING;
-			}
+				newThread = getCPULocal()->idleThread;
+			newThread->affinity = ((uint64_t)1 << getCPULocal()->cpuId);
 			getCPULocal()->currentThread = newThread;
 			newThread->timeSliceIndex = newThread->timeSliceIndex + 1;
-			newThread->status &= ~THREAD_STATUS_CAN_RUN;
-			newThread->status |= THREAD_STATUS_RUNNING;
+			newThread->status = (newThread->status & ~THREAD_STATUS_CAN_RUN) | THREAD_STATUS_RUNNING;
 			g_coreGlobalSchedulerLock.Unlock();
 			atomic_clear((bool*)&getCPULocal()->schedulerLock);
 			switchToThreadImpl((taskSwitchInfo*)&newThread->context, newThread);
@@ -219,7 +235,7 @@ namespace obos
 			kernelMainThread->priorityList = g_priorityLists + 2;
 			kernelMainThread->threadList = new Thread::ThreadList;
 			
-			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 0x10000, &valloc, false);
+			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 0x10000, &valloc, nullptr);
 
 			kernelMainThread->threadList->head = kernelMainThread;
 			kernelMainThread->threadList->tail = kernelMainThread;
@@ -243,7 +259,7 @@ namespace obos
 
 			for (size_t i = 0; i < g_nCPUs; i++)
 				g_defaultAffinity |= (uint64_t)1 << g_cpuInfo[i].cpuId;
-			kernelMainThread->affinity = g_defaultAffinity;
+			kernelMainThread->affinity = kernelMainThread->ogAffinity = g_defaultAffinity;
 
 			for (size_t i = 0; i < g_nCPUs; i++)
 			{
@@ -253,7 +269,7 @@ namespace obos
 				idleThread->priorityList = g_priorityLists + 0;
 				idleThread->status = THREAD_STATUS_CAN_RUN;
 				idleThread->priority = THREAD_PRIORITY_IDLE;
-				idleThread->affinity = (uint64_t)1 << g_cpuInfo[i].cpuId;
+				idleThread->affinity = idleThread->ogAffinity = (uint64_t)1 << g_cpuInfo[i].cpuId;
 				auto threadListProc = kernelMainThread->threadList;
 				if (threadListProc->tail)
 					threadListProc->tail->next_list = idleThread;
@@ -270,7 +286,7 @@ namespace obos
 				idleThread->next_run = priorityList.tail;
 				priorityList.tail = idleThread;
 				priorityList.size++;
-				setupThreadContext(&idleThread->context, &idleThread->stackInfo, (uintptr_t)idleTask, 0, 0x2000, &valloc, false);
+				setupThreadContext(&idleThread->context, &idleThread->stackInfo, (uintptr_t)idleTask, 0, 0x2000, &valloc, nullptr);
 			}
 
 			volatile Thread*& currentThread = getCPULocal()->currentThread;

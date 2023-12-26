@@ -103,7 +103,7 @@ void freePageBlock(pageBlock* block)
 		pageBlockTail = block->prev;
 	nPageBlocks--;
 	totalPagesAllocated -= block->nPagesAllocated;
-	g_liballocVirtualAllocator.VirtualFree(block, block->nPagesAllocated);
+	g_liballocVirtualAllocator.VirtualFree(block, block->nPagesAllocated * obos::memory::VirtualAllocator::GetPageSize());
 }
 
 // A wrapper for Mutex that unlocks the mutex on destruction.
@@ -213,11 +213,7 @@ extern "C" {
 
 		// If this is an empty block.
 		if (!currentPageBlock->firstBlock)
-		{
 			block = (memBlock*)(currentPageBlock + 1);
-			currentPageBlock->firstBlock = block;
-			block->pageBlock = currentPageBlock;
-		}
 		else
 		{
 			// Look for a free address.
@@ -238,8 +234,16 @@ extern "C" {
 			}
 			if (!block)
 			{
+				OBOS_ASSERTP(currentPageBlock->lastBlock->magic == MEMBLOCK_MAGIC, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: %p!", "",
+					currentPageBlock->lastBlock,
+					currentPageBlock->lastBlock->allocAddr,
+					currentPageBlock->lastBlock->size);
 				uintptr_t addr = (uintptr_t)currentPageBlock->lastBlock->allocAddr;
 				addr += currentPageBlock->lastBlock->size;
+				OBOS_ASSERTP(addr > 0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: %p!", "",
+					currentPageBlock->lastBlock,
+					currentPageBlock->lastBlock->allocAddr,
+					currentPageBlock->lastBlock->size);
 				block = (memBlock*)addr;
 			}
 		}
@@ -302,24 +306,24 @@ extern "C" {
 		{
 			if (block->next)
 			{
-				if (currentPageBlock->lastBlock == block)
-				{
-					block->next = nullptr;
-					goto next1;
-				}
 				OBOS_ASSERTP(block->next > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
 				block->next->prev = block->prev;
+			}
+			if (currentPageBlock->lastBlock == block)
+			{
+				block->next = nullptr;
+				goto next1;
 			}
 		next1:
 			if (block->prev)
 			{
-				if (currentPageBlock->firstBlock == block)
-				{
-					block->prev = nullptr;
-					goto next2;
-				}
 				OBOS_ASSERTP(block->prev > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
 				block->prev->next = block->next;
+			}
+			if (currentPageBlock->firstBlock == block)
+			{
+				block->prev = nullptr;
+				goto next2;
 			}
 		next2:
 			if (currentPageBlock->lastBlock == block)

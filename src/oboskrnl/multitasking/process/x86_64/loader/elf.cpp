@@ -29,7 +29,7 @@ namespace obos
 				{
 					if (programHeader->p_type != PT_LOAD)
 						continue;
-					uintptr_t allocFlags = memory::PROT_USER_MODE_ACCESS;
+					uintptr_t allocFlags = (uintptr_t)allocator.IsUsermodeAllocator() * memory::PROT_USER_MODE_ACCESS;
 					if (programHeader->p_flags & PF_X)
 						allocFlags |= memory::PROT_CAN_EXECUTE;
 					if (!(programHeader->p_flags & PF_W))
@@ -44,7 +44,7 @@ namespace obos
 						uint32_t nPages = programHeader->p_memsz >> 12;
 						if ((programHeader->p_memsz % 4096) != 0)
 							nPages++;
-						byte* addr = (byte*)allocator.VirtualAlloc((void*)programHeader->p_vaddr, (size_t)nPages * 4096, memory::PROT_USER_MODE_ACCESS);
+						byte* addr = (byte*)allocator.VirtualAlloc((void*)programHeader->p_vaddr, (size_t)nPages * 4096, 0);
 						if (programHeader->p_filesz)
 						{
 							uintptr_t offset = programHeader->p_vaddr - (uintptr_t)addr;

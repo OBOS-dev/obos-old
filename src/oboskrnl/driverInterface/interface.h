@@ -22,7 +22,8 @@ namespace obos
 			size_t szBuf;
 			size_t amountExcepted; // For RecvDataOnBuffer
 			bool wake;
-			locks::Mutex inUse;
+			locks::Mutex inUseForRead;
+			locks::Mutex inUseForWrite;
 		};
 		class DriverConnection
 		{

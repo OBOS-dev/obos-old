@@ -56,7 +56,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			return par->_this->CreateThread(par->priority, par->stackSize, par->entry, par->userdata, par->affinity, nullptr, par->startPaused, ((process::Process*)getCPULocal()->currentThread->owner)->isUsermode);
+			return par->_this->CreateThread(par->priority, par->stackSize, par->entry, par->userdata, par->affinity, nullptr, par->startPaused);
 		}
 		bool SyscallOpenThread(void* pars)
 		{
