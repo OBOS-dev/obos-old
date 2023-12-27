@@ -35,18 +35,16 @@ namespace obos
 		{
 			if (!block && Locked())
 			{
-				SetLastError(OBOS_ERROR_MUTEX_LOCKED);
+				if (this != &thread::g_coreGlobalSchedulerLock)
+					SetLastError(OBOS_ERROR_MUTEX_LOCKED);
 				return false;
 			}
-			if (thread::g_initialized && m_canUseMultitasking)
-				if (m_ownerThread == thread::GetCurrentCpuLocalPtr()->currentThread)
-					return true;
 			// Compare m_locked with zero, and if it is zero, then set it to true and return true, otherwise return false and keep m_locked intact.
 			uint64_t wakeupTime = thread::g_timerTicks + timeout;
 			if (timeout == 0)
 				wakeupTime = 0xffffffffffffffff /* UINT64_MAX */;
 			const bool expected = false;
-			while ((__atomic_compare_exchange_n(&m_locked,(bool*)&expected, true, false, 0, 0) || m_wake) && thread::g_timerTicks < wakeupTime);
+			while ((__atomic_compare_exchange_n(&m_locked, (bool*)&expected, true, false, 0, 0) || m_wake) || thread::g_timerTicks >= wakeupTime);
 			if (thread::g_timerTicks >= wakeupTime)
 			{
 				SetLastError(OBOS_ERROR_TIMEOUT);

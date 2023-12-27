@@ -50,6 +50,7 @@ namespace obos
 			typedef uintptr_t Elf64_Off;
 			typedef uint32_t Elf64_Word;
 			typedef uint64_t Elf64_Qword;
+			typedef int64_t Elf64_SQword;
 			typedef uint16_t Elf64_Half;
 
 			enum
@@ -61,6 +62,47 @@ namespace obos
 				PT_NOTE,
 				PT_SHLIB,
 				PT_PHDR
+			};
+
+			enum
+			{
+				ET_NONE,
+				ET_REL,
+				ET_EXEC,
+				ET_DYN,
+				ET_CORE,
+				ET_LOPROC = 0xff00,
+				ET_HIPROC = 0xffff,
+			};
+
+			enum
+			{
+				SHT_NULL,
+				SHT_PROGBITS,
+				SHT_SYMTAB,
+				SHT_STRTAB,
+				SHT_RELA,
+				SHT_HASH,
+				SHT_DYNAMIC,
+				SHT_NOTE,
+				SHT_NOBITS,
+				SHT_REL,
+				SHT_SHLIB,
+				SHT_DYNSYM,
+				SHT_INIT_ARRAY,
+				SHT_FINI_ARRAY,
+				SHT_PREINIT_ARRAY,
+				SHT_GROUP,
+				SHT_SYMTAB_SHNDX,
+			};
+
+			enum
+			{
+				STB_LOCAL,
+				STB_GLOBAL,
+				STB_WEAK,
+				STB_LOOS,
+				STB_HIOS,
 			};
 
 			struct Elf64_Ehdr
@@ -115,6 +157,87 @@ namespace obos
 				Elf64_Half      st_shndx;
 				Elf64_Addr      st_value;
 				Elf64_Qword     st_size;
+			};
+
+			typedef struct {
+				Elf64_Addr      r_offset;
+				Elf64_Qword     r_info;
+			} Elf64_Rel;
+
+			typedef struct {
+				Elf64_Addr      r_offset;
+				Elf64_Qword     r_info;
+				Elf64_SQword    r_addend;
+			} Elf64_Rela;
+
+			typedef struct {
+				Elf64_Qword d_tag;
+				union {
+					Elf64_Qword     d_val;
+					Elf64_Addr      d_ptr;
+				} d_un;
+			} Elf64_Dyn;
+
+			enum
+			{
+				DT_NULL,
+				DT_NEEDED,
+				DT_PLTRELSZ,
+				DT_PLTGOT,
+				DT_HASH,
+				DT_STRTAB,
+				DT_SYMTAB,
+				DT_RELA,
+				DT_RELASZ,
+				DT_RELAENT,
+				DT_STRSZ,
+				DT_SYMENT,
+				DT_INIT,
+				DT_FINI,
+				DT_SONAME,
+				DT_RPATH,
+				DT_SYMBOLIC,
+				DT_REL,
+				DT_RELSZ,
+				DT_RELENT,
+				DT_PLTREL,
+				DT_DEBUG,
+				DT_TEXTREL,
+				DT_JMPREL,
+				DT_BIND_NOW,
+				DT_INIT_ARRAY,
+				DT_FINI_ARRAY,
+				DT_INIT_ARRAYSZ,
+				DT_FINI_ARRAYSZ,
+				DT_RUNPATH,
+				DT_FLAGS,
+				DT_ENCODING,
+				DT_PREINIT_ARRAY,
+			};
+
+			enum 
+			{
+				R_AMD64_NONE,
+				R_AMD64_64,
+				R_AMD64_PC32,
+				R_AMD64_GOT32,
+				R_AMD64_PLT32,
+				R_AMD64_COPY,
+				R_AMD64_GLOB_DAT,
+				R_AMD64_JUMP_SLOT,
+				R_AMD64_RELATIVE,
+				R_AMD64_GOTPCREL,
+				R_AMD64_32,
+				R_AMD64_32S,
+				R_AMD64_16,
+				R_AMD64_PC16,
+				R_AMD64_8,
+				R_AMD64_PC8,
+				R_AMD64_PC64 = 24,
+				R_AMD64_GOTOFF64 = 25,
+				R_AMD64_GOTPC32 = 26,
+				R_AMD64_SIZE32 = 32,
+				R_AMD64_SIZE64 = 33,
 			};
 		}
 	}

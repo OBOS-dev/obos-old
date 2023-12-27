@@ -21,6 +21,46 @@ namespace obos
 	class Vector
 	{
 	public:
+		template<typename _IT>
+		class VectorIter
+		{
+		public:
+			VectorIter() = delete;
+
+			_IT& operator*()
+			{
+				return m_vec->operator[](m_index);
+			}
+			size_t operator++()
+			{
+				return ++m_index;
+			}
+			size_t operator++(int)
+			{
+				return m_index++;
+			}
+			size_t operator--()
+			{
+				return --m_index;
+			}
+			size_t operator--(int)
+			{
+				return m_index--;
+			}
+
+			operator bool() { return m_index < m_vec->m_sz; }
+
+			friend Vector<T>;
+		private:
+			VectorIter(Vector<_IT>* vec, size_t startingIndex)
+			{
+				m_vec = vec;
+				m_index = startingIndex;
+			}
+			size_t m_index = 0;
+			Vector<_IT>* m_vec;
+		};
+
 		Vector() 
 		{ 
 			m_capacity = 0;
@@ -105,12 +145,23 @@ namespace obos
 		T& back() const
 		{ return at(m_sz - 1); }
 
+		VectorIter<T> begin()
+		{
+			VectorIter iter{ this, 0 };
+			return iter;
+		}
+		VectorIter<T> end()
+		{
+			VectorIter iter{ this, m_sz };
+			return iter;
+		}
 
 		~Vector()
 		{
 			if (m_ptr)
 				delete[] m_ptr;
 		}
+		friend VectorIter<T>;
 	private:
 		T* m_ptr = 0;
 		size_t m_sz = 0;

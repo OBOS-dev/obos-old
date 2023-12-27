@@ -84,21 +84,21 @@ namespace obos
 			logger::panic(nullptr, "Could not load the initrd driver. GetLastError: %d", GetLastError());
 		SetLastError(0);
 
-		new (&vfs::g_mountPoints) Vector<vfs::MountPoint*>{};
+		//new (&vfs::g_mountPoints) Vector<vfs::MountPoint*>{};
 
-		logger::log("Mounting the initrd.\n");
-		uint32_t point = 0;
-		// MountB the initrd.
-		if (!vfs::mount(point, 0))
-			logger::panic(nullptr, "Could not mount the initrd, GetLastError: %d!\n", GetLastError());
+		//logger::log("Mounting the initrd.\n");
+		//uint32_t point = 0;
+		//// MountB the initrd.
+		//if (!vfs::mount(point, 0))
+		//	logger::panic(nullptr, "Could not mount the initrd, GetLastError: %d!\n", GetLastError());
 
-		vfs::FileHandle handle;
-		handle.Open("0:/test.txt");
-		char* data = new char[handle.GetFileSize() + 1];
-		handle.Read(data, handle.GetFileSize());
-		logger::printf("0:/test.txt:\n%s\n", data);
-		delete[] data;
-		//handle.Close();
+		//vfs::FileHandle handle;
+		//handle.Open("0:/test.txt");
+		//char* data = new char[handle.GetFileSize() + 1];
+		//handle.Read(data, handle.GetFileSize());
+		//logger::printf("0:/test.txt:\n%s\n", data);
+		//delete[] data;
+		////handle.Close();
 
 		thread::ExitThread(0);
 	}

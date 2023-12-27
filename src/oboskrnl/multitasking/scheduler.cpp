@@ -43,9 +43,15 @@ namespace obos
 #else
 #define DEFINE_IN_SECTION
 #endif
-		static bool DEFINE_IN_SECTION checkThreadAffinity(Thread* thr)
+		static bool DEFINE_IN_SECTION checkThreadAffinity(const Thread* thr)
 		{
 			return (thr->affinity >> GetCurrentCpuLocalPtr()->cpuId) & 1;
+		}
+		static bool DEFINE_IN_SECTION ThreadCanRun(const Thread* thr)
+		{
+			return (thr->status == THREAD_STATUS_CAN_RUN || (thr->status & THREAD_STATUS_CAN_RUN && thr->status & THREAD_STATUS_SINGLE_STEPPING)) &&
+				checkThreadAffinity(thr) &&
+				(thr->timeSliceIndex < thr->priority);
 		}
 		static Thread* DEFINE_IN_SECTION findRunnableThreadInList(Thread::ThreadList& list)
 		{
@@ -60,9 +66,7 @@ namespace obos
 				if (currentThread->timeSliceIndex >= currentThread->priority)
 					currentThread->status |= THREAD_STATUS_CLEAR_TIME_SLICE_INDEX;
 
-				bool canRun = currentThread->status == THREAD_STATUS_CAN_RUN || (currentThread->status & THREAD_STATUS_CAN_RUN && currentThread->status & THREAD_STATUS_SINGLE_STEPPING);
-				
-				if (canRun && (currentThread->timeSliceIndex < currentThread->priority) && checkThreadAffinity(currentThread))
+				if (ThreadCanRun(currentThread))
 				{
 					if (!ret)
 						ret = currentThread;
@@ -138,12 +142,12 @@ namespace obos
 				thread = thread->next_run;
 			}
 		}
-		static bool DEFINE_IN_SECTION otherCPUsScheduling()
+		static size_t DEFINE_IN_SECTION getCpusInScheduler()
 		{
 			size_t nCpusInScheduler = 0;
 			for (size_t i = 0; i < g_nCPUs; i++)
 				nCpusInScheduler += g_cpuInfo[i].schedulerLock;
-			return nCpusInScheduler > 1;
+			return nCpusInScheduler;
 		}
 		void DEFINE_IN_SECTION schedule()
 		{
@@ -153,12 +157,42 @@ namespace obos
 			if (getCPULocal()->schedulerLock)
 				return;
 
-			if (!g_coreGlobalSchedulerLock.Lock(0, true))
+			lock:
+			if (!g_coreGlobalSchedulerLock.Lock(0, false))
+			{
+				if (!getCpusInScheduler())
+				{
+					g_coreGlobalSchedulerLock.Unlock();
+					goto lock;
+				}
+				auto switchToIdleTask = [&]() {
+					currentThread->lastTimePreempted = g_timerTicks;
+					currentThread->status |= THREAD_STATUS_CAN_RUN;
+					currentThread->status &= ~THREAD_STATUS_RUNNING;
+					currentThread->affinity = currentThread->ogAffinity;
+					Thread* newThread = getCPULocal()->idleThread;
+					newThread->status = (newThread->status & ~THREAD_STATUS_CAN_RUN) | THREAD_STATUS_RUNNING;
+					getCPULocal()->currentThread = newThread;
+					switchToThreadImpl(&newThread->context, newThread);
+					return;
+					};
+				if (currentThread)
+					if (ThreadCanRun((thread::Thread*)currentThread))
+						return;
+					else
+						switchToIdleTask();
+				else {}
 				return;
+			}
 			
 			atomic_set((bool*)&getCPULocal()->schedulerLock);
 
-			OBOS_ASSERTP(!otherCPUsScheduling(), "");
+			//OBOS_ASSERTP(getCpusInScheduler() < 2, "");
+			if (getCpusInScheduler() != 1)
+			{
+				atomic_clear((bool*)&getCPULocal()->schedulerLock);
+				goto lock;
+			}
 
 			if (currentThread)
 			{
@@ -259,7 +293,7 @@ namespace obos
 
 			for (size_t i = 0; i < g_nCPUs; i++)
 				g_defaultAffinity |= (uint64_t)1 << g_cpuInfo[i].cpuId;
-			kernelMainThread->affinity = kernelMainThread->ogAffinity = g_defaultAffinity;
+			kernelMainThread->affinity = kernelMainThread->ogAffinity = /*g_defaultAffinity*/1;
 
 			for (size_t i = 0; i < g_nCPUs; i++)
 			{

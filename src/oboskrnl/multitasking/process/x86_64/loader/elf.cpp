@@ -61,7 +61,8 @@ namespace obos
 
 			uint32_t LoadElfFile(byte* startAddress, size_t size, uintptr_t& entry, uintptr_t& baseAddress, memory::VirtualAllocator& allocator, bool lazyLoad)
 			{
-				if (uint32_t err = CheckElfFile(startAddress, size, true); err != 0)
+				uint32_t err = CheckElfFile(startAddress, size, true);
+				if (err != 0)
 					return err;
 				Elf64_Ehdr* elfHeader = (Elf64_Ehdr*)startAddress;
 				entry = elfHeader->e_entry;

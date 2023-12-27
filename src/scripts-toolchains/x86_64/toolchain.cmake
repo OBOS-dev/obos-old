@@ -38,7 +38,7 @@ if (HAS_x86_64_elf_nm)
 else()
 	set(NM "nm")
 endif()
-set(TARGET_COMPILE_OPTIONS_CPP -mno-red-zone  -mcmodel=kernel -fno-omit-frame-pointer -mgeneral-regs-only)
+set(TARGET_COMPILE_OPTIONS_CPP -mno-red-zone -fno-omit-frame-pointer -mgeneral-regs-only -mcmodel=kernel)
 set(TARGET_COMPILE_OPTIONS_C ${TARGET_COMPILE_OPTIONS_CPP})
 set(TARGET_LINKER_OPTIONS -mcmodel=kernel)
 

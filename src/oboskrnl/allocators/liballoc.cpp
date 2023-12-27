@@ -232,6 +232,13 @@ extern "C" {
 				}
 				current = current->next;
 			}
+			if (currentPageBlock->lastBlock->magic == MEMBLOCK_DEAD && !block)
+			{
+				block = currentPageBlock->lastBlock;
+			}
+			// This may seem recursive, but it's possible that the loop chose the last block.
+			if (block == currentPageBlock->lastBlock)
+				currentPageBlock->lastBlock = block->prev;
 			if (!block)
 			{
 				OBOS_ASSERTP(currentPageBlock->lastBlock->magic == MEMBLOCK_MAGIC, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: %p!", "",
@@ -304,26 +311,26 @@ extern "C" {
 
 		if (--currentPageBlock->nMemBlocks)
 		{
-			if (block->next)
-			{
-				OBOS_ASSERTP(block->next > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
-				block->next->prev = block->prev;
-			}
 			if (currentPageBlock->lastBlock == block)
 			{
 				block->next = nullptr;
 				goto next1;
 			}
-		next1:
-			if (block->prev)
+			if (block->next)
 			{
-				OBOS_ASSERTP(block->prev > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
-				block->prev->next = block->next;
+				OBOS_ASSERTP(block->next > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
+				block->next->prev = block->prev;
 			}
+		next1:
 			if (currentPageBlock->firstBlock == block)
 			{
 				block->prev = nullptr;
 				goto next2;
+			}
+			if (block->prev)
+			{
+				OBOS_ASSERTP(block->prev > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
+				block->prev->next = block->next;
 			}
 		next2:
 			if (currentPageBlock->lastBlock == block)

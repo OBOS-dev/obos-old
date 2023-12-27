@@ -14,6 +14,6 @@ namespace obos
 {
 	namespace driverInterface
 	{
-		uint32_t LoadModule(byte* file, size_t size, thread::ThreadHandle** mainThread);
+		bool LoadModule(byte* file, size_t size, thread::ThreadHandle** mainThread);
 	}
 }

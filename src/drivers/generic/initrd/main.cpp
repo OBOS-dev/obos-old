@@ -54,10 +54,24 @@ size_t printf(const char* format, ...)
 
 extern void ConnectionHandler(uintptr_t);
 
+#ifdef __GNUC__
+#define WEAK __attribute__((weak))
+#else
+#define WEAK
+#endif
+
+namespace obos
+{
+	namespace logger
+	{
+		[[noreturn]] void WEAK panic(void*, const char*, ...);
+	}
+}
+
 extern "C" void _start()
 {
 	if (!g_driverHeader.initrdLocationResponse.addr)
-		kpanic("[DRIVER 0, FATAL] No initrd image received from the kernel.\n");
+		obos::logger::panic(nullptr, "[DRIVER 0, FATAL] No initrd image received from the kernel.\n");
 	//printf("[DRIVER 0, LOG] Initializing filesystem cache.\n");
 	InitializeFilesystemCache();
 	// Listen for connections.

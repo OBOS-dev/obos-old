@@ -12,6 +12,7 @@ add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
 
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${LINKER_SCRIPT}")
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
+set_target_properties(oboskrnl PROPERTIES ENABLE_EXPORTS 1)
 
 message("Output Directory: ${OUTPUT_DIR}")
 
@@ -51,38 +52,42 @@ target_link_libraries(oboskrnl PUBLIC ${LIBGCC})
 target_compile_definitions(oboskrnl PUBLIC OBOS_KERNEL=1)
 
 if (UNIX OR GENERATE_BUILD_FILES_FOR_UNIX)
-	add_custom_command(TARGET oboskrnl POST_BUILD
-	                   COMMAND echo "Generating the iso..."
-					   COMMAND cp -u ${OUTPUT_DIR}/oboskrnl ${CMAKE_SOURCE_DIR}/isodir/obos/oboskrnl
-					   COMMAND ${OBJCOPY} -g isodir/obos/oboskrnl
-					   COMMAND cp -u ${OUTPUT_DIR}/initrdDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
-					   COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
-					   COMMAND cd scripts
-					   COMMAND ./make_initrd.sh
-					   COMMAND cd ..
-					   COMMAND xorriso -as mkisofs -b limine/limine-bios-cd.bin  -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine/limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label isodir -o ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
-					   COMMAND ./limine/limine bios-install ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
-	                   COMMAND echo "Finished build!"
-	                   WORKING_DIRECTORY ${OUTPUT_DIR}/../
-	                   BYPRODUCTS "${OUTPUT_DIR}/obos.iso")
+	add_custom_target(generate_iso ALL
+		COMMAND echo "Generating the iso..."
+		COMMAND cp -u ${OUTPUT_DIR}/oboskrnl ${CMAKE_SOURCE_DIR}/isodir/obos/oboskrnl
+		COMMAND ${OBJCOPY} -g isodir/obos/oboskrnl
+		COMMAND cp -u ${OUTPUT_DIR}/initrdDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
+		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
+		COMMAND cd scripts
+		COMMAND ./make_initrd.sh
+		COMMAND cd ..
+		COMMAND xorriso -as mkisofs -b limine/limine-bios-cd.bin  -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine/limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label isodir -o ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
+		COMMAND ./limine/limine bios-install ${OUTPUT_DIR}/obos.iso > /dev/null 2> /dev/null
+		COMMAND echo "Finished build!"
+		WORKING_DIRECTORY ${OUTPUT_DIR}/../
+		BYPRODUCTS "${OUTPUT_DIR}/obos.iso"
+		DEPENDS oboskrnl
+	    DEPENDS initrdDriver)
 else (WIN32)
 	string(REPLACE "/" "\\" OUTPUT_DIR ${OUTPUT_DIR})
 	string(REPLACE "/" "\\" SOURCE_DIRECTORY ${CMAKE_SOURCE_DIR})
-	add_custom_command(TARGET oboskrnl POST_BUILD
-	                   COMMAND @echo off
-	                   COMMAND echo Generating the iso...
-					   COMMAND copy /Y "${OUTPUT_DIR}\\oboskrnl" "${SOURCE_DIRECTORY}\\isodir\\obos\\oboskrnl" > NUL 2>&1
-					   COMMAND ${OBJCOPY} -g isodir/obos/oboskrnl > NUL 2>&1
-					   COMMAND copy /Y "${OUTPUT_DIR}\\initrdDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrdDriver" > NUL 2>&1
-					   COMMAND ${OBJCOPY} -g isodir/obos/initrdDriver > NUL 2>&1
-					   COMMAND cd scripts
-					   COMMAND make_initrd.bat
-					   COMMAND cd ..
-					   COMMAND xorriso -as mkisofs -b limine/limine-bios-cd.bin  -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine/limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label isodir -o ${OUTPUT_DIR}/obos.iso > NUL 2>&1
-					   COMMAND limine/limine.exe bios-install ${OUTPUT_DIR}/obos.iso > NUL 2>&1
-	                   COMMAND echo Finished build!
-	                   WORKING_DIRECTORY ${OUTPUT_DIR}/../
-	                   BYPRODUCTS "${OUTPUT_DIR}/obos.iso")
+	add_custom_target(generate_iso ALL
+        COMMAND @echo off
+        COMMAND echo Generating the iso...
+		COMMAND copy /Y "${OUTPUT_DIR}\\oboskrnl" "${SOURCE_DIRECTORY}\\isodir\\obos\\oboskrnl" > NUL 2>&1
+		COMMAND ${OBJCOPY} -g isodir/obos/oboskrnl > NUL 2>&1
+		COMMAND copy /Y "${OUTPUT_DIR}\\initrdDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrdDriver" > NUL 2>&1
+		COMMAND ${OBJCOPY} -g isodir/obos/initrdDriver > NUL 2>&1
+		COMMAND cd scripts
+		COMMAND make_initrd.bat
+		COMMAND cd ..
+		COMMAND xorriso -as mkisofs -b limine/limine-bios-cd.bin  -no-emul-boot -boot-load-size 4 -boot-info-table --efi-boot limine/limine-uefi-cd.bin -efi-boot-part --efi-boot-image --protective-msdos-label isodir -o ${OUTPUT_DIR}/obos.iso > NUL 2>&1
+		COMMAND limine/limine.exe bios-install ${OUTPUT_DIR}/obos.iso > NUL 2>&1
+        COMMAND echo Finished build!
+        WORKING_DIRECTORY ${OUTPUT_DIR}/../
+        BYPRODUCTS "${OUTPUT_DIR}/obos.iso"
+	    DEPENDS oboskrnl
+	    DEPENDS initrdDriver)
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

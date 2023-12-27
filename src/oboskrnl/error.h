@@ -7,6 +7,7 @@
 #pragma once
 
 #include <int.h>
+#include <export.h>
 
 namespace obos
 {
@@ -104,11 +105,13 @@ namespace obos
 		/// A page fault occurred.
 		/// </summary>
 		OBOS_ERROR_PAGE_FAULT,
+		/// <summary>
+		/// The driver's code referenced an undefined symbol in the kernel.
+		/// </summary>
+		OBOS_ERROR_DRIVER_REFERENCED_UNRESOLVED_SYMBOL,
 
 		OBOS_ERROR_HIGHEST_VALUE,
 	};
-#ifdef OBOS_KERNEL
-	void SetLastError(uint32_t err);
-	uint32_t GetLastError();
-#endif
+	OBOS_EXPORT void SetLastError(uint32_t err);
+	OBOS_EXPORT uint32_t GetLastError();
 }

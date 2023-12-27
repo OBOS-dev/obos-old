@@ -72,6 +72,12 @@ namespace obos
 				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
 				return false;
 			}
+			if (!thread::g_defaultAffinity)
+			{
+				// This shouldn't happen, but fix it anyway.
+				for (size_t i = 0; i < g_nCPUs; i++)
+					g_defaultAffinity |= (uint64_t)1 << g_cpuInfo[i].cpuId;
+			}
 			if (!affinity)
 				affinity = thread::g_defaultAffinity;
 			Thread::ThreadList* priorityList;
@@ -102,14 +108,15 @@ namespace obos
 			m_obj = thread;
 
 			thread->tid = g_nextTid++;
-			thread->status = THREAD_STATUS_CAN_RUN | (startPaused ? THREAD_STATUS_PAUSED : 0);
+			thread->status = THREAD_STATUS_CAN_RUN | ((uint32_t)startPaused * THREAD_STATUS_PAUSED);
 			thread->priority = THREAD_PRIORITY_NORMAL;
 			thread->exitCode = 0;
 			thread->lastError = 0;
 			thread->priorityList = priorityList;
 			thread->owner = tproc;
 			thread->threadList = &tproc->threads;
-			thread->affinity = affinity;
+			thread->affinity = 
+				thread->ogAffinity = affinity;
 			setupThreadContext(&thread->context, &thread->stackInfo, (uintptr_t)entry, userdata, stackSize, &tproc->vallocator, tproc);
 			uintptr_t val = stopTimer();
 
