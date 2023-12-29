@@ -7,6 +7,7 @@
 #pragma once
 
 #include <int.h>
+#include <export.h>
 #include <stdarg.h>
 
 #include <console.h>
@@ -43,25 +44,25 @@ namespace obos
 		// %s: Print string
 		// %p: Print pointer as a hex number with a padding of sizeof(uintptr_t) * 2
 		// %%: Prints a '%'
-		size_t printf_impl(void(*printCallback)(char ch, void* userdata), void* userdata, const char* format, va_list list);
+		OBOS_EXPORT size_t printf_impl(void(*printCallback)(char ch, void* userdata), void* userdata, const char* format, va_list list);
 
-		size_t printf(const char* format, ...);
-		size_t vprintf(const char* format, va_list list);
-		size_t sprintf(char* dest, const char* format, ...); // TODO: Implement this.
+		OBOS_EXPORT size_t printf(const char* format, ...);
+		OBOS_EXPORT size_t vprintf(const char* format, va_list list);
+		OBOS_EXPORT size_t sprintf(char* dest, const char* format, ...); // TODO: Implement this.
 
 		constexpr const char* LOG_PREFIX_MESSAGE = "[Log] ";
 		constexpr const char* INFO_PREFIX_MESSAGE = "[Log] ";
 		constexpr const char* WARNING_PREFIX_MESSAGE = "[Warning] ";
 		constexpr const char* ERROR_PREFIX_MESSAGE = "[Error] ";
 
-		size_t log(const char* format, ...);
-		size_t info(const char* format, ...);
-		size_t warning(const char* format, ...);
-		size_t error(const char* format, ...);
-		[[noreturn]] void panic(void* stackTraceParameter, const char* format, ...);
-		[[noreturn]] void panicVariadic(void* stackTraceParameter, const char* format, va_list list);
+		OBOS_EXPORT size_t log(const char* format, ...);
+		OBOS_EXPORT size_t info(const char* format, ...);
+		OBOS_EXPORT size_t warning(const char* format, ...);
+		OBOS_EXPORT size_t error(const char* format, ...);
+		OBOS_EXPORT [[noreturn]] void panic(void* stackTraceParameter, const char* format, ...);
+		OBOS_EXPORT [[noreturn]] void panicVariadic(void* stackTraceParameter, const char* format, va_list list);
 
-		void stackTrace(void* stackTraceParameter);
+		OBOS_EXPORT void stackTrace(void* stackTraceParameter);
 		void dumpAddr(uint32_t* addr);
 	}
 }

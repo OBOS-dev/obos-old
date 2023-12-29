@@ -44,6 +44,26 @@ namespace obos
 			if (timeout == 0)
 				wakeupTime = 0xffffffffffffffff /* UINT64_MAX */;
 			const bool expected = false;
+			if (m_locked)
+			{
+				if (m_canUseMultitasking && thread::g_initialized)
+				{
+					thread::Thread* currentThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
+					currentThread->blockCallback.callback = [](thread::Thread* thr, void* udata)->bool
+					{
+						Mutex* _this = (Mutex*)udata;
+						return (_this->m_locked && !_this->m_wake && thread::g_timerTicks < thr->wakeUpTime);
+					};
+					currentThread->blockCallback.userdata = this;
+					currentThread->wakeUpTime = wakeupTime;
+					currentThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;
+					thread::callScheduler(false);
+				}
+				else
+				{
+					while (m_locked && !m_wake && thread::g_timerTicks < wakeupTime);
+				}
+			}
 			while ((__atomic_compare_exchange_n(&m_locked, (bool*)&expected, true, false, 0, 0) || m_wake) || thread::g_timerTicks >= wakeupTime);
 			if (thread::g_timerTicks >= wakeupTime)
 			{

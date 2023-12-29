@@ -62,7 +62,6 @@ struct filesystemCache
 
 void InitializeFilesystemCache();
 
-void GetFileAttribute(const char* filepath, size_t* size, uint32_t* attrib); // OBOS_SERVICE_QUERY_FILE_DATA
-void ReadFile(const char* filepath, size_t filepathSize, size_t* szRead, char* dataRead); // OBOS_SERVICE_READ_FILE
+bool GetFileAttribute(const char* filepath, size_t* size, uint32_t* attrib); // OBOS_SERVICE_QUERY_FILE_DATA
 bool FileExists(const char* path);
 ustarEntryCache* GetCacheForPath(const char* path);

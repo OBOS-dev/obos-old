@@ -72,7 +72,7 @@ namespace obos
 			}
 			return true;
 		}
-		static driverHeader* CheckModule(byte* file, size_t size)
+		static driverHeader* CheckModule(byte* file, size_t size, uintptr_t* headerVirtAddr)
 		{
 			using namespace process::loader;
 
@@ -103,6 +103,8 @@ namespace obos
 				SetLastError(OBOS_ERROR_NOT_A_DRIVER);
 				return nullptr;
 			}
+			if(headerVirtAddr)
+				*headerVirtAddr = currentSection->sh_addr;
 			return header;
 		}
 		// From https://docs.oracle.com/cd/E23824_01/html/819-0690/chapter6-48031.html#scrolltoc
@@ -119,7 +121,7 @@ namespace obos
 			}
 			return h;
 		}
-		static process::loader::Elf64_Sym* GetSymbolFromTable(
+		process::loader::Elf64_Sym* GetSymbolFromTable(
 			byte* fileStart,
 			byte* baseAddress,
 			process::loader::Elf64_Sym* symbolTable,
@@ -193,9 +195,9 @@ namespace obos
 					break;
 			}
 			if (!symtab_section)
-				return;
+				return { nullptr,nullptr };
 			if (!strtab_section)
-				return;
+				return { nullptr,nullptr };
 			return { symtab_section,strtab_section };
 		}
 		static process::loader::Elf64_Sym* GetSymbolFromIndex(
@@ -255,9 +257,13 @@ namespace obos
 			Vector<relocation> required_relocations;
 			Elf64_Dyn* currentDynamicHeader = dynamicHeader;
 			size_t last_dtrelasz = 0, last_dtrelsz = 0, last_dtpltrelsz = 0;
+			bool awaitingRelaSz = false, foundRelaSz = false;
+			Elf64_Dyn* dynEntryAwaitingRelaSz = nullptr;
+			bool awaitingRelSz = false, foundRelSz = false;
+			Elf64_Dyn* dynEntryAwaitingRelSz = nullptr;
 			uint64_t last_dlpltrel = 0;
-			auto handleDtRel = [&](size_t sz) {
-				Elf64_Rela* relTable = (Elf64_Rela*)(file + currentDynamicHeader->d_un.d_ptr);
+			auto handleDtRel = [&](Elf64_Dyn* dynamicHeader, size_t sz) {
+				Elf64_Rela* relTable = (Elf64_Rela*)(file + dynamicHeader->d_un.d_ptr);
 				for (size_t i = 0; i < sz / sizeof(Elf64_Rela); i++)
 					required_relocations.push_back({
 						(uint32_t)(relTable[i].r_info >> 32),
@@ -266,8 +272,8 @@ namespace obos
 						relTable[i].r_addend,
 						});
 				};
-			auto handleDtRela = [&](size_t sz) {
-				Elf64_Rela* relTable = (Elf64_Rela*)(file + currentDynamicHeader->d_un.d_ptr);
+			auto handleDtRela = [&](Elf64_Dyn* dynamicHeader, size_t sz) {
+				Elf64_Rela* relTable = (Elf64_Rela*)(file + dynamicHeader->d_un.d_ptr);
 				for (size_t i = 0; i < (sz / sizeof(Elf64_Rela)); i++)
 					required_relocations.push_back({
 						(uint32_t)(relTable[i].r_info >> 32),
@@ -292,19 +298,35 @@ namespace obos
 					GOT = (Elf64_Addr*)(baseAddress + currentDynamicHeader->d_un.d_ptr);
 					break;
 				case DT_REL:
-					handleDtRel(last_dtrelsz);
+					if (!foundRelSz)
+					{
+						awaitingRelSz = true;
+						dynEntryAwaitingRelSz = currentDynamicHeader;
+						break;
+					}
+					handleDtRel(currentDynamicHeader, last_dtrelsz);
+					foundRelSz = false;
+					last_dtrelsz = 0;
 					break;
 				case DT_RELA:
-					handleDtRela(last_dtrelasz);
+					if (!foundRelaSz)
+					{
+						awaitingRelaSz = true;
+						dynEntryAwaitingRelaSz = currentDynamicHeader;
+						break;
+					}
+					handleDtRela(currentDynamicHeader, last_dtrelasz);
+					foundRelaSz = false;
+					last_dtrelasz = 0;
 					break;
 				case DT_JMPREL:
 					switch (last_dlpltrel)
 					{
 					case DT_REL:
-						handleDtRel(last_dtpltrelsz);
+						handleDtRel(currentDynamicHeader, last_dtpltrelsz);
 						break;
 					case DT_RELA:
-						handleDtRela(last_dtpltrelsz);
+						handleDtRela(currentDynamicHeader, last_dtpltrelsz);
 						break;
 					default:
 						break;
@@ -312,9 +334,21 @@ namespace obos
 					break;
 				case DT_RELSZ:
 					last_dtrelsz = currentDynamicHeader->d_un.d_val;
+					foundRelSz = !awaitingRelSz;
+					if (awaitingRelSz)
+					{
+						handleDtRel(dynEntryAwaitingRelSz, last_dtrelsz);
+						awaitingRelSz = false;
+					}
 					break;
 				case DT_RELASZ:
 					last_dtrelasz = currentDynamicHeader->d_un.d_val;
+					foundRelaSz = !awaitingRelaSz;
+					if (awaitingRelaSz)
+					{
+						handleDtRel(dynEntryAwaitingRelaSz, last_dtrelasz);
+						awaitingRelaSz = false;
+					}
 					break;
 				case DT_PLTREL:
 					last_dlpltrel = currentDynamicHeader->d_un.d_val;
@@ -332,8 +366,14 @@ namespace obos
 					break;
 				}
 			}
+			struct copy_reloc
+			{
+				void* src = nullptr, *dest = nullptr;
+				size_t size = 0;
+			};
+			Vector<copy_reloc> copy_relocations;
 			byte* kFileBase = (byte*)kernel_file.response->kernel_file->address;
-			tables& kernel_tables = GetKernelSymbolStringTables();
+			tables kernel_tables = GetKernelSymbolStringTables();
 			for ([[maybe_unused]] const relocation& i : required_relocations)
 			{
 				[[maybe_unused]] auto& Unresolved_Symbol = *GetSymbolFromIndex(symbolTable, i.symbolTableOffset);
@@ -347,6 +387,7 @@ namespace obos
 				if (!Symbol)
 				{
 					SetLastError(OBOS_ERROR_DRIVER_REFERENCED_UNRESOLVED_SYMBOL);
+					vallocator.VirtualFree(baseAddress, nPagesTotal);
 					break;
 				}
 				auto& type = i.relocationType;
@@ -362,16 +403,124 @@ namespace obos
 					relocSize = 8;
 					break;
 				case R_AMD64_PC32:
-					relocResult = (Symbol->st_value + i.addend - relocAddr) & 0xffffffff;
+					relocResult = Symbol->st_value + i.addend - relocAddr;
 					relocSize = 4;
 					break;
 				case R_AMD64_GOT32:
-					// TODO: Implement.
-					relocResult = (0 + i.addend) & 0xffffffff;
+					SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
+					vallocator.VirtualFree(baseAddress, nPagesTotal);
+					return false;
+					// TODO: Replace the zero in the calculation with "G" (see elf spec for more info).
+					relocResult = 0 + i.addend;
 					relocSize = 4;
+					break;
+				case R_AMD64_PLT32:
+					SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
+					vallocator.VirtualFree(baseAddress, nPagesTotal);
+					return false;
+					// TODO: Replace the zero in the calculation with "L" (see elf spec for more info).
+					relocResult = 0 + i.addend - relocAddr;
+					relocSize = 4;
+					break;
+				case R_AMD64_COPY:
+					if (Unresolved_Symbol.st_size != Symbol->st_size)
+					{
+						// Oh no!
+						SetLastError(OBOS_ERROR_DRIVER_SYMBOL_MISMATCH);
+						vallocator.VirtualFree(baseAddress, nPagesTotal);
+						return false;
+					}
+					// Save copy relocations for the end because if we don't, it might contain unresolved addresses.
+					copy_relocations.push_back({ (void*)relocAddr, (void*)Symbol->st_value, Symbol->st_size });
+					relocSize = 0;
+					break;
+				case R_AMD64_JUMP_SLOT:
+				case R_AMD64_GLOB_DAT:
+					relocResult = Symbol->st_value;
+					relocSize = 8;
+					break;
+				case R_AMD64_RELATIVE:
+					relocResult = (uint64_t)baseAddress + i.addend;
+					relocSize = 8;
+					break;
+				case R_AMD64_GOTPCREL:
+					SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
+					vallocator.VirtualFree(baseAddress, nPagesTotal);
+					return false;
+					// TODO: Replace the zero in the calculation with "G" (see elf spec for more info).
+					relocResult = 0 + (uint64_t)baseAddress + i.addend - relocAddr;
+					relocSize = 8;
+					break;
+				case R_AMD64_32:
+					relocResult = Symbol->st_value + i.addend;
+					relocSize = 4;
+					break;
+				case R_AMD64_32S:
+					relocResult = Symbol->st_value + i.addend;
+					relocSize = 4;
+					break;
+				case R_AMD64_16:
+					relocResult = Symbol->st_value + i.addend;
+					relocSize = 2;
+					break;
+				case R_AMD64_PC16:
+					relocResult = Symbol->st_value + i.addend - relocAddr;
+					relocSize = 2;
+					break;
+				case R_AMD64_8:
+					relocResult = Symbol->st_value + i.addend;
+					relocSize = 1;
+					break;
+				case R_AMD64_PC8:
+					relocResult = Symbol->st_value + i.addend - relocAddr;
+					relocSize = 1;
+					break;
+				case R_AMD64_PC64:
+					relocResult = Symbol->st_value + i.addend - relocAddr;
+					relocSize = 8;
+					break;
+				case R_AMD64_GOTOFF64:
+					relocResult = Symbol->st_value + i.addend - ((uint64_t)GOT);
+					relocSize = 8;
+					break;
+				case R_AMD64_GOTPC32:
+					relocResult = (uint64_t)GOT + i.addend + relocAddr;
+					relocSize = 8;
+					break;
+				case R_AMD64_SIZE32:
+					relocSize = 4;
+					relocResult = Symbol->st_size + i.addend;
+					break;
+				case R_AMD64_SIZE64:
+					relocSize = 8;
+					relocResult = Symbol->st_size + i.addend;
+					break;
+				default:
+					break; // Ignore.
+				}
+				switch (relocSize)
+				{
+				case 0:
+					break; // The relocation type is rather unsupported or special.
+				case 1: // word8
+					*(uint8_t*)(relocAddr) = (uint8_t)(relocResult & 0xff);
+					break;
+				case 2: // word16
+					*(uint16_t*)(relocAddr) = (uint16_t)(relocResult & 0xffff);
+					break;
+				case 4: // word32
+					*(uint32_t*)(relocAddr) = (uint16_t)(relocResult & 0xffffffff);
+					break;
+				case 8: // word64
+					*(uint64_t*)(relocAddr) = relocResult;
+					break;
+				default:
 					break;
 				}
 			}
+			// Apply copy relocations.
+			for (auto& reloc : copy_relocations)
+				utils::memcpy(reloc.src, reloc.dest, reloc.size);
 			// Apply protection flags.
 			programHeader = *programHeaderStart;
 			for (size_t i = 0; i < elfHeader->e_phnum; programHeader = programHeaderStart[i++])
@@ -387,28 +536,39 @@ namespace obos
 			}
 			return true;
 		}
+		driverIdentity** g_driverInterfaces;
+		size_t g_driverInterfacesCapacity;
+		constexpr static size_t g_driverInterfacesCapacityStep = 4; 
 		bool LoadModule(byte* file, size_t size, thread::ThreadHandle** mainThread)
 		{
-			driverHeader* header = CheckModule(file, size);
+			uintptr_t headerVirtAddr = 0;
+			driverHeader* header = CheckModule(file, size, &headerVirtAddr);
 			if (!header)
 				return false;
+			if (!header->functionTable.GetServiceType)
+			{
+				SetLastError(OBOS_ERROR_INVALID_DRIVER_HEADER);
+				return false;
+			}
+
+			uintptr_t entryPoint = 0, baseAddress = 0;
+			if (!LoadModuleAndRelocate(file, size, baseAddress, entryPoint))
+				return false;
+			
+			header = (driverHeader*)(baseAddress + headerVirtAddr);
 
 			driverIdentity* identity = new driverIdentity;
 			identity->driverId = header->driverId;
 			identity->_serviceType = header->driverType;
-
-			if (header->requests & driverHeader::VPRINTF_FUNCTION_REQUEST)
-				header->vprintfFunctionResponse = logger::vprintf;
-			if (header->requests & driverHeader::PANIC_FUNCTION_REQUEST)
-				header->panicFunctionResponse = logger::panicVariadic;
-			if (header->requests & driverHeader::MEMORY_MANIPULATION_FUNCTIONS_REQUEST)
+			identity->functionTable = header->functionTable;
+			identity->header = header;
+			// We emplace it after the driver finishes initialization.
+			if (identity->driverId >= g_driverInterfacesCapacity)
+				g_driverInterfaces = new driverIdentity*[g_driverInterfacesCapacity + g_driverInterfacesCapacityStep];
+			if(g_driverInterfaces[identity->driverId])
 			{
-				header->memoryManipFunctionsResponse.memzero = utils::memzero;
-				header->memoryManipFunctionsResponse.memcpy = utils::memcpy;
-				header->memoryManipFunctionsResponse.memcmp = utils::memcmp;
-				header->memoryManipFunctionsResponse.memcmp_toByte = utils::memcmp;
-				header->memoryManipFunctionsResponse.strlen = utils::strlen;
-				header->memoryManipFunctionsResponse.strcmp = utils::strcmp;
+				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
+				return false;
 			}
 			if (header->requests & driverHeader::INITRD_LOCATION_REQUEST)
 			{
@@ -422,10 +582,6 @@ namespace obos
 					}
 				}
 			}
-			
-			uintptr_t entryPoint = 0, baseAddress = 0;
-			if (!LoadModuleAndRelocate(file, size, baseAddress, entryPoint))
-				return false;
 
 			thread::ThreadHandle* thread = new thread::ThreadHandle{};
 			if (mainThread)
@@ -439,7 +595,9 @@ namespace obos
 				thread::g_defaultAffinity,
 				thread::GetCurrentCpuLocalPtr()->idleThread->owner, // The idle thread always uses the kernel's process as it's owner.
 				false);
-			
+			while (!header->driver_initialized);
+			g_driverInterfaces[identity->driverId] = identity;
+			header->driver_finished_loading = true;
 			return true;
 		}
 	}

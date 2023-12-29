@@ -109,6 +109,18 @@ namespace obos
 		/// The driver's code referenced an undefined symbol in the kernel.
 		/// </summary>
 		OBOS_ERROR_DRIVER_REFERENCED_UNRESOLVED_SYMBOL,
+		/// <summary>
+		/// The driver's code referenced a variable that had a different size in the kernel.
+		/// </summary>
+		OBOS_ERROR_DRIVER_SYMBOL_MISMATCH,
+		/// <summary>
+		/// The driver has an invalid or corrupt header.
+		/// </summary>
+		OBOS_ERROR_INVALID_DRIVER_HEADER,
+		/// <summary>
+		/// A driver function returned false.
+		/// </summary>
+		OBOS_ERROR_VFS_DRIVER_FAILURE,
 
 		OBOS_ERROR_HIGHEST_VALUE,
 	};

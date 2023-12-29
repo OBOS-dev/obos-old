@@ -5,17 +5,20 @@
 */
 
 #include <int.h>
+#include <klog.h>
 
 #include <stdarg.h>
 
 #include <multitasking/thread.h>
 
 #include <driverInterface/struct.h>
-#include <driverInterface/x86_64/call_interface.h>
 
 #include <arch/x86_64/syscall/syscall_interface.h>
 
+#include <multitasking/threadAPI/thrHandle.h>
+
 #include "parse.h"
+#include "interface.h"
 
 using namespace obos;
 
@@ -29,28 +32,21 @@ driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 	.magicNumber = obos::driverInterface::OBOS_DRIVER_HEADER_MAGIC,
 	.driverId = 0,
 	.driverType = obos::driverInterface::OBOS_SERVICE_TYPE_INITRD_FILESYSTEM,
-	.requests = driverInterface::driverHeader::VPRINTF_FUNCTION_REQUEST | 
-				driverInterface::driverHeader::INITRD_LOCATION_REQUEST | 
-				driverInterface::driverHeader::MEMORY_MANIPULATION_FUNCTIONS_REQUEST |
-				driverInterface::driverHeader::PANIC_FUNCTION_REQUEST,
+	.requests = driverInterface::driverHeader::INITRD_LOCATION_REQUEST,
+	.functionTable = {
+		.GetServiceType = []()->driverInterface::serviceType { return driverInterface::serviceType::OBOS_SERVICE_TYPE_INITRD_FILESYSTEM; },
+		.serviceSpecific = {
+			.filesystem = {
+				.QueryFileProperties = initrdInterface::QueryFileProperties,
+				.FileIteratorCreate = initrdInterface::IterCreate,
+				.FileIteratorNext = initrdInterface::IterNext,
+				.FileIteratorClose = initrdInterface::IterClose,
+				.ReadFile = initrdInterface::ReadFile,
+				.unused = { nullptr,nullptr,nullptr,nullptr }
+			}
+		}
+	}
 };
-
-size_t printf(const char* format, ...)
-{
-	va_list list;
-	va_start(list, format);
-	size_t ret = g_driverHeader.vprintfFunctionResponse(format, list);
-	va_end(list);
-	return ret;
-}
-[[noreturn]] void kpanic(const char* format, ...)
-{
-	va_list list;
-	va_start(list, format);
-	g_driverHeader.panicFunctionResponse(nullptr, format, list);
-	va_end(list); // shouldn't get hit.
-	while (1);
-}
 
 extern void ConnectionHandler(uintptr_t);
 
@@ -60,43 +56,13 @@ extern void ConnectionHandler(uintptr_t);
 #define WEAK
 #endif
 
-namespace obos
-{
-	namespace logger
-	{
-		[[noreturn]] void WEAK panic(void*, const char*, ...);
-	}
-}
-
 extern "C" void _start()
 {
 	if (!g_driverHeader.initrdLocationResponse.addr)
-		obos::logger::panic(nullptr, "[DRIVER 0, FATAL] No initrd image received from the kernel.\n");
-	//printf("[DRIVER 0, LOG] Initializing filesystem cache.\n");
+		logger::panic(nullptr, "[DRIVER 0, FATAL] No initrd image received from the kernel.\n");
+	logger::log("DRIVER 0: Initializing filesystem cache.\n");
 	InitializeFilesystemCache();
-	// Listen for connections.
-	driverInterface::DriverServer* currentClient = nullptr;
-	while (1)
-	{
-		currentClient = AllocDriverServer();
-		if (!currentClient->Listen())
-		{
-			//printf("[DRIVER 0, ERROR] Listen: Error code: %d.\nTrying again...\n", g_driverHeader.driverId, GetLastError());
-			FreeDriverServer(currentClient);
-			continue;
-		}
-		uintptr_t thread = MakeThreadObject();
-		if (!CreateThread(thread, thread::THREAD_PRIORITY_NORMAL, 0x8000, 0, ConnectionHandler, (uintptr_t)currentClient, false))
-		{
-			//printf("[DRIVER 0, ERROR] CreateThread: Error code: %d.\n", g_driverHeader.driverId, GetLastError());
-			currentClient->CloseConnection();
-			FreeDriverServer(currentClient);
-			CloseThread(thread);
-			FreeThread(thread);
-			continue;
-		}
-		CloseThread(thread);
-		FreeThread(thread);
-	}
-	ExitThread(0);
+	g_driverHeader.driver_initialized = true;
+	while (g_driverHeader.driver_finished_loading);
+	thread::ExitThread(0);
 }

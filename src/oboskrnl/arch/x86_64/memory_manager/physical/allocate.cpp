@@ -25,7 +25,7 @@ namespace obos
 {
 	static volatile limine_memmap_request mmap_request = {
 		.id = LIMINE_MEMMAP_REQUEST,
-		.revision = 0
+		.revision = 1
 	};
 	namespace memory
 	{

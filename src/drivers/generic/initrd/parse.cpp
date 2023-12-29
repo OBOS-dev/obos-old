@@ -4,13 +4,16 @@
 	Copyright (c) 2023 Omar Berrow
 */
 
-#include "parse.h"
-
 #include <int.h>
+#include <klog.h>
+#include <memory_manipulation.h>
+
+#include "parse.h"
 
 #include <driverInterface/struct.h>
 
-#include <driverInterface/x86_64/call_interface.h>
+#include <allocators/liballoc.h>
+
 
 using namespace obos;
 
@@ -37,14 +40,14 @@ filesystemCache g_filesystemCache = {};
 void InitializeFilesystemCache()
 {
 	ustarEntry* entry = (ustarEntry*)g_driverHeader.initrdLocationResponse.addr;
-	if (!g_driverHeader.memoryManipFunctionsResponse.memcmp(&entry->indication, "ustar", 6))
-		kpanic("[DRIVER 0, FATAL] %s: Invalid or empty initrd image!\n", __func__);
-	while (g_driverHeader.memoryManipFunctionsResponse.memcmp(&entry->indication, "ustar", 6))
+	if (!obos::utils::memcmp(&entry->indication, "ustar", 6))
+		obos::logger::panic(nullptr, "DRIVER 0, %s: Invalid or empty initrd image!\n", __func__);
+	while (obos::utils::memcmp(&entry->indication, "ustar", 6))
 	{
 		size_t filesize = oct2bin(entry->filesizeOctal, 11);
-		ustarEntryCacheNode* node = (ustarEntryCacheNode*)Malloc(sizeof(ustarEntryCacheNode));
-		ustarEntryCache* cache = node->cache = (ustarEntryCache*)Malloc(sizeof(ustarEntryCache));
-		g_driverHeader.memoryManipFunctionsResponse.memzero(node, sizeof(*node));
+		ustarEntryCacheNode* node = (ustarEntryCacheNode*)kcalloc(1, sizeof(ustarEntryCacheNode));
+		ustarEntryCache* cache = node->cache = (ustarEntryCache*)kcalloc(1, sizeof(ustarEntryCache));
+		obos::utils::memzero(node, sizeof(*node));
 		cache->entry = entry;
 		cache->entryFilesize = filesize;
 		cache->dataStart = (uint8_t*)(entry + 1);
@@ -79,25 +82,22 @@ void InitializeFilesystemCache()
 	}
 }
 
-void GetFileAttribute(const char* filepath, size_t* size, uint32_t* _attrib)
+bool GetFileAttribute(const char* filepath, size_t* size, uint32_t* _attrib)
 {
 	ustarEntryCache* entry = GetCacheForPath(filepath);
+	if (!entry)
+	{
+		if (_attrib)
+			*_attrib = driverInterface::fileAttributes::FILE_DOESNT_EXIST;
+		if (size)
+			*size = 0;
+		return false;
+	}
 	if (_attrib)
 		*_attrib = entry->entryAttributes;
 	if (size)
 		*size = entry->entryFilesize;
-	return;
-}
-
-void ReadFile(const char* filepath, size_t, size_t* szRead, char* dataRead)
-{
-	ustarEntryCache* entry = GetCacheForPath(filepath);
-	if (!entry)
-		return;
-	if (szRead)
-		*szRead = entry->entryFilesize;
-	if (dataRead)
-		g_driverHeader.memoryManipFunctionsResponse.memcpy(dataRead, entry->dataStart, entry->entryFilesize);
+	return true;
 }
 bool FileExists(const char* filepath)
 {
@@ -109,7 +109,7 @@ ustarEntryCache* GetCacheForPath(const char* path)
 	ustarEntryCacheNode* entry = g_filesystemCache.head;
 	while (entry)
 	{
-		if (g_driverHeader.memoryManipFunctionsResponse.strcmp(path, entry->cache->entry->path))
+		if (obos::utils::strcmp(path, entry->cache->entry->path))
 			break;
 
 		entry = entry->next;

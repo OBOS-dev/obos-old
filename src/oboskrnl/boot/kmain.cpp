@@ -24,7 +24,6 @@
 #include <multitasking/process/process.h>
 
 #include <driverInterface/load.h>
-#include <driverInterface/call.h>
 
 #include <vfs/mount/mount.h>
 #include <vfs/fileManip/fileHandle.h>
@@ -35,6 +34,7 @@ extern obos::memory::VirtualAllocator g_liballocVirtualAllocator;
 
 namespace obos
 {
+	const char* the_kernel_messages[3] = { "Hello, drivers!!! ", "This really works!!! ", "Anyway, goodbye, drivers :(\n" }; // as a test for copy relocations.
 	void kmain_common(byte* initrdDriverData, size_t initrdDriverSize)
 	{
 		logger::log("Multitasking initialized! In \"%s\" now.\n", __func__);
@@ -66,39 +66,27 @@ namespace obos
 		process::g_processes.tail = process::g_processes.head = kernelProc;
 		kernelProc->pid = process::g_processes.size++;
 		
-		logger::log("Initializing driver syscalls.\n");
-		driverInterface::RegisterSyscall(0, (uintptr_t)driverInterface::SyscallVPrintf);
-		driverInterface::RegisterSyscall(1, (uintptr_t)(void(*)(const uint32_t*))[](const uint32_t* exitCode) {
-			thread::ExitThread(*exitCode);
-			});
-		driverInterface::RegisterSyscall(2, (uintptr_t)driverInterface::SyscallAllocDriverServer);
-		driverInterface::RegisterSyscall(3, (uintptr_t)driverInterface::SyscallFreeDriverServer);
-		driverInterface::RegisterSyscall(4, (uintptr_t)driverInterface::SyscallMalloc);
-		driverInterface::RegisterSyscall(5, (uintptr_t)driverInterface::SyscallFree);
-		driverInterface::RegisterSyscall(6, (uintptr_t)driverInterface::SyscallMapPhysToVirt);
-		driverInterface::RegisterSyscall(7, (uintptr_t)driverInterface::SyscallGetInitrdLocation);
-
 		logger::log("Loading the initrd driver.\n");
 		SetLastError(0);
 		if (!driverInterface::LoadModule(initrdDriverData, initrdDriverSize, nullptr))
-			logger::panic(nullptr, "Could not load the initrd driver. GetLastError: %d", GetLastError());
+			logger::panic(nullptr, "Could not load the initrd driver. GetLastError: %d\n", GetLastError());
 		SetLastError(0);
 
-		//new (&vfs::g_mountPoints) Vector<vfs::MountPoint*>{};
+		new (&vfs::g_mountPoints) Vector<vfs::MountPoint*>{};
 
-		//logger::log("Mounting the initrd.\n");
-		//uint32_t point = 0;
-		//// MountB the initrd.
-		//if (!vfs::mount(point, 0))
-		//	logger::panic(nullptr, "Could not mount the initrd, GetLastError: %d!\n", GetLastError());
+		logger::log("Mounting the initrd.\n");
+		uint32_t point = 0;
+		// Mount the initrd.
+		if (!vfs::mount(point, 0))
+			logger::panic(nullptr, "Could not mount the initrd, GetLastError: %d!\n", GetLastError());
 
-		//vfs::FileHandle handle;
-		//handle.Open("0:/test.txt");
-		//char* data = new char[handle.GetFileSize() + 1];
-		//handle.Read(data, handle.GetFileSize());
-		//logger::printf("0:/test.txt:\n%s\n", data);
-		//delete[] data;
-		////handle.Close();
+		vfs::FileHandle handle;
+		handle.Open("0:/test.txt");
+		char* data = new char[handle.GetFileSize() + 1];
+		handle.Read(data, handle.GetFileSize());
+		logger::printf("0:/test.txt:\n%s\n", data);
+		delete[] data;
+		//handle.Close();
 
 		thread::ExitThread(0);
 	}

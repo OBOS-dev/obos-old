@@ -37,7 +37,7 @@ namespace obos
 
 		volatile limine_hhdm_request hhdm_offset = {
 			.id = LIMINE_HHDM_REQUEST,
-			.revision = 0,
+			.revision = 1,
 		};
 
 		uintptr_t* mapPageTable(uintptr_t* phys)

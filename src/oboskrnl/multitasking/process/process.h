@@ -41,7 +41,6 @@ namespace obos
 			ProcessList children;
 			Console* console;
 			bool isUsermode;
-			void* _driverIdentity;
 			procContextInfo context;
 			Process* prev;
 			Process* next;

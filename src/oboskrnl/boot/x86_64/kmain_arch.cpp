@@ -43,6 +43,8 @@
 extern "C" void fpuInit();
 extern "C" void initialize_syscall_instruction();
 
+uint64_t limine_base_revision[3] = { 0xf9562b2d5c95a6c8, 0x6a7b384944536bdc, 1 };
+
 namespace obos
 {	
 	extern void InitializeGdt();
@@ -52,15 +54,15 @@ namespace obos
 	Console g_kernelConsole{};
 	volatile limine_framebuffer_request framebuffer_request = {
 		.id = LIMINE_FRAMEBUFFER_REQUEST,
-		.revision = 0
+		.revision = 1
 	};
 	volatile limine_module_request module_request = {
 		.id = LIMINE_MODULE_REQUEST,
-		.revision = 0,
+		.revision = 1,
 	};
 	static volatile limine_stack_size_request stack_size_request = {
 		.id = LIMINE_STACK_SIZE_REQUEST,
-		.revision = 0,
+		.revision = 1,
 		.stack_size = (4 * 4096)
 	};
 	void EarlyKPanic();

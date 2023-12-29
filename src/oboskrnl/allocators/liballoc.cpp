@@ -278,6 +278,8 @@ extern "C" {
 	}
 	void* krealloc(void* ptr, size_t newSize)
 	{
+		newSize = ROUND_PTR_UP(newSize);
+
 		if (!ptr)
 			return kcalloc(newSize, 1);
 
@@ -288,7 +290,17 @@ extern "C" {
 		if (block->magic != MEMBLOCK_MAGIC)
 			return nullptr;
 		oldSize = block->size;
+		if (oldSize == newSize)
+			return ptr; // The block can be kept in the same state.
+		if (newSize < oldSize)
+		{
+			// Truncuate the block to the right size.
+			block->size = newSize;
+			obos::utils::memzero((byte*)ptr + newSize, newSize - oldSize);
+			return ptr;
+		}
 
+		// We need a new block.
 		void* newBlock = kcalloc(newSize, 1);
 		obos::utils::memcpy(newBlock, ptr, oldSize);
 		kfree(ptr);
@@ -338,7 +350,7 @@ extern "C" {
 			if (currentPageBlock->firstBlock == block)
 				currentPageBlock->firstBlock = block->next;
 			obos::utils::memzero(block->allocAddr, block->size);
-			block->magic = MEMBLOCK_DEAD;
+ 			block->magic = MEMBLOCK_DEAD;
 		}
 		else
 			freePageBlock(currentPageBlock);

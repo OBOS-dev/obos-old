@@ -68,7 +68,7 @@ bool VirtualGetProtection(void* base, size_t size, uintptr_t* oFlags)
 		ALIGNAS(8) size_t size;
 		ALIGNAS(8) uintptr_t *oFlags;
 	} par = { base,size,oFlags };
-	Syscall(3, (void*)&par);
+	return Syscall(3, (void*)&par);
 }
 
 // Console manipulation syscalls.
@@ -129,7 +129,7 @@ void ConsoleSetPosition(uint32_t x, uint32_t y)
 		ALIGNAS(8) uint32_t x;
 		ALIGNAS(8) uint32_t y;
 	} par = { x,y };
-	Syscall(10, &x);
+	Syscall(10, &par);
 }
 void ConsoleGetPosition(uint32_t* x, uint32_t* y)
 {

@@ -167,10 +167,10 @@ ISR_NOERRCODE 28
 ISR_ERRCODE   29
 ISR_ERRCODE   30
 ISR_NOERRCODE 31
-%rep 17
+%rep 18
 ISR_NOERRCODE current_isr
 %endrep
-%assign current_isr current_isr + 2
+%assign current_isr current_isr + 1
 %rep 205
 ISR_NOERRCODE current_isr
 %endrep

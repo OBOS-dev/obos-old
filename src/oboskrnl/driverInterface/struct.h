@@ -10,8 +10,6 @@
 
 #include <int.h>
 
-#include <driverInterface/interface.h>
-
 #include <multitasking/threadAPI/thrHandle.h>
 
 #define OBOS_DRIVER_HEADER_SECTION_NAME ".obosDriverHeader"
@@ -66,13 +64,113 @@ namespace obos
 			// If this is set, this is a file, not a directory.
 			FILE_ATTRIBUTES_FILE = 16,
 		};
+		struct ftable
+		{
+			static constexpr size_t maxCallbacks = 10 - 1; // The max - GetServiceType
+			serviceType(*GetServiceType)();
+			union
+			{
+				struct
+				{
+					/// <summary>
+					/// Queries the file's properties.
+					/// </summary>
+					/// <param name="path">The path of the file to query.</param>
+					/// <param name="driveId">The drive id the file is located on.</param>
+					/// <param name="partitionIdOnDrive">The partition id on the drive the file is located on.</param>
+					/// <param name="oFsizeBytes">The size of the file in bytes.</param>
+					/// <param name="oLBAOffset">The lba offset of the file.</param>
+					/// <param name="oFAttribs">The file properties</param>
+					/// <returns>The function's status.</returns>
+					bool(*QueryFileProperties)(
+						const char* path,
+						uint64_t driveId, uint8_t partitionIdOnDrive,
+						size_t* oFsizeBytes,
+						uint64_t* oLBAOffset,
+						fileAttributes* oFAttribs);
+					/// <summary>
+					/// Creates a file iterator.
+					/// </summary>
+					/// <param name="driveId">The drive id the file is located on.</param>
+					/// <param name="partitionIdOnDrive">The partition id on the drive the file is located on.</param>
+					/// <param name="oIter">The variable to store the iterator in.</param>
+					bool(*FileIteratorCreate)(
+						uint64_t driveId, uint8_t partitionIdOnDrive,
+						uintptr_t* oIter);
+					bool(*FileIteratorNext)(
+						uintptr_t iter,
+						const char** oFilepath,
+						void(**freeFunction)(void* buf),
+						size_t* oFsizeBytes,
+						uint64_t* oLBAOffset,
+						fileAttributes* oFAttribs);
+					bool(*FileIteratorClose)(uintptr_t iter);
+					bool(*ReadFile)(
+						uint64_t driveId, uint8_t partitionIdOnDrive,
+						const char* path,
+						size_t nToSkip,
+						size_t nToRead,
+						char* buff);
+					// TODO: Make a write file
+					void* unused[maxCallbacks - 5]; // Add padding
+				} filesystem;
+				struct
+				{
+					bool(*ReadSectors)(
+						uint64_t driveId,
+						uint64_t lbaOffset,
+						size_t nSectorsToRead,
+						char* buff,
+						size_t* oNSectorsRead
+						);
+					bool(*WriteSectors)(
+						uint64_t driveId,
+						uint64_t lbaOffset,
+						size_t nSectorsToWrite,
+						char* buff,
+						size_t* oNSectorsWrote
+						);
+					// TODO: Find other useful information a program could use for disk.
+					bool(*QueryDiskInfo)(
+						uint64_t driveId,
+						uint64_t *oNSectors,
+						uint64_t *oBytesPerSector
+						);
+					void* unused[maxCallbacks - 3]; // Add padding
+				} storageDevice;
+				struct
+				{
+					bool(*ReadCharacter)(
+						uint64_t deviceId,
+						char* ch
+						);
+					void* unused[maxCallbacks - 1]; // Add padding
+				} userInputDevice;
+				struct
+				{
+					bool(*InitializeConnection)(
+						uint64_t deviceId,
+						void* driverSpecificParameters,
+						size_t szParameters
+						);
+					bool(*ReadCharacter)(
+						uint64_t deviceId,
+						char* ch
+						);
+					bool(*WriteCharacter)(
+						uint64_t deviceId,
+						char ch
+						);
+					void* unused[maxCallbacks - 3]; // Add padding
+				} externalCommunication; // eg: NIC driver.
+			} serviceSpecific;
+		};
 		struct driverIdentity
 		{
 			uint32_t driverId;
 			uint32_t _serviceType;
-			DriverConnectionList connections;
-			bool listening;
-			void* process;
+			ftable functionTable;
+			struct driverHeader* header;
 		};
 		struct bitfield128
 		{
@@ -84,21 +182,14 @@ namespace obos
 			uint32_t magicNumber;
 			uint32_t driverId;
 			uint32_t driverType;
-			/*struct {
-				bool vprintfFunctionRequest : 1;
-				bool setStackSizeRequest : 1;
-				bool initrdLocationRequest : 1;
-			} requests;*/
 			enum _requests
 			{
-				VPRINTF_FUNCTION_REQUEST = 1,
+				INITRD_LOCATION_REQUEST = 1,
 				SET_STACK_SIZE_REQUEST = 2,
-				INITRD_LOCATION_REQUEST = 4,
-				PANIC_FUNCTION_REQUEST = 8,
-				MEMORY_MANIPULATION_FUNCTIONS_REQUEST = 16,
 			};
 			uint64_t requests;
 			size_t stackSize; // SET_STACK_SIZE_REQUEST
+			ftable functionTable;
 			/// <summary>
 			/// Bit 0: PCI
 			/// </summary>
@@ -113,21 +204,16 @@ namespace obos
 				/// </summary>
 				struct bitfield128 subclass;
 				struct bitfield128 progIf;
-			} pciInfo;
-			size_t(*vprintfFunctionResponse)(const char* format, va_list list); // VPRINTF_FUNCTION_REQUEST
-			void(*panicFunctionResponse)(void* stackTraceParameter, const char* format, va_list list); // PANIC_FUNCTION_REQUEST
-			struct {
+			};
+			__driverInfoPciInfo pciInfo;
+			struct
+			{
 				void* addr;
 				size_t size;
-			} initrdLocationResponse; // INITRD_LOCATION_REQUEST
-			struct {
-				void* (*memzero)(void* block, size_t size); // fills block to block+size with zeros.
-				void* (*memcpy)(void* dest, const void* src, size_t size); // copies size bytes of src to dest
-				bool (*memcmp)(const void* blk1, const void* blk2, size_t size); // returns false when the blocks do not match, otherwise
-				bool (*memcmp_toByte)(const void* blk1, uint32_t val, size_t size); // returns false if one of the bytes does not match cal
-				size_t(*strlen)(const char* string); // counts the bytes in string until it gets to a null byte
-				bool (*strcmp)(const char* str1, const char* str2); // checks if strlen(str1) == strlen(str2), and if it is, memcmp's str1 and str2.
-			} memoryManipFunctionsResponse; // MEMORY_MANIPULATION_FUNCTIONS_REQUEST
+			} initrdLocationResponse;
+			// Must be set by the driver when it's done initializing. The driver should not use the driver identity until 
+			// driver_finished_loading is set by the kernel
+			bool driver_initialized, driver_finished_loading;
 		};
 	}
 }

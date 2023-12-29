@@ -7,16 +7,17 @@
 #pragma once
 
 #include <int.h>
+#include <export.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-void* kmalloc(size_t amount);
-void* kcalloc(size_t nobj, size_t szObj);
-void* krealloc(void* ptr, size_t newSize);
-void kfree(void* ptr);
+OBOS_EXPORT void* kmalloc(size_t amount);
+OBOS_EXPORT void* kcalloc(size_t nobj, size_t szObj);
+OBOS_EXPORT void* krealloc(void* ptr, size_t newSize);
+OBOS_EXPORT void kfree(void* ptr);
 
 #ifdef __cplusplus
 }

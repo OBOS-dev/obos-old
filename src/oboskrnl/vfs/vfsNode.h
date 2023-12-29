@@ -31,6 +31,7 @@ namespace obos
 					return;
 				for (strLen = 0; str[strLen]; strLen++);
 			}
+			operator char*() { return str; };
 		};
 
 		enum NodeType
@@ -58,7 +59,6 @@ namespace obos
 			struct DirectoryEntry *next, *prev; // used for the children.
 			struct DirectoryEntry *parent;
 			DirectoryEntryList children;
-			struct MountPoint* mountPoint;
 			NodeType type = VFS_INVALID_NODE_TYPE;
 		};
 
@@ -92,6 +92,7 @@ namespace obos
 			size_t filesize;
 			VFSString path; // Never should be null.
 			DirectoryEntry* linkedNode; // Only non-null when direntType == DIRECTORY_ENTRY_TYPE_SYMLINK
+			struct MountPoint* mountPoint;
 			HandleList fileHandlesReferencing;
 		};
 		struct Directory : public DirectoryEntry

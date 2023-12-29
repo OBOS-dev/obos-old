@@ -4,8 +4,7 @@
 
 set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "allocators/liballoc.cpp" 
 					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp"
-				      "driverInterface/interface.cpp" "vfs/mount/mount.cpp" "vfs/fileManip/fileHandle.cpp" "multitasking/locks/mutex.cpp"
-					  "allocators/vmm/vmm.cpp"
+				      "vfs/mount/mount.cpp" "vfs/fileManip/fileHandle.cpp" "multitasking/locks/mutex.cpp" "allocators/vmm/vmm.cpp"
 )
 
 add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
@@ -13,6 +12,8 @@ add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
 set_target_properties(oboskrnl PROPERTIES LINK_DEPENDS "${LINKER_SCRIPT}")
 set_target_properties(oboskrnl PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 set_target_properties(oboskrnl PROPERTIES ENABLE_EXPORTS 1)
+set_target_properties(oboskrnl PROPERTIES CXX_STANDARD 20)
+set_target_properties(oboskrnl PROPERTIES CXX_STANDARD_REQUIRED 20)
 
 message("Output Directory: ${OUTPUT_DIR}")
 
@@ -37,7 +38,7 @@ target_compile_options(oboskrnl
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
 	PRIVATE $<$<COMPILE_LANGUAGE:C>:${TARGET_COMPILE_OPTIONS_C}>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${TARGET_COMPILE_OPTIONS_CPP}>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:${DEBUG_SYMBOLS_OPT}>
+	PRIVATE ${DEBUG_SYMBOLS_OPT}
 )
 
 target_link_options(oboskrnl

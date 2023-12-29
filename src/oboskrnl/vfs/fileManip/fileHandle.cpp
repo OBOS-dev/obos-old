@@ -95,6 +95,7 @@ namespace obos
 			const char* realPath = path;
 			realPath += utils::strCountToChar(path, ':');
 			realPath += utils::strCountToChar(path, '/');
+			logger::log("Looking for %s\n", path);
 			// If a file is in the root, the file size is zero, whether it actually is or not? TODO: Fix.
 			DirectoryEntry* entry = SearchForNode(point->children.head, (void*)realPath, [](DirectoryEntry* current, void* userdata)->bool {
 				return utils::strcmp(current->path.str, (const char*)userdata);
@@ -124,7 +125,6 @@ namespace obos
 				m_flags |= FLAGS_ALLOW_WRITE;
 			return true;
 		}
-		bool ReadFile(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, void** data, size_t* nRead, size_t nToSkip, size_t nToRead);
 
 		bool FileHandle::Read(char* data, size_t nToRead, bool peek)
 		{
@@ -139,41 +139,33 @@ namespace obos
 				SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
 				return false;
 			}
+			if (__TestEof(m_currentFilePos + (nToRead - 1)))
+			{
+				SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
+				return false;
+			}
 			if (!nToRead)
 				return true;
-			driverInterface::DriverClient driver;
-			bool(*ReadCharacter)(driverInterface::DriverClient&, char*, FileHandle*) =
-				[](driverInterface::DriverClient& driver, char* dest, FileHandle* _this)->bool
-				{
-					char* tempDest = nullptr;
-					DirectoryEntry* node = (DirectoryEntry*)_this->m_node;
-					if (_this->Eof())
-					{
-						SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
-						return false;
-					}
-					bool ret = ReadFile(driver, node->path.str, node->mountPoint->partitionId, (void**)&tempDest, nullptr, _this->m_currentFilePos++, 1);
-					*dest = *tempDest;
-					delete[] tempDest;
-					return ret;
-				};
-			process::Process* proc = (process::Process*)node->mountPoint->filesystemDriver->process;
-
-			uint32_t pid = proc->pid;
 			bool ret = true;
 
 			if (data)
 			{
-				driver.OpenConnection(pid, 15000);
+				auto& functions = node->mountPoint->filesystemDriver->functionTable.serviceSpecific.filesystem;
 
-				volatile auto originalFilePos = m_currentFilePos;
+				uint64_t driveId = node->mountPoint->partitionId >> 24;
+				uint8_t drivePartitionId = node->mountPoint->partitionId & 0xff;
 
-				for (size_t i = 0; i < nToRead && ret; ret = ReadCharacter(driver, &data[i++], this));
-
-				if (peek)
-					m_currentFilePos = originalFilePos;
-
-				driver.CloseConnection();
+				ret = functions.ReadFile(
+						driveId,
+						drivePartitionId,
+						node->path,
+						m_currentFilePos,
+						nToRead,
+						data);
+				if (!ret)
+					SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
+				if (ret && !peek)
+					m_currentFilePos += nToRead;
 			}
 			return ret;
 		}
@@ -185,8 +177,9 @@ namespace obos
 
 		bool FileHandle::Eof() const
 		{
-			const DirectoryEntry* node = (DirectoryEntry*)m_node;
-			return m_currentFilePos + 1 >= node->filesize;
+			// const DirectoryEntry* node = (DirectoryEntry*)m_node;
+			// return m_currentFilePos + 1 >= node->filesize;
+			return __TestEof(m_currentFilePos);
 		}
 		size_t FileHandle::GetFileSize() const
 		{
@@ -243,8 +236,14 @@ namespace obos
 
 		bool FileHandle::Close()
 		{
+			SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
 			return false;
 		}
 
+		bool FileHandle::__TestEof(uoff_t pos) const
+		{
+			const DirectoryEntry* node = (DirectoryEntry*)m_node;
+			return pos >= node->filesize;
+		}
 	}
 }

@@ -23,7 +23,7 @@ namespace obos
 {
 	limine_rsdp_request rsdp_request = {
 		.id = LIMINE_RSDP_REQUEST,
-		.revision = 0,
+		.revision = 1,
 	};
 	uint8_t g_processorIDs[256];
 	uint8_t g_lapicIDs[256];

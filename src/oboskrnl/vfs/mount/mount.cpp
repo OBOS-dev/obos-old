@@ -12,17 +12,18 @@
 #include <vfs/mount/mount.h>
 #include <vfs/vfsNode.h>
 
-#include <driverInterface/interface.h>
 #include <driverInterface/struct.h>
+#include <driverInterface/load.h>
 
 #include <multitasking/process/process.h>
+
 
 namespace obos
 {
 	namespace vfs
 	{
 		Vector<MountPoint*> g_mountPoints;
-
+#if 0
 		bool SendCommand(driverInterface::DriverClient& client, uint32_t command)
 		{
 			if (!client.SendData(&command, sizeof(command)))
@@ -155,7 +156,8 @@ namespace obos
 			}
 			return true;
 		}
-		static void dividePathToTokens(const char* filepath, const char**& tokens, size_t& nTokens, bool useOffset = true)
+#endif
+		void dividePathToTokens(const char* filepath, const char**& tokens, size_t& nTokens, bool useOffset = true)
 		{
 			for (; filepath[0] == '/'; filepath++);
 			nTokens = 1;
@@ -178,68 +180,34 @@ namespace obos
 		}
 		static bool setupMountPointEntries(MountPoint* point)
 		{
-			process::Process* proc = (process::Process*)point->filesystemDriver->process;
-			driverInterface::DriverClient client{};
-			if (!client.OpenConnection(proc->pid, /*60000*/(uintptr_t)-1)) // Connect to the driver.
-				return false;
-			// Check if the driver is a filesystem (or initrd filesystem if pid == 1) driver.
+			if (point->filesystemDriver->_serviceType != ((point->partitionId == 0) + driverInterface::OBOS_SERVICE_TYPE_FILESYSTEM))
 			{
-				if (!SendCommand(client, driverInterface::OBOS_SERVICE_GET_SERVICE_TYPE))
-					return false;
-				uint32_t response = 0;
-				if (!client.RecvData(&response, sizeof(response), 15000))
-				{
-					client.CloseConnection();
-					return false;
-				}
-				if (response != driverInterface::OBOS_SERVICE_TYPE_FILESYSTEM + (proc->pid == 1))
-				{
-					SetLastError(OBOS_ERROR_VFS_NOT_A_FILESYSTEM_DRIVER);
-					client.CloseConnection();
-					return false;
-				}
-			}
-			// Make a file iterator.
-			if (!SendCommand(client, driverInterface::OBOS_SERVICE_MAKE_FILE_ITERATOR))
+				SetLastError(OBOS_ERROR_VFS_NOT_A_FILESYSTEM_DRIVER);
 				return false;
+			}
+			auto functions = point->filesystemDriver->functionTable.serviceSpecific.filesystem;
 			uint64_t driveId = point->partitionId >> 24;
-			if (!client.SendData(&driveId, sizeof(driveId)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			uint8_t driverPartitionId = point->partitionId & 0xff;
-			if (!client.SendData(&driverPartitionId, sizeof(driverPartitionId)))
-			{
-				client.CloseConnection();
-				return false;
-			}
+			uint8_t drivePartitionId = point->partitionId & 0xff;
 			uintptr_t fileIterator = 0;
-			if (!client.RecvData(&fileIterator, sizeof(fileIterator), 15000))
+			if (!functions.FileIteratorCreate(driveId, drivePartitionId, &fileIterator))
 			{
-				client.CloseConnection();
+				SetLastError(OBOS_ERROR_VFS_DRIVER_FAILURE);
 				return false;
 			}
 			// Iterate over the files, adding new directory entries.
-			uint64_t fileAttribs[3] = {};
-			char* filepath = nullptr;
+			size_t filesize = 0;
+			driverInterface::fileAttributes fAttributes;
+			const char* filepath = nullptr;
+			void(*freeFilepath)(void* buff) = nullptr;
 			while (1)
 			{
+				if (!functions.FileIteratorNext(fileIterator, &filepath, &freeFilepath, &filesize, nullptr, &fAttributes))
 				{
-					uint64_t* _fileAttribs = (uintptr_t*)&fileAttribs[0];
-					if (!NextFile(client, fileIterator, _fileAttribs, filepath))
-					{
-						if (filepath)
-							delete[] filepath;
-						return false;
-					}
+					SetLastError(OBOS_ERROR_VFS_DRIVER_FAILURE);
+					return false;
 				}
- 				if (utils::memcmp(&fileAttribs[0], (uint32_t)0, sizeof(fileAttribs)))
-				{
-					if (filepath)
-						delete[] filepath;
+ 				if (fAttributes == driverInterface::FILE_DOESNT_EXIST)
 					break;
-				}
 				const char** tokens = nullptr, **sTokens = nullptr;
 				size_t nTokens = 0;
 				dividePathToTokens(filepath, tokens, nTokens);
@@ -261,26 +229,30 @@ namespace obos
 							continue; // Continue linking the next part of the path
 						// We must make a new directory entry.
 						// If the entry that we're making is a directory, all of it's tokens will be a directory as well.
-						uint64_t attribs[3] = { fileAttribs[0], fileAttribs[1], fileAttribs[2] };
-						if(!(attribs[2] & driverInterface::FILE_ATTRIBUTES_DIRECTORY))
+						size_t cFilesize = filesize;
+						driverInterface::fileAttributes cFAttributes = fAttributes;
+						if(!(fAttributes & driverInterface::FILE_ATTRIBUTES_DIRECTORY))
 						{
-							if (!GetFileAttributes(client, sTokens[i], point->partitionId, (uint64_t*)&attribs))
+							// If the entry we're making isn't a file we must check if the current part of the path we're parsing
+							// is a directory or not, otherwise we might make a file entry for a directory.
+							if (!functions.QueryFileProperties(sTokens[i], driveId, drivePartitionId, &cFilesize, nullptr, &cFAttributes))
 							{
 								for (size_t j = 0; j < nTokens; j++)
 									delete[] sTokens[j];
 								delete[] tokens;
 								delete[] sTokens;
 								delete[] filepath;
+								SetLastError(OBOS_ERROR_VFS_DRIVER_FAILURE);
 								return false;
 							}
 						}
-						if(attribs[2] & driverInterface::FILE_ATTRIBUTES_DIRECTORY)
+						if(cFAttributes & driverInterface::FILE_ATTRIBUTES_DIRECTORY)
 							directoryEntry = new Directory{};
 						else
 							directoryEntry = new DirectoryEntry{};
 						directoryEntry->path = (char*)utils::memcpy(new char[utils::strlen(sTokens[i]) + 1], sTokens[i], utils::strlen(sTokens[i]));
-						directoryEntry->fileAttrib = attribs[2];
-						directoryEntry->filesize = attribs[0];
+						directoryEntry->fileAttrib = cFAttributes;
+						directoryEntry->filesize = cFilesize;
 						if (point->children.tail)
 							point->children.tail->next = directoryEntry;
 						if (!point->children.head)
@@ -289,7 +261,7 @@ namespace obos
 						directoryEntry->mountPoint = point;
 						point->children.tail = directoryEntry;
 						point->children.size++;
-						if (attribs[2] & driverInterface::FILE_ATTRIBUTES_FILE)
+						if (cFAttributes & driverInterface::FILE_ATTRIBUTES_FILE)
 							directoryEntry->direntType = DIRECTORY_ENTRY_TYPE_FILE;
 						continue;
 					}
@@ -332,22 +304,22 @@ namespace obos
 							delete[] path;
 						continue; // Continue linking the next part of the path
 					}
-					uint64_t attribs[3] = { fileAttribs[0], fileAttribs[1], fileAttribs[2] };
-					if (!(attribs[2] & driverInterface::FILE_ATTRIBUTES_DIRECTORY))
-					{
-						if (!GetFileAttributes(client, path, point->partitionId, (uint64_t*)&attribs))
+					size_t cFilesize = filesize;
+						driverInterface::fileAttributes cFAttributes = fAttributes;
+						if(!(fAttributes & driverInterface::FILE_ATTRIBUTES_DIRECTORY))
 						{
-							for (size_t j = 0; j < nTokens; j++)
-								delete[] sTokens[j];
-							delete[] tokens;
-							delete[] sTokens;
-							delete[] filepath;
-							if (path != filepath)
-								delete[] path;
-							return false;
+							if (!functions.QueryFileProperties(path, driveId, drivePartitionId, &cFilesize, nullptr, &cFAttributes))
+							{
+								for (size_t j = 0; j < nTokens; j++)
+									delete[] sTokens[j];
+								delete[] tokens;
+								delete[] sTokens;
+								delete[] filepath;
+								SetLastError(OBOS_ERROR_VFS_DRIVER_FAILURE);
+								return false;
+							}
 						}
-					}
-					if (attribs[2] & driverInterface::FILE_ATTRIBUTES_DIRECTORY)
+					if (cFAttributes & driverInterface::FILE_ATTRIBUTES_DIRECTORY)
 						newDirectoryEntry = new Directory{};
 					else
 					{
@@ -364,8 +336,8 @@ namespace obos
 					newDirectoryEntry->mountPoint = point;
 					directoryEntry->children.tail = newDirectoryEntry;
 					directoryEntry->children.size++;
-					newDirectoryEntry->fileAttrib = attribs[2];
-					newDirectoryEntry->filesize = attribs[0];
+					newDirectoryEntry->fileAttrib = fAttributes;
+					newDirectoryEntry->filesize = cFilesize;
 
 					directoryEntry = newDirectoryEntry;
 				}
@@ -374,16 +346,16 @@ namespace obos
 					delete[] sTokens[j];
 				delete[] sTokens;
 				delete[] tokens;
-				delete[] filepath;
+				freeFilepath((void*)filepath);
 				filepath = nullptr;
 			}
 
 			// Close the file iterator.
-			if (!SendCommand(client, driverInterface::OBOS_SERVICE_CLOSE_FILE_ITERATOR))
+			if (!functions.FileIteratorClose(fileIterator))
+			{
+				SetLastError(OBOS_ERROR_VFS_DRIVER_FAILURE);
 				return false;
-			if (!client.SendData(&fileIterator, sizeof(fileIterator)))
-				return false;
-			client.RecvData(nullptr, sizeof(uint8_t));
+			}
 
 			return true;
 		}
@@ -428,7 +400,7 @@ namespace obos
 			else
 			{
 				if (partitionId == 0)
-					newPoint->filesystemDriver = (driverInterface::driverIdentity*)process::g_processes.head->next->_driverIdentity;
+					newPoint->filesystemDriver = driverInterface::g_driverInterfaces[0];
 				else 
 				{
 					SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);

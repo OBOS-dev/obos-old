@@ -80,7 +80,7 @@ namespace obos
 		}
 		T& push_back(const T& val)
 		{
-			if ((m_sz + 1) >= m_capacity)
+			if ((m_sz + 1) > m_capacity)
 			{
 				m_capacity += m_capacityIncrement;
 				m_ptr = (T*)krealloc(m_ptr, m_capacity * sizeof(T));

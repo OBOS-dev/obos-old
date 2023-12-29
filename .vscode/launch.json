@@ -14,16 +14,16 @@
         "miDebuggerPath": "gdb",
         "targetArchitecture": "x64",
         "miDebuggerServerAddress": "192.168.2.104:1234",
-        "logging": {"engineLogging":"verbose","trace": true, "traceResponse": true},
+        "logging": {},
         "customLaunchSetupCommands": [
-            {
-                "description": "Enable pretty-printing for gdb",
-                "text": "-enable-pretty-printing",
-                "ignoreFailures": true
-            },
             {
                 "description": "Set Disassembly Flavor to Intel",
                 "text": "-gdb-set disassembly-flavor intel",
+                "ignoreFailures": true
+            },
+            {
+                "description": "Set architecture",
+                "text": "-gdb-set architecture i386:x86_64",
                 "ignoreFailures": true
             },
             {
@@ -32,7 +32,8 @@
             },
             {
                 "description": "Load the kernel binary.",
-                "text": "-file-exec-and-symbols /mnt/c/Code/obos/out/oboskrnl"
+                "text": "-file-exec-and-symbols C:/Code/obos/out/oboskrnl",
+                "ignoreFailures": true
             }
         ],
        },

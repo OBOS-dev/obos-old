@@ -76,6 +76,7 @@ namespace obos
 			~FileHandle();
 
 		private:
+			bool __TestEof(uoff_t pos) const;
 			void* m_pathNode = nullptr; // The node that Open finds.
 			void* m_node = nullptr; // The node that m_pathNode links to if it's a symlink. If m_pathNode is not a symlink, this is the same as m_pathNode.
 			uoff_t m_currentFilePos = 0;
