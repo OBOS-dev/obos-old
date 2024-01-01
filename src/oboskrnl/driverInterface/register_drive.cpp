@@ -55,6 +55,7 @@ namespace obos
             drive* node = new drive{};
             node->id = g_drives.len;
             g_drives.push(*node);
+            return node->id;
         }
 		void UnregisterDrive(uint32_t id)
         {

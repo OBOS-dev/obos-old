@@ -186,8 +186,8 @@ namespace obos
 			uint32_t driverType;
 			enum _requests
 			{
-				INITRD_LOCATION_REQUEST = 1,
-				SET_STACK_SIZE_REQUEST = 2,
+				REQUEST_INITRD_LOCATION = 1,
+				REQUEST_SET_STACK_SIZE = 2,
 			};
 			uint64_t requests;
 			size_t stackSize; // SET_STACK_SIZE_REQUEST

@@ -14,12 +14,12 @@ namespace initrdInterface
 {
 	bool QueryFileProperties (
 		const char* path,
-		uint64_t driveId, uint8_t partitionIdOnDrive,
+		uint32_t driveId, uint8_t partitionIdOnDrive,
 		size_t* oFsizeBytes,
 		uint64_t* oLBAOffset,
 		obos::driverInterface::fileAttributes* oFAttribs);
 	bool IterCreate(
-		uint64_t driveId, uint8_t partitionIdOnDrive,
+		uint32_t driveId, uint8_t partitionIdOnDrive,
 		uintptr_t* oIter);
 	bool IterNext(
 		uintptr_t iter,
@@ -30,7 +30,7 @@ namespace initrdInterface
 		obos::driverInterface::fileAttributes* oFAttribs);
 	bool IterClose(uintptr_t iter);
 	bool ReadFile(
-		uint64_t driveId, uint8_t partitionIdOnDrive,
+		uint32_t driveId, uint8_t partitionIdOnDrive,
 		const char* path,
 		size_t nToSkip,
 		size_t nToRead,

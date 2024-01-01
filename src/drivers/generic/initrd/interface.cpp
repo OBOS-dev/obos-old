@@ -24,7 +24,7 @@ namespace initrdInterface
 {
 	bool QueryFileProperties(
 		const char* path,
-		uint64_t, uint8_t,
+		uint32_t, uint8_t,
 		size_t* oFsizeBytes,
 		uint64_t* oLBAOffset,
 		obos::driverInterface::fileAttributes* oFAttribs)
@@ -48,7 +48,7 @@ namespace initrdInterface
 
 	}
 	bool IterCreate(
-		uint64_t, uint8_t,
+		uint32_t, uint8_t,
 		uintptr_t* oIter)
 	{
 		fileIterator* iter = (fileIterator*)kcalloc(1, sizeof(fileIterator));
@@ -130,7 +130,7 @@ namespace initrdInterface
 		return true;
 	}
 	bool ReadFile(
-		uint64_t, uint8_t,
+		uint32_t, uint8_t,
 		const char* path,
 		size_t nToSkip,
 		size_t nToRead,

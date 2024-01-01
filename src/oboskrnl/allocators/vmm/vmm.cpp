@@ -47,7 +47,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return nullptr;
 			}
-			const size_t nPages = (size % m_pageSize) ? (size / m_pageSize + 1) : (size / m_pageSize);
+			const size_t nPages = size / m_pageSize + ((size % m_pageSize) != 0);
 			if (!_base)
 			{
 				_base = _Impl_FindUsableAddress(m_owner, nPages);
@@ -90,7 +90,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			const size_t nPages = (size % m_pageSize) ? (size / m_pageSize + 1) : (size / m_pageSize);
+			const size_t nPages = size / m_pageSize + ((size % m_pageSize) != 0);
 			uint32_t status = 0;
 			_Impl_ProcVirtualFree(m_owner, _base, nPages, &status);
 			bool ret = false;
@@ -123,7 +123,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			const size_t nPages = (size % m_pageSize) ? (size / m_pageSize + 1) : (size / m_pageSize);
+			const size_t nPages = size / m_pageSize + ((size % m_pageSize) != 0);
 			uint32_t status = 0;
 			_Impl_ProcVirtualProtect(m_owner, _base, nPages, flags, &status);
 			bool ret = false;
@@ -156,7 +156,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
-			const size_t nPages = (size % m_pageSize) ? (size / m_pageSize + 1) : (size / m_pageSize);
+			const size_t nPages = size / m_pageSize + ((size % m_pageSize) != 0);
 			uint32_t status = 0;
 			_Impl_ProcVirtualGetProtection(m_owner, _base, nPages, flags, &status);
 			bool ret = false;

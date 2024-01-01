@@ -67,7 +67,7 @@ driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 	.magicNumber = obos::driverInterface::OBOS_DRIVER_HEADER_MAGIC,
 	.driverId = 0,
 	.driverType = obos::driverInterface::OBOS_SERVICE_TYPE_STORAGE_DEVICE,
-	.requests = driverInterface::driverHeader::SET_STACK_SIZE_REQUEST,
+	.requests = driverInterface::driverHeader::REQUEST_SET_STACK_SIZE,
     .stackSize = 0x8000,
 	.functionTable = {
 		.GetServiceType = []()->driverInterface::serviceType { return driverInterface::serviceType::OBOS_SERVICE_TYPE_STORAGE_DEVICE; },
@@ -161,7 +161,7 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 			continue;
 		volatile HBA_PORT* pPort = g_generalHostControl->ports + port;
 
-		auto ssts = pPort->ssts;
+		uint32_t ssts = pPort->ssts;
 
 		uint8_t ipm = (ssts >> 8) & 0x0F;
 		uint8_t det = ssts & 0x0F;
@@ -287,10 +287,10 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 		vallocator.VirtualFree((void*)response, 4096);
 		// Register the drive with the kernel.
 		portDescriptor.kernelID = driverInterface::RegisterDrive();
-		logger::log("AHCI: Found drive at port %d. Kernel drive ID: %d, drive type: %s, sector count: %e0x%X, sector size %e0x%X.\n",
+		logger::info("AHCI: Found %s drive at port %d. Kernel drive ID: %d, sector count: %e0x%X, sector size %e0x%X.\n",
+			portDescriptor.driveType == Port::DRIVE_TYPE_SATA ? "SATA" : "SATAPI",
 			port,
 			portDescriptor.kernelID,
-			portDescriptor.driveType == Port::DRIVE_TYPE_SATA ? "SATA" : "SATAPI",
 			16,
 			portDescriptor.nSectors,
 			8,
@@ -314,9 +314,6 @@ extern "C" void _start()
 	else
 		logger::error("AHCI: Could not initialize AHCI.\n");
 	done:
-	void* data = nullptr;
-	size_t nSectorsRead = 0;
-	DriveReadSectors(0, 0, 8, &data, &nSectorsRead);
     g_driverHeader.driver_initialized = true;
 	while (g_driverHeader.driver_finished_loading);
 	thread::ExitThread(exitCode);

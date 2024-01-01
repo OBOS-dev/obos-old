@@ -570,7 +570,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
 				return false;
 			}
-			if (header->requests & driverHeader::INITRD_LOCATION_REQUEST)
+			if (header->requests & driverHeader::REQUEST_INITRD_LOCATION)
 			{
 				for (size_t moduleIndex = 0; moduleIndex < module_request.response->module_count; moduleIndex++)
 				{
@@ -589,7 +589,7 @@ namespace obos
 
 			thread->CreateThread(
 				thread::THREAD_PRIORITY_NORMAL, 
-				(header->requests & driverHeader::SET_STACK_SIZE_REQUEST) ? header->stackSize : 0,
+				(header->requests & driverHeader::REQUEST_SET_STACK_SIZE) ? header->stackSize : 0,
 				(void(*)(uintptr_t))entryPoint,
 				0,
 				// thread::g_defaultAffinity,

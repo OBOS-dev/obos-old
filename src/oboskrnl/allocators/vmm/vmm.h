@@ -87,7 +87,7 @@ namespace obos
 			/// </summary>
 			/// <param name="base">The base address to get the protection for.</param>
 			/// <param name="size">The amount of bytes (rounded to the nearest page size) to get the protection for.</param>
-			/// <param name="flags">A pointer to a buffer of the size "sizeof(PageProtectionFlags) * nPages" to store the protection in.</param>
+			/// <param name="flags">A pointer to a buffer of the size "sizeof(PageProtectionFlags) * sizeToPageCount(size)" to store the protection in.</param>
 			/// <returns>false on failure, otherwise true. If this function fails, use GetLastError for extra error information.</returns>
 			OBOS_EXPORT bool VirtualGetProtection(void* base, size_t size, uintptr_t* flags);
 
