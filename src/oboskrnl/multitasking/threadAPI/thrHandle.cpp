@@ -1,7 +1,7 @@
 /*
 	oboskrnl/threadAPI/thrHandle.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <int.h>
@@ -366,6 +366,7 @@ namespace obos
 			uintptr_t exitCode = (uintptr_t)_exitCode;
 			currentThread->exitCode = exitCode;
 			currentThread->status = THREAD_STATUS_DEAD;
+			currentThread->flags = 0;
 			if (currentThread->prev_run)
 				currentThread->prev_run->next_run = currentThread->next_run;
 			if (currentThread->next_run)

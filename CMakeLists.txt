@@ -1,6 +1,6 @@
 # CMakeLists.txt
 
-# Copyright (c) 2023 Omar Berrow
+# Copyright (c) 2023-2024 Omar Berrow
 
 cmake_minimum_required(VERSION 3.5)
 
@@ -30,3 +30,4 @@ set (CXX_STANDARD 20)
 
 add_subdirectory("src/oboskrnl")
 add_subdirectory("src/drivers/generic/initrd")
+add_subdirectory("src/drivers/x86_64/sata")

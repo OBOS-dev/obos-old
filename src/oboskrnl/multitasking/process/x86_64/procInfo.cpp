@@ -1,7 +1,7 @@
 /*
 	oboskrnl/process/x86_64/procInfo.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <int.h>
@@ -50,5 +50,18 @@ namespace obos
 			SetIST((byte*)_info->temp_stack.addr + _info->temp_stack.size);
 			cr3->switchToThis(); // Warning: May page fault because of the stack being unmapped in the other process' context.
 		}
-	}
+
+		void putThreadAtFunctionWithCPUTempStack(thread::Thread *thread, void *function, void *par1, void *par2)
+		{
+			auto cpu_local = thread::GetCurrentCpuLocalPtr();
+			uintptr_t rsp = (uintptr_t)cpu_local->temp_stack.addr + cpu_local->temp_stack.size;
+			thread->context.frame.rip = (uintptr_t)function;
+			thread->context.frame.rdi = (uintptr_t)par1;
+			thread->context.frame.rsi = (uintptr_t)par2;
+			thread->context.frame.rsp =            rsp;
+			thread::switchToThreadImpl(&thread->context, thread);
+			// Should never get hit, as switchToThreadImpl on x86_64 is [[noreturn]].
+			while(1);
+		}
+    }
 }

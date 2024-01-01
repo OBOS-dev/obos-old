@@ -1,7 +1,7 @@
 /*
 	drivers/generic/initrd/main.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <int.h>
@@ -12,8 +12,6 @@
 #include <multitasking/thread.h>
 
 #include <driverInterface/struct.h>
-
-#include <arch/x86_64/syscall/syscall_interface.h>
 
 #include <multitasking/threadAPI/thrHandle.h>
 

@@ -1,7 +1,7 @@
 /*
 	oboskrnl/boot/x86_64/kmain_arch.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #ifndef __x86_64__

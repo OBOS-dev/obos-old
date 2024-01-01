@@ -1,7 +1,7 @@
 /*
 	oboskrnl/arch/x86_64/irq/timer.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <x86_64-utils/asm.h>

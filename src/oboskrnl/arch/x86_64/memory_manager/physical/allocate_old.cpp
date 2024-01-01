@@ -1,7 +1,7 @@
 /*
 	oboskrnl/arch/x86_64/memory_manager/allocate.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <limine.h>

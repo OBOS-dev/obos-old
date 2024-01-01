@@ -1,6 +1,6 @@
 ; oboskrnl/x86_64-utils/asm.asm
 
-; Copyright (c) 2023 Omar Berrow
+; Copyright (c) 2023-2024 Omar Berrow
 
 [BITS 64]
 
@@ -32,6 +32,10 @@ global _ZN4obos5rdtscEv
 global _ZN4obos11set_if_zeroEPmm
 global _ZN4obos7bswap64Em
 global _ZN4obos7bswap32Ej
+global _ZN4obos3bsfEj
+global _ZN4obos3bsfEm
+global _ZN4obos3bsrEj
+global _ZN4obos3bsrEjm
 
 _ZN4obos4outbEth:
 	mov dx, di
@@ -308,4 +312,16 @@ _ZN4obos14atomic_cmpxchgEPbbb:
 	mov al, sil
 	lock cmpxchg byte [rdi], dl
 	setz al
+	ret
+_ZN4obos3bsfEj:
+	bsf eax, edi
+	ret
+_ZN4obos3bsfEm:
+	bsf rax, rdi
+	ret
+_ZN4obos3bsrEj:
+	bsr eax, edi
+	ret
+_ZN4obos3bsrEm:
+	bsr rax, rdi
 	ret

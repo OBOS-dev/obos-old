@@ -1,7 +1,7 @@
 /*
 	oboskrnl/process/process.h
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #pragma once
@@ -14,6 +14,8 @@
 #include <multitasking/process/arch.h>
 
 #include <allocators/vmm/vmm.h>
+
+#include <multitasking/process/signals.h>
 
 #define MULTIASKING_PROCESS_PROCESS_H_INCLUDED
 
@@ -47,8 +49,11 @@ namespace obos
 			Process* prev_child;
 			Process* next_child;
 			memory::VirtualAllocator vallocator{ this };
+			void(*signal_table[SIGMAX])();
 		};
 		extern Process::ProcessList g_processes;
 		Process* CreateProcess(bool isUsermode);
+		bool TerminateProcess(Process* process);
+		bool GracefullyTerminateProcess(Process* process);
 	}
 }

@@ -1,12 +1,13 @@
 /*
 	oboskrnl/allocators/vmm/vmm.h
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #pragma once
 
 #include <int.h>
+#include <export.h>
 
 #define ALLOCATORS_VMM_VMM_H_INCLUDED 1
 
@@ -54,9 +55,9 @@ namespace obos
 		public:
 			VirtualAllocator() = delete;
 			// if owner is nullptr, the class should allocate as the current process.
-			VirtualAllocator(process::Process* owner);
+			OBOS_EXPORT VirtualAllocator(process::Process* owner);
 
-			void Initialize(process::Process* owner);
+			OBOS_EXPORT void Initialize(process::Process* owner);
 
 			/// <summary>
 			/// Allocates nPages at base.
@@ -65,14 +66,14 @@ namespace obos
 			/// <param name="size">The amount of bytes (rounded to the nearest page size) to allocate at base.</param>
 			/// <param name="flags">The initial protection flags.</param>
 			/// <returns>"base" if base isn't nullptr. If base is nullptr, the function finds a base address. </returns>
-			void* VirtualAlloc(void* base, size_t size, uintptr_t flags);
+			OBOS_EXPORT void* VirtualAlloc(void* base, size_t size, uintptr_t flags);
 			/// <summary>
 			/// Free nPages pages at base.
 			/// </summary>
 			/// <param name="base">The base address to free.</param>
 			/// <param name="size">The amount of bytes (rounded to the nearest page size) to free.</param>
 			/// <returns>false on failure, otherwise true. If this function fails, use GetLastError for extra error information.</returns>
-			bool VirtualFree(void* base, size_t size);
+			OBOS_EXPORT bool VirtualFree(void* base, size_t size);
 			/// <summary>
 			/// Sets the protection for the pages at base.
 			/// </summary>
@@ -80,7 +81,7 @@ namespace obos
 			/// <param name="size">The amount of bytes (rounded to the nearest page size) to set the protection for.</param>
 			/// <param name="flags">The new protection flags</param>
 			/// <returns>false on failure, otherwise true. If this function fails, use GetLastError for extra error information.</returns>
-			bool VirtualProtect(void* base, size_t size, uintptr_t flags);
+			OBOS_EXPORT bool VirtualProtect(void* base, size_t size, uintptr_t flags);
 			/// <summary>
 			/// Gets the protection for base.
 			/// </summary>
@@ -88,7 +89,7 @@ namespace obos
 			/// <param name="size">The amount of bytes (rounded to the nearest page size) to get the protection for.</param>
 			/// <param name="flags">A pointer to a buffer of the size "sizeof(PageProtectionFlags) * nPages" to store the protection in.</param>
 			/// <returns>false on failure, otherwise true. If this function fails, use GetLastError for extra error information.</returns>
-			bool VirtualGetProtection(void* base, size_t size, uintptr_t* flags);
+			OBOS_EXPORT bool VirtualGetProtection(void* base, size_t size, uintptr_t* flags);
 
 			/// <summary>
 			/// Copies a buffer from this program to the other process.
@@ -97,13 +98,15 @@ namespace obos
 			/// <param name="localSrc">The local source's address.</param>
 			/// <param name="size">The size of the buffer.</param>
 			/// <returns>remoteDest on success, or nullptr.</returns>
-			void* Memcpy(void* remoteDest, void* localSrc, size_t size);
+			OBOS_EXPORT void* Memcpy(void* remoteDest, void* localSrc, size_t size);
 
-			bool IsUsermodeAllocator();
+			OBOS_EXPORT bool IsUsermodeAllocator();
 
-			~VirtualAllocator() { m_owner = nullptr; }
+			OBOS_EXPORT bool FreeUserProcessAddressSpace();
 
-			static size_t GetPageSize() { return m_pageSize; }
+			OBOS_EXPORT ~VirtualAllocator() { m_owner = nullptr; }
+
+			static OBOS_EXPORT size_t GetPageSize() { return m_pageSize; }
 		private:
 			process::Process* m_owner;
 			static size_t m_pageSize;

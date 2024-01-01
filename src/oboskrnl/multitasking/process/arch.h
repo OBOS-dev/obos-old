@@ -1,7 +1,7 @@
 /*
 	oboskrnl/process/arch.h
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #pragma once
@@ -20,5 +20,8 @@ namespace obos
 	{
 		void setupContextInfo(procContextInfo* info);
 		void switchToProcessContext(procContextInfo* info);
+
+		// Makes the thread be at "function" with the current cpu's temporary stack, and passes par1 and par2 to the function.
+		[[noreturn]] void putThreadAtFunctionWithCPUTempStack(thread::Thread* thread, void* function, void* par1, void* par2);
 	}
 }

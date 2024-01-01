@@ -1,7 +1,7 @@
 /*
-	arch/x86_64/memory_manager/virtual/allocate.h
+	arch/x86_64/memory_manager/virtual/allocate.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <int.h>
@@ -500,5 +500,60 @@ namespace obos
 			*status = MEMCPY_SUCCESS;
 			return remoteDest;
 		}
-	}
+		static void IteratePages(
+			uintptr_t* headPM, 
+			uintptr_t* currentPM,
+			uint8_t level,
+			uintptr_t end,
+			void(*callback)(uintptr_t* pm, uintptr_t virt, uintptr_t entry),
+			uintptr_t *indices // must be an array of at least 4 entries (anything over is ignored).
+			)
+		{
+			size_t index = 0;
+			size_t nToIterate = 512;
+			if (level == 3)
+				nToIterate = PageMap::addressToIndex(end, level);
+			if (currentPM)
+			{
+				for (; index < nToIterate; index++)
+				{
+					indices[level] = index;
+					if (level == 0)
+					{
+						uintptr_t virt = 0;
+						virt |= (indices[3] << 39);
+						virt |= (indices[2] << 30);
+						virt |= (indices[1] << 21);
+						virt |= (indices[0] << 12);
+						callback(headPM, virt, currentPM[index]);
+						continue;
+					}
+					IteratePages(headPM, (uintptr_t*)(currentPM[index] & 0xFFFFFFFFFF000), level - 1, end, callback, indices);
+				}
+			}
+		}
+		bool _Impl_FreeUserProcessAddressSpace(process::Process *proc)
+		{
+			if (!proc)
+				return false;
+			// Free everything from nullptr-0x7FFFFFFFFFFF
+			auto[_pageMap, isUserProcess] = GetPageMapFromProcess(proc);
+			if (!isUserProcess)
+				return false;
+			uintptr_t* pml4 = mapPageTable(_pageMap->getPageMap());
+			[[maybe_unused]] uintptr_t start = 0, end = 0x7FFFFFFFFFFF;
+			// Iterate over the page tables, going into them if present == true.
+			uintptr_t indices[4];
+			IteratePages(pml4, pml4, 3, end, 
+			[](uintptr_t *pm, uintptr_t virt, uintptr_t entry)
+			{
+				PageMap* _pm = (PageMap*)pm;
+				uintptr_t _pml2Phys = (uintptr_t)_pm->getL2PageMapEntryAt(virt) & 0xFFFFFFFFFF000;
+				if (!(entry & ((uintptr_t)1 << 9)))
+					freePhysicalPage(entry & 0xFFFFFFFFFF000);
+				freePagingStructures(mapPageTable((uintptr_t*)_pml2Phys), _pml2Phys, _pm, virt);
+			}, indices);
+			return true;
+		}
+    }
 }

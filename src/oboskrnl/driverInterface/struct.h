@@ -1,7 +1,7 @@
 /*
 	driverInterface/struct.h
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #pragma once
@@ -84,7 +84,7 @@ namespace obos
 					/// <returns>The function's status.</returns>
 					bool(*QueryFileProperties)(
 						const char* path,
-						uint64_t driveId, uint8_t partitionIdOnDrive,
+						uint32_t driveId, uint8_t partitionIdOnDrive,
 						size_t* oFsizeBytes,
 						uint64_t* oLBAOffset,
 						fileAttributes* oFAttribs);
@@ -95,7 +95,7 @@ namespace obos
 					/// <param name="partitionIdOnDrive">The partition id on the drive the file is located on.</param>
 					/// <param name="oIter">The variable to store the iterator in.</param>
 					bool(*FileIteratorCreate)(
-						uint64_t driveId, uint8_t partitionIdOnDrive,
+						uint32_t driveId, uint8_t partitionIdOnDrive,
 						uintptr_t* oIter);
 					bool(*FileIteratorNext)(
 						uintptr_t iter,
@@ -106,7 +106,7 @@ namespace obos
 						fileAttributes* oFAttribs);
 					bool(*FileIteratorClose)(uintptr_t iter);
 					bool(*ReadFile)(
-						uint64_t driveId, uint8_t partitionIdOnDrive,
+						uint32_t driveId, uint8_t partitionIdOnDrive,
 						const char* path,
 						size_t nToSkip,
 						size_t nToRead,
@@ -116,23 +116,25 @@ namespace obos
 				} filesystem;
 				struct
 				{
+					// If lbaOffset + nSectorsToRead > the drive's sector count, this function shall return true and set *oNSectorsRead to zero.
 					bool(*ReadSectors)(
-						uint64_t driveId,
+						uint32_t driveId,
 						uint64_t lbaOffset,
 						size_t nSectorsToRead,
-						char* buff,
+						void** buff,
 						size_t* oNSectorsRead
 						);
+					// If lbaOffset + nSectorsToWrite > the drive's sector count, this function shall return true and set *oNSectorsWrote to zero.
 					bool(*WriteSectors)(
-						uint64_t driveId,
+						uint32_t driveId,
 						uint64_t lbaOffset,
 						size_t nSectorsToWrite,
 						char* buff,
 						size_t* oNSectorsWrote
 						);
-					// TODO: Find other useful information a program could use for disk.
+					// TODO: Find other useful information a program could use for a disk.
 					bool(*QueryDiskInfo)(
-						uint64_t driveId,
+						uint32_t driveId,
 						uint64_t *oNSectors,
 						uint64_t *oBytesPerSector
 						);
@@ -203,6 +205,13 @@ namespace obos
 				/// This bitfield can have more than bit set (for multiple values).
 				/// </summary>
 				struct bitfield128 subclass;
+				/// <summary>
+				/// If a bit is set, the bit number will be the value.
+				/// <para></para>
+				/// This bitfield can have more than bit set (for multiple values).
+				/// <para></para>
+				/// If no bit is set any prog if is assumed.
+				/// </summary>
 				struct bitfield128 progIf;
 			};
 			__driverInfoPciInfo pciInfo;

@@ -1,7 +1,7 @@
 /*
 	oboskrnl/arch/x86_64/trace.cpp
 	
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <int.h>

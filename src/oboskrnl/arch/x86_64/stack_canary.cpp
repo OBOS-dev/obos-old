@@ -1,7 +1,7 @@
 /*
 	oboskrnl/arch/x86_64/stack_canary.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 #ifdef OBOS_DEBUG
 #include <int.h>

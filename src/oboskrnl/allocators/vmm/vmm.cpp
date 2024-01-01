@@ -1,7 +1,7 @@
 /*
 	oboskrnl/allocators/vmm/vmm.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <int.h>
@@ -15,6 +15,7 @@
 #include <multitasking/cpu_local.h>
 
 #include <memory_manipulation.h>
+#include "vmm.h"
 
 namespace obos
 {
@@ -206,5 +207,14 @@ namespace obos
 					proc = (process::Process*)thread::GetCurrentCpuLocalPtr()->currentThread->owner;
 			return proc ? proc->isUsermode : false;
 		}
-	}
+		bool VirtualAllocator::FreeUserProcessAddressSpace()
+		{
+			if (!m_owner)
+			{
+				SetLastError(OBOS_ERROR_NO_SUCH_OBJECT);
+				return false;
+			}
+			return _Impl_FreeUserProcessAddressSpace((process::Process*)m_owner);
+		}
+    }
 }

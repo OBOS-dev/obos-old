@@ -1,10 +1,13 @@
 /*
 	oboskrnl/allocators/vmm/arch.h
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #pragma once
+
+#include <int.h>
+#include <export.h>
 
 #include <multitasking/process/process.h>
 
@@ -51,7 +54,7 @@ namespace obos
 		/// <param name="proc">The process.</param>
 		/// <param name="nPages">The minimum amount of pages the free region must be.</param>
 		/// <returns>The address, or nullptr if there is no such address.</returns>
-		void* _Impl_FindUsableAddress(process::Process* proc, size_t nPages);
+		OBOS_EXPORT void* _Impl_FindUsableAddress(process::Process* proc, size_t nPages);
 		/// <summary>
 		/// Maps "nPages" pages with the flags "protFlags" at base as the process "proc." If this function fails, it must undo any changes to the address.
 		/// </summary>
@@ -95,7 +98,7 @@ namespace obos
 		/// </summary>
 		/// <param name="addr">The address to check.</param>
 		/// <returns>Whether the check failed (false) or not (true).</returns>
-		bool _Impl_IsValidAddress(void* addr);
+		OBOS_EXPORT bool _Impl_IsValidAddress(void* addr);
 		/// <summary>
 		/// Gets the page size for the architecture.
 		/// </summary>
@@ -112,5 +115,12 @@ namespace obos
 		/// <param name="status">(out) The function's status (enum MemcpyStatus)</param>
 		/// <returns>remoteDest on success, otherwise nullptr.</returns>
 		void* _Impl_Memcpy(process::Process* proc, void* remoteDest, void* localSrc, size_t size, uint32_t* status);
+
+		/// <summary>
+		/// Frees the user process's address space.
+		/// </summary>
+		/// <param name="proc">The process. This cannot be a wildcard (nullptr).</param>
+		/// <returns>Whether the function succedeed (true) or not (false).</returns>
+		bool _Impl_FreeUserProcessAddressSpace(process::Process* proc);
 	}
 }

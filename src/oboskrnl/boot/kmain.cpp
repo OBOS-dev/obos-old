@@ -1,7 +1,7 @@
 /*
 	oboskrnl/boot/kmain.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 // __ALL__ code in this file must be platform-independent.
@@ -81,12 +81,18 @@ namespace obos
 			logger::panic(nullptr, "Could not mount the initrd, GetLastError: %d!\n", GetLastError());
 
 		vfs::FileHandle handle;
-		handle.Open("0:/test.txt");
-		char* data = new char[handle.GetFileSize() + 1];
-		handle.Read(data, handle.GetFileSize());
-		logger::printf("0:/test.txt:\n%s\n", data);
-		delete[] data;
+		if (!handle.Open("0:/sataDriver"))
+			logger::panic(nullptr, "Could not find the sata driver. GetLastError: %d\n", GetLastError());
+		if (!handle.GetFileSize())
+			logger::panic(nullptr, "The sata driver's file size is zero.\n");
+		byte* data = new byte[handle.GetFileSize() + 1];
+		handle.Read((char*)data, handle.GetFileSize());
 		//handle.Close();
+		SetLastError(0);
+		if (!driverInterface::LoadModule(data, handle.GetFileSize(), nullptr))
+			logger::panic(nullptr, "Could not load the sata driver. GetLastError: %d\n", GetLastError());
+		SetLastError(0);
+		delete[] data;
 
 		thread::ExitThread(0);
 	}

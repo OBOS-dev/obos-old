@@ -5,7 +5,9 @@ cd ../
 del qemu_log.txt
 
 qemu-system-x86_64 ^
--drive file=out/obos.iso,format=raw ^
+-drive id=disk,file=out/obos.iso,if=none,format=raw ^
+-device ahci,id=ahci ^
+-device ide-hd,drive=disk,bus=ahci.0 ^
 -gdb tcp:0.0.0.0:1234 -S ^
 -m 1G ^
 -cpu qemu64,+nx,+pdpe1gb,+syscall,+fsgsbase,+rdrand,+rdseed,+rdtscp,+smep,+smap ^
@@ -14,7 +16,7 @@ qemu-system-x86_64 ^
 -serial tcp:0.0.0.0:1534,server,nowait ^
 -smp cores=4,threads=1,sockets=1 ^
 -M smm=off ^
--d int ^
+-d trace:*ahci*,int ^
 -D qemu_log.txt
 rem  ^
 rem -no-reboot

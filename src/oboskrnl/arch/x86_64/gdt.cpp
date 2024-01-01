@@ -1,7 +1,7 @@
 /*
 	arch/x86_64/gdt.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <stdint.h>

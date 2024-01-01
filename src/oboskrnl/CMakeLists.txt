@@ -1,10 +1,11 @@
 # oboskrnl/CMakeLists.txt
 
-# Copyright (c) 2023 Omar Berrow
+# Copyright (c) 2023-2024 Omar Berrow
 
 set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "allocators/liballoc.cpp" 
 					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp"
 				      "vfs/mount/mount.cpp" "vfs/fileManip/fileHandle.cpp" "multitasking/locks/mutex.cpp" "allocators/vmm/vmm.cpp"
+					  "driverInterface/register_drive.cpp"
 )
 
 add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
@@ -59,6 +60,8 @@ if (UNIX OR GENERATE_BUILD_FILES_FOR_UNIX)
 		COMMAND ${OBJCOPY} -g isodir/obos/oboskrnl
 		COMMAND cp -u ${OUTPUT_DIR}/initrdDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
 		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
+		COMMAND cp -u ${OUTPUT_DIR}/sataDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/sataDriver
+		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/sataDriver
 		COMMAND cd scripts
 		COMMAND ./make_initrd.sh
 		COMMAND cd ..
@@ -68,6 +71,7 @@ if (UNIX OR GENERATE_BUILD_FILES_FOR_UNIX)
 		WORKING_DIRECTORY ${OUTPUT_DIR}/../
 		BYPRODUCTS "${OUTPUT_DIR}/obos.iso"
 		DEPENDS oboskrnl
+	    DEPENDS sataDriver
 	    DEPENDS initrdDriver)
 else (WIN32)
 	string(REPLACE "/" "\\" OUTPUT_DIR ${OUTPUT_DIR})
@@ -79,6 +83,8 @@ else (WIN32)
 		COMMAND ${OBJCOPY} -g isodir/obos/oboskrnl > NUL 2>&1
 		COMMAND copy /Y "${OUTPUT_DIR}\\initrdDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrdDriver" > NUL 2>&1
 		COMMAND ${OBJCOPY} -g isodir/obos/initrdDriver > NUL 2>&1
+		COMMAND copy /Y "${OUTPUT_DIR}\\sataDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrd\\sataDriver" > NUL 2>&1
+		COMMAND ${OBJCOPY} -g isodir/obos/initrd/sataDriver > NUL 2>&1
 		COMMAND cd scripts
 		COMMAND make_initrd.bat
 		COMMAND cd ..
@@ -88,6 +94,7 @@ else (WIN32)
         WORKING_DIRECTORY ${OUTPUT_DIR}/../
         BYPRODUCTS "${OUTPUT_DIR}/obos.iso"
 	    DEPENDS oboskrnl
+	    DEPENDS sataDriver
 	    DEPENDS initrdDriver)
 endif()
 

@@ -1,7 +1,7 @@
 /*
 	oboskrnl/multitasking/thread.h
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #pragma once
@@ -24,14 +24,18 @@ namespace obos
 	{
 		enum thrStatus
 		{
-			THREAD_STATUS_DEAD = 0b1,
-			THREAD_STATUS_CAN_RUN = 0b10,
-			THREAD_STATUS_BLOCKED = 0b100,
-			THREAD_STATUS_PAUSED = 0b1000,
-			THREAD_STATUS_CLEAR_TIME_SLICE_INDEX = 0b10000,
-			THREAD_STATUS_RUNNING = 0b100000,
-			THREAD_STATUS_CALLING_BLOCK_CALLBACK = 0b1000000,
-			THREAD_STATUS_SINGLE_STEPPING = 0b10000000, // Used for debugging.
+			THREAD_STATUS_DEAD                   = 0x01,
+			THREAD_STATUS_CAN_RUN                = 0x02,
+			THREAD_STATUS_BLOCKED                = 0x04,
+			THREAD_STATUS_PAUSED                 = 0x08,
+			THREAD_STATUS_CLEAR_TIME_SLICE_INDEX = 0x10,
+			THREAD_STATUS_RUNNING                = 0x20,
+		};
+		enum thrFlags
+		{
+			THREAD_FLAGS_IN_SIGNAL               = 0x01,
+			THREAD_FLAGS_SINGLE_STEPPING         = 0x02,
+			THREAD_FLAGS_CALLING_BLOCK_CALLBACK = 0x04,
 		};
 		enum thrPriority
 		{
@@ -82,6 +86,7 @@ namespace obos
 			// If a bit is set, the cpu corresponding to that bit number can run the thread.
 			// This limits the kernel to 64 core machines.
 			uint64_t affinity, ogAffinity;
+			uint32_t flags;
 		} OBOS_ALIGN(4);
 	}
 }

@@ -1,7 +1,7 @@
 /*
 	oboskrnl/multitasking/scheduler.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <new>
@@ -49,7 +49,7 @@ namespace obos
 		}
 		static bool DEFINE_IN_SECTION ThreadCanRun(const Thread* thr)
 		{
-			return (thr->status == THREAD_STATUS_CAN_RUN || (thr->status & THREAD_STATUS_CAN_RUN && thr->status & THREAD_STATUS_SINGLE_STEPPING)) &&
+			return (thr->status == THREAD_STATUS_CAN_RUN) &&
 				checkThreadAffinity(thr) &&
 				(thr->timeSliceIndex < thr->priority);
 		}
@@ -130,11 +130,11 @@ namespace obos
 			{
 				if (thread->status & THREAD_STATUS_BLOCKED)
 				{
-					while (thread->status & THREAD_STATUS_CALLING_BLOCK_CALLBACK);
+					while (thread->flags & THREAD_FLAGS_CALLING_BLOCK_CALLBACK);
 					OBOS_ASSERTP(!(thread->status & THREAD_STATUS_RUNNING), "Thread (tid %d) is both blocked and running (status 0x%e%X)!\n","", thread->tid, 4, thread->status);
-					thread->status |= THREAD_STATUS_CALLING_BLOCK_CALLBACK;
+					thread->flags |= THREAD_FLAGS_CALLING_BLOCK_CALLBACK;
 					bool ret = callBlockCallbackOnThread(&thread->context, (bool(*)(void*,void*))thread->blockCallback.callback, thread, thread->blockCallback.userdata);
-					thread->status &= ~THREAD_STATUS_CALLING_BLOCK_CALLBACK;
+					thread->flags &= ~THREAD_FLAGS_CALLING_BLOCK_CALLBACK;
 					if (ret)
 						thread->status &= ~THREAD_STATUS_BLOCKED;
 				}

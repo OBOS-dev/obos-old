@@ -1,7 +1,7 @@
 /*
 	oboskrnl/error.h
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #pragma once
@@ -121,6 +121,10 @@ namespace obos
 		/// A driver function returned false.
 		/// </summary>
 		OBOS_ERROR_VFS_DRIVER_FAILURE,
+		/// <summary>
+		/// The signal handler is nullptr.
+		/// </summary>
+		OBOS_ERROR_NULL_HANDLER,
 
 		OBOS_ERROR_HIGHEST_VALUE,
 	};

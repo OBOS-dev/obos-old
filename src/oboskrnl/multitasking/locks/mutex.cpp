@@ -1,7 +1,7 @@
 /*
 	multitasking/locks/mutex.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <int.h>

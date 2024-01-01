@@ -1,7 +1,7 @@
 /*
 	driverInterface/x86_64/load.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <limine.h>
@@ -592,7 +592,8 @@ namespace obos
 				(header->requests & driverHeader::SET_STACK_SIZE_REQUEST) ? header->stackSize : 0,
 				(void(*)(uintptr_t))entryPoint,
 				0,
-				thread::g_defaultAffinity,
+				// thread::g_defaultAffinity,
+				2,
 				thread::GetCurrentCpuLocalPtr()->idleThread->owner, // The idle thread always uses the kernel's process as it's owner.
 				false);
 			while (!header->driver_initialized);

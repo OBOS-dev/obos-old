@@ -1,6 +1,6 @@
 # drivers/generic/test/CMakeLists.txt
 
-# Copyright (c) 2023 Omar Berrow
+# Copyright (c) 2023-2024 Omar Berrow
 
 add_executable(initrdDriver "main.cpp" "parse.cpp" "interface.cpp")
 

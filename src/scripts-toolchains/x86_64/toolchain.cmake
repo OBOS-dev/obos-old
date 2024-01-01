@@ -52,7 +52,7 @@ set (oboskrnl_platformSpecificSources
 	"driverInterface/x86_64/load.cpp" "multitasking/x86_64/calibrate_timer.asm" "arch/x86_64/stack_canary.cpp" "arch/x86_64/fpu.asm"
 	"arch/x86_64/syscall/register.cpp" "arch/x86_64/syscall/memory_syscalls.cpp" "arch/x86_64/syscall/verify_pars.cpp" "arch/x86_64/syscall/console_syscalls.cpp"
 	"arch/x86_64/syscall/thread_syscalls.cpp" "arch/x86_64/sse.asm" "arch/x86_64/smp_start.cpp" "arch/x86_64/smp_trampoline.asm"
-	"arch/x86_64/gdbstub/communicate.cpp" "arch/x86_64/gdbstub/stub.cpp"
+	"arch/x86_64/gdbstub/communicate.cpp" "arch/x86_64/gdbstub/stub.cpp" "arch/x86_64/signals.cpp"
 )
 
 set (OBOS_ARCHITECTURE "x86_64")

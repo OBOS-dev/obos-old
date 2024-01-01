@@ -1,7 +1,7 @@
 /*
 	oboskrnl/arch/x86_64/exception_handlers.cpp
 
-	Copyright (c) 2023 Omar Berrow
+	Copyright (c) 2023-2024 Omar Berrow
 */
 
 #include <int.h>
@@ -23,6 +23,8 @@
 #include <arch/x86_64/memory_manager/physical/allocate.h>
 
 #include <arch/x86_64/irq/irq.h>
+
+#include <multitasking/process/signals.h>
 
 extern "C" char _sched_text_start;
 extern "C" char _sched_text_end;
@@ -90,6 +92,14 @@ namespace obos
 		// Sometimes we page fault while accessing the lapic, even though that's impossible.
 		if ((faultAddress >= (uintptr_t)g_localAPICAddr && faultAddress <= 0xfffffffffffff000) && !(frame->errorCode >> 4) && !((frame->errorCode << 2)))
 			return;
+		// If in user mode...
+		if ((frame->errorCode >> 2) & 1)
+		{
+			// Call SIGPF, or terminate.
+			currentThread->context.frame = *frame;
+			process::CallSignalOrTerminate(currentThread, process::SIGPF);
+			return;
+		}
 		logger::panic(
 			nullptr,
 			"Page fault in %s-mode at %p (cpu %d, pid %d, tid %d) while trying to %s a %s page. The address of this page is %p. Error code: %d. whileInScheduler = %s\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\nDumping registers:\n"
@@ -128,25 +138,49 @@ namespace obos
 	}
 	void defaultExceptionHandler(interrupt_frame* frame)
 	{
-		thread::StopCPUs(false);
-		uint32_t cpuId = 0, pid = 0, tid = 0;
-		if ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
+		uint32_t cpuId = 0, pid = -1, tid = -1;
+		bool whileInScheduler = (frame->rip >= (uintptr_t)&_sched_text_start && frame->rip < (uintptr_t)&_sched_text_end);
+		thread::Thread* currentThread = nullptr;
+		if (thread::getCurrentCpuLocalPtr())
 		{
-			cpuId = ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->cpuId;
-			volatile thread::Thread* currentThread = ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())->currentThread;
-			if (currentThread)
+			cpuId = thread::GetCurrentCpuLocalPtr()->cpuId;
+			whileInScheduler = whileInScheduler || thread::GetCurrentCpuLocalPtr()->schedulerLock;
+			currentThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
+			if (!whileInScheduler)
 			{
-				tid = currentThread->tid;
-				if (currentThread->owner)
+				if (currentThread)
 				{
-					process::Process* proc = (process::Process*)currentThread->owner;
-					pid = proc->pid;
+					tid = currentThread->tid;
+					if (currentThread->owner)
+					{
+						process::Process* proc = (process::Process*)currentThread->owner;
+						pid = proc->pid;
+					}
 				}
-				else
-					pid = (uint32_t)-1;
 			}
-			else
-				tid = (uint32_t)-1;
+		}
+		if (whileInScheduler)
+			tid = pid = (uint32_t)-1;
+		// If in user mode...
+		if (frame->cs != 0x08 && frame->ds != 0x10)
+		{
+			constexpr const process::signals intToSignal[] = {
+				process::signals::SIGME         ,process::signals::SIGDG         ,process::signals::INVALID_SIGNAL,process::signals::         SIGDG,
+				process::signals::SIGOF         ,process::signals::SIGUEXC       ,process::signals::SIGUDOC       ,process::signals::INVALID_SIGNAL,
+				process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,
+				process::signals::INVALID_SIGNAL,process::signals::SIGPM         ,process::signals::SIGPF         ,process::signals::INVALID_SIGNAL,
+				process::signals::SIGME         ,process::signals::SIGUEXC       ,process::signals::INVALID_SIGNAL,process::signals::SIGME         ,
+				process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,
+				process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,
+				process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,process::signals::INVALID_SIGNAL,
+			};
+			process::signals sig = intToSignal[frame->intNumber];
+			if (sig != process::signals::INVALID_SIGNAL)
+			{
+				currentThread->context.frame = *frame;
+				process::CallSignalOrTerminate(currentThread, sig);
+				return;
+			}
 		}
 		logger::panic(
 			nullptr,

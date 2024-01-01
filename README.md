@@ -35,7 +35,7 @@
 ```bash
 git clone https://github.com/oberrow/obos.git
 cd obos
-git clone https://github.com/limine-bootloader/limine.git --branch=v5.20231006.0-binary --depth=1
+git clone https://github.com/limine-bootloader/limine.git --branch=v5.2023-20241006.0-binary --depth=1
 ```
 You can ignore any warnings.<br>
 2. Configure cmake with this command:
