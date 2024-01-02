@@ -34,8 +34,10 @@ global _ZN4obos7bswap64Em
 global _ZN4obos7bswap32Ej
 global _ZN4obos3bsfEj
 global _ZN4obos3bsfEm
+global _ZN4obos3bsfEo
 global _ZN4obos3bsrEj
 global _ZN4obos3bsrEjm
+global _ZN4obos3bsrEo
 
 _ZN4obos4outbEth:
 	mov dx, di
@@ -319,9 +321,31 @@ _ZN4obos3bsfEj:
 _ZN4obos3bsfEm:
 	bsf rax, rdi
 	ret
+_ZN4obos3bsfEo:
+	xor rax, rax
+	bsf rax, rdi
+	mov rdx, 1
+	mov rcx, rax
+	shl rdx, cl
+	test rdi, rdx
+	jnz .ret
+	bsf rax, rsi
+.ret:
+	ret
 _ZN4obos3bsrEj:
 	bsr eax, edi
 	ret
 _ZN4obos3bsrEm:
 	bsr rax, rdi
+	ret
+_ZN4obos3bsrEo:
+	xor rax, rax
+	bsr rax, rdi
+	mov rdx, 1
+	mov rcx, rax
+	shl rdx, cl
+	test rdi, rdx
+	jnz .ret
+	bsr rax, rsi
+.ret:
 	ret

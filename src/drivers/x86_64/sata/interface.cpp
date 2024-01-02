@@ -14,10 +14,21 @@
 
 #include <allocators/vmm/arch.h>
 
+#include <arch/x86_64/memory_manager/physical/allocate.h>
+
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 
 #include "structs.h"
 #include "command.h"
+
+namespace obos
+{
+	namespace memory
+	{
+		OBOS_EXPORT void* MapPhysicalAddress(PageMap* pageMap, uintptr_t phys, void* to, uintptr_t cpuFlags);
+		OBOS_EXPORT uintptr_t DecodeProtectionFlags(uintptr_t _flags);
+	}
+}
 
 using namespace obos;
 
@@ -59,9 +70,14 @@ bool DriveReadSectors(
     size_t pagesToRead = (nSectorsToRead * portDescriptor.sectorSize) / 4096;
 	if (((nSectorsToRead * portDescriptor.sectorSize) % 4096) != 0)
         pagesToRead++;
-    volatile byte* response = (volatile byte*)vallocator.VirtualAlloc(nullptr, pagesToRead * 4096, memory::PROT_NO_COW_ON_ALLOCATE);
-	StopCommandEngine(pPort);
+    size_t blocksToRead = (pagesToRead / 1024) + ((pagesToRead % 1024) != 0);
+    uintptr_t responsePhysicalAddresses[blocksToRead];
+    uintptr_t responsePhysicalAddressBase = memory::allocatePhysicalPage(pagesToRead);
+    for (size_t i = 0; i < blocksToRead; i++)
+        responsePhysicalAddresses[i] = responsePhysicalAddressBase + i * 1024;
+    StopCommandEngine(pPort);
     size_t currentSectorCount = nSectorsToRead;
+    size_t currentPageCount = pagesToRead;
     size_t currentLBAOffset = lbaOffset;
 	uint32_t cmdSlot = FindCMDSlot(pPort);
     HBA_CMD_HEADER* cmdHeader = (HBA_CMD_HEADER*)portDescriptor.clBase + cmdSlot;
@@ -74,11 +90,9 @@ bool DriveReadSectors(
 	    	(byte*)portDescriptor.clBase +
 	    	 ((cmdHeader->ctba | ((uintptr_t)cmdHeader->ctbau << 32)) /* physical address of the HBA_CMD_TBL */ - portDescriptor.clBasePhys) // The offset of the HBA_CMD_TBL
 	    );
-    for (size_t i = 0; i < pagesToRead; i++)
+    for (size_t i = 0; i < blocksToRead; i++)
     {
-	    uintptr_t responsePhys = 
-            (uintptr_t)memory::getCurrentPageMap()->getL1PageMapEntryAt((uintptr_t)response + i * 4096) 
-                & 0xFFFFFFFFFF000;
+	    uintptr_t responsePhys = responsePhysicalAddresses[i];
 	    // Setup the command slot.
 	    cmdTBL->prdt_entry[0].dba = responsePhys & 0xffffffff;
 	    if (g_generalHostControl->cap.s64a)
@@ -86,7 +100,7 @@ bool DriveReadSectors(
 	    else
 	    	if (responsePhys & ~(0xffffffff))
 	    		logger::panic(nullptr, "AHCI: %s: responsePhys has its upper 32-bits set and cap.s64a is false.\n", __func__);
-	    cmdTBL->prdt_entry[0].dbc = 4095;
+	    cmdTBL->prdt_entry[0].dbc = currentPageCount * 4096 - 1;
 	    cmdTBL->prdt_entry[0].i = 1;
 	    FIS_REG_H2D* command = (FIS_REG_H2D*)&cmdTBL->cfis;
 	    utils::memzero(command, sizeof(*command));
@@ -115,12 +129,26 @@ bool DriveReadSectors(
 	    while ( (pPort->ci & (1 << cmdSlot)) && !(pPort->is & (0xFD800000)) /*An error in the IS.*/ );
         if (currentSectorCount > (4096 / portDescriptor.sectorSize))
             currentSectorCount -= (4096 / portDescriptor.sectorSize);
+        if (currentPageCount > 1024)
+            currentPageCount -= 1024;
         currentLBAOffset += (nSectorsToRead - currentSectorCount);
     }
     if (oNSectorsRead)
         *oNSectorsRead = nSectorsToRead;
     if (buff)
-        *buff = (void*)response;
+    {
+        memory::PageMap* currentPageMap = memory::getCurrentPageMap();
+        byte* response = (byte*)memory::_Impl_FindUsableAddress(nullptr, pagesToRead);
+        size_t i = 0;
+        for (byte* addr = response; addr < (response + pagesToRead * 4096); addr += 4096, i++)
+            memory::MapPhysicalAddress(
+                currentPageMap,
+                responsePhysicalAddressBase + i * 4096,
+                addr,
+                memory::DecodeProtectionFlags(0)
+            );
+        *buff = response;
+    }
     return true;
 }
 bool DriveWriteSectors(

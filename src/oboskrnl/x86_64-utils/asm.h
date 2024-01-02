@@ -71,8 +71,10 @@ namespace obos
 
 	OBOS_EXPORT void *getRBP();
 
-	OBOS_EXPORT uint32_t bsf(uint32_t bitfield);
-	OBOS_EXPORT uint64_t bsf(uint64_t bitfield);
-	OBOS_EXPORT uint32_t bsr(uint32_t bitfield);
-	OBOS_EXPORT uint64_t bsr(uint64_t bitfield);
+	OBOS_EXPORT uint8_t bsf(uint32_t bitfield);
+	OBOS_EXPORT uint8_t bsf(uint64_t bitfield);
+	OBOS_EXPORT uint8_t bsf(__uint128_t bitfield);
+	OBOS_EXPORT uint8_t bsr(uint32_t bitfield);
+	OBOS_EXPORT uint8_t bsr(uint64_t bitfield);
+	OBOS_EXPORT uint8_t bsr(__uint128_t bitfield);
 }

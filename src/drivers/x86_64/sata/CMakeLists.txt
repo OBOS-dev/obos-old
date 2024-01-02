@@ -2,7 +2,7 @@
 
 # Copyright (c) 2023-2024 Omar Berrow
 
-add_executable(sataDriver "main.cpp" "new.cpp" "command.cpp" "interface.cpp" ${CMAKE_SOURCE_DIR}/src/drivers/x86_64/common/enumerate_pci.cpp)
+add_executable(sataDriver "main.cpp" "new.cpp" "command.cpp" "interface.cpp")
 
 target_compile_options(sataDriver
 	PRIVATE "-ffreestanding"

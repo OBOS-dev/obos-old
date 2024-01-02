@@ -22,141 +22,7 @@ namespace obos
 {
 	namespace vfs
 	{
-		Vector<MountPoint*> g_mountPoints;
-#if 0
-		bool SendCommand(driverInterface::DriverClient& client, uint32_t command)
-		{
-			if (!client.SendData(&command, sizeof(command)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			return true;
-		}
-		bool NextFile(driverInterface::DriverClient& client, uintptr_t fileIterator, uint64_t*& fileAttribs, char*& filepath)
-		{
-			if (!SendCommand(client, driverInterface::OBOS_SERVICE_NEXT_FILE))
-				return false;
-			if (!client.SendData(&fileIterator, sizeof(fileIterator)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			if (!client.RecvData(fileAttribs, sizeof(uint64_t) * 3, 15000))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			size_t filepathSize = 0;
-			if (!client.RecvData(&filepathSize, sizeof(filepathSize), 15000))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			filepath = new char[filepathSize + 1];
-			if (!client.RecvData(filepath, filepathSize, 15000))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			return true;
-		}
-		bool GetFileAttributes(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, uint64_t* fileAttribs)
-		{
-			if (!SendCommand(client, driverInterface::OBOS_SERVICE_QUERY_FILE_DATA))
-				return false;
-			size_t filepathLen = utils::strlen(path);
-			if (!client.SendData(&filepathLen, sizeof(filepathLen)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			if (!client.SendData(path, filepathLen))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			uint64_t driveId = partitionId >> 24;
-			if (!client.SendData(&driveId, sizeof(driveId)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			byte driverPartitionId = partitionId & 0xff;
-			if (!client.SendData(&driverPartitionId, sizeof(driverPartitionId)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			if (!client.RecvData(fileAttribs, sizeof(uint64_t) * 3, 15000))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			return true;
-		}
-		bool ReadFile(driverInterface::DriverClient& client, const char* path, uint32_t partitionId, void** data, size_t* nRead, size_t nToSkip, size_t nToRead)
-		{
-			if (!SendCommand(client, driverInterface::OBOS_SERVICE_READ_FILE))
-				return false;
-			size_t filepathLen = utils::strlen(path);
-			if (!client.SendData(&filepathLen, sizeof(filepathLen)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			if (!client.SendData(path, filepathLen))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			uint64_t driveId = partitionId >> 24;
-			if (!client.SendData(&driveId, sizeof(driveId)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			uint8_t driverPartitionId = partitionId & 0xff;
-			if (!client.SendData(&driverPartitionId, sizeof(driverPartitionId)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			// sizeof(size_t) is not guarenteed to be sizeof(uint64_t) (see driver_communications.md->OBOS_SERVICE_READ_FILE)
-			uint64_t _nToSkip = nToSkip;
-			if (!client.SendData(&_nToSkip, sizeof(_nToSkip)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			if (!client.SendData(&nToRead, sizeof(nToRead)))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			size_t _nRead = 0;
-			if (!client.RecvData(&_nRead, sizeof(_nRead), 15000))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			if (nRead)
-				*nRead = _nRead;
-			void* _data = nullptr;
-			if (data)
-			{
-				_data = new char[_nRead + 1];
-				utils::memzero(_data, _nRead + 1);
-				*data = _data;
-			}
-			if (!client.RecvData(data ? _data : nullptr, _nRead, 15000))
-			{
-				client.CloseConnection();
-				return false;
-			}
-			return true;
-		}
-#endif
+		utils::Vector<MountPoint*> g_mountPoints;
 		void dividePathToTokens(const char* filepath, const char**& tokens, size_t& nTokens, bool useOffset = true)
 		{
 			for (; filepath[0] == '/'; filepath++);
@@ -442,7 +308,7 @@ namespace obos
 		{
 			if (!oMountPoints)
 				return;
-			Vector<uint32_t> mPoints;
+			utils::Vector<uint32_t> mPoints;
 			for (size_t i = 0; i < g_mountPoints.length(); i++)
 			{
 				auto mountPoint = g_mountPoints[i];

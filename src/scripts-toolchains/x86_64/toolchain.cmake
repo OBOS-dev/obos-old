@@ -46,13 +46,14 @@ set (LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/src/scripts-toolchains/x86_64/linker.ld"
 set (oboskrnl_platformSpecificSources 
 	"boot/x86_64/kmain_arch.cpp" "x86_64-utils/memory_manipulation.asm" "x86_64-utils/asm.asm" "arch/x86_64/gdt.cpp"
 	"arch/x86_64/gdt.asm" "arch/x86_64/idt.cpp" "arch/x86_64/idt.asm" "arch/x86_64/int_handlers.asm" 
-	"arch/x86_64/memory_manager/physical/allocate.cpp"  "arch/x86_64/irq/irq.cpp" "arch/x86_64/exception_handlers.cpp" "arch/x86_64/trace.cpp"
+	"arch/x86_64/memory_manager/physical/allocatePhys.cpp"  "arch/x86_64/irq/irq.cpp" "arch/x86_64/exception_handlers.cpp" "arch/x86_64/trace.cpp"
 	"arch/x86_64/memory_manager/virtual/initialize.cpp" "arch/x86_64/memory_manager/virtual/allocate.cpp" "arch/x86_64/irq/timer.cpp" "multitasking/x86_64/taskSwitchImpl.asm"
 	"multitasking/x86_64/setupFrameInfo.cpp" "multitasking/x86_64/scheduler_bootstrapper.cpp" "multitasking/process/x86_64/procInfo.cpp" "multitasking/process/x86_64/loader/elf.cpp"
 	"driverInterface/x86_64/load.cpp" "multitasking/x86_64/calibrate_timer.asm" "arch/x86_64/stack_canary.cpp" "arch/x86_64/fpu.asm"
 	"arch/x86_64/syscall/register.cpp" "arch/x86_64/syscall/memory_syscalls.cpp" "arch/x86_64/syscall/verify_pars.cpp" "arch/x86_64/syscall/console_syscalls.cpp"
 	"arch/x86_64/syscall/thread_syscalls.cpp" "arch/x86_64/sse.asm" "arch/x86_64/smp_start.cpp" "arch/x86_64/smp_trampoline.asm"
-	"arch/x86_64/gdbstub/communicate.cpp" "arch/x86_64/gdbstub/stub.cpp" "arch/x86_64/signals.cpp"
+	"arch/x86_64/gdbstub/communicate.cpp" "arch/x86_64/gdbstub/stub.cpp" "arch/x86_64/signals.cpp" "driverInterface/x86_64/scan.cpp"
+	"driverInterface/x86_64/enumerate_pci.cpp"
 )
 
 set (OBOS_ARCHITECTURE "x86_64")

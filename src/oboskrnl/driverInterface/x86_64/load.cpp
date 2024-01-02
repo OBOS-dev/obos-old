@@ -254,7 +254,7 @@ namespace obos
 				uint16_t relocationType = 0;
 				int64_t addend = 0;
 			};
-			Vector<relocation> required_relocations;
+			utils::Vector<relocation> required_relocations;
 			Elf64_Dyn* currentDynamicHeader = dynamicHeader;
 			size_t last_dtrelasz = 0, last_dtrelsz = 0, last_dtpltrelsz = 0;
 			bool awaitingRelaSz = false, foundRelaSz = false;
@@ -371,7 +371,7 @@ namespace obos
 				void* src = nullptr, *dest = nullptr;
 				size_t size = 0;
 			};
-			Vector<copy_reloc> copy_relocations;
+			utils::Vector<copy_reloc> copy_relocations;
 			byte* kFileBase = (byte*)kernel_file.response->kernel_file->address;
 			tables kernel_tables = GetKernelSymbolStringTables();
 			for ([[maybe_unused]] const relocation& i : required_relocations)

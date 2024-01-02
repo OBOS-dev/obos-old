@@ -72,7 +72,7 @@ namespace obos
 			logger::panic(nullptr, "Could not load the initrd driver. GetLastError: %d\n", GetLastError());
 		SetLastError(0);
 
-		new (&vfs::g_mountPoints) Vector<vfs::MountPoint*>{};
+		new (&vfs::g_mountPoints) utils::Vector<vfs::MountPoint*>{};
 
 		logger::log("Mounting the initrd.\n");
 		uint32_t point = 0;

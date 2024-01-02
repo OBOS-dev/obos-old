@@ -16,7 +16,7 @@ namespace obos
 {
 	namespace vfs
 	{
-		extern Vector<MountPoint*> g_mountPoints;
+		extern utils::Vector<MountPoint*> g_mountPoints;
 		/// <summary>
 		/// Mounts a partition. You can mount a partition multiple times.
 		/// </summary>

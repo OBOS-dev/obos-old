@@ -174,11 +174,6 @@ namespace obos
 			ftable functionTable;
 			struct driverHeader* header;
 		};
-		struct bitfield128
-		{
-			uint64_t bytes0_7;
-			uint64_t bytes7_15;
-		};
 		struct driverHeader
 		{
 			uint32_t magicNumber;
@@ -204,7 +199,7 @@ namespace obos
 				/// <para></para>
 				/// This bitfield can have more than bit set (for multiple values).
 				/// </summary>
-				struct bitfield128 subclass;
+				__uint128_t subclass;
 				/// <summary>
 				/// If a bit is set, the bit number will be the value.
 				/// <para></para>
@@ -212,7 +207,7 @@ namespace obos
 				/// <para></para>
 				/// If no bit is set any prog if is assumed.
 				/// </summary>
-				struct bitfield128 progIf;
+				__uint128_t progIf;
 			};
 			__driverInfoPciInfo pciInfo;
 			struct

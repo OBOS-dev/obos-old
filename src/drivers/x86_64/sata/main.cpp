@@ -13,7 +13,7 @@
 
 #include <multitasking/threadAPI/thrHandle.h>
 
-#include <enumerate_pci.h>
+#include <driverInterface/x86_64/enumerate_pci.h>
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 
@@ -76,14 +76,15 @@ driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 				.ReadSectors = DriveReadSectors,
 				.WriteSectors = DriveWriteSectors,
 				.QueryDiskInfo = DriveQueryInfo,
+				.unused = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,}
 			}
 		}
 	},
     .howToIdentifyDevice = 0b1, // PCI
     .pciInfo = {
         .classCode = 0x1, // Class code 0x01
-        .subclass = { .bytes0_7 = (1<<6), .bytes7_15 = 0 }, // Subclass: 0x06
-        .progIf = { .bytes0_7 = (1<<1), .bytes7_15 = 0 } // Prog IF: 0x01
+        .subclass = 1<<6, // Subclass: 0x06
+        .progIf = 1<<1 // Prog IF: 0x01
     }
 };
 
@@ -91,42 +92,22 @@ volatile byte* g_hbaBase = nullptr;
 volatile HBA_MEM* g_generalHostControl = nullptr;
 Port g_ports[32];
 
-uintptr_t allocateCLB(size_t maxTries = 10)
-{
-	uintptr_t firstPage = memory::allocatePhysicalPage();
-	uintptr_t secondPage = memory::allocatePhysicalPage();
-	size_t i = 0;
-	for (; i < maxTries && (firstPage + 0x1000) != secondPage; i++)
-	{
-		memory::freePhysicalPage(firstPage);
-		memory::freePhysicalPage(secondPage);
-		firstPage = memory::allocatePhysicalPage();
-		secondPage = memory::allocatePhysicalPage();
-	}
-	if (i == (maxTries - 1))
-	{
-		memory::freePhysicalPage(firstPage);
-		memory::freePhysicalPage(secondPage);
-		return 0;
-	}
-	return firstPage;
-}
 void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 {
 	// Map the HBA memory registers.
 
-	uint16_t pciCommand = pciReadWordRegister(bus, slot, function, getRegisterOffset(1, 2));
+	uint16_t pciCommand = driverInterface::pciReadWordRegister(bus, slot, function, PCI_GetRegisterOffset(1, 2));
 	// DMA Bus mastering, and memory space access are on.
 	pciCommand |= 6;
-	uint16_t pciStatus = pciReadWordRegister(bus, slot, function, getRegisterOffset(1, 0));
-	pciWriteDwordRegister(bus, slot, function, getRegisterOffset(1, 0), pciStatus | pciCommand);
+	uint16_t pciStatus = driverInterface::pciReadWordRegister(bus, slot, function, PCI_GetRegisterOffset(1, 0));
+	driverInterface::pciWriteDwordRegister(bus, slot, function, PCI_GetRegisterOffset(1, 0), pciStatus | pciCommand);
 
-	uintptr_t baseAddr = pciReadDwordRegister(bus, slot, function, getRegisterOffset(9, 0)) & (~0b1111);
+	uintptr_t baseAddr = driverInterface::pciReadDwordRegister(bus, slot, function, PCI_GetRegisterOffset(9, 0)) & (~0b1111);
 
-	pciWriteDwordRegister(bus, slot, function, getRegisterOffset(9, 0), 0xFFFFFFFF);
-	size_t hbaSize = (~pciReadDwordRegister(bus, slot, function, getRegisterOffset(9, 0)) & (~0b1111)) + 1;
+	driverInterface::pciWriteDwordRegister(bus, slot, function, PCI_GetRegisterOffset(9, 0), 0xFFFFFFFF);
+	size_t hbaSize = (~driverInterface::pciReadDwordRegister(bus, slot, function, PCI_GetRegisterOffset(9, 0)) & (~0b1111)) + 1;
 	hbaSize = ((hbaSize >> 12) + 1) << 12;
-	pciWriteDwordRegister(bus, slot, function, getRegisterOffset(9, 0), baseAddr);
+	driverInterface::pciWriteDwordRegister(bus, slot, function, PCI_GetRegisterOffset(9, 0), baseAddr);
 
 	size_t hbaSizePages = hbaSize / 0x1000;
 	g_hbaBase = (byte*)memory::_Impl_FindUsableAddress(nullptr, hbaSizePages);
@@ -183,7 +164,7 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 			while(pPort->cmd & (1<<14) /*PxCMD.FR*/);
 		}
 		void* realClFisBase = memory::_Impl_FindUsableAddress(nullptr, 3);
-		uintptr_t clBase = allocateCLB();
+		uintptr_t clBase = memory::allocatePhysicalPage(2);
 		utils::memzero(memory::mapPageTable((uintptr_t*)clBase), 4096);
 		utils::memzero(memory::mapPageTable((uintptr_t*)(clBase + 4096)), 4096);
 		pPort->clb = clBase & 0xffffffff;
@@ -302,7 +283,7 @@ extern "C" void _start()
 {
 	uint32_t exitCode = 0;
 	uint8_t bus = 0, slot = 0, function = 0;
-	if (!enumeratePci(0x01, 0x06, 0x01, &slot, &function, &bus))
+	if (!driverInterface::enumeratePci(0x01, 0x06, 0x01, &slot, &function, &bus))
 	{
 		exitCode = 1;
 		goto done;
@@ -313,6 +294,11 @@ extern "C" void _start()
 		logger::log("AHCI: Initialized AHCI.\n");
 	else
 		logger::error("AHCI: Could not initialize AHCI.\n");
+	{
+		void* buff = nullptr;
+		DriveReadSectors(0, 0, 1025, &buff, nullptr);
+		memory::VirtualAllocator{nullptr}.VirtualFree(buff, 1025 * 4096);
+	}
 	done:
     g_driverHeader.driver_initialized = true;
 	while (g_driverHeader.driver_finished_loading);
