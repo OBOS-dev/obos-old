@@ -118,13 +118,6 @@ namespace obos
 			kernel_cr3 = memory::getCurrentPageMap();
 			memory::VirtualAllocator vallocator{ nullptr };
 			memory::MapPhysicalAddress(kernel_cr3, 0, nullptr, 3);
-			logger::debug("%s: Entries for page 0:\nPTE: %p\nPDE: %p\nPDPE: %p\nPME: %p\n",
-				__func__,
-				kernel_cr3->getL1PageMapEntryAt(0),
-				kernel_cr3->getL2PageMapEntryAt(0),
-				kernel_cr3->getL3PageMapEntryAt(0),
-				kernel_cr3->getL4PageMapEntryAt(0)
-			);
 			(*(void**)0xFC8) = (void*)(uintptr_t)*((uint16_t*)&GDT_Ptr);
 			(*(void**)0xFF0) = *((void**)((&GDT_Ptr) + 2));
 			(*(void**)0xFF8) = kernel_cr3;
