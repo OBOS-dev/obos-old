@@ -108,7 +108,7 @@ bool DriveReadSectors(
 	    command->command = ATA_READ_DMA_EXT;
 	    command->device = 0x40;
 	    command->c = 1;
-        uint16_t count = i == (pagesToRead - 1) ? currentSectorCount : (4096 / portDescriptor.sectorSize);
+        uint16_t count = i == (blocksToRead - 1) ? currentSectorCount : 1024;
 	    command->countl = (uint8_t)(count & 0xff);
 	    command->counth = (uint8_t)((count >> 8) & 0xff);
         command->lba0 = (currentLBAOffset & 0xff);
@@ -145,7 +145,7 @@ bool DriveReadSectors(
                 currentPageMap,
                 responsePhysicalAddressBase + i * 4096,
                 addr,
-                memory::DecodeProtectionFlags(0)
+                memory::DecodeProtectionFlags(0)|1
             );
         *buff = response;
     }

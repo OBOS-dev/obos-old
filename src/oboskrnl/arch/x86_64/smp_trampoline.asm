@@ -85,12 +85,13 @@ align 1
 	xor ecx,ecx
 	cpuid
 	xor eax, eax
+	test edx, (1<<20)
 	mov esi, (1<<11)
-	and edx, (1<<20)
 	cmovnz eax, esi ; If bit 20 is set
 	mov ecx, 0xC0000080
-    or eax, (1 << 8) | (1 << 10)
-    wrmsr
+    or eax, (1 << 8)|(1<<10)
+    xor edx,edx
+	wrmsr
 
 ; Enable paging.
 	mov eax, 0x80010001
@@ -102,7 +103,7 @@ align 1
 	pop edi ; The address of .set_cs needs to be in a register that won't be modified by a) cpuid b) the rest of the code.
 	add edi, 8
 	db 0x6A, 0x08, 0x57, 0xCB ; push 0x08; push edi; retfd
-
+	
 .set_cs:
 	mov ax, 0x10
 	mov ds, ax
@@ -117,7 +118,7 @@ align 1
 	test al,al
 	jnz .call_procInit
 
-	lgdt [GDT_Ptr]	
+	lgdt [GDT_Ptr]
 
 ; Set "trampoline_has_gdt" to true
 	mov qword [0xFB0], 1

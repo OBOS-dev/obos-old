@@ -80,19 +80,8 @@ namespace obos
 		if (!vfs::mount(point, 0))
 			logger::panic(nullptr, "Could not mount the initrd, GetLastError: %d!\n", GetLastError());
 
-		vfs::FileHandle handle;
-		if (!handle.Open("0:/sataDriver"))
-			logger::panic(nullptr, "Could not find the sata driver. GetLastError: %d\n", GetLastError());
-		if (!handle.GetFileSize())
-			logger::panic(nullptr, "The sata driver's file size is zero.\n");
-		byte* data = new byte[handle.GetFileSize() + 1];
-		handle.Read((char*)data, handle.GetFileSize());
-		//handle.Close();
-		SetLastError(0);
-		if (!driverInterface::LoadModule(data, handle.GetFileSize(), nullptr))
-			logger::panic(nullptr, "Could not load the sata driver. GetLastError: %d\n", GetLastError());
-		SetLastError(0);
-		delete[] data;
+		// Load all modules under the initrd.
+		driverInterface::ScanAndLoadModules("0:/");
 
 		thread::ExitThread(0);
 	}

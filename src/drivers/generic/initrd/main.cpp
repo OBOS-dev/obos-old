@@ -57,8 +57,8 @@ extern void ConnectionHandler(uintptr_t);
 extern "C" void _start()
 {
 	if (!g_driverHeader.initrdLocationResponse.addr)
-		logger::panic(nullptr, "[DRIVER 0, FATAL] No initrd image received from the kernel.\n");
-	logger::log("DRIVER 0: Initializing filesystem cache.\n");
+		logger::panic(nullptr, "InitRD Driver: No initrd image received from the kernel.\n");
+	logger::log("InitRD Driver: Initializing filesystem cache.\n");
 	InitializeFilesystemCache();
 	g_driverHeader.driver_initialized = true;
 	while (g_driverHeader.driver_finished_loading);

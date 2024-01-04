@@ -7,6 +7,7 @@
 #pragma once
 
 #include <int.h>
+#include <pair.h>
 
 #include <memory_manipulation.h>
 
@@ -41,11 +42,70 @@ namespace obos
         class Hashmap
         {
         public:
+            template<typename _Key, typename _ValT, bool(*_equals)(const Key& key1, const Key& key2) = defaultEquals<Key>, size_t(*_hash)(const Key& key) = defaultHasher<Key>>
+            class HashmapIter
+            {
+            public:
+                using _node = Hashmap<_Key, _ValT, _equals, _hash>::node;
+
+                HashmapIter() = delete;
+
+                _node& operator*()
+				{
+                    return *m_currentNode;
+				}
+				size_t operator++()
+				{
+                    auto newNode = ++m_currentNode;
+                    while (!newNode->used && this->operator bool()) newNode++;
+					return ((uintptr_t)(newNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
+				}
+				size_t operator++(int)
+				{
+                    auto oldNode = m_currentNode;
+                    auto newNode = ++m_currentNode;
+                    while (!newNode->used && this->operator bool()) newNode++;
+					return ((uintptr_t)(oldNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
+				}
+				size_t operator--()
+				{
+					auto newNode = --m_currentNode;
+                    while (!newNode->used && this->operator bool()) newNode--;
+					return ((uintptr_t)(newNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
+				}
+				size_t operator--(int)
+				{
+					auto oldNode = m_currentNode;
+                    auto newNode = --m_currentNode;
+                    while (!newNode->used && this->operator bool()) newNode--;
+					return ((uintptr_t)(oldNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
+				}
+
+				operator bool() 
+                { 
+                    return m_currentNode >= m_map->m_nodeTable && m_currentNode < (m_map->m_nodeTable + m_map->m_tableCapacity);
+                }
+            
+                friend class Hashmap;
+            private:
+                HashmapIter(Hashmap<_Key, _ValT, _equals, _hash>* map, _node* currentNode)
+                {
+                    m_map = map;
+                    m_currentNode = currentNode;
+                }
+                Hashmap<_Key, _ValT, _equals, _hash>* m_map;
+                _node* m_currentNode;
+            };
             Hashmap()
             {
                 m_buckets = (bucket*)kcalloc(m_tableCapacity, sizeof(bucket));
                 m_nodeTable = (node*)kcalloc(m_tableCapacity, sizeof(node));
             }
+
+            Hashmap(const Hashmap& other) = delete;
+            Hashmap& operator=(const Hashmap& other) = delete;
+            Hashmap(Hashmap&& other) = delete;
+            Hashmap& operator=(Hashmap&& other) = delete;
 
             ValT& at(const Key& key) const
             {
@@ -57,7 +117,7 @@ namespace obos
                     return *(ValT*)nullptr;
                 chain* currentChain = currentBucket->firstChain;
                 node* currentNode = m_nodeTable + currentChain->tableIndex;
-                while (!equals(key, currentNode->key) && currentChain)
+                while (!equals(key, *currentNode->key) && currentChain)
                 {
                     currentChain = currentChain->next;
                     if (currentChain)
@@ -65,9 +125,9 @@ namespace obos
                 }
                 if (!currentBucket)
                     return *(ValT*)nullptr;
-                if (!equals(key, currentNode->key))
+                if (!equals(key, *currentNode->key))
                     return *(ValT*)nullptr;
-                return currentNode->value;
+                return *currentNode->value;
             }
 
             void emplace_at(const Key& key, ValT& value)
@@ -99,8 +159,9 @@ namespace obos
                     ourBucket->firstChain = ourChain;
                 ourChain->prev = ourBucket->lastChain;
                 ourBucket->nChains++;
-                m_nodeTable[ourIndex].key   = key;
-                m_nodeTable[ourIndex].value = value;
+                m_nodeTable[ourIndex].key   = &key;
+                m_nodeTable[ourIndex].value = &value;
+                m_nodeTable[ourIndex].used = true;
             }
 
             void remove(const Key& key)
@@ -173,17 +234,38 @@ namespace obos
             bool contains(const Key& key) const
             { return &at(key) != nullptr; }
 
+            HashmapIter<Key, ValT, equals, hash> begin()
+            {
+                node* firstUsableNode = m_nodeTable;
+                for(size_t i = 0; i < m_tableCapacity && !firstUsableNode->used; i++, firstUsableNode++);
+                if (!firstUsableNode->used)
+                    firstUsableNode = m_nodeTable;
+                HashmapIter<Key, ValT, equals, hash> iter{ this, firstUsableNode };
+                return iter;
+            }
+            HashmapIter<Key, ValT, equals, hash> end()
+            {
+                node* lastUsableNode = m_nodeTable + m_tableCapacity;
+                for(int64_t i = 0; i > -1 && !lastUsableNode->used; i++, lastUsableNode--);
+                if (!lastUsableNode->used)
+                    lastUsableNode = m_nodeTable + m_tableCapacity;
+                HashmapIter<Key, ValT, equals, hash> iter{ this, lastUsableNode };
+                return iter;
+            }
+
             ~Hashmap()
             {
                 erase();
             }
-        private:
+
+            friend HashmapIter<Key, ValT, equals, hash>;
             struct node
             {
-                const Key& key;
-                ValT& value;
+                const Key* key;
+                ValT* value;
                 bool used = false;
             };
+        private:
             struct chain
             {
                 size_t tableIndex;

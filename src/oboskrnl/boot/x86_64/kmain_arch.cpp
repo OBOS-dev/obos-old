@@ -92,7 +92,7 @@ namespace obos
 			}
 		}
 		new (&g_kernelConsole) Console { font, framebuffer, false };
-		g_kernelConsole.SetColour(0xffffffff, 0);
+		g_kernelConsole.SetColour(0xCCCCCCCC, 0);
 		logger::info("%s: Initializing the boot GDT.\n", __func__);
 		InitializeGdt();
 		logger::info("%s: Initializing IDT.\n", __func__);

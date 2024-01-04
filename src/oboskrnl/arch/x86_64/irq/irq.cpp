@@ -258,7 +258,7 @@ namespace obos
 		if (madtTable)
 		{
 			if(isBSP)
-				logger::log("%s: Using the APIC as the irq controller.\n", __func__);
+				logger::debug("%s: Using the APIC as the irq controller.\n", __func__);
 			InitializeAPIC(madtTable, isBSP);
 			return;
 		}

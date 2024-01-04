@@ -105,6 +105,21 @@ namespace obos
 				STB_HIOS,
 			};
 
+			enum
+			{
+				STT_NOTYPE,
+				STT_OBJECT,
+				STT_FUNC,
+				STT_SECTION,
+				STT_FILE,
+				STT_COMMON,
+				STT_TLS,
+				STT_LOOS,
+				STT_HIOS,
+				STT_LOPROC,
+				STT_HIPROC,
+			};
+
 			struct Elf64_Ehdr
 			{
 				unsigned char e_ident[EI_NIDENT];

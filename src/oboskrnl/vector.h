@@ -90,7 +90,8 @@ namespace obos
 #ifdef OBOS_DEBUG
 				OBOS_ASSERTP(m_ptr > (void*)0xfffffffff0000000, "");
 #endif
-				return m_ptr[m_sz++] = val;
+				m_ptr[m_sz++] = val;
+				return m_ptr[m_sz - 1];
 			}
 			void pop_back()
 			{

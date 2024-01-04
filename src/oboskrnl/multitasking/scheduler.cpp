@@ -261,6 +261,7 @@ namespace obos
 		
 			memory::VirtualAllocator valloc{ nullptr };
 
+			logger::debug("%s: Making kernel main thread.\n", __func__);
 			Thread* kernelMainThread = new Thread{};
 
 			kernelMainThread->tid = g_nextTid++;
@@ -269,6 +270,7 @@ namespace obos
 			kernelMainThread->priorityList = g_priorityLists + 2;
 			kernelMainThread->threadList = new Thread::ThreadList;
 			
+			logger::debug("%s: Setting up the context of the kernel main thread.\n", __func__);
 			setupThreadContext(&kernelMainThread->context, &kernelMainThread->stackInfo, (uintptr_t)kmain_common, 0, 0x10000, &valloc, nullptr);
 
 			kernelMainThread->threadList->head = kernelMainThread;
@@ -288,13 +290,16 @@ namespace obos
 			g_priorityLists[1].nextThreadList = g_priorityLists + 2;
 			g_priorityLists[0].nextThreadList = g_priorityLists + 1;
 
+			logger::debug("%s: Starting other CPUs.\n", __func__);
 			if (!StartCPUs())
 				logger::panic(nullptr, "Could not start the other cores.");
+			logger::debug("%s: Started other CPUs.\n", __func__);
 
 			for (size_t i = 0; i < g_nCPUs; i++)
 				g_defaultAffinity |= (uint64_t)1 << g_cpuInfo[i].cpuId;
 			kernelMainThread->affinity = kernelMainThread->ogAffinity = /*g_defaultAffinity*/1;
 
+			logger::debug("%s: Starting the idle threads.\n", __func__);
 			for (size_t i = 0; i < g_nCPUs; i++)
 			{
 				auto &idleThread = g_cpuInfo[i].idleThread;
@@ -328,6 +333,7 @@ namespace obos
 
 			setupTimerInterrupt();
 			thread::g_initialized = true;
+			logger::debug("%s: Switching to the kernel main thread.\n", __func__);
 			switchToThreadImpl((taskSwitchInfo*)&currentThread->context, (Thread*)currentThread);
 			logger::panic(nullptr, "Could not switch to thread context for the kernel main thread while initializing the scheduler.");
 		}

@@ -57,30 +57,61 @@ namespace obos
 
 			bool Write(); // Not implemented.
 
+			/// <summary>
+			/// Checks if the file handle has reached the end of the file.
+			/// </summary>
+			/// <returns>Whether EOF has been reached (true) or not (false)</returns>
 			bool Eof() const;
+			/// <summary>
+			/// Gets the current file offset.
+			/// </summary>
+			/// <returns>The current file offset.</returns>
 			uoff_t GetPos() const { return m_currentFilePos; }
+			/// <summary>
+			/// Gets the file handle's status/flags.
+			/// </summary>
+			/// <returns>The handle's status/flags.</returns>
 			uint32_t GetFlags() const { return m_flags; }
+			/// <summary>
+			/// Gets the file's size.
+			/// </summary>
+			/// <returns>The file's size.</returns>
 			size_t GetFileSize() const;
+			/// <summary>
+			/// Gets the path of the parent directory of the file.
+			/// </summary>
+			/// <param name="path">The buffer to put the path in. This can be nullptr.</param>
+			/// <param name="sizePath">(output) The size of the path.</param>
 			void GetParent(char* path, size_t* sizePath);
 
 			/// <summary>
-			/// Seeks to where based on the parameters.
+			/// Seeks to count based on the parameters.
 			/// </summary>
 			/// <param name="count">How much to adjust the position by</param>
 			/// <param name="from">Where to add "count".</param>
 			/// <returns>The old file position.</returns>
 			uoff_t SeekTo(off_t count, SeekPlace from = SEEKPLACE_BEG);
 
+			/// <summary>
+			/// Invalidates a file handle, allowing it to be used for another file.
+			/// </summary>
+			/// <returns>Whether the file could be closed (true) or not (false). If it fails, use GetLastError for an error code.</returns>
 			bool Close();
 
-			~FileHandle();
+			~FileHandle() 
+			{
+				if (m_flags & FLAGS_CLOSED || !m_node) 
+					return;
+				Close();
+			}
 
 		private:
 			bool __TestEof(uoff_t pos) const;
 			void* m_pathNode = nullptr; // The node that Open finds.
 			void* m_node = nullptr; // The node that m_pathNode links to if it's a symlink. If m_pathNode is not a symlink, this is the same as m_pathNode.
+			void* m_nodeInFileHandlesReferencing = nullptr;
 			uoff_t m_currentFilePos = 0;
-			uint32_t m_flags = 0;
+			uint32_t m_flags = FLAGS_CLOSED;
 		};
 	}
 }

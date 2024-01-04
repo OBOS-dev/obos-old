@@ -49,9 +49,9 @@ namespace obos
 		// Assumes the timer divisor is one.
 		uint64_t FindCounterValueFromFrequency(uint64_t freq)
 		{
-			logger::log("%s, cpu %d: Calibrating the timer at a frequency of %d.\n", __func__, getCPULocal()->cpuId, freq);
+			logger::debug("%s, cpu %d: Calibrating the timer at a frequency of %d.\n", __func__, getCPULocal()->cpuId, freq);
 			uint64_t ret = calibrateTimer(freq);
-			logger::log("%s, cpu %d: Timer count is %d.\n", __func__, getCPULocal()->cpuId, ret);
+			logger::debug("%s, cpu %d: Timer count is %d.\n", __func__, getCPULocal()->cpuId, ret);
 			return ret;
 		}
 

@@ -21,6 +21,7 @@ namespace obos
 {
 	namespace vfs
 	{
+		// Do not make these next three functions static, as it's used by DirectoryIterator::OpenAt
 		bool strContains(const char* str, char ch)
 		{
 			size_t i = 0;
@@ -65,7 +66,7 @@ namespace obos
 		}
 		bool FileHandle::Open(const char* path, OpenOptions options)
 		{
-			if ((m_flags & FLAGS_CLOSED))
+			if (!(m_flags & FLAGS_CLOSED) || m_node)
 			{
 				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
 				return 0;
@@ -95,8 +96,6 @@ namespace obos
 			const char* realPath = path;
 			realPath += utils::strCountToChar(path, ':');
 			realPath += utils::strCountToChar(path, '/');
-			logger::log("Looking for %s\n", path);
-			// If a file is in the root, the file size is zero, whether it actually is or not? TODO: Fix.
 			DirectoryEntry* entry = SearchForNode(point->children.head, (void*)realPath, [](DirectoryEntry* current, void* userdata)->bool {
 				return utils::strcmp(current->path.str, (const char*)userdata);
 				});
@@ -117,18 +116,21 @@ namespace obos
 			if(!entry->fileHandlesReferencing.head)
 				entry->fileHandlesReferencing.head = node;
 			node->prev = entry->fileHandlesReferencing.tail;
+			entry->fileHandlesReferencing.tail = node;
 			entry->fileHandlesReferencing.size++;
-			
+			m_nodeInFileHandlesReferencing = node;
+
 			if (options & OPTIONS_APPEND)
 				SeekTo(0, SEEKPLACE_END);
 			if (!(options & OPTIONS_READ_ONLY))
 				m_flags |= FLAGS_ALLOW_WRITE;
+			m_flags &= ~FLAGS_CLOSED;
 			return true;
 		}
 
 		bool FileHandle::Read(char* data, size_t nToRead, bool peek)
 		{
-			if (m_flags & FLAGS_CLOSED)
+			if (m_flags & FLAGS_CLOSED || !m_node)
 			{
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
@@ -236,8 +238,33 @@ namespace obos
 
 		bool FileHandle::Close()
 		{
-			SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
-			return false;
+			if (m_flags & FLAGS_CLOSED)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return false;
+			}
+			if (!m_node || !m_nodeInFileHandlesReferencing)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return false;
+			}
+			DirectoryEntry* node = (DirectoryEntry*)m_node;
+			HandleListNode* nodeInFHR = (HandleListNode*)m_nodeInFileHandlesReferencing;
+			if (nodeInFHR->next)
+				nodeInFHR->next->prev = nodeInFHR->prev;
+			if (nodeInFHR->prev)
+				nodeInFHR->prev->next = nodeInFHR->next;
+			if (node->fileHandlesReferencing.head == nodeInFHR)
+				node->fileHandlesReferencing.head = nodeInFHR->next;
+			if (node->fileHandlesReferencing.tail == nodeInFHR)
+				node->fileHandlesReferencing.tail = nodeInFHR->prev;
+			node->fileHandlesReferencing.size--;
+			delete nodeInFHR;
+			m_nodeInFileHandlesReferencing = m_pathNode = m_node = nullptr;
+			m_currentFilePos = 0;
+
+			m_flags = FLAGS_CLOSED;
+			return true;
 		}
 
 		bool FileHandle::__TestEof(uoff_t pos) const

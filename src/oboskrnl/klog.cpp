@@ -202,7 +202,7 @@ namespace obos
 			return ret;
 		}
 
-
+		locks::Mutex debug_lock;
 		locks::Mutex log_lock;
 		locks::Mutex warning_lock;
 		locks::Mutex error_lock;
@@ -221,6 +221,18 @@ namespace obos
 			lock_name.Unlock();\
 			return ret
 
+#ifdef OBOS_DEBUG
+		size_t debug(const char* format, ...)
+		{
+			__impl_log(BLUE, DEBUG_PREFIX_MESSAGE, debug_lock);
+			return 0;
+		}
+#else
+		size_t debug(const char*, ...)
+		{
+			return 0;
+		}
+#endif
 		size_t log(const char* format, ...)
 		{
 			__impl_log(GREEN, LOG_PREFIX_MESSAGE, log_lock);

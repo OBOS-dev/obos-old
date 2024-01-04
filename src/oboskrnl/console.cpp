@@ -206,6 +206,9 @@ namespace obos
 		case '\b':
 			putChar(' ', --x, y, foregroundColour, backgroundColour);
 			break;
+		case ' ':
+			putChar(' ', ++x, y, foregroundColour, backgroundColour);
+			break;
 		default:
 			if (x >= m_nCharsHorizontal)
 				newlineHandler(x, y);

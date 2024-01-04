@@ -149,7 +149,7 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 
 		if (det != HBA_PORT_DET_PRESENT || ipm != HBA_PORT_IPM_ACTIVE)
 		{
-			logger::warning("AHCI: No drive found on port %d, even though it is implemented.\n");
+			logger::debug("AHCI: No drive found on port %d, even though it is implemented.\n", port);
 			continue;
 		}
 
@@ -218,8 +218,6 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 					logger::panic(nullptr, "AHCI: %s: ctba has its upper 32-bits set and cap.s64a is false.\n", __func__);
 		}
 		// Send IDENTIFIY ATA to find out information about the connected drives (eg: sector count, sector size)
-		// The "command engine" is already stopped.
-		// StopCommandEngine(pPort);
 		uint32_t cmdSlot = FindCMDSlot(pPort);
 		memory::VirtualAllocator vallocator{ nullptr };
 		uintptr_t responsePhys = 0;
@@ -295,9 +293,55 @@ extern "C" void _start()
 	else
 		logger::error("AHCI: Could not initialize AHCI.\n");
 	{
-		void* buff = nullptr;
-		DriveReadSectors(0, 0, 1025, &buff, nullptr);
-		memory::VirtualAllocator{nullptr}.VirtualFree(buff, 1025 * 4096);
+		byte* buff = nullptr;
+		size_t bufSizePages = 1;
+		uint64_t lba = 0;
+		if (!DriveReadSectors(1, lba, 1, (void**)&buff, nullptr))
+			goto done;
+		logger::log("Hexdump of sector %u of drive 1:\n", lba);
+		bool printCh = false;
+		const size_t width = 31;
+		logger::printf("         Address: ");
+		for(byte i = 0; i < ((byte)width) + 1; i++)
+			logger::printf("%e%x ", 2, i);
+		logger::printf("\n0000000000000000: ", 16, 0);
+		for (size_t i = 0, chI = 0; i < 512; i++, chI++)
+		{
+			if (printCh)
+			{
+				char ch = buff[i];
+				switch (ch)
+				{
+				case '\n':
+				case '\t':
+				case '\r':
+				case '\b':
+				case '\a':
+				case '\0':
+				{
+					ch = '.';
+					break;
+				}
+				default:
+					break;
+				}
+				logger::printf("%c", ch);
+			}
+			else
+				logger::printf("%e%x ", 2, buff[i]);
+			if (chI == static_cast<size_t>(width + (!(i < (width + 1)) || printCh)))
+			{
+				chI = 0;
+				if (!printCh)
+					i -= (width + 1);
+				else
+					logger::printf(" |\n%e%x: ", 16, i + 1);
+				printCh = !printCh;
+				if (printCh)
+					logger::printf("\t| ");
+			}
+		}
+		memory::VirtualAllocator{nullptr}.VirtualFree(buff, bufSizePages * 4096);
 	}
 	done:
     g_driverHeader.driver_initialized = true;

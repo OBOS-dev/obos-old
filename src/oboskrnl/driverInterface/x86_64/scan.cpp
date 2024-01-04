@@ -16,6 +16,11 @@
 
 #include <x86_64-utils/asm.h>
 
+#include <vfs/fileManip/fileHandle.h>
+#include <vfs/fileManip/directoryIterator.h>
+
+#include <multitasking/process/x86_64/loader/elfStructures.h>
+
 namespace obos
 {
 	namespace driverInterface
@@ -24,17 +29,41 @@ namespace obos
 		{
 			const char* fullPath = nullptr;
 			driverHeader* header = nullptr;
+			LoadableDriver() = default;
+			LoadableDriver(const char* path, driverHeader* _header)
+				:fullPath{path},header{_header}
+			{}
+			LoadableDriver(const LoadableDriver& other)
+			{
+				fullPath = other.fullPath;
+				header = other.header;
+			}
 			void operator=(const LoadableDriver& other)
 			{
 				fullPath = other.fullPath;
 				header = other.header;
+			}
+			LoadableDriver(LoadableDriver&& other)
+			{
+				fullPath = other.fullPath;
+				header = other.header;
+				other.header = nullptr;
+				other.fullPath = nullptr;
+			}
+			void operator=(LoadableDriver&& other)
+			{
+				fullPath = other.fullPath;
+				header = other.header;
+				other.header = nullptr;
+				other.fullPath = nullptr;
 			}
 		};
 		bool operator==(const LoadableDriver& first, const LoadableDriver& second)
 		{
 			return utils::strcmp(first.fullPath, second.fullPath);
 		}
-
+		
+		driverHeader* CheckModule(byte* file, size_t size, uintptr_t* headerVirtAddr);
 		void ScanPCIBus(const utils::Vector<LoadableDriver>& driverList)
 		{
 			struct pciDevice
@@ -70,42 +99,104 @@ namespace obos
 								if (driver.header->pciInfo.classCode == dev.classCode)
 								{
 									bool found = true;
-									for (uint8_t csubclass = bsf(driver.header->pciInfo.subclass); 
+									__uint128_t drv_subclass = driver.header->pciInfo.subclass;
+									for (uint8_t csubclass = bsf(drv_subclass); 
 												 csubclass != subclass;
-												 csubclass = bsf(driver.header->pciInfo.subclass))
+												 csubclass = bsf(drv_subclass))
 									{
-										if (!(driver.header->pciInfo.subclass & ((__uint128_t)1<<csubclass)))
+										if (!(drv_subclass & ((__uint128_t)1<<csubclass)))
 										{
 											found = false;
 											break;
 										}
+										drv_subclass &= ~((__uint128_t)1<<csubclass);
 									}
 									if (!found)
 										continue;
-									for (uint8_t cprogIF = bsf(driver.header->pciInfo.progIf); 
+									__uint128_t drv_progIf = driver.header->pciInfo.progIf;
+									for (uint8_t cprogIF = bsf(drv_progIf); 
 												 cprogIF != progIF;
-												 cprogIF = bsf(driver.header->pciInfo.progIf))
+												 cprogIF = bsf(drv_progIf))
 									{
-										if (!(driver.header->pciInfo.progIf & ((__uint128_t)1<<cprogIF)))
+										if (!(drv_progIf & ((__uint128_t)1<<cprogIF)))
 										{
 											found = false;
 											break;
 										}
+										drv_progIf &= ~((__uint128_t)1<<cprogIF);
 									}
-									driversToLoad.emplace_at(driver, dev);
 									if (!found)
 										continue;
+									driversToLoad.emplace_at(driver, dev);
 								}
 							}
 						}
 						return true;
 					}, &udata);
-			
+			for(auto&[driver, unused1, unused2] : driversToLoad)
+			{
+				(unused1 = unused1);
+				(unused2 = unused2);
+				vfs::FileHandle file;
+				file.Open(driver->fullPath, vfs::OPTIONS_READ_ONLY);
+				// Load the driver's data.
+				size_t size = file.GetFileSize();
+				char* data = new char[size + 1];
+				file.Read(data, size);
+				file.Close();
+				// Load the driver.
+				if (!LoadModule((byte*)data, size, nullptr))
+				{
+					// Oh no! Anyway...
+					delete[] data;
+					continue;
+				}
+				delete[] data;
+			}
 		}
-		void ScanAndLoadModules()
+		void ScanAndLoadModules(const char* root)
 		{
 			utils::Vector<LoadableDriver> drivers;
+			// Look for loadable drivers in "root"
+			vfs::DirectoryIterator iter;
+			iter.OpenAt(root);
+			for (const char* path = *iter; iter; iter++)
+			{
+				vfs::FileHandle file;
+				file.Open(path);
+				if (file.GetFileSize() < sizeof(process::loader::Elf64_Ehdr))
+				{
+					file.Close();
+					continue;
+				}
+				char header[4];
+				file.Read(header, 4, true);
+				if (utils::memcmp(header, "\177ELF", 4))
+				{
+					// Read the entire file and verify it is a module.
+					char* _file = new char[file.GetFileSize()];
+					file.Read(_file, file.GetFileSize());
+					driverHeader* fheader = CheckModule((byte*)_file, file.GetFileSize(), nullptr);
+					if (!fheader)
+					{
+						delete[] _file;
+						file.Close();
+						continue;
+					}
+					// If it is, add it to the list.
+					driverHeader* header = new driverHeader;
+					utils::memcpy(header, fheader, sizeof(driverHeader));
+					drivers.push_back(LoadableDriver{ path, header });
+					delete[] _file;
+				}
+				file.Close();
+			}
 			ScanPCIBus(drivers);
+			for (auto& driver : drivers)
+			{
+				delete driver.fullPath;
+				delete driver.header;
+			}
 		}
 	}
 }

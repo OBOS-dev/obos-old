@@ -16,7 +16,7 @@ namespace obos
 	{
 		extern struct driverIdentity** g_driverInterfaces;
 		extern size_t g_driverInterfacesCapacity;
-		void ScanAndLoadModules();
+		void ScanAndLoadModules(const char* root);
 		bool LoadModule(byte* file, size_t size, thread::ThreadHandle** mainThread);
 	}
 }

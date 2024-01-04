@@ -72,7 +72,7 @@ namespace obos
 			}
 			return true;
 		}
-		static driverHeader* CheckModule(byte* file, size_t size, uintptr_t* headerVirtAddr)
+		driverHeader* CheckModule(byte* file, size_t size, uintptr_t* headerVirtAddr)
 		{
 			using namespace process::loader;
 
@@ -152,13 +152,16 @@ namespace obos
 			process::loader::Elf64_Sym* symbolTable,
 			size_t szSymbolTable,
 			process::loader::Elf64_Off stringTable,
-			const char* _symbol)
+			const char* _symbol,
+			uint8_t requiredBinding = process::loader::STB_GLOBAL)
 		{
 			using namespace process::loader;
 			size_t countEntries = szSymbolTable / sizeof(Elf64_Sym);
 			for (size_t i = 0; i < countEntries; i++)
 			{
 				auto& symbol = symbolTable[i];
+				if ((symbol.st_info >> 4) != requiredBinding)
+					continue;
 				const char* symbolName = (char*)(fileStart + stringTable + symbol.st_name);
 				if (utils::strcmp(symbolName, _symbol))
 					return &symbol;
@@ -376,19 +379,30 @@ namespace obos
 			tables kernel_tables = GetKernelSymbolStringTables();
 			for ([[maybe_unused]] const relocation& i : required_relocations)
 			{
-				[[maybe_unused]] auto& Unresolved_Symbol = *GetSymbolFromIndex(symbolTable, i.symbolTableOffset);
-				[[maybe_unused]] auto Symbol = GetSymbolFromTable(
-					kFileBase,
-					(Elf64_Sym*)(kFileBase + kernel_tables.symtab_section->sh_offset),
-					kernel_tables.symtab_section->sh_size,
-					kernel_tables.strtab_section->sh_offset,
-					(const char*)(baseAddress + stringTable + Unresolved_Symbol.st_name)
-				);
-				if (!Symbol)
+				Elf64_Sym* Symbol = nullptr;
+				if (i.symbolTableOffset)
 				{
-					SetLastError(OBOS_ERROR_DRIVER_REFERENCED_UNRESOLVED_SYMBOL);
-					vallocator.VirtualFree(baseAddress, nPagesTotal);
-					break;
+					auto& Unresolved_Symbol = *GetSymbolFromIndex(symbolTable, i.symbolTableOffset);
+					Symbol = GetSymbolFromTable(
+						kFileBase,
+						(Elf64_Sym*)(kFileBase + kernel_tables.symtab_section->sh_offset),
+						kernel_tables.symtab_section->sh_size,
+						kernel_tables.strtab_section->sh_offset,
+						(const char*)(baseAddress + stringTable + Unresolved_Symbol.st_name)
+					);
+					if (!Symbol) 
+					{
+						SetLastError(OBOS_ERROR_DRIVER_REFERENCED_UNRESOLVED_SYMBOL);
+						vallocator.VirtualFree(baseAddress, nPagesTotal);
+						return false;
+					}
+					if (Unresolved_Symbol.st_size != Symbol->st_size && i.relocationType == R_AMD64_COPY)
+					{
+						// Oh no!
+						SetLastError(OBOS_ERROR_DRIVER_SYMBOL_MISMATCH);
+						vallocator.VirtualFree(baseAddress, nPagesTotal);
+						return false;
+					}
 				}
 				auto& type = i.relocationType;
 				uintptr_t relocAddr = (uintptr_t)baseAddress + i.virtualAddress;
@@ -423,13 +437,6 @@ namespace obos
 					relocSize = 4;
 					break;
 				case R_AMD64_COPY:
-					if (Unresolved_Symbol.st_size != Symbol->st_size)
-					{
-						// Oh no!
-						SetLastError(OBOS_ERROR_DRIVER_SYMBOL_MISMATCH);
-						vallocator.VirtualFree(baseAddress, nPagesTotal);
-						return false;
-					}
 					// Save copy relocations for the end because if we don't, it might contain unresolved addresses.
 					copy_relocations.push_back({ (void*)relocAddr, (void*)Symbol->st_value, Symbol->st_size });
 					relocSize = 0;

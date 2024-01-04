@@ -280,7 +280,7 @@ struct HBA_CMD_TBL
  
 	uint8_t rsv[48];
  
-	HBA_PRDT_ENTRY prdt_entry[1];
+	HBA_PRDT_ENTRY prdt_entry[4];
 };
 
 struct Port

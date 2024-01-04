@@ -118,6 +118,13 @@ namespace obos
 			kernel_cr3 = memory::getCurrentPageMap();
 			memory::VirtualAllocator vallocator{ nullptr };
 			memory::MapPhysicalAddress(kernel_cr3, 0, nullptr, 3);
+			logger::debug("%s: Entries for page 0:\nPTE: %p\nPDE: %p\nPDPE: %p\nPME: %p\n",
+				__func__,
+				kernel_cr3->getL1PageMapEntryAt(0),
+				kernel_cr3->getL2PageMapEntryAt(0),
+				kernel_cr3->getL3PageMapEntryAt(0),
+				kernel_cr3->getL4PageMapEntryAt(0)
+			);
 			(*(void**)0xFC8) = (void*)(uintptr_t)*((uint16_t*)&GDT_Ptr);
 			(*(void**)0xFF0) = *((void**)((&GDT_Ptr) + 2));
 			(*(void**)0xFF8) = kernel_cr3;
@@ -137,6 +144,7 @@ namespace obos
 					InitializeGDTCpu(&g_cpuInfo[i]);
 					continue;
 				}
+				logger::debug("%s: Initializing core %d.\n", __func__, i);
 				utils::memcpy(nullptr, &_strampoline, ((uintptr_t)&_etrampoline - (uintptr_t)&_strampoline) - 0x58); // Reload the trampoline at address 0x00.
 				(*(void**)0xFD8) = &g_cpuInfo[i];
 				if (i != 1)
@@ -149,11 +157,14 @@ namespace obos
 				g_cpuInfo[i].startup_stack.size = 0x4000;
 				g_cpuInfo[i].temp_stack.size = 0x4000;
 				// Assert the INIT# pin of the AP.
+				logger::debug("%s: Sending #INIT to the AP.\n", __func__);
 				SendIPI(DestinationShorthand::None, DeliveryMode::INIT, 0, g_lapicIDs[i]);
 				// Send a Startup IPI to the AP.
+				logger::debug("%s: Sending #SIPI to the AP.\n", __func__);
 				SendIPI(DestinationShorthand::None, DeliveryMode::SIPI, 0, g_lapicIDs[i]);
 				while (!(*(uintptr_t*)0xfe8)); // Wait for "trampoline_done_jumping"
 				(*(uintptr_t*)0xfe8) = false;
+				logger::debug("%s: Done initialzing core %d.", __func__, i);
 			}
 			g_cpuInfo[0].initialized = true;
 			bool allInitialized = false;
