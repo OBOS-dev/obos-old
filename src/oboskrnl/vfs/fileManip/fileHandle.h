@@ -14,25 +14,26 @@ namespace obos
 	{
 		typedef intptr_t off_t;
 		typedef uintptr_t uoff_t;
-		enum OpenOptions
-		{
-			OPTIONS_READ_ONLY = 0b1, // Open the file read only.
-			OPTIONS_APPEND = 0b10, // Open the file, then seek to the end.
-		};
-		enum Flags
-		{
-			//FLAGS_REACHED_EOF = 0b1,
-			FLAGS_ALLOW_WRITE = 0b10,
-			FLAGS_CLOSED = 0b100,
-		};
-		enum SeekPlace
-		{
-			SEEKPLACE_CUR,
-			SEEKPLACE_BEG,
-			SEEKPLACE_END,
-		};
 		class FileHandle
 		{
+		public:
+			enum OpenOptions
+			{
+				OPTIONS_READ_ONLY = 0b1, // Open the file read only.
+				OPTIONS_APPEND = 0b10, // Open the file, then seek to the end.
+			};
+			enum Flags
+			{
+				//FLAGS_REACHED_EOF = 0b1,
+				FLAGS_ALLOW_WRITE = 0b10,
+				FLAGS_CLOSED = 0b100,
+			};
+			enum SeekPlace
+			{
+				SEEKPLACE_CUR,
+				SEEKPLACE_BEG,
+				SEEKPLACE_END,
+			};
 		public:
 			FileHandle() = default;
 

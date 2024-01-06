@@ -125,6 +125,10 @@ namespace obos
 		/// The signal handler is nullptr.
 		/// </summary>
 		OBOS_ERROR_NULL_HANDLER,
+		/// <summary>
+		/// The write was aborted.
+		/// </summary>
+		OBOS_ERROR_VFS_WRITE_ABORTED,
 
 		OBOS_ERROR_HIGHEST_VALUE,
 	};

@@ -8,53 +8,18 @@ global _ZN4obos5utils8dwMemsetEPjjm
 global _ZN4obos5utils6memcmpEPKvS2_m
 global _ZN4obos5utils6memcmpEPKvjm
 global _ZN4obos5utils6memcpyEPvPKvm
+global _ZN4obos3vfs20_VectorizedMemcpy64BEPvPKvm
 
 _ZN4obos5utils8dwMemcpyEPjPKjm:
-	push rbp
-	mov rbp, rsp
-
-	xor rax, rax
-
-	mov rcx, rdx
-	test rcx, rcx
-	jz .finish
-	
-	test rdi, rsi
-	jz .finish
-
-	mov rax, rdi
-.loop:
-	mov r8d, [rsi]
-	mov [rdi], r8d
-
-	add rdi, 4
-	add rsi, 4
-	loop .loop
-
-.finish:
-	
-	leave
+	lea rdx, [rdx*4]
+	call _ZN4obos5utils6memcpyEPvPKvm
 	ret
 _ZN4obos5utils8dwMemsetEPjjm:
-	push rbp
-	mov rbp, rsp
-
-	xor rax, rax
-
+	push rdi
 	mov rcx, rdx
-	test rcx, rcx
-	jz .finish
-	
-	mov rax, rdi
-.loop:
-	mov [rdi], rsi
-
-	add rdi, 4
-	loop .loop
-
-.finish:
-	
-	leave
+	mov eax, esi
+	rep stosd
+	pop rax
 	ret
 
 _ZN4obos5utils6memcpyEPvPKvm:
@@ -63,21 +28,11 @@ _ZN4obos5utils6memcpyEPvPKvm:
 
 	xor rax, rax
 
-	mov rcx, rdx
-	test rcx, rcx
-	jz .finish
-	
 	mov rax, rdi
-.loop:
-	mov r8b, byte [rsi]
-	mov byte [rdi], r8b
 
-	inc rdi
-	inc rsi
-	loop .loop
-
-.finish:
-
+	mov rcx, rdx
+	rep movsb
+	
 	leave
 	ret
 
@@ -87,18 +42,14 @@ _ZN4obos5utils7memzeroEPvm:
 
 	mov rcx, rsi
 
-	test rcx,rcx
-	jz .finish
+	push rdi
 
-	mov rax, rdi
-
-.loop:
-	mov byte [rdi], 0
-
-	inc rdi
-	loop .loop
+	xor rax,rax
+	rep stosb
 
 .finish:
+
+	pop rax
 
 	leave
 	ret
@@ -181,4 +132,22 @@ _ZN4obos5utils6strlenEPKc:
 	xor sil, sil
 	xor dl, dl
 	call _ZN4obos5utils14strCountToCharEPKccb
+	ret
+_ZN4obos3vfs20_VectorizedMemcpy64BEPvPKvm:
+	push rbp
+	mov rbp, rsp
+
+	push rdi
+
+	mov rax, rdx
+	xor rdx,rdx
+	mov rcx, 64
+	mul rcx
+	mov rcx, rax
+	rep movsb
+
+	pop rdi
+
+	mov rsp, rbp
+	pop rbp
 	ret

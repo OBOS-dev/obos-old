@@ -24,7 +24,7 @@ namespace obos
 
             size_t h = 0, g = 0;
 
-			while (*_key)
+			for (size_t i = 0; i < sizeof(Key); i++)
 			{
 				h = (h << 4) + *_key++;
 				if ((g = h & 0xf0000000))
@@ -46,44 +46,42 @@ namespace obos
             class HashmapIter
             {
             public:
-                using _node = Hashmap<_Key, _ValT, _equals, _hash>::node;
+                using _node = Hashmap<_Key, _ValT, _equals, _hash>::listNode;
 
                 HashmapIter() = delete;
 
-                _node& operator*()
+                auto& operator*()
 				{
-                    return *m_currentNode;
+                    node* n = (node*)m_currentNode->data;
+                    return *n;
 				}
 				size_t operator++()
 				{
-                    auto newNode = ++m_currentNode;
-                    while (!newNode->used && this->operator bool()) newNode++;
+                    auto newNode = m_currentNode = m_currentNode->next;
 					return ((uintptr_t)(newNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
 				}
 				size_t operator++(int)
 				{
                     auto oldNode = m_currentNode;
-                    auto newNode = ++m_currentNode;
-                    while (!newNode->used && this->operator bool()) newNode++;
-					return ((uintptr_t)(oldNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
+                    m_currentNode = m_currentNode->next;
+                    return ((uintptr_t)(oldNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
 				}
 				size_t operator--()
 				{
-					auto newNode = --m_currentNode;
-                    while (!newNode->used && this->operator bool()) newNode--;
-					return ((uintptr_t)(newNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
+					auto oldNode = m_currentNode;
+					m_currentNode = m_currentNode->prev;
+                    return ((uintptr_t)(oldNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
 				}
 				size_t operator--(int)
 				{
 					auto oldNode = m_currentNode;
-                    auto newNode = --m_currentNode;
-                    while (!newNode->used && this->operator bool()) newNode--;
-					return ((uintptr_t)(oldNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
+                    auto newNode = m_currentNode = m_currentNode->prev;
+                    return ((uintptr_t)(oldNode) - (uintptr_t)m_map->m_nodeTable) / sizeof(*m_currentNode);
 				}
 
 				operator bool() 
                 { 
-                    return m_currentNode >= m_map->m_nodeTable && m_currentNode < (m_map->m_nodeTable + m_map->m_tableCapacity);
+                    return m_currentNode != nullptr;
                 }
             
                 friend class Hashmap;
@@ -158,10 +156,21 @@ namespace obos
                 if(!ourBucket->firstChain)
                     ourBucket->firstChain = ourChain;
                 ourChain->prev = ourBucket->lastChain;
+                ourBucket->lastChain = ourChain;
                 ourBucket->nChains++;
-                m_nodeTable[ourIndex].key   = &key;
-                m_nodeTable[ourIndex].value = &value;
+                m_nodeTable[ourIndex].key   = new Key{ key };
+                m_nodeTable[ourIndex].value = new ValT{value };
                 m_nodeTable[ourIndex].used = true;
+                listNode* node = new listNode;
+                node->data = m_nodeTable + ourIndex;
+                if (m_tail)
+                    m_tail->next = node;
+                if(!m_head)
+                    m_head = node;
+                node->prev = m_tail;
+                m_tail = node;
+                m_nNodes++;
+                m_nodeTable[ourIndex].referencingNode = node;
             }
 
             void remove(const Key& key)
@@ -192,9 +201,20 @@ namespace obos
                     currentBucket->firstChain = currentChain->next;
                 if (currentBucket->lastChain == currentChain)
                     currentBucket->lastChain = currentChain->prev;
-                currentBucket->nChains--;
+
+                if (currentNode->next)
+                    currentNode->next->prev = currentNode->prev;
+                if (currentNode->prev)
+                    currentNode->prev->next = currentNode->next;
+                if (m_head == currentNode)
+                    m_head = currentNode->next;
+                if (m_tail->lastChain == currentNode)
+                    m_tail->lastChain = currentNode->prev;
+                m_nNodes--;
                 kfree(currentChain);
                 currentNode->used = false;
+                delete currentNode->key;
+                delete currentNode->value;
                 utils::memzero(currentNode, sizeof(*currentNode));
             }
             // This does nothing to the value stored in a node. Freeing any objects is the user's responsibility.
@@ -202,18 +222,29 @@ namespace obos
             {
                 if (!m_nodeTable || !m_buckets)
                     return;
-                for (size_t i = 0; i < m_tableCapacity; i++)
+                // for (size_t i = 0; i < m_tableCapacity; i++)
+                // {
+                //     if (m_buckets[i].nChains)
+                //     {
+                //         for (chain* node = m_buckets[i].firstChain; node; )
+                //         {
+                //             chain* temp = node->next;
+                //             kfree(node);
+                //             node = temp;
+                //             m_buckets[i].nChains--;
+                //         }
+                //     }
+                // }
+                for (auto _node = m_head; _node;)
                 {
-                    if (m_buckets[i].nChains)
-                    {
-                        for (chain* node = m_buckets[i].firstChain; node; )
-                        {
-                            chain* temp = node->next;
-                            kfree(node);
-                            node = temp;
-                            m_buckets[i].nChains--;
-                        }
-                    }
+                    ((node*)_node->data)->used = false;
+                    delete ((node*)_node->data)->key;
+                    delete ((node*)_node->data)->value;
+                    delete (node*)_node->data;
+                    auto temp = _node->next;
+                    delete _node;
+
+                    _node = temp;
                 }
                 kfree(m_buckets); m_buckets = nullptr;
                 kfree(m_nodeTable); m_nodeTable = nullptr;
@@ -236,20 +267,12 @@ namespace obos
 
             HashmapIter<Key, ValT, equals, hash> begin()
             {
-                node* firstUsableNode = m_nodeTable;
-                for(size_t i = 0; i < m_tableCapacity && !firstUsableNode->used; i++, firstUsableNode++);
-                if (!firstUsableNode->used)
-                    firstUsableNode = m_nodeTable;
-                HashmapIter<Key, ValT, equals, hash> iter{ this, firstUsableNode };
+                HashmapIter<Key, ValT, equals, hash> iter{ this, m_head };
                 return iter;
             }
             HashmapIter<Key, ValT, equals, hash> end()
             {
-                node* lastUsableNode = m_nodeTable + m_tableCapacity;
-                for(int64_t i = 0; i > -1 && !lastUsableNode->used; i++, lastUsableNode--);
-                if (!lastUsableNode->used)
-                    lastUsableNode = m_nodeTable + m_tableCapacity;
-                HashmapIter<Key, ValT, equals, hash> iter{ this, lastUsableNode };
+                HashmapIter<Key, ValT, equals, hash> iter{ this, m_tail };
                 return iter;
             }
 
@@ -259,12 +282,6 @@ namespace obos
             }
 
             friend HashmapIter<Key, ValT, equals, hash>;
-            struct node
-            {
-                const Key* key;
-                ValT* value;
-                bool used = false;
-            };
         private:
             struct chain
             {
@@ -276,8 +293,27 @@ namespace obos
                 chain *firstChain, *lastChain;
                 size_t nChains;
             };
+            struct listNode
+            {
+                listNode *next, *prev;
+                void* data;
+            };
+            struct node
+            {
+                const Key* key;
+                ValT* value;
+                struct listNode* referencingNode;
+                bool used = false;
+            };
             bucket* m_buckets = nullptr;
             node* m_nodeTable = nullptr;
+            
+            // These are used for iterators.
+
+            listNode* m_head = nullptr;
+            listNode* m_tail = nullptr;
+            size_t m_nNodes;
+
             size_t m_tableCapacity = 64;
         };
     }

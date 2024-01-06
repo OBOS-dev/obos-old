@@ -12,67 +12,93 @@
 
 #include <allocators/liballoc.h>
 
+#include <vfs/vfsNode.h>
+
+#include <multitasking/thread.h>
+#include <multitasking/cpu_local.h>
+
+#include <vfs/devManip/driveHandle.h>
+
 namespace obos
 {
+    namespace vfs
+    {
+        DriveList g_drives;
+    }
 	namespace driverInterface
 	{
-        struct drive
+        using vfs::g_drives;
+        using vfs::DriveEntry;
+        uint32_t RegisterDrive()
         {
-            uint32_t id = 0;
-            drive *next, *prev;
-        };
-        struct 
-        {
-            drive *head = nullptr, *tail = nullptr;
-            size_t len = 0;
-            void push(drive& node)
-            {
-                if (tail)
-                    tail->next = &node;
-                if(!head)
-                    head = &node;
-                node.prev = tail;
-                len++;
-            }
-            void remove(drive& node, void(*freer)(void*))
-            {
-                if(node.next)
-                    node.next->prev = node.prev;
-                if(node.next)
-                    node.prev->next = node.next;
-                if (head == &node)
-                    head = node.next;
-                if (tail == &node)
-                    tail = node.prev;
-                len--;
-                if (freer)
-                    freer(&node);
-            }
-        } g_drives;
-        
-		uint32_t RegisterDrive()
-        {
-            drive* node = new drive{};
-            node->id = g_drives.len;
-            g_drives.push(*node);
-            return node->id;
+            auto currentThread = thread::GetCurrentCpuLocalPtr()->currentThread;
+            if (!currentThread->driverIdentity)
+                return -1;
+            auto _serviceType = ((driverIdentity*)currentThread->driverIdentity)->_serviceType;
+            if (_serviceType != serviceType::OBOS_SERVICE_TYPE_STORAGE_DEVICE &&
+                _serviceType != serviceType::OBOS_SERVICE_TYPE_VIRTUAL_STORAGE_DEVICE)
+                return -1;
+            uint32_t id = g_drives.nDrives;
+            DriveEntry* entry = new DriveEntry;
+            if (g_drives.tail)
+                g_drives.tail->next = entry;
+            if(!g_drives.head)
+                g_drives.head = entry;
+            entry->prev = g_drives.tail;
+            g_drives.tail = entry;
+            g_drives.nDrives++;
+            
+            entry->driveId = id;
+            entry->storageDriver = (driverIdentity*)(currentThread->driverIdentity);   
+            return id;
         }
 		void UnregisterDrive(uint32_t id)
         {
-            drive* node = nullptr;
-            for (drive* cnode = g_drives.head; cnode;)
+            // Find the drive.
+            DriveEntry* cdrive = g_drives.head;
+            DriveEntry* drive = nullptr;
+            if (!cdrive)
+                return;
+            while (cdrive)
             {
-                if (cnode->id == id)
+                if (cdrive->driveId == id)
                 {
-                    node = cnode;
+                    drive = cdrive;
                     break;
                 }
 
-                cnode = cnode->next;
+                cdrive = drive->next;
             }
-            if (!node)
+            if (!drive)
                 return;
-            g_drives.remove(*node, kfree);
+            // Unlink the driver.
+            if (drive->next)
+                drive->next->prev = drive->prev;
+            if (drive->prev)
+                drive->prev->next = drive->next;
+            if (g_drives.head == drive)
+                g_drives.head = drive->next;
+            if (g_drives.tail == drive)
+                g_drives.tail = drive->prev;
+            g_drives.nDrives--;
+            // Close any open handles, partition handles for this driver will also be closed.
+            for (auto handleNode = drive->handlesReferencing.head; handleNode;)
+            {
+                vfs::DriveHandle* handle = (vfs::DriveHandle*)handleNode->handle;
+                auto next = handleNode->next;
+                handle->Close();
+                
+                handleNode = next;
+            }
+            // Delete any partition handles.
+            for (auto part = drive->firstPartition; part;)
+            {
+                auto next = part->next;
+                delete part;
+                part = next;
+            }
+            delete drive;
+            return;
         }
 	}
 }

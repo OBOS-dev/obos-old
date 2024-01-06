@@ -39,6 +39,8 @@ namespace obos
 			VFS_INVALID_NODE_TYPE,
 			VFS_NODE_MOUNTPOINT,
 			VFS_NODE_DIRECTORY_ENTRY,
+			VFS_NODE_DRIVE_ENTRY,
+			VFS_NODE_PARTITION_ENTRY,
 		};
 		enum DirectoryEntryType
 		{
@@ -47,6 +49,7 @@ namespace obos
 			DIRECTORY_ENTRY_TYPE_SYMLINK,
 			DIRECTORY_ENTRY_TYPE_DIRECTORY,
 		};
+		// General
 		struct DirectoryEntryList
 		{
 			struct DirectoryEntry *head, *tail;
@@ -56,15 +59,23 @@ namespace obos
 		{
 			VFSNode() = default;
 			VFSNode(NodeType _type) : type{ _type } {}
-			struct DirectoryEntry *next, *prev; // used for the children.
-			struct DirectoryEntry *parent;
-			DirectoryEntryList children;
 			NodeType type = VFS_INVALID_NODE_TYPE;
 		};
 
-		struct MountPoint : public VFSNode
+		// Filesystem-Related nodes.
+
+		struct GeneralFSNode : public VFSNode
 		{
-			MountPoint() : VFSNode{ VFS_NODE_MOUNTPOINT }
+			GeneralFSNode() = delete;
+			GeneralFSNode(NodeType type) : VFSNode{ type }
+			{}
+			struct DirectoryEntry *next, *prev; // used for the children.
+			struct DirectoryEntry *parent;
+			DirectoryEntryList children;
+		};
+		struct MountPoint : public GeneralFSNode
+		{
+			MountPoint() : GeneralFSNode{ VFS_NODE_MOUNTPOINT }
 			{}
 			uint32_t id;
 			uint32_t partitionId = ((uint32_t)-1);
@@ -81,11 +92,11 @@ namespace obos
 			HandleListNode *head, *tail;
 			size_t size;
 		};
-		struct DirectoryEntry : public VFSNode
+		struct DirectoryEntry : public GeneralFSNode
 		{
-			DirectoryEntry() : VFSNode{ VFS_NODE_DIRECTORY_ENTRY }
+			DirectoryEntry() : GeneralFSNode{ VFS_NODE_DIRECTORY_ENTRY }
 			{}
-			DirectoryEntry(DirectoryEntryType _direntType) : VFSNode{ VFS_NODE_DIRECTORY_ENTRY }, direntType{ _direntType }
+			DirectoryEntry(DirectoryEntryType _direntType) : GeneralFSNode{ VFS_NODE_DIRECTORY_ENTRY }, direntType{ _direntType }
 			{}
 			DirectoryEntryType direntType = DIRECTORY_ENTRY_TYPE_INVALID;
 			uint32_t fileAttrib;
@@ -100,5 +111,39 @@ namespace obos
 			Directory() : DirectoryEntry{ DIRECTORY_ENTRY_TYPE_DIRECTORY }
 			{}
 		};
+
+		// Drive-related nodes
+
+		struct PartitionEntry : public VFSNode
+		{
+			PartitionEntry() : VFSNode{ VFS_NODE_PARTITION_ENTRY }
+			{}
+			uint32_t partitionId = 0;
+			uintptr_t lbaOffset = 0;
+			// Also add the handle to the DriveEntry's handle list.
+			HandleList handlesReferencing;
+			struct DriveEntry* drive;
+			PartitionEntry *next = nullptr, *prev = nullptr;
+		};
+		struct DriveEntry : public VFSNode
+		{
+			DriveEntry() : VFSNode{ VFS_NODE_DRIVE_ENTRY }
+			{}
+			uint32_t driveId = 0;
+			bool isReadOnly = false;
+			driverInterface::driverIdentity* storageDriver = nullptr; // The storage driver to invoke.
+			PartitionEntry *firstPartition = nullptr,
+						   *lastPartition  = nullptr;
+			size_t nPartitions = 0;
+			HandleList handlesReferencing;
+			DriveEntry *next, *prev;
+		};
+		struct DriveList
+		{
+			DriveEntry *head, *tail;
+			size_t nDrives;
+		};
+
+		extern DriveList g_drives;
 	}
 }

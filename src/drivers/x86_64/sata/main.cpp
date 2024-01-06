@@ -65,7 +65,7 @@ extern bool DriveQueryInfo(
 
 driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 	.magicNumber = obos::driverInterface::OBOS_DRIVER_HEADER_MAGIC,
-	.driverId = 0,
+	.driverId = 1,
 	.driverType = obos::driverInterface::OBOS_SERVICE_TYPE_STORAGE_DEVICE,
 	.requests = driverInterface::driverHeader::REQUEST_SET_STACK_SIZE,
     .stackSize = 0x8000,
@@ -88,9 +88,59 @@ driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
     }
 };
 
+#ifndef __pie__
+#error Not compiling with -fPIE
+#endif
+
 volatile byte* g_hbaBase = nullptr;
 volatile HBA_MEM* g_generalHostControl = nullptr;
 Port g_ports[32];
+
+void hexdump(void* _buff, size_t nBytes, const size_t width = 31)
+{
+	bool printCh = false;
+	byte* buff = (byte*)_buff;
+	logger::printf("         Address: ");
+	for(byte i = 0; i < ((byte)width) + 1; i++)
+		logger::printf("%e%x ", 2, i);
+	logger::printf("\n%e%x: ", 16, buff);
+	for (size_t i = 0, chI = 0; i < nBytes; i++, chI++)
+	{
+		if (printCh)
+		{
+			char ch = buff[i];
+			switch (ch)
+			{
+			case '\n':
+			case '\t':
+			case '\r':
+			case '\b':
+			case '\a':
+			case '\0':
+			{
+				ch = '.';
+				break;
+			}
+			default:
+				break;
+			}
+			logger::printf("%c", ch);
+		}
+		else
+			logger::printf("%e%x ", 2, buff[i]);
+		if (chI == static_cast<size_t>(width + (!(i < (width + 1)) || printCh)))
+		{
+			chI = 0;
+			if (!printCh)
+				i -= (width + 1);
+			else
+				logger::printf(" |\n%e%x: ", 16, &buff[i + 1]);
+			printCh = !printCh;
+			if (printCh)
+				logger::printf("\t| ");
+		}
+	}
+}
 
 void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 {
@@ -261,7 +311,7 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 		portDescriptor.sectorSize = *(uint32_t*)(response + (117 * 2));
 		if (!portDescriptor.sectorSize)
 			portDescriptor.sectorSize = 512; // Assume one sector = 512 bytes.
-		portDescriptor.nSectors = *(uint64_t*)(response + (100 * 2));
+		size_t nSectors = *(uint64_t*)(response + (100 * 2));
 		portDescriptor.driveType = pPort->sig == SATA_SIG_ATA ? Port::DRIVE_TYPE_SATA : Port::DRIVE_TYPE_SATAPI;
 		vallocator.VirtualFree((void*)response, 4096);
 		// Register the drive with the kernel.
@@ -271,9 +321,10 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 			port,
 			portDescriptor.kernelID,
 			16,
-			portDescriptor.nSectors,
+			nSectors,
 			8,
 			portDescriptor.sectorSize);
+		portDescriptor.nSectors = nSectors;
 	}
 }
 
@@ -292,57 +343,19 @@ extern "C" void _start()
 		logger::log("AHCI: Initialized AHCI.\n");
 	else
 		logger::error("AHCI: Could not initialize AHCI.\n");
-	{
-		byte* buff = nullptr;
-		size_t bufSizePages = 1;
-		uint64_t lba = 0;
-		if (!DriveReadSectors(1, lba, 1, (void**)&buff, nullptr))
-			goto done;
-		logger::log("Hexdump of sector %u of drive 1:\n", lba);
-		bool printCh = false;
-		const size_t width = 31;
-		logger::printf("         Address: ");
-		for(byte i = 0; i < ((byte)width) + 1; i++)
-			logger::printf("%e%x ", 2, i);
-		logger::printf("\n0000000000000000: ", 16, 0);
-		for (size_t i = 0, chI = 0; i < 512; i++, chI++)
-		{
-			if (printCh)
-			{
-				char ch = buff[i];
-				switch (ch)
-				{
-				case '\n':
-				case '\t':
-				case '\r':
-				case '\b':
-				case '\a':
-				case '\0':
-				{
-					ch = '.';
-					break;
-				}
-				default:
-					break;
-				}
-				logger::printf("%c", ch);
-			}
-			else
-				logger::printf("%e%x ", 2, buff[i]);
-			if (chI == static_cast<size_t>(width + (!(i < (width + 1)) || printCh)))
-			{
-				chI = 0;
-				if (!printCh)
-					i -= (width + 1);
-				else
-					logger::printf(" |\n%e%x: ", 16, i + 1);
-				printCh = !printCh;
-				if (printCh)
-					logger::printf("\t| ");
-			}
-		}
-		memory::VirtualAllocator{nullptr}.VirtualFree(buff, bufSizePages * 4096);
-	}
+	// {
+	// 	byte* buff = nullptr;
+	// 	size_t bufSizePages = 1;
+	// 	uint64_t lba = 0;
+	// 	size_t nSectorsRead = 0;
+	// 	if (!DriveReadSectors(0, lba, 1, (void**)&buff, &nSectorsRead))
+	// 		goto done;
+	// 	if (!nSectorsRead)
+	// 		goto done;
+	// 	logger::log("Hexdump of sector %u of drive 0:\n", lba);
+	// 	hexdump(buff, 512 * 1, 31);
+	// 	memory::VirtualAllocator{nullptr}.VirtualFree(buff, bufSizePages * 4096);
+	// }
 	done:
     g_driverHeader.driver_initialized = true;
 	while (g_driverHeader.driver_finished_loading);

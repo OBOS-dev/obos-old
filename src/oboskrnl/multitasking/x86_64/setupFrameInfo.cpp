@@ -20,12 +20,15 @@
 
 #include <limine.h>
 
+#include <vector.h>
+
 #define BIT(n) (1<<n)
 
 namespace obos
 {
 	extern void kmain_common(byte* initrdDriverData, size_t initrdDriverSize);
 	extern volatile limine_module_request module_request;
+	extern volatile limine_kernel_file_request kernel_file;
 	namespace thread
 	{
 		void setupThreadContext(taskSwitchInfo* info, void* _stackInfo, uintptr_t entry, uintptr_t userdata, size_t stackSize, memory::VirtualAllocator* vallocator, void* asProc)

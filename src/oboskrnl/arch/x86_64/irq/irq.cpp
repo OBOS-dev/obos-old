@@ -45,10 +45,17 @@ namespace obos
 		outb(0xA1, 0x1);
 	}
 	
+	extern volatile limine_hhdm_request hhdm_offset;
 	volatile LAPIC* g_localAPICAddr = nullptr;
 	volatile HPET* g_HPETAddr = nullptr;
 	uint64_t g_hpetFrequency = 0;
 
+	template<typename T>
+	T mapToHHDM(T addr)
+	{
+		uintptr_t _addr = (uintptr_t)addr;
+		return (T)(hhdm_offset.response->offset + _addr);
+	}
 	static size_t ProcessEntryHeader(acpi::MADT_EntryHeader* entryHeader, void*& lapicAddressOut, void*& ioapicAddressOut, uint8_t& nCores, uint8_t* processorIDs, uint8_t* lapicIDs)
 	{
 		size_t ret = 0;
@@ -115,14 +122,14 @@ namespace obos
 
 		if (isBSP)
 		{
-			acpi::MADT_EntryHeader* entryHeader = reinterpret_cast<acpi::MADT_EntryHeader*>(madtTable + 1);
+			acpi::MADT_EntryHeader* entryHeader = (acpi::MADT_EntryHeader*)(madtTable + 1);
 			void* end = reinterpret_cast<void*>(reinterpret_cast<uintptr_t>(madtTable) + madtTable->sdtHeader.Length);
 			void* lapicAddress = (void*)(uintptr_t)madtTable->lapicAddress;
 			void* ioapicAddress = nullptr;
 			for (; entryHeader != end; entryHeader = reinterpret_cast<acpi::MADT_EntryHeader*>(reinterpret_cast<uintptr_t>(entryHeader) + entryHeader->length))
 				ProcessEntryHeader(entryHeader, lapicAddress, ioapicAddress, g_nCores, &g_processorIDs[0], &g_lapicIDs[0]);
 			logger::log("Found %d cores, local apic address: %p, io apic address: %p.\n", g_nCores, lapicAddress, ioapicAddress);
-			g_localAPICAddr = (LAPIC*)lapicAddress;
+			g_localAPICAddr = mapToHHDM((LAPIC*)lapicAddress);
 		}
 		uint64_t msr = rdmsr(IA32_APIC_BASE);
 		msr |= ((uint64_t)1 << 11) | ((uint64_t)isBSP << 8);
@@ -174,7 +181,10 @@ namespace obos
 	void SendIPI(DestinationShorthand shorthand, DeliveryMode deliveryMode, uint8_t vector, uint8_t _destination)
 	{
 		if (!g_localAPICAddr)
-			return; // If the kernel panics before InitializeIrq(), we are in trouble.
+			return; // If the kernel panics before InitializeIrq(), we are in trouble. 
+		// 4th of January, 2024, Omar, I forgot about this comment, and changed to limine's new revision and faulted in
+		// InitializeIrq(). Anyway I fixed that bug...
+
 		while ((g_localAPICAddr->interruptCommand0_31 >> 12 & 0b1)) pause();
 		uint32_t icr1 = 0;
 		uint32_t icr2 = 0;
@@ -225,7 +235,9 @@ namespace obos
 			logger::log("%s: System OEM: %c%c%c%c%c\n", __func__, rsdp->OEMID[0], rsdp->OEMID[1], rsdp->OEMID[2], rsdp->OEMID[3], rsdp->OEMID[4]);
 		acpi::ACPISDTHeader* xsdt = (acpi::ACPISDTHeader*)rsdp->XsdtAddress;
 		if ((is32BitTables = !xsdt))
-			xsdt = (acpi::ACPISDTHeader*)(uintptr_t)rsdp->RsdtAddress;
+			xsdt = mapToHHDM((acpi::ACPISDTHeader*)(uintptr_t)rsdp->RsdtAddress);
+		else
+			xsdt = mapToHHDM(xsdt);
 		if (!xsdt)
 			logger::panic(nullptr, "Buggy ACPI tables. There is neither a xsdt nor an rsdt.\n");
 		uint64_t* tableAddresses64 = reinterpret_cast<uint64_t*>(xsdt + 1);
@@ -240,6 +252,7 @@ namespace obos
 				currentSDT = (acpi::ACPISDTHeader*)(uintptr_t)tableAddresses32[i];
 			else
 				currentSDT = (acpi::ACPISDTHeader*)tableAddresses64[i];
+			currentSDT = mapToHHDM(currentSDT);
 			if (utils::memcmp(currentSDT->Signature, "APIC", 4))
 				madtTable = (acpi::MADTTable*)currentSDT;
 			if (utils::memcmp(currentSDT->Signature, "HPET", 4))
@@ -252,7 +265,7 @@ namespace obos
 			logger::panic(nullptr, "The HPET is not supported on your computer!\n");
 		if (isBSP)
 		{
-			g_HPETAddr = (HPET*)hpetTable->baseAddress.address;
+			g_HPETAddr = mapToHHDM((HPET*)hpetTable->baseAddress.address);
 			g_hpetFrequency = 1000000000000000 / g_HPETAddr->generalCapabilitiesAndID.counterCLKPeriod;
 		}
 		if (madtTable)

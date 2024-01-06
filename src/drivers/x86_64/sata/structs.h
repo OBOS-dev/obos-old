@@ -294,12 +294,12 @@ struct Port
 	uint64_t nSectors = 0;
 	enum DriverType
 	{
-		DRIVE_TYPE_INVALID = -1,
+		DRIVE_TYPE_INVALID = 0,
 		DRIVE_TYPE_SATA,
 		DRIVE_TYPE_SATAPI,
 	} driveType = DRIVE_TYPE_INVALID;
 	obos::locks::Mutex lock{ true };
-	uint32_t kernelID = 0;
+	uint32_t kernelID = 0xffffffff;
 };
 
 enum

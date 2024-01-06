@@ -117,6 +117,7 @@ namespace obos
 			thread->threadList = &tproc->threads;
 			thread->affinity = 
 				thread->ogAffinity = affinity;
+			thread->driverIdentity = thread::GetCurrentCpuLocalPtr()->currentThread->driverIdentity;
 			setupThreadContext(&thread->context, &thread->stackInfo, (uintptr_t)entry, userdata, stackSize, &tproc->vallocator, tproc);
 			uintptr_t val = stopTimer();
 

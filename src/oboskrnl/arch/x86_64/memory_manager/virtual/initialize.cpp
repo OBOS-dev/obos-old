@@ -25,6 +25,10 @@
 
 namespace obos
 {
+	volatile limine_hhdm_request hhdm_offset = {
+		.id = LIMINE_HHDM_REQUEST,
+		.revision = 1,
+	};
 	namespace memory
 	{
 		bool g_initialized = false;
@@ -35,10 +39,6 @@ namespace obos
 		uintptr_t s_pageDirectoryPhys = 0;
 		uintptr_t DecodeProtectionFlags(uintptr_t _flags);
 
-		volatile limine_hhdm_request hhdm_offset = {
-			.id = LIMINE_HHDM_REQUEST,
-			.revision = 1,
-		};
 
 		uintptr_t* mapPageTable(uintptr_t* phys)
 		{
@@ -130,15 +130,22 @@ namespace obos
 			uintptr_t* pPageMap = (uintptr_t*)newKernelPageMap;
 			s_pageTablePhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageTable) & 0xFFFFFFFFFF000;
 			s_pageDirectoryPhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageDirectory) & 0xFFFFFFFFFF000;
-			utils::memzero(newKernelPageMap, 4096);
-			pPageMap[511] = (uintptr_t)kernelPageMap->getL4PageMapEntryAt(0xffffffff80000000);
-			pPageMap[PageMap::addressToIndex(0xffff800000000000, 3)] = (uintptr_t)kernelPageMap->getL4PageMapEntryAt(0xffff800000000000);
-			reinterpret_cast<uintptr_t*>((uintptr_t)newKernelPageMap->getL4PageMapEntryAt(0xfffffffffffff000) & 0xFFFFFFFFFF000)
+			utils::memzero(mapPageTable(pPageMap), 4096);
+			mapPageTable(pPageMap)[511] = (uintptr_t)kernelPageMap->getL4PageMapEntryAt(0xffffffff80000000);
+			mapPageTable(pPageMap)[PageMap::addressToIndex(0xffff800000000000, 3)] = (uintptr_t)kernelPageMap->getL4PageMapEntryAt(0xffff800000000000);
+			// I don't know what this is, and this point I'm too afraid to ask.
+			mapPageTable(
+				reinterpret_cast<uintptr_t*>(
+					(uintptr_t)newKernelPageMap->getL4PageMapEntryAt(0xfffffffffffff000) 
+					& 0xFFFFFFFFFF000)
+				)
 				[PageMap::addressToIndex(0xfffffffffffff000, 2)] = s_pageDirectoryPhys | 3;
 			newKernelPageMap->switchToThis();
 			g_initialized = true;
 			utils::memzero(mapPageTable(nullptr), 4096);
 			freePhysicalPage((uintptr_t)kernelPageMap);
+			g_localAPICAddr = (volatile LAPIC*)((uintptr_t)g_localAPICAddr - hhdm_offset.response->offset);
+			g_HPETAddr = (volatile HPET*)((uintptr_t)g_HPETAddr - hhdm_offset.response->offset);
 			MapPhysicalAddress(newKernelPageMap, (uintptr_t)g_localAPICAddr, (void*)0xffffffffffffe000, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
 			// Do it twice. Why, I don't know. But that fixes the problem
 			MapPhysicalAddress(newKernelPageMap, (uintptr_t)g_localAPICAddr, (void*)0xffffffffffffe000, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));

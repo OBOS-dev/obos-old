@@ -18,6 +18,8 @@
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 
+#include <vfs/devManip/memcpy.h>
+
 #include "structs.h"
 #include "command.h"
 
@@ -26,6 +28,7 @@ namespace obos
 	namespace memory
 	{
 		OBOS_EXPORT void* MapPhysicalAddress(PageMap* pageMap, uintptr_t phys, void* to, uintptr_t cpuFlags);
+		OBOS_EXPORT void UnmapAddress(PageMap* pageMap, void* _addr);
 		OBOS_EXPORT uintptr_t DecodeProtectionFlags(uintptr_t _flags);
 	}
 }
@@ -170,35 +173,41 @@ bool DriveWriteSectors(
             *oNSectorsWrote = 0;
         return true;
     }
-    if (!buff)
-        return false;
-    // Based on nSectorsToRead and portDescriptor.sectorSize, we might need to send multiple WRITE commands to write all our data.
+    // Based on nSectorsToRead and portDescriptor.sectorSize, we might need to send multiple READ commands to get all our data.
     memory::VirtualAllocator vallocator{ nullptr };
     size_t pagesToWrite = (nSectorsToWrite * portDescriptor.sectorSize) / 4096;
 	if (((nSectorsToWrite * portDescriptor.sectorSize) % 4096) != 0)
         pagesToWrite++;
-    uintptr_t* buff_attribs = new uintptr_t[pagesToWrite];
-    if (!vallocator.VirtualGetProtection(buff, pagesToWrite * 4096, buff_attribs))
+    size_t blocksToWrite = (pagesToWrite / 1024) + ((pagesToWrite % 1024) != 0);
+    uintptr_t *dataPhysicalAddresses = new uintptr_t[blocksToWrite];
+    uintptr_t dataPhysicalAddressBase = memory::allocatePhysicalPage(pagesToWrite);
+    for (size_t i = 0; i < blocksToWrite; i++)
+        dataPhysicalAddresses[i] = dataPhysicalAddressBase + i * 1024;
     {
-        delete[] buff_attribs;
-        return false;
+        memory::PageMap* currentPageMap = memory::getCurrentPageMap();
+        byte* data = (byte*)memory::_Impl_FindUsableAddress(nullptr, pagesToWrite);
+        size_t i = 0;
+        for (byte* addr = data; addr < (data + pagesToWrite * 4096); addr += 4096, i++)
+            memory::MapPhysicalAddress(
+                currentPageMap,
+                dataPhysicalAddressBase + i * 4096,
+                addr,
+                memory::DecodeProtectionFlags(0)|1
+            );
+        // Should always exist on x86-64, so we're good using it without the check.
+        vfs::_VectorizedMemcpy64B(data, buff, (nSectorsToWrite * portDescriptor.sectorSize) / 64);
+        i = 0;
+        for (byte* addr = data; addr < (data + pagesToWrite * 4096); addr += 4096, i++)
+            memory::UnmapAddress(currentPageMap, addr);
     }
-    for (size_t i = 0; i < pagesToWrite; i++)
-    {
-        if (!(buff_attribs[i] & memory::PROT_IS_PRESENT))
-        {
-            delete[] buff_attribs;
-            return false;
-        }
-    }
-    delete[] buff_attribs;
     StopCommandEngine(pPort);
     size_t currentSectorCount = nSectorsToWrite;
+    size_t currentPageCount = pagesToWrite;
     size_t currentLBAOffset = lbaOffset;
 	uint32_t cmdSlot = FindCMDSlot(pPort);
     HBA_CMD_HEADER* cmdHeader = (HBA_CMD_HEADER*)portDescriptor.clBase + cmdSlot;
 	cmdHeader->cfl = sizeof(FIS_REG_H2D) / sizeof(uint32_t);
-	cmdHeader->w   = 1; // Host to device.
+	cmdHeader->w   = 1; // Host to Device.
 	cmdHeader->prdtl = 1; // One PRDT entry
     HBA_CMD_TBL* cmdTBL = 
 	    (HBA_CMD_TBL*)
@@ -206,19 +215,17 @@ bool DriveWriteSectors(
 	    	(byte*)portDescriptor.clBase +
 	    	 ((cmdHeader->ctba | ((uintptr_t)cmdHeader->ctbau << 32)) /* physical address of the HBA_CMD_TBL */ - portDescriptor.clBasePhys) // The offset of the HBA_CMD_TBL
 	    );
-    for (size_t i = 0; i < pagesToWrite; i++)
+    for (size_t i = 0; i < blocksToWrite; i++)
     {
+	    uintptr_t dataPhys = dataPhysicalAddresses[i];
 	    // Setup the command slot.
-	    uintptr_t dataPhys = 
-            (uintptr_t)memory::getCurrentPageMap()->getL1PageMapEntryAt((uintptr_t)buff + i * 4096) 
-                & 0xFFFFFFFFFF000;
-        cmdTBL->prdt_entry[0].dba = dataPhys & 0xffffffff;
+	    cmdTBL->prdt_entry[0].dba = dataPhys & 0xffffffff;
 	    if (g_generalHostControl->cap.s64a)
 	    	cmdTBL->prdt_entry[0].dbau = dataPhys & ~(0xffffffff);
 	    else
 	    	if (dataPhys & ~(0xffffffff))
-	    		logger::panic(nullptr, "AHCI: %s: responsePhys has its upper 32-bits set and cap.s64a is false.\n", __func__);
-	    cmdTBL->prdt_entry[0].dbc = 4095;
+	    		logger::panic(nullptr, "AHCI: %s: dataPhys has its upper 32-bits set and cap.s64a is false.\n", __func__);
+	    cmdTBL->prdt_entry[0].dbc = currentPageCount * 4096 - 1;
 	    cmdTBL->prdt_entry[0].i = 1;
 	    FIS_REG_H2D* command = (FIS_REG_H2D*)&cmdTBL->cfis;
 	    utils::memzero(command, sizeof(*command));
@@ -226,7 +233,7 @@ bool DriveWriteSectors(
 	    command->command = ATA_WRITE_DMA_EXT;
 	    command->device = 0x40;
 	    command->c = 1;
-        uint16_t count = i == (pagesToWrite - 1) ? currentSectorCount : (4096 / portDescriptor.sectorSize);
+        uint16_t count = i == (blocksToWrite - 1) ? currentSectorCount : 1024;
 	    command->countl = (uint8_t)(count & 0xff);
 	    command->counth = (uint8_t)((count >> 8) & 0xff);
         command->lba0 = (currentLBAOffset & 0xff);
@@ -247,10 +254,15 @@ bool DriveWriteSectors(
 	    while ( (pPort->ci & (1 << cmdSlot)) && !(pPort->is & (0xFD800000)) /*An error in the IS.*/ );
         if (currentSectorCount > (4096 / portDescriptor.sectorSize))
             currentSectorCount -= (4096 / portDescriptor.sectorSize);
+        if (currentPageCount > 1024)
+            currentPageCount -= 1024;
         currentLBAOffset += (nSectorsToWrite - currentSectorCount);
     }
     if (oNSectorsWrote)
         *oNSectorsWrote = nSectorsToWrite;
+    for (uintptr_t _phys = dataPhysicalAddressBase; _phys < (_phys + (pagesToWrite * 4096)); _phys += 4096)
+        memory::freePhysicalPage(_phys);
+    delete[] dataPhysicalAddresses;
     return true;
 }
 bool DriveQueryInfo(

@@ -137,7 +137,6 @@ namespace obos
 					InitializeGDTCpu(&g_cpuInfo[i]);
 					continue;
 				}
-				logger::debug("%s: Initializing core %d.\n", __func__, i);
 				utils::memcpy(nullptr, &_strampoline, ((uintptr_t)&_etrampoline - (uintptr_t)&_strampoline) - 0x58); // Reload the trampoline at address 0x00.
 				(*(void**)0xFD8) = &g_cpuInfo[i];
 				if (i != 1)
@@ -150,14 +149,11 @@ namespace obos
 				g_cpuInfo[i].startup_stack.size = 0x4000;
 				g_cpuInfo[i].temp_stack.size = 0x4000;
 				// Assert the INIT# pin of the AP.
-				logger::debug("%s: Sending #INIT to the AP.\n", __func__);
 				SendIPI(DestinationShorthand::None, DeliveryMode::INIT, 0, g_lapicIDs[i]);
 				// Send a Startup IPI to the AP.
-				logger::debug("%s: Sending #SIPI to the AP.\n", __func__);
 				SendIPI(DestinationShorthand::None, DeliveryMode::SIPI, 0, g_lapicIDs[i]);
 				while (!(*(uintptr_t*)0xfe8)); // Wait for "trampoline_done_jumping"
 				(*(uintptr_t*)0xfe8) = false;
-				logger::debug("%s: Done initialzing core %d.", __func__, i);
 			}
 			g_cpuInfo[0].initialized = true;
 			bool allInitialized = false;
@@ -180,10 +176,8 @@ namespace obos
 		}
 		void StopCPUs(bool includingSelf)
 		{
-#if OBOS_DEBUG
-			if (!g_halt)
-				logger::log("Stopping all CPUs...\n");
-#endif
+			if (!g_cpuInfo)
+				return;
 			if (g_halt)
 				return;
 			g_halt = true; // tell the nmi handler to halt the cpu.

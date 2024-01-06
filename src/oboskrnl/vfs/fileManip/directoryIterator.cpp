@@ -18,7 +18,7 @@ namespace obos
 	namespace vfs
 	{
 		extern bool strContains(const char* str, char ch);
-		extern uint32_t getMountId(const char* path);
+		extern uint32_t getMountId(const char* path, size_t size = 0);
 		extern DirectoryEntry* SearchForNode(DirectoryEntry* root, void* userdata, bool(*compare)(DirectoryEntry* current, void* userdata));
 		bool DirectoryIterator::OpenAt(const char* path)
 		{

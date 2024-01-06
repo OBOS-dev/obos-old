@@ -54,15 +54,16 @@ namespace obos
 					base = (base + 0xfff) & 0xfff;
 				size_t size = mmap_request.response->entries[i]->length & ~0xfff;
 				g_nMemoryNodes++;
-				MemoryNode* newNode = (MemoryNode*)base;
+				MemoryNode* newNode = (MemoryNode*)mapPageTable((uintptr_t*)base);
+				MemoryNode* newNodePhys = (MemoryNode*)base;
 				if (g_memoryTail)
-					g_memoryTail->next = newNode;
+					((MemoryNode*)mapPageTable((uintptr_t*)g_memoryTail))->next = newNodePhys;
 				if(!g_memoryHead)
-					g_memoryHead = newNode;
+					g_memoryHead = newNodePhys;
 				newNode->prev = g_memoryTail;
 				newNode->next = nullptr;
 				newNode->nPages = size / 0x1000;
-				g_memoryTail = newNode;
+				g_memoryTail = newNodePhys;
 			}
 		}
 #pragma GCC pop_options

@@ -72,7 +72,7 @@ namespace obos
 			}
 			return true;
 		}
-		driverHeader* CheckModule(byte* file, size_t size, uintptr_t* headerVirtAddr)
+		driverHeader* _CheckModuleImpl(byte* file, size_t size, uintptr_t* headerVirtAddr)
 		{
 			using namespace process::loader;
 
@@ -545,11 +545,15 @@ namespace obos
 		}
 		driverIdentity** g_driverInterfaces;
 		size_t g_driverInterfacesCapacity;
-		constexpr static size_t g_driverInterfacesCapacityStep = 4; 
+		constexpr static size_t g_driverInterfacesCapacityStep = 4;
+		driverHeader* CheckModule(byte* file, size_t size)
+		{
+			return _CheckModuleImpl(file, size, nullptr);
+		}
 		bool LoadModule(byte* file, size_t size, thread::ThreadHandle** mainThread)
 		{
 			uintptr_t headerVirtAddr = 0;
-			driverHeader* header = CheckModule(file, size, &headerVirtAddr);
+			driverHeader* header = _CheckModuleImpl(file, size, &headerVirtAddr);
 			if (!header)
 				return false;
 			if (!header->functionTable.GetServiceType)
@@ -602,7 +606,9 @@ namespace obos
 				// thread::g_defaultAffinity,
 				2,
 				thread::GetCurrentCpuLocalPtr()->idleThread->owner, // The idle thread always uses the kernel's process as it's owner.
-				false);
+				true);
+			((thread::Thread*)thread->GetUnderlyingObject())->driverIdentity = identity;
+			thread->ResumeThread();
 			while (!header->driver_initialized);
 			g_driverInterfaces[identity->driverId] = identity;
 			header->driver_finished_loading = true;

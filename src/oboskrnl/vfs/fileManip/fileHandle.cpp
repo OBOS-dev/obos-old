@@ -21,17 +21,19 @@ namespace obos
 {
 	namespace vfs
 	{
-		// Do not make these next three functions static, as it's used by DirectoryIterator::OpenAt
+		// Do not make these next three functions static, as it's used in many places.
 		bool strContains(const char* str, char ch)
 		{
 			size_t i = 0;
 			for (; str[i] && str[i] != ch; i++);
 			return str[i] == ch;
 		}
-		uint32_t getMountId(const char* path)
+		// If size == 0, it is determined automatically.
+		uint32_t getMountId(const char* path, size_t size = 0)
 		{
 			uint32_t ret = 0;
-			size_t size = utils::strCountToChar(path, ':');
+			if (!size)
+				size = utils::strCountToChar(path, ':');
 			path += *path == '\n';
 			for (size_t i = 0; i < size; i++)
 			{
@@ -221,13 +223,13 @@ namespace obos
 			uoff_t ret = GetPos();
 			switch (from)
 			{
-			case obos::vfs::SEEKPLACE_CUR:
+			case SEEKPLACE_CUR:
 				m_currentFilePos += count;
 				break;
-			case obos::vfs::SEEKPLACE_BEG:
+			case SEEKPLACE_BEG:
 				m_currentFilePos = count;
 				break;
-			case obos::vfs::SEEKPLACE_END:
+			case SEEKPLACE_END:
 				m_currentFilePos = node->filesize + count;
 				break;
 			default:

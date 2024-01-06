@@ -117,6 +117,8 @@ namespace obos
 				struct
 				{
 					// If lbaOffset + nSectorsToRead > the drive's sector count, this function shall return true and set *oNSectorsRead to zero.
+					// This function should use the kernel's VMM+PMM to allocate, not any heap, as it's freed with
+					// VirtualFree().
 					bool(*ReadSectors)(
 						uint32_t driveId,
 						uint64_t lbaOffset,

@@ -84,9 +84,10 @@ namespace obos
 			ThreadList* threadList; // A pointer to the process' thread list.
 			taskSwitchInfo context;
 			// If a bit is set, the cpu corresponding to that bit number can run the thread.
-			// This limits the kernel to 64 core machines.
+			// This limits the kernel to 64 cores.
 			uint64_t affinity, ogAffinity;
 			uint32_t flags;
+			void* driverIdentity = nullptr;
 		} OBOS_ALIGN(4);
 	}
 }

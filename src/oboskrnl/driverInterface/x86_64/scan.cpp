@@ -63,15 +63,15 @@ namespace obos
 			return utils::strcmp(first.fullPath, second.fullPath);
 		}
 		
-		driverHeader* CheckModule(byte* file, size_t size, uintptr_t* headerVirtAddr);
+		driverHeader* CheckModule(byte* file, size_t size);
+		struct pciDevice
+		{
+			uint8_t classCode : 8;
+			uint8_t subclass : 8;
+			uint8_t progIF : 8;
+		};
 		void ScanPCIBus(const utils::Vector<LoadableDriver>& driverList)
 		{
-			struct pciDevice
-			{
-				uint8_t classCode : 8;
-				uint8_t subclass : 8;
-				uint8_t progIF : 8;
-			};
 			utils::Hashmap<
 				LoadableDriver, pciDevice> driversToLoad;
 			uintptr_t udata[2] = { (uintptr_t)&driverList, (uintptr_t)&driversToLoad };
@@ -133,12 +133,14 @@ namespace obos
 						}
 						return true;
 					}, &udata);
-			for(auto&[driver, unused1, unused2] : driversToLoad)
+			for(auto iter = driversToLoad.begin(); iter; iter++)
 			{
+				auto&[driver, unused1, unused2, unused3] = *iter;
 				(unused1 = unused1);
 				(unused2 = unused2);
+				(unused3 = unused3);
 				vfs::FileHandle file;
-				file.Open(driver->fullPath, vfs::OPTIONS_READ_ONLY);
+				file.Open(driver->fullPath, vfs::FileHandle::OPTIONS_READ_ONLY);
 				// Load the driver's data.
 				size_t size = file.GetFileSize();
 				char* data = new char[size + 1];
@@ -176,7 +178,7 @@ namespace obos
 					// Read the entire file and verify it is a module.
 					char* _file = new char[file.GetFileSize()];
 					file.Read(_file, file.GetFileSize());
-					driverHeader* fheader = CheckModule((byte*)_file, file.GetFileSize(), nullptr);
+					driverHeader* fheader = CheckModule((byte*)_file, file.GetFileSize());
 					if (!fheader)
 					{
 						delete[] _file;

@@ -66,6 +66,61 @@ namespace obos
 			Vector() 
 			{ 
 				m_capacity = 0;
+				m_sz = 0;
+				m_ptr = nullptr;
+			}
+
+			Vector(const Vector& other)
+			{
+				if (!other.m_capacity)
+					return;
+				m_capacity = other.m_capacity;
+				m_sz       = other.m_sz;
+				m_ptr      = new T[m_capacity];
+				for (size_t i = 0; i < m_sz; i++)
+					m_ptr[i] = other.m_ptr[i];
+			}
+			Vector& operator=(const Vector& other)
+			{
+				if (!other.m_capacity)
+					return *this;
+				m_capacity = other.m_capacity;
+				m_sz       = other.m_sz;
+				m_ptr      = new T[m_capacity];
+				for (size_t i = 0; i < m_sz; i++)
+					m_ptr[i] = other.m_ptr[i];
+				return *this;
+			}
+			Vector(Vector&& other)
+			{
+				if (!other.m_capacity)
+					return;
+				m_capacity = other.m_capacity;
+				m_sz       = other.m_sz;
+				m_ptr      = new T[m_capacity];
+				for (size_t i = 0; i < m_sz; i++)
+					m_ptr[i] = other.m_ptr[i];
+				if (other.m_ptr)
+					delete m_ptr;
+				other.m_ptr = nullptr;
+				other.m_sz = 0;
+				other.m_capacity = 0;
+			}
+			Vector& operator=(Vector&& other)
+			{
+				if (!other.m_capacity)
+					return *this;
+				m_capacity = other.m_capacity;
+				m_sz       = other.m_sz;
+				m_ptr      = new T[m_capacity];
+				for (size_t i = 0; i < m_sz; i++)
+					m_ptr[i] = other.m_ptr[i];
+				if (other.m_ptr)
+					delete m_ptr;
+				other.m_ptr = nullptr;
+				other.m_sz = 0;
+				other.m_capacity = 0;
+				return *this;
 			}
 
 			T& push_back()
@@ -103,22 +158,20 @@ namespace obos
 					if (m_capacity)
 						m_ptr = (T*)krealloc(m_ptr, m_capacity * sizeof(T));
 				}
-				else
-					m_ptr[m_sz] = T{};
 			}
 
-			size_t length() { return m_sz; }
-			size_t capacity() { return m_capacity; }
+			size_t length() const { return m_sz; }
+			size_t capacity() const { return m_capacity; }
 			// Checks if val is the invalid value returned by at and operator[]
 			static bool isInvalidElement(T& val)
 			{
-				return &val == &m_invalidValue;
+				return &val == nullptr;
 			}
 
 			T& at(size_t i) const
 			{
 				if (i >= m_sz)
-					return m_invalidValue;
+					return *((T*)nullptr);
 				return m_ptr[i];
 			}
 
@@ -134,7 +187,7 @@ namespace obos
 			void clear()
 			{
 				if (m_ptr)
-					delete[] m_ptr;
+					delete m_ptr;
 				m_ptr = nullptr;
 				m_sz = 0;
 				m_capacity = 0;
@@ -162,14 +215,13 @@ namespace obos
 			~Vector()
 			{
 				if (m_ptr)
-					delete[] m_ptr;
+					delete m_ptr;
 			}
 			friend VectorIter<T>;
 		private:
 			T* m_ptr = 0;
 			size_t m_sz = 0;
 			size_t m_capacity = 0;
-			static inline T m_invalidValue;
 			static inline constexpr size_t m_capacityIncrement = 4;
 		};
 	}

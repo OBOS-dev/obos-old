@@ -123,7 +123,19 @@ _callScheduler:
 segment .text
 global _ZN4obos6thread21getCurrentCpuLocalPtrEv
 _ZN4obos6thread21getCurrentCpuLocalPtrEv:
+; Note even if we check if rdgsbase is enabled, it is still a system requirement.
+; See int_handlers.asm
+	mov rax, cr4
+	test rax, (1<<16)
+	jz .rdmsr
 	rdgsbase rax
+	jmp .done
+.rdmsr:
+	mov rcx, 0xC0000101
+	rdmsr
+	shl rdx, 32
+	or rax, rdx
+.done:
 	ret
 idleTask:
 	sti
