@@ -13,7 +13,7 @@
         "MIMode": "gdb",
         "miDebuggerPath": "gdb",
         "targetArchitecture": "x64",
-        "miDebuggerServerAddress": "192.168.2.104:1234",
+        "miDebuggerServerAddress": ":1234",
         "logging": {},
         "customLaunchSetupCommands": [
             {
@@ -28,11 +28,11 @@
             },
             {
                 "description": "Connect to qemu",
-                "text": "-target-select extended-remote 192.168.2.104:1234"
+                "text": "-target-select extended-remote localhost:1234"
             },
             {
                 "description": "Load the kernel binary.",
-                "text": "-file-exec-and-symbols C:/Code/obos/out/oboskrnl",
+                "text": "-file-exec-and-symbols /Code/obos/out/oboskrnl",
                 "ignoreFailures": true
             }
         ],
