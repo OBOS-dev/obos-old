@@ -20,6 +20,20 @@ namespace obos
         DATA,
         ARRAY_INITIALIZER,
     };
+    struct token
+    {
+        const char* contents;
+        size_t len;
+        void(*freer)(void*);
+        tokenType type;
+        uint64_t line = 0, character = 0;
+    };
+    enum integerType
+    {
+        INVALID,
+        DECIMAL = 10,
+        HEX = 16,
+    };
     uintptr_t hex2bin(const char* str, unsigned size)
 	{
 		uintptr_t ret = 0;
@@ -77,31 +91,6 @@ namespace obos
 		}
 		return ret;
 	}
-    const char* tokenTypeToStr(tokenType type)
-    {
-        if ((int)type >= 3)
-            return "INVALID";
-        const char* table[3] = {
-            "VARIABLE_NAME",
-            "OPERATOR",
-            "DATA",
-        };
-        return table[(int)type];
-    }
-    struct token
-    {
-        const char* contents;
-        size_t len;
-        void(*freer)(void*);
-        tokenType type;
-        uint64_t line = 0, character = 0;
-    };
-    enum integerType
-    {
-        INVALID,
-        DECIMAL = 10,
-        HEX = 16,
-    };
     static integerType strToIntegerType(const char* str, size_t len)
     {
         integerType ret = integerType::INVALID;
@@ -166,7 +155,7 @@ namespace obos
         for(; (str[i] != 0) && (!isWhitespace(str[i])) && (str[i] != ch); i++);
         return i;
     }
-    void ProcessDataToken(Element& element, const token& tok)
+    static void ProcessDataToken(Element& element, const token& tok)
     {
         const char* data = tok.contents;
         integerType isInteger = strToIntegerType(data, tok.len);
@@ -248,13 +237,8 @@ namespace obos
             element.type = Element::ELEMENT_STRING;
         }
     }
-    bool Parser::Parse(const char* data, size_t size, utils::Vector<const char*>& errorMessages)
+    static void RunLexicalAnalysis(const char* data, size_t size, utils::Vector<const char*>& errorMessages, utils::Vector<token>& tokens)
     {
-        // Parse the file, looking for three tokens:
-        // (variable name)
-        // '='
-        // (variable contents)
-        utils::Vector<token> tokens;
         tokenType searchingFor = tokenType::VARIABLE_NAME;
         size_t lxCurrentLine = 1;
         size_t lxCurrentChar = 0;
@@ -320,6 +304,15 @@ namespace obos
             iter += tok.len - 1;
             tokens.push_back(tok);
         }
+    }
+    bool Parser::Parse(const char* data, size_t size, utils::Vector<const char*>& errorMessages)
+    {
+        // Parse the file, looking for three tokens:
+        // (variable name)
+        // '='
+        // (variable contents)
+        utils::Vector<token> tokens;
+        RunLexicalAnalysis(data, size, errorMessages, tokens);
         if (errorMessages.length() > 0)
             goto finish; // Lexer error.
         {
@@ -354,7 +347,7 @@ namespace obos
                         size_t szMsg = 
                         logger::sprintf(nullptr, "Line %d:%d, Internal error: Unexcepted token of type \"DATA.\"", tok.line, tok.character);
                         char* msg = new char[szMsg + 1];
-                        logger::sprintf(msg, "Line %d:%d, Internal error: Unexcepted token of type \"DATA.\"", tok.line, tok.character);
+                        logger::sprintf(msg, "Line %d:%d, Internal error: Unexcepted token of type \"VARIABLE_NAME.\"", tok.line, tok.character);
                         errorMessages.push_back(msg);
                         canContinue = false;
                         break;
