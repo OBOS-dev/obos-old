@@ -1,10 +1,10 @@
-# drivers/x86_64/sata/CMakeLists.txt
+# drivers/x86_64/mbr/CMakeLists.txt
 
 # Copyright (c) 2023-2024 Omar Berrow
 
-add_executable(sataDriver "main.cpp" "../../generic/common/new.cpp" "command.cpp" "interface.cpp")
+add_executable(gptDriver "main.cpp" "../common/new.cpp")
 
-target_compile_options(sataDriver
+target_compile_options(gptDriver
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-use-cxa-atexit>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-rtti>
@@ -16,18 +16,18 @@ target_compile_options(sataDriver
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fPIE>
 	PRIVATE "${DEBUG_SYMBOLS_OPT}"
 )
-set_property (TARGET sataDriver PROPERTY CXX_STANDARD 20)
+set_property (TARGET gptDriver PROPERTY CXX_STANDARD 20)
 
-set_target_properties(sataDriver PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
+set_target_properties(gptDriver PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 
-target_compile_definitions(sataDriver PRIVATE OBOS_DRIVER=1)
+target_compile_definitions(gptDriver PRIVATE OBOS_DRIVER=1)
 
-target_include_directories(sataDriver PRIVATE "${CMAKE_SOURCE_DIR}/src/oboskrnl")
+target_include_directories(gptDriver PRIVATE "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 
-target_link_options(sataDriver
+target_link_options(gptDriver
 	PRIVATE "-ffreestanding"
 	PRIVATE "-nostdlib"
 	PRIVATE "-pie"
 )
 
-add_dependencies(sataDriver oboskrnl)
+add_dependencies(gptDriver oboskrnl)

@@ -13,11 +13,15 @@
 
 #include <hashmap.h>
 #include <vector.h>
+#include <error.h>
 
 #include <x86_64-utils/asm.h>
 
 #include <vfs/fileManip/fileHandle.h>
 #include <vfs/fileManip/directoryIterator.h>
+
+#include <vfs/devManip/driveHandle.h>
+#include <vfs/devManip/driveIterator.h>
 
 #include <multitasking/process/x86_64/loader/elfStructures.h>
 
@@ -156,6 +160,103 @@ namespace obos
 				delete[] data;
 			}
 		}
+		void ScanDrivesForPartitions(const utils::Vector<LoadableDriver>&)
+		{
+			bool loadMBR = false, loadGPT = false;
+			size_t nSectorsRead = 0;
+			for (vfs::DriveIterator drvI; drvI; drvI++)
+			{
+				if (loadGPT && loadMBR)
+					break;
+
+				vfs::DriveHandle drv;
+				drv.OpenDrive(*drvI);
+
+				size_t sectorSize = 0, nSectors = 0;
+				drv.QueryInfo(&nSectors, &sectorSize);
+				if (nSectors <= 2)
+				{
+					loadMBR = true;
+					drv.Close();
+					continue;
+				}
+
+				utils::Vector<byte> currentSector;
+				currentSector.resize(sectorSize);
+
+				if (!drv.ReadSectors((void*)currentSector.data(), &nSectorsRead, 1, 1))
+				{
+					drv.Close();
+					continue;
+				}
+				if (nSectorsRead != 1)
+				{
+					drv.Close();
+					continue;
+				}
+				if (utils::memcmp(currentSector.data(), "EFI PART", 8))
+				{
+					loadGPT = true;
+					drv.Close();
+					continue;
+				}
+				if (!drv.ReadSectors(currentSector.data(), &nSectorsRead, 0, 1))
+				{
+					drv.Close();
+					continue;
+				}
+				if (nSectorsRead != 1)
+				{
+					drv.Close();
+					continue;
+				}
+				if (utils::memcmp(&currentSector[510], "\x55\xAA", 2))
+				{
+					loadMBR = true;
+					drv.Close();
+					continue;
+				}
+				drv.Close();
+				// This drive is... special.
+				// Ignore it.
+			}
+			if (loadMBR)
+			{
+				if (g_driverInterfacesCapacity >= 3)
+					if (g_driverInterfaces[2]->header)
+						goto next;
+				vfs::FileHandle mbrDriver;
+				if (!mbrDriver.Open("0:/mbrDriver"))
+					logger::panic(nullptr, "Could not load the MBR driver. GetLastError: %d\n", GetLastError());
+				size_t filesize = mbrDriver.GetFileSize();
+				if (!filesize)
+					logger::panic(nullptr, "Could not load the MBR driver. GetLastError: %d\n", GetLastError());
+				byte* fdata = new byte[filesize];
+				mbrDriver.Read((char*)fdata, filesize);
+				mbrDriver.Close();
+				if (!LoadModule(fdata, filesize, nullptr))
+					logger::panic(nullptr, "Could not load the MBR driver. GetLastError: %d\n", GetLastError());
+			}
+			next:
+			if (loadMBR)
+			{
+				if (g_driverInterfacesCapacity >= 4)
+					if (g_driverInterfaces[3]->header)
+						goto done;
+				vfs::FileHandle mbrDriver;
+				if (!mbrDriver.Open("0:/gptDriver"))
+					logger::panic(nullptr, "Could not load the GPT driver. GetLastError: %d\n", GetLastError());
+				size_t filesize = mbrDriver.GetFileSize();
+				if (!filesize)
+					logger::panic(nullptr, "Could not load the GPT driver. GetLastError: %d\n", GetLastError());
+				byte* fdata = new byte[filesize];
+				mbrDriver.Read((char*)fdata, filesize);
+				mbrDriver.Close();
+				if (!LoadModule(fdata, filesize, nullptr))
+					logger::panic(nullptr, "Could not load the GPT driver. GetLastError: %d\n", GetLastError());
+			}
+			done:
+		}
 		void ScanAndLoadModules(const char* root)
 		{
 			utils::Vector<LoadableDriver> drivers;
@@ -194,6 +295,8 @@ namespace obos
 				file.Close();
 			}
 			ScanPCIBus(drivers);
+			// Look for partitions, and load the partition drivers.
+			ScanDrivesForPartitions(drivers);
 			for (auto& driver : drivers)
 			{
 				delete driver.fullPath;

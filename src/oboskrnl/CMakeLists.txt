@@ -6,7 +6,7 @@ set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "allocators/liba
 					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp"
 				      "vfs/mount/mount.cpp" "vfs/fileManip/fileHandle.cpp" "multitasking/locks/mutex.cpp" "allocators/vmm/vmm.cpp"
 					  "driverInterface/register_drive.cpp" "vfs/fileManip/directoryIterator.cpp" "vfs/devManip/driveHandle.cpp" "boot/cfg.cpp"
-					  "string.cpp"
+					  "string.cpp" "vfs/devManip/driveIterator.cpp"
 )
 
 add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
@@ -63,6 +63,8 @@ if (UNIX OR GENERATE_BUILD_FILES_FOR_UNIX)
 		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrdDriver
 		COMMAND cp -u ${OUTPUT_DIR}/sataDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/sataDriver
 		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/sataDriver
+		COMMAND cp -u ${OUTPUT_DIR}/mbrDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/mbrDriver
+		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/mbrDriver
 		COMMAND cd scripts
 		COMMAND ./make_initrd.sh
 		COMMAND cd ..
@@ -86,6 +88,8 @@ else (WIN32)
 		COMMAND ${OBJCOPY} -g isodir/obos/initrdDriver > NUL 2>&1
 		COMMAND copy /Y "${OUTPUT_DIR}\\sataDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrd\\sataDriver" > NUL 2>&1
 		COMMAND ${OBJCOPY} -g isodir/obos/initrd/sataDriver > NUL 2>&1
+		COMMAND copy /Y "${OUTPUT_DIR}\\mbrDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrd\\mbrDriver" > NUL 2>&1
+		COMMAND ${OBJCOPY} -g isodir/obos/initrd/mbrDriver > NUL 2>&1
 		COMMAND cd scripts
 		COMMAND make_initrd.bat
 		COMMAND cd ..

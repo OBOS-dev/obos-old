@@ -594,21 +594,26 @@ namespace obos
 				}
 			}
 
-			thread::ThreadHandle* thread = new thread::ThreadHandle{};
-			if (mainThread)
-				*mainThread = thread;
+			if (!(header->requests & driverHeader::REQUEST_NO_MAIN_THREAD))
+			{
+				thread::ThreadHandle* thread = new thread::ThreadHandle{};
+				if (mainThread)
+					*mainThread = thread;
 
-			thread->CreateThread(
-				thread::THREAD_PRIORITY_NORMAL, 
-				(header->requests & driverHeader::REQUEST_SET_STACK_SIZE) ? header->stackSize : 0,
-				(void(*)(uintptr_t))entryPoint,
-				0,
-				// thread::g_defaultAffinity,
-				2,
-				thread::GetCurrentCpuLocalPtr()->idleThread->owner, // The idle thread always uses the kernel's process as it's owner.
-				true);
-			((thread::Thread*)thread->GetUnderlyingObject())->driverIdentity = identity;
-			thread->ResumeThread();
+				thread->CreateThread(
+					thread::THREAD_PRIORITY_NORMAL, 
+					(header->requests & driverHeader::REQUEST_SET_STACK_SIZE) ? header->stackSize : 0,
+					(void(*)(uintptr_t))entryPoint,
+					0,
+					// thread::g_defaultAffinity,
+					2,
+					thread::GetCurrentCpuLocalPtr()->idleThread->owner, // The idle thread always uses the kernel's process as it's owner.
+					true);
+				((thread::Thread*)thread->GetUnderlyingObject())->driverIdentity = identity;
+				thread->ResumeThread();
+			}
+			else
+				header->driver_initialized = true;
 			while (!header->driver_initialized);
 			g_driverInterfaces[identity->driverId] = identity;
 			header->driver_finished_loading = true;

@@ -1,5 +1,5 @@
 /*
-	oboskrnl/vfs/fileManip/directoryIterator.h
+	oboskrnl/vfs/devManip/driveIterator.h
 
 	Copyright (c) 2023-2024 Omar Berrow
 */
@@ -12,12 +12,10 @@ namespace obos
 {
 	namespace vfs
 	{
-		class DirectoryIterator final
+		class DriveIterator final
 		{
 		public:
-			DirectoryIterator() = default;
-
-			bool OpenAt(const char* directory);
+			DriveIterator();
 
 			// These functions return the path of the next/current element. The lifetime of the path is controlled by the user.
 			// Allocated with the kernel's new.
@@ -30,9 +28,8 @@ namespace obos
 
 			operator bool() { return m_currentNode; }
 
-			~DirectoryIterator() {}
+			~DriveIterator() {}
 		private:
-			void* m_directoryNode = nullptr;
 			void* m_currentNode = nullptr;
 		};
 	}

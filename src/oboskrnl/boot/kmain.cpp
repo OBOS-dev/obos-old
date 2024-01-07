@@ -89,10 +89,10 @@ namespace obos
 		driverInterface::ScanAndLoadModules("0:/");
 
 		// Load the kernel configuration file.
-		logger::log("Loading 0:/kcfg.cfg\n");
+		logger::log("Loading 0:/boot.cfg\n");
 		vfs::FileHandle kcfgFile;
 		Parser kcfg;
-		if (!kcfgFile.Open("0:/kcfg.cfg"))
+		if (!kcfgFile.Open("0:/boot.cfg"))
 			logger::panic(nullptr, "Could not find the kernel configuration file!\n");
 		size_t kcfgFsize = kcfgFile.GetFileSize();
 		char* kcfgData = new char[kcfgFsize];
@@ -116,12 +116,12 @@ namespace obos
 			}
 			logger::panic(nullptr, "Could not parse kernel config file! Parser output:\n%s", emsg);
 		}
-		logger::log("Successfully loaded and parsed 0:/kcfg.cfg\n");
+		logger::log("Successfully loaded and parsed 0:/boot.cfg\n");
 		if (!kcfg.GetElement("FS_DRIVERS"))
-			logger::panic(nullptr, "Missing required property in 0:/kcfg.cfg:FS_DRIVERS.\n");
+			logger::panic(nullptr, "Missing required property \"FS_DRIVERS\" in 0:/boot.cfg.\n");
 		const utils::Vector<Element>& fs_drivers = kcfg.GetElement("FS_DRIVERS")->array;
 		if (!fs_drivers.length())
-			logger::panic(nullptr, "No filesystem drivers listed in 0:/kfg.cfg:FS_DRIVERS.\n");
+			logger::panic(nullptr, "No filesystem drivers listed in 0:/boot.cfg:FS_DRIVERS.\n");
 		size_t nFSDriversLoaded = 0;
 		for (const auto& ele : fs_drivers)
 		{

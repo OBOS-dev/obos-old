@@ -25,30 +25,7 @@ namespace obos
 			OBOS_SERVICE_TYPE_STORAGE_DEVICE, OBOS_SERVICE_TYPE_VIRTUAL_STORAGE_DEVICE,
 			OBOS_SERVICE_TYPE_USER_INPUT_DEVICE, OBOS_SERVICE_TYPE_VIRTUAL_USER_INPUT_DEVICE,
 			OBOS_SERVICE_TYPE_COMMUNICATION, OBOS_SERVICE_TYPE_VIRTUAL_COMMUNICATION,
-		};
-		enum driverCommands
-		{
-			OBOS_SERVICE_INVALID_SERVICE_COMMAND = -1,
-			// Common Commands
-			OBOS_SERVICE_GET_SERVICE_TYPE,
-			// OBOS_SERVICE_TYPE_FILESYSTEM
-			OBOS_SERVICE_QUERY_FILE_DATA,
-			OBOS_SERVICE_MAKE_FILE_ITERATOR,
-			OBOS_SERVICE_NEXT_FILE,
-			OBOS_SERVICE_CLOSE_FILE_ITERATOR,
-			OBOS_SERVICE_READ_FILE,
-			// OBOS_SERVICE_TYPE_INITRD_FILESYSTEM <- OBOS_SERVICE_TYPE_FILESYSTEM
-			// No commands yet.
-			// OBOS_SERVICE_TYPE_STORAGE_DEVICE, SERVICE_TYPE_VIRTUAL_STORAGE_DEVICE
-			OBOS_SERVICE_READ_LBA,
-			OBOS_SERVICE_WRITE_LBA,
-			// OBOS_SERVICE_TYPE_USER_INPUT_DEVICE, SERVICE_TYPE_VIRTUAL_USER_INPUT_DEVICE
-			OBOS_SERVICE_READ_CHARACTER,
-			// TODO: SERVICE_TYPE_GRAPHICS_DEVICE, SERVICE_TYPE_MONITOR, SERVICE_TYPE_KERNEL_EXTENSION
-			// OBOS_SERVICE_TYPE_COMMUNICATION, OBOS_SERVICE_TYPE_VIRTUAL_COMMUNICATION
-			OBOS_SERVICE_CONFIGURE_COMMUNICATION,
-			OBOS_SERVICE_RECV_BYTE_FROM_DEVICE,
-			OBOS_SERVICE_SEND_BYTE_TO_DEVICE,
+			OBOS_SERVICE_TYPE_PARTITION_MANAGER,
 		};
 		enum fileAttributes
 		{
@@ -63,6 +40,12 @@ namespace obos
 			FILE_ATTRIBUTES_HARDLINK = 8,
 			// If this is set, this is a file, not a directory.
 			FILE_ATTRIBUTES_FILE = 16,
+		};
+		struct partitionInfo
+		{
+			uint32_t id;
+			uint64_t lbaOffset;
+			size_t sizeSectors;
 		};
 		struct ftable
 		{
@@ -167,6 +150,11 @@ namespace obos
 						);
 					void* unused[maxCallbacks - 3]; // Add padding
 				} externalCommunication; // eg: NIC driver.
+				struct
+				{
+					bool(*RegisterPartitionsOnDrive)(uint32_t driveId, size_t* nPartitions, partitionInfo **oPartitionsInfo);
+					void* unused[maxCallbacks - 1]; // Add padding
+				} partitionManager;
 			} serviceSpecific;
 		};
 		struct driverIdentity
@@ -174,7 +162,7 @@ namespace obos
 			uint32_t driverId;
 			uint32_t _serviceType;
 			ftable functionTable;
-			struct driverHeader* header;
+			struct driverHeader* header; 
 		};
 		struct driverHeader
 		{
@@ -185,6 +173,7 @@ namespace obos
 			{
 				REQUEST_INITRD_LOCATION = 1,
 				REQUEST_SET_STACK_SIZE = 2,
+				REQUEST_NO_MAIN_THREAD = 4,
 			};
 			uint64_t requests;
 			size_t stackSize; // SET_STACK_SIZE_REQUEST

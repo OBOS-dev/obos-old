@@ -1,5 +1,5 @@
 /*
-	oboskrnl/vfs/directoryIterator.cpp
+	oboskrnl/vfs/fileManip/directoryIterator.cpp
 
 	Copyright (c) 2023-2024 Omar Berrow
 */
