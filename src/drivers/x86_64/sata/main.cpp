@@ -219,18 +219,18 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 		utils::memzero(memory::mapPageTable((uintptr_t*)(clBase + 4096)), 4096);
 		pPort->clb = clBase & 0xffffffff;
 		if (g_generalHostControl->cap.s64a)
-			pPort->clbu = clBase & ~(0xffffffff);
+			pPort->clbu = clBase >> 32;
 		else
-			if (clBase & ~(0xffffffff))
+			if (clBase >> 32)
 				logger::panic(nullptr, "AHCI: clBase has its upper 32-bits set and cap.s64a is false.\n");
 		
 		uintptr_t fisBase = memory::allocatePhysicalPage();
 		utils::memzero(memory::mapPageTable((uintptr_t*)fisBase), 4096);
 		pPort->fb = fisBase & 0xffffffff;
 		if (g_generalHostControl->cap.s64a)
-			pPort->fbu = fisBase & ~(0xffffffff);
+			pPort->fbu = fisBase >> 32;
 		else
-			if (fisBase & ~(0xffffffff))
+			if (fisBase >> 32)
 				logger::panic(nullptr, "AHCI: fisBase has its upper 32-bits set and cap.s64a is false.\n");
 		auto& portDescriptor = g_ports[port];
 		portDescriptor.id = port;
@@ -262,9 +262,9 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 			uintptr_t ctba = clBase + sizeof(HBA_CMD_HEADER) * 32 + slot * sizeof(HBA_CMD_TBL);
 			cmdHeader->ctba = (uint32_t)ctba & 0xffffffff;
 			if (g_generalHostControl->cap.s64a)
-				cmdHeader->ctbau = ctba & ~(0xffffffff);
+				cmdHeader->ctbau = ctba >> 32;
 			else
-				if (ctba & ~(0xffffffff))
+				if (ctba >> 32)
 					logger::panic(nullptr, "AHCI: %s: ctba has its upper 32-bits set and cap.s64a is false.\n", __func__);
 		}
 		// Send IDENTIFIY ATA to find out information about the connected drives (eg: sector count, sector size)
@@ -286,9 +286,9 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 		);
 		cmdTBL->prdt_entry[0].dba = responsePhys & 0xffffffff;
 		if (g_generalHostControl->cap.s64a)
-			cmdTBL->prdt_entry[0].dbau = responsePhys & ~(0xffffffff);
+			cmdTBL->prdt_entry[0].dbau = responsePhys >> 32;
 		else
-			if (responsePhys & ~(0xffffffff))
+			if (responsePhys >> 32)
 				logger::panic(nullptr, "AHCI: %s: responsePhys has its upper 32-bits set and cap.s64a is false.\n", __func__);
 		cmdTBL->prdt_entry[0].dbc = 4095;
 		cmdTBL->prdt_entry[0].i = 1;

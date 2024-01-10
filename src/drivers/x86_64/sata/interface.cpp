@@ -99,9 +99,9 @@ bool DriveReadSectors(
 	    // Setup the command slot.
 	    cmdTBL->prdt_entry[0].dba = responsePhys & 0xffffffff;
 	    if (g_generalHostControl->cap.s64a)
-	    	cmdTBL->prdt_entry[0].dbau = responsePhys & ~(0xffffffff);
+	    	cmdTBL->prdt_entry[0].dbau = responsePhys >> 32;
 	    else
-	    	if (responsePhys & ~(0xffffffff))
+	    	if (responsePhys >> 32)
 	    		logger::panic(nullptr, "AHCI: %s: responsePhys has its upper 32-bits set and cap.s64a is false.\n", __func__);
 	    cmdTBL->prdt_entry[0].dbc = currentPageCount * 4096 - 1;
 	    cmdTBL->prdt_entry[0].i = 1;
@@ -222,9 +222,9 @@ bool DriveWriteSectors(
 	    // Setup the command slot.
 	    cmdTBL->prdt_entry[0].dba = dataPhys & 0xffffffff;
 	    if (g_generalHostControl->cap.s64a)
-	    	cmdTBL->prdt_entry[0].dbau = dataPhys & ~(0xffffffff);
+	    	cmdTBL->prdt_entry[0].dbau = dataPhys >> 32;
 	    else
-	    	if (dataPhys & ~(0xffffffff))
+	    	if (dataPhys >> 32)
 	    		logger::panic(nullptr, "AHCI: %s: dataPhys has its upper 32-bits set and cap.s64a is false.\n", __func__);
 	    cmdTBL->prdt_entry[0].dbc = currentPageCount * 4096 - 1;
 	    cmdTBL->prdt_entry[0].i = 1;
