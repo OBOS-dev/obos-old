@@ -2,7 +2,7 @@
 
 # Copyright (c) 2023-2024 Omar Berrow
 
-add_executable(fatDriver "main.cpp" "../common/new.cpp")
+add_executable(fatDriver "main.cpp" "../common/new.cpp" "cache.cpp")
 
 target_compile_options(fatDriver
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>
