@@ -48,6 +48,11 @@ namespace obos
 				return nullptr;
 			}
 			const size_t nPages = size / m_pageSize + ((size % m_pageSize) != 0);
+			if (!nPages)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return nullptr;
+			}
 			if (!_base)
 			{
 				_base = _Impl_FindUsableAddress(m_owner, nPages);

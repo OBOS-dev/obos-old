@@ -29,35 +29,37 @@
 #define MEMBLOCK_MAGIC  0x6AB450AA
 #define PAGEBLOCK_MAGIC	0x768AADFC
 #define MEMBLOCK_DEAD   0x3D793CCD
-#define PTR_ALIGNMENT   16
+#define PTR_ALIGNMENT   0x10
 #define ROUND_PTR_UP(ptr) (((ptr) + PTR_ALIGNMENT) & ~(PTR_ALIGNMENT - 1))
 #define ROUND_PTR_DOWN(ptr) ((ptr) & ~(PTR_ALIGNMENT - 1))
 
 struct memBlock
 {
-	uint32_t magic = MEMBLOCK_MAGIC;
+	alignas (0x10) uint32_t magic = MEMBLOCK_MAGIC;
 	
-	size_t size = 0;
-	void* allocAddr = 0;
+	alignas (0x10) size_t size = 0;
+	alignas (0x10) void* allocAddr = 0;
+	
+	alignas (0x10) memBlock* next = nullptr;
+	alignas (0x10) memBlock* prev = nullptr;
+	
+	alignas (0x10) void* pageBlock = nullptr;
 
-	memBlock* next = nullptr;
-	memBlock* prev = nullptr;
-
-	void* pageBlock = nullptr;
+	alignas (0x10) void* whoAllocated = nullptr;
 };
 struct pageBlock
 {
-	uint32_t magic = PAGEBLOCK_MAGIC;
-
-	pageBlock* next = nullptr;
-	pageBlock* prev = nullptr;
-
-	memBlock* firstBlock = nullptr;
-	memBlock* lastBlock = nullptr;
-	size_t nMemBlocks = 0;
-
-	size_t nBytesUsed = 0;
-	size_t nPagesAllocated = 0;
+	alignas (0x10) uint32_t magic = PAGEBLOCK_MAGIC;
+	
+	alignas (0x10) pageBlock* next = nullptr;
+	alignas (0x10) pageBlock* prev = nullptr;
+	
+	alignas (0x10) memBlock* firstBlock = nullptr;
+	alignas (0x10) memBlock* lastBlock = nullptr;
+	alignas (0x10) size_t nMemBlocks = 0;
+	
+	alignas (0x10) size_t nBytesUsed = 0;
+	alignas (0x10) size_t nPagesAllocated = 0;
 } *pageBlockHead = nullptr, *pageBlockTail = nullptr;
 
 size_t nPageBlocks = 0;
@@ -270,6 +272,9 @@ extern "C" {
 
 		currentPageBlock->nBytesUsed += amountNeeded;
 		currentPageBlock->lastBlock = block;
+#ifdef OBOS_DEBUG
+		block->whoAllocated = (void*)__builtin_extract_return_addr(__builtin_return_address(0));
+#endif
 		return block->allocAddr;
 	}
 	void* kcalloc(size_t nobj, size_t szObj)
@@ -296,7 +301,7 @@ extern "C" {
 		{
 			// Truncuate the block to the right size.
 			block->size = newSize;
-			obos::utils::memzero((byte*)ptr + newSize, newSize - oldSize);
+			obos::utils::memzero((byte*)ptr + newSize, oldSize - newSize);
 			return ptr;
 		}
 
@@ -367,17 +372,26 @@ namespace obos
 	}
 }
 
+#ifdef OBOS_DEBUG
+#define new_impl \
+void* ret = kmalloc(count);\
+if (!ret)\
+	return ret;\
+memBlock* blk = (memBlock*)ret;\
+blk--;\
+blk->whoAllocated = (void*)__builtin_extract_return_addr(__builtin_return_address(0));\
+return ret;
+#else
+return kmalloc(count);
+#endif
+
 [[nodiscard]] void* operator new(size_t count) noexcept
 {
-#ifndef OBOS_RELEASE
-	return obos::utils::memzero(kmalloc(count), count);
-#else
-	return kmalloc(count);
-#endif
+	new_impl
 }
 [[nodiscard]] void* operator new[](size_t count) noexcept
 {
-	return operator new(count);
+	new_impl
 }
 void operator delete(void* block) noexcept
 {

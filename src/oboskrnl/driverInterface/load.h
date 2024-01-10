@@ -8,14 +8,15 @@
 
 #include <int.h>
 
+#include <hashmap.h>
+
 #include <multitasking/threadAPI/thrHandle.h>
 
 namespace obos
 {
 	namespace driverInterface
 	{
-		extern struct driverIdentity** g_driverInterfaces;
-		extern size_t g_driverInterfacesCapacity;
+		extern utils::Hashmap<uint32_t, struct driverIdentity*> g_driverInterfaces;
 		void ScanAndLoadModules(const char* root);
 		// Returns the driver header, this header must be in an offset from file to file+size.
 		struct driverHeader* CheckModule(byte* file, size_t size);

@@ -52,7 +52,7 @@ namespace obos
 					currentThread->blockCallback.callback = [](thread::Thread* thr, void* udata)->bool
 					{
 						Mutex* _this = (Mutex*)udata;
-						return (_this->m_locked && !_this->m_wake && thread::g_timerTicks < thr->wakeUpTime);
+						return _this->m_locked || _this->m_wake || thread::g_timerTicks < thr->wakeUpTime;
 					};
 					currentThread->blockCallback.userdata = this;
 					currentThread->wakeUpTime = wakeupTime;

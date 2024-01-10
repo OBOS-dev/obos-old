@@ -266,7 +266,7 @@ namespace obos
 			else
 			{
 				if (partitionId == 0)
-					newPoint->filesystemDriver = driverInterface::g_driverInterfaces[0];
+					newPoint->filesystemDriver = driverInterface::g_driverInterfaces.at(0);
 				else 
 				{
 					SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);

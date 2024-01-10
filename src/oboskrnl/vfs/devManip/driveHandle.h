@@ -42,6 +42,9 @@ namespace obos
             OBOS_EXPORT bool ReadSectors(void* buff, size_t* nSectorsRead, uoff_t lbaOffset, size_t nSectors); 
             OBOS_EXPORT bool WriteSectors(void* buff, size_t* nSectorsWritten, uoff_t lbaOffset, size_t nSectors); 
         
+            OBOS_EXPORT uint32_t GetDriveId();
+            OBOS_EXPORT uint32_t GetPartitionId();
+
             OBOS_EXPORT bool QueryInfo(size_t *nSectors, size_t *bytesPerSector);
         
             OBOS_EXPORT bool Close();

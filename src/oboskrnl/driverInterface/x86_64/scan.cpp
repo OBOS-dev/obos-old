@@ -5,6 +5,7 @@
 */
 
 #include <int.h>
+#include <error.h>
 
 #include <driverInterface/struct.h>
 #include <driverInterface/load.h>
@@ -13,12 +14,14 @@
 
 #include <hashmap.h>
 #include <vector.h>
-#include <error.h>
+#include <string.h>
 
 #include <x86_64-utils/asm.h>
 
 #include <vfs/fileManip/fileHandle.h>
 #include <vfs/fileManip/directoryIterator.h>
+
+#include <vfs/vfsNode.h>
 
 #include <vfs/devManip/driveHandle.h>
 #include <vfs/devManip/driveIterator.h>
@@ -31,7 +34,7 @@ namespace obos
 	{
 		struct LoadableDriver
 		{
-			const char* fullPath = nullptr;
+			utils::String fullPath;
 			driverHeader* header = nullptr;
 			LoadableDriver() = default;
 			LoadableDriver(const char* path, driverHeader* _header)
@@ -61,10 +64,15 @@ namespace obos
 				other.header = nullptr;
 				other.fullPath = nullptr;
 			}
+
+			static size_t hasher(const LoadableDriver& key)
+			{
+				return utils::defaultHasher<const char*>(key.fullPath.data());
+			}
 		};
 		bool operator==(const LoadableDriver& first, const LoadableDriver& second)
 		{
-			return utils::strcmp(first.fullPath, second.fullPath);
+			return utils::strcmp(first.fullPath.data(), second.fullPath.data());
 		}
 		
 		driverHeader* CheckModule(byte* file, size_t size);
@@ -77,7 +85,7 @@ namespace obos
 		void ScanPCIBus(const utils::Vector<LoadableDriver>& driverList)
 		{
 			utils::Hashmap<
-				LoadableDriver, pciDevice> driversToLoad;
+				LoadableDriver, pciDevice, utils::defaultEquals<LoadableDriver>, LoadableDriver::hasher> driversToLoad;
 			uintptr_t udata[2] = { (uintptr_t)&driverList, (uintptr_t)&driversToLoad };
 			for (uint16_t bus = 0; bus < 256; bus++)
 				enumerateBus((uint8_t)bus, [](
@@ -144,7 +152,7 @@ namespace obos
 				(unused2 = unused2);
 				(unused3 = unused3);
 				vfs::FileHandle file;
-				file.Open(driver->fullPath, vfs::FileHandle::OPTIONS_READ_ONLY);
+				file.Open(driver->fullPath.data(), vfs::FileHandle::OPTIONS_READ_ONLY);
 				// Load the driver's data.
 				size_t size = file.GetFileSize();
 				char* data = new char[size + 1];
@@ -160,17 +168,21 @@ namespace obos
 				delete[] data;
 			}
 		}
-		void ScanDrivesForPartitions(const utils::Vector<LoadableDriver>&)
+		static void ScanDrivesForPartitions(const utils::Vector<LoadableDriver>&)
 		{
 			bool loadMBR = false, loadGPT = false;
 			size_t nSectorsRead = 0;
-			for (vfs::DriveIterator drvI; drvI; drvI++)
+			utils::Vector<uint32_t> gptDrives;
+			utils::Vector<uint32_t> mbrDrives;
+			for (vfs::DriveIterator drvI; drvI; delete[] (drvI++))
 			{
 				if (loadGPT && loadMBR)
 					break;
 
 				vfs::DriveHandle drv;
-				drv.OpenDrive(*drvI);
+				auto path = *drvI;
+				drv.OpenDrive(path);
+				delete[] path;
 
 				size_t sectorSize = 0, nSectors = 0;
 				drv.QueryInfo(&nSectors, &sectorSize);
@@ -185,46 +197,31 @@ namespace obos
 				currentSector.resize(sectorSize);
 
 				if (!drv.ReadSectors((void*)currentSector.data(), &nSectorsRead, 1, 1))
-				{
-					drv.Close();
 					continue;
-				}
 				if (nSectorsRead != 1)
-				{
-					drv.Close();
 					continue;
-				}
 				if (utils::memcmp(currentSector.data(), "EFI PART", 8))
 				{
-					loadGPT = true;
-					drv.Close();
+					gptDrives.push_back(drv.GetDriveId());
 					continue;
 				}
 				if (!drv.ReadSectors(currentSector.data(), &nSectorsRead, 0, 1))
-				{
-					drv.Close();
 					continue;
-				}
 				if (nSectorsRead != 1)
-				{
-					drv.Close();
 					continue;
-				}
 				if (utils::memcmp(&currentSector[510], "\x55\xAA", 2))
 				{
-					loadMBR = true;
-					drv.Close();
+					mbrDrives.push_back(drv.GetDriveId());
 					continue;
 				}
 				drv.Close();
 				// This drive is... special.
 				// Ignore it.
 			}
-			if (loadMBR)
+			if (mbrDrives.length())
 			{
-				if (g_driverInterfacesCapacity >= 3)
-					if (g_driverInterfaces[2]->header)
-						goto next;
+				if (g_driverInterfaces.contains(2))
+					goto next;
 				vfs::FileHandle mbrDriver;
 				if (!mbrDriver.Open("0:/mbrDriver"))
 					logger::panic(nullptr, "Could not load the MBR driver. GetLastError: %d\n", GetLastError());
@@ -238,24 +235,76 @@ namespace obos
 					logger::panic(nullptr, "Could not load the MBR driver. GetLastError: %d\n", GetLastError());
 			}
 			next:
-			if (loadMBR)
+			if (gptDrives.length())
 			{
-				if (g_driverInterfacesCapacity >= 4)
-					if (g_driverInterfaces[3]->header)
-						goto done;
-				vfs::FileHandle mbrDriver;
-				if (!mbrDriver.Open("0:/gptDriver"))
+				if (g_driverInterfaces.contains(3))
+					goto done;
+				vfs::FileHandle gptDriver;
+				if (!gptDriver.Open("0:/gptDriver"))
 					logger::panic(nullptr, "Could not load the GPT driver. GetLastError: %d\n", GetLastError());
-				size_t filesize = mbrDriver.GetFileSize();
+				size_t filesize = gptDriver.GetFileSize();
 				if (!filesize)
 					logger::panic(nullptr, "Could not load the GPT driver. GetLastError: %d\n", GetLastError());
 				byte* fdata = new byte[filesize];
-				mbrDriver.Read((char*)fdata, filesize);
-				mbrDriver.Close();
+				gptDriver.Read((char*)fdata, filesize);
+				gptDriver.Close();
 				if (!LoadModule(fdata, filesize, nullptr))
 					logger::panic(nullptr, "Could not load the GPT driver. GetLastError: %d\n", GetLastError());
 			}
-			done:
+		done:
+			driverIdentity *gptDriver = nullptr, *mbrDriver = nullptr;
+			if (&g_driverInterfaces.at(2))
+				mbrDriver = g_driverInterfaces.at(2);
+			if (&g_driverInterfaces.at(3))
+				gptDriver = g_driverInterfaces.at(3);
+			auto iterateDrivesAndRegisterPartitions = [](utils::Vector<uint32_t> drives, driverIdentity* driver)
+				{
+					for (auto& driveId : drives)
+					{
+						size_t nPartitions = 0;
+						partitionInfo* partitions;
+						driver->functionTable.serviceSpecific.partitionManager.RegisterPartitionsOnDrive(driveId, &nPartitions, &partitions);
+						vfs::DriveEntry* cdrive = vfs::g_drives.head;
+						vfs::DriveEntry* drive = nullptr;
+						while (cdrive)
+						{
+							if (cdrive->driveId == driveId)
+							{
+								drive = cdrive;
+								break;
+							}
+
+							cdrive = cdrive->next;
+						}
+						// Free all partition entries.
+						for (auto part = drive->firstPartition; part; )
+						{
+							auto next = part->next;
+							delete[] part;
+
+							part = next;
+						}
+						for (size_t i = 0; i < nPartitions; i++)
+						{
+							vfs::PartitionEntry* partEntry = new vfs::PartitionEntry{};
+							partEntry->drive = drive;
+							partEntry->lbaOffset = partitions[i].lbaOffset;
+							partEntry->sizeSectors = partitions[i].sizeSectors;
+							partEntry->partitionId = partitions[i].id;
+							if(!drive->firstPartition)
+								drive->firstPartition = partEntry;
+							if (drive->lastPartition)
+								drive->lastPartition->next = partEntry;
+							partEntry->prev = drive->lastPartition;
+							drive->lastPartition = partEntry;
+							drive->nPartitions++;
+						}
+						delete[] partitions;
+					}
+				};
+			iterateDrivesAndRegisterPartitions(mbrDrives, mbrDriver);
+			iterateDrivesAndRegisterPartitions(gptDrives, gptDriver);
+			return;
 		}
 		void ScanAndLoadModules(const char* root)
 		{
@@ -263,13 +312,14 @@ namespace obos
 			// Look for loadable drivers in "root"
 			vfs::DirectoryIterator iter;
 			iter.OpenAt(root);
-			for (const char* path = *iter; iter; iter++)
+			for (const char* path = *iter; iter; path = ++iter)
 			{
 				vfs::FileHandle file;
 				file.Open(path);
 				if (file.GetFileSize() < sizeof(process::loader::Elf64_Ehdr))
 				{
 					file.Close();
+					delete[] path;
 					continue;
 				}
 				char header[4];
@@ -283,6 +333,7 @@ namespace obos
 					if (!fheader)
 					{
 						delete[] _file;
+						delete[] path;
 						file.Close();
 						continue;
 					}
@@ -292,16 +343,14 @@ namespace obos
 					drivers.push_back(LoadableDriver{ path, header });
 					delete[] _file;
 				}
+				delete[] path;
 				file.Close();
 			}
 			ScanPCIBus(drivers);
 			// Look for partitions, and load the partition drivers.
 			ScanDrivesForPartitions(drivers);
 			for (auto& driver : drivers)
-			{
-				delete driver.fullPath;
 				delete driver.header;
-			}
 		}
 	}
 }

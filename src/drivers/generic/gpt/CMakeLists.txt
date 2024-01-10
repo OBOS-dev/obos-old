@@ -1,8 +1,8 @@
-# drivers/x86_64/mbr/CMakeLists.txt
+# drivers/generic/gpt/CMakeLists.txt
 
 # Copyright (c) 2023-2024 Omar Berrow
 
-add_executable(gptDriver "main.cpp" "../common/new.cpp")
+add_executable(gptDriver "main.cpp" "../common/new.cpp" "cache.cpp")
 
 target_compile_options(gptDriver
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>

@@ -33,6 +33,22 @@ namespace obos
 			}
 			return h;
         }
+        template<>
+        inline size_t defaultHasher<const char*>(const char* const& key)
+        {
+            const byte* _key = (byte*)key;
+
+            size_t h = 0, g = 0;
+
+            for (size_t i = 0; i < utils::strlen(key); i++)
+            {
+                h = (h << 4) + *_key++;
+                if ((g = h & 0xf0000000))
+                    h ^= g >> 24;
+                h &= ~g;
+            }
+            return h;
+        }
         template<typename Key>
         inline bool defaultEquals(const Key& key1, const Key& key2)
         {
@@ -141,10 +157,10 @@ namespace obos
                     }
                 }
                 if (!m_tableCapacity)
-                    capacity(m_tableCapacity = 64);
+                    expand(m_tableCapacity = 64);
                 if (m_nodeTable[ourIndex].used)
                 {
-                    capacity(m_tableCapacity *= 2);
+                    expand(m_tableCapacity *= 2);
                     ourIndex++;
                 }
                 size_t _hash = hash(key) % m_tableCapacity;
@@ -222,25 +238,11 @@ namespace obos
             {
                 if (!m_nodeTable || !m_buckets)
                     return;
-                // for (size_t i = 0; i < m_tableCapacity; i++)
-                // {
-                //     if (m_buckets[i].nChains)
-                //     {
-                //         for (chain* node = m_buckets[i].firstChain; node; )
-                //         {
-                //             chain* temp = node->next;
-                //             kfree(node);
-                //             node = temp;
-                //             m_buckets[i].nChains--;
-                //         }
-                //     }
-                // }
                 for (auto _node = m_head; _node;)
                 {
                     ((node*)_node->data)->used = false;
                     delete ((node*)_node->data)->key;
                     delete ((node*)_node->data)->value;
-                    delete (node*)_node->data;
                     auto temp = _node->next;
                     delete _node;
 
@@ -253,12 +255,12 @@ namespace obos
 
             size_t capacity() const
             { return m_tableCapacity; }
-            void capacity(size_t newCapacity)
+            void expand(size_t newCapacity)
             {
                 if (newCapacity < m_tableCapacity)
                     return;
                 m_tableCapacity = newCapacity;
-                m_buckets   = (bucket*)krealloc(m_nodeTable, m_tableCapacity * sizeof(bucket));
+                m_buckets   = (bucket*)krealloc(m_buckets  , m_tableCapacity * sizeof(bucket));
                 m_nodeTable =   (node*)krealloc(m_nodeTable, m_tableCapacity * sizeof(node));
             }
             

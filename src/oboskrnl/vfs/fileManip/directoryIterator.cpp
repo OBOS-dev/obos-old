@@ -96,28 +96,28 @@ namespace obos
 			);
 			return path;
 		}
-		// iter++;
+		// ++iter;
 		const char* DirectoryIterator::operator++()
 		{
 			if (!m_currentNode)
 				return nullptr;
 			DirectoryEntry* entry = (DirectoryEntry*)m_currentNode;
-			const char* ret = operator*();
 			m_currentNode = entry->next;
-			return ret;
+			return operator*();
 		}
-		// ++iter;
+		// iter++;
 		const char* DirectoryIterator::operator++(int)
 		{
 			if (!m_currentNode)
 				return nullptr;
 			DirectoryEntry* entry = (DirectoryEntry*)m_currentNode;
+			const char* ret = operator*();
 			m_currentNode = entry->next;
 			if (!m_currentNode)
 				return nullptr;
-			const char* ret = operator*();
 			return ret;
 		}
+		// --iter;
 		const char* DirectoryIterator::operator--()
 		{
 			if (!m_currentNode)
@@ -129,6 +129,7 @@ namespace obos
 			const char* ret = operator*();
 			return ret;
 		}
+		// iter--;
 		const char* DirectoryIterator::operator--(int)
 		{
 			if (!m_currentNode)

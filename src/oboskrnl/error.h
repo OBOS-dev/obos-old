@@ -129,6 +129,10 @@ namespace obos
 		/// The write was aborted.
 		/// </summary>
 		OBOS_ERROR_VFS_WRITE_ABORTED,
+		/// <summary>
+		/// The DriveHandle doesn't refer to a partition.
+		/// </summary>
+		OBOS_ERROR_VFS_HANDLE_NOT_REFERRING_TO_PARTITION,
 
 		OBOS_ERROR_HIGHEST_VALUE,
 	};

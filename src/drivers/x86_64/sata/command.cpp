@@ -12,35 +12,43 @@
 
 extern volatile HBA_MEM* g_generalHostControl;
 
-uint32_t FindCMDSlot(volatile HBA_PORT* pPort)
-{
-    uint32_t slots = (pPort->sact | pPort->ci);
-    return obos::bsf(~slots);
-}
-void StopCommandEngine(volatile HBA_PORT* pPort)
-{
-    pPort->cmd &= ~(1<<0); // PxCMD.st
-
-	// Clear FRE (bit 4)
-	pPort->cmd &= ~(1<<4);
-
-	// Wait until FR (bit 14), CR (bit 15) are cleared
-	while (1)
-	{
-		if (pPort->cmd & (1<<14))
-			continue;
-		if (pPort->cmd & (1<<15))
-			continue;
-		break;
-	}
-
-}
-void StartCommandEngine(volatile HBA_PORT* pPort)
-{
-    while (pPort->cmd & (1<<15))
-    {}
-
-	// Set FRE (bit 4) and ST (bit 0)
-	pPort->cmd |= (1<<4);
-	pPort->cmd |= (1<<0);
-}
+asm(
+".global _Z17StopCommandEnginePV8HBA_PORT;"
+".global _Z18StartCommandEnginePV8HBA_PORT;"
+".global _Z11FindCMDSlotPV8HBA_PORT;"
+".intel_syntax noprefix;"
+"_Z11FindCMDSlotPV8HBA_PORT:;"
+"	mov eax, dword ptr [rdi+0x34];"
+"	or eax, [rdi+0x38];"
+"	mov esi, eax;"
+"	not esi;"
+"	bsf eax, esi;"
+"	ret;"
+"_Z17StopCommandEnginePV8HBA_PORT:;"
+"	push rbp;"
+"	mov rbp, rsp;"
+"	and dword ptr [rdi+0x18], ~(1<<0);" // Clear ST (bit 0)
+"	and dword ptr [rdi+0x18], ~(1<<4);" // Clear FRE (bit 4)
+// Wait until FR (bit 14), CR (bit 15) are cleared
+"_Z17StopCommandEnginePV8HBA_PORT.loop:;"
+"	test dword ptr [rdi+0x18], (1<<14);"
+"	jnz _Z17StopCommandEnginePV8HBA_PORT.loop;"
+"	test dword ptr [rdi+0x18], (1<<15);"
+"	jnz _Z17StopCommandEnginePV8HBA_PORT.loop;"
+"_Z17StopCommandEnginePV8HBA_PORT.end:;"
+"	leave;"
+"	ret;"
+".intel_syntax noprefix;"
+"_Z18StartCommandEnginePV8HBA_PORT:;"
+"	push rbp;"
+"	mov rbp, rsp;"
+"_Z18StartCommandEnginePV8HBA_PORT.loop:;"
+"	test dword ptr [rdi+0x18], (1<<15);"
+"	jnz _Z18StartCommandEnginePV8HBA_PORT.loop;"
+"_Z18StartCommandEnginePV8HBA_PORT.end:;"
+"	or dword ptr [rdi+0x18], (1<<4);"
+"	or dword ptr [rdi+0x18], (1<<0);"
+"	leave;"
+"	ret;"
+".att_syntax prefix;"
+);

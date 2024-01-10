@@ -37,7 +37,6 @@
 
 extern obos::memory::VirtualAllocator g_liballocVirtualAllocator;
 
-
 namespace obos
 {
 	void kmain_common(byte* initrdDriverData, size_t initrdDriverSize)
@@ -65,12 +64,13 @@ namespace obos
 #if defined(__x86_64__) || defined(_WIN64)
 		kernelProc->context.cr3 = currentThread->context.cr3; // Only this time... (reference to line 7)
 #endif
+		process::g_processes.tail = process::g_processes.head = kernelProc;
+		kernelProc->pid = process::g_processes.size++;
+
 		// Reconstruct the liballoc's allocator with the kernel process, to avoid future problems with liballoc in user mode.
 		g_liballocVirtualAllocator.~VirtualAllocator();
 		new (&g_liballocVirtualAllocator) memory::VirtualAllocator{ kernelProc };
-		process::g_processes.tail = process::g_processes.head = kernelProc;
-		kernelProc->pid = process::g_processes.size++;
-		
+
 		logger::log("Loading the initrd driver.\n");
 		SetLastError(0);
 		if (!driverInterface::LoadModule(initrdDriverData, initrdDriverSize, nullptr))

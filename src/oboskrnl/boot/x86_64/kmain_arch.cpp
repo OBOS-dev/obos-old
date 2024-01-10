@@ -153,3 +153,12 @@ namespace obos
 		}
 	}
 }
+
+extern "C" [[noreturn]] void __cxa_pure_virtual()
+{
+	obos::logger::panic(nullptr, "Pure virtual function called by kernel/driver code\n");
+}
+extern "C" void __cxa_atexit()
+{
+	while (1);
+}

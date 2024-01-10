@@ -12,6 +12,8 @@
 
 #include <multitasking/threadAPI/thrHandle.h>
 
+#include <vector.h>
+
 #define OBOS_DRIVER_HEADER_SECTION_NAME ".obosDriverHeader"
 
 namespace obos
@@ -157,12 +159,19 @@ namespace obos
 				} partitionManager;
 			} serviceSpecific;
 		};
+		struct obosDriverSymbol
+		{
+			uintptr_t addr;
+			size_t size;
+			char* name;
+		};
 		struct driverIdentity
 		{
 			uint32_t driverId;
 			uint32_t _serviceType;
 			ftable functionTable;
-			struct driverHeader* header; 
+			struct driverHeader* header;
+			utils::Vector<obosDriverSymbol> symbols;
 		};
 		struct driverHeader
 		{

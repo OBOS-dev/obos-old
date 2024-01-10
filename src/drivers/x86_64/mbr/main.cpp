@@ -105,5 +105,5 @@ bool RegisterMBRPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driver
     return true;
 }
 
-void _start()
+extern "C" void _start()
 {}

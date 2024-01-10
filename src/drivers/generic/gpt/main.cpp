@@ -13,6 +13,7 @@
 #include <driverInterface/struct.h>
 
 #include <allocators/liballoc.h>
+#include <allocators/vmm/vmm.h>
 
 using namespace obos;
 
@@ -22,7 +23,7 @@ using namespace obos;
 #define DEFINE_IN_SECTION
 #endif
 
-bool RegisterMBRPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driverInterface::partitionInfo** oPartInfo);
+bool RegisterGPTPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driverInterface::partitionInfo** oPartInfo);
 
 driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 	.magicNumber = driverInterface::OBOS_DRIVER_HEADER_MAGIC,
@@ -33,7 +34,7 @@ driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 		.GetServiceType = []()->driverInterface::serviceType { return driverInterface::serviceType::OBOS_SERVICE_TYPE_STORAGE_DEVICE; },
 		.serviceSpecific = {
 			.partitionManager = {
-                .RegisterPartitionsOnDrive = RegisterMBRPartitionsOnDrive,
+                .RegisterPartitionsOnDrive = RegisterGPTPartitionsOnDrive,
                 .unused = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,}
             }
 		}
@@ -60,7 +61,7 @@ struct gpt_header
     uint32_t szPartitionEntry; // Must be a multiple of 128.
     uint32_t partitionTableCRC32;
     // The rest of the sector is reserved.
-};
+} __attribute__((packed));
 struct gpt_partition
 {
     char partGUID[16];
@@ -68,41 +69,68 @@ struct gpt_partition
     uint64_t startLBA;
     uint64_t endLBA;
     uint64_t attrib;
-    char partitionName[72];
+    char16_t partitionName[36];
     // From here to szPartitionEntry is reserved.
-};
+} __attribute__((packed));
 
-uint32_t crc32_bytes(void* data, size_t sz);
-#if defined(__x86_64__)
-asm (
+extern "C" uint32_t crc32_bytes(void* data, size_t sz);
+extern "C" uint32_t crc32_bytes_from_previous(void* data, size_t sz, uint32_t previousChecksum);
+#if defined(__x86_64__) || defined(_WIN64)
+#include <x86_64-utils/asm.h>
+static bool _x86_64_initialized_crc32 = false;
+extern "C" uint32_t crc32_bytes_from_previous_accelerated(void* data, size_t sz, uint32_t previousChecksum);
+uint32_t crctab[256];
+void crcInit()
+{
+    uint32_t crc = 0;
+    for (uint16_t i = 0; i < 256; ++i)
+    {
+        crc = i;
+        for (uint8_t j = 0; j < 8; ++j)
+        {
+            uint32_t mask = -(crc & 1);
+            crc = (crc >> 1) ^ (0xEDB88320 & mask);
+        }
+        crctab[i] = crc;
+    }
+}
+uint32_t crc(const char* data, size_t len, uint32_t result = ~0U)
+{
+    for (size_t i = 0; i < len; ++i)
+        result = (result >> 8) ^ crctab[(result ^ data[i]) & 0xFF];
+    return ~result;
+}
+extern "C" uint32_t crc32_bytes_from_previous(void* data, size_t sz, uint32_t previousChecksum)
+{
+    if (!_x86_64_initialized_crc32)
+    {
+        crcInit();
+        _x86_64_initialized_crc32 = true;
+    }
+    return crc((char*)data, sz, ~previousChecksum);
+}
+extern "C" uint32_t crc32_bytes(void* data, size_t sz)
+{
+    if (!_x86_64_initialized_crc32)
+    {
+        crcInit();
+        _x86_64_initialized_crc32 = true;
+    }
+    return crc((char*)data, sz);
+}
+asm(
     ".intel_syntax noprefix\n"
-    "crc32_bytes:\n"
+    "crc32_bytes_from_previous_accelerated:\n"
     "   push rbp\n"
     "   mov rbp, rsp\n"
+    "   xor rax,rax\n"
     "   mov rcx, rsi\n"
-    "   cmp rcx,rcx\n"
+    "   test rcx,rcx\n"
     "   jz crc32_bytesDone\n"
+    "   mov rax,rdx\n"
     "   crc32_bytesLoop:\n"
-    "       crc32 rax, [rdi]\n"
+    "       crc32 rax, byte ptr [rdi]\n"
     "       inc rdi\n"
-    "       loop crc32_bytesLoop\n"
-    "   crc32_bytesDone:\n"
-    "   leave\n"
-    "   ret\n"
-    ".att_syntax prefix\n"
-);
-#elif defined(__i386__)
-asm (
-    ".intel_syntax noprefix\n"
-    "crc32_bytes:\n"
-    "   push ebp\n"
-    "   mov ebp, esp\n"
-    "   mov ecx, [ebp+0x10]\n"
-    "   cmp ecx,ecx\n"
-    "   jz crc32_bytesDone\n"
-    "   crc32_bytesLoop:\n"
-    "       crc32 eax, [edi]\n"
-    "       inc edi\n"
     "       loop crc32_bytesLoop\n"
     "   crc32_bytesDone:\n"
     "   leave\n"
@@ -111,7 +139,7 @@ asm (
 );
 #endif
 
-bool RegisterMBRPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driverInterface::partitionInfo** oPartInfo)
+bool RegisterGPTPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driverInterface::partitionInfo** oPartInfo)
 {
     char* path = new char[logger::sprintf(nullptr, "D%d:/", driveId) + 1];
     logger::sprintf(path, "D%d:/", driveId);
@@ -120,29 +148,111 @@ bool RegisterMBRPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driver
     delete[] path;
     size_t sizeofSector;
     drive.QueryInfo(nullptr, &sizeofSector);
-    byte* firstSector = new byte[sizeofSector];
+    memory::VirtualAllocator allocator{ nullptr };
+    byte* firstSector = (byte*)allocator.VirtualAlloc(nullptr, sizeofSector, 0);
     if (!drive.ReadSectors(firstSector, nullptr, 1, 1))
     {
-        delete[] firstSector;
+        allocator.VirtualFree(firstSector, sizeofSector);
         drive.Close();
         return false;
     }
+    // Verify the fact that this drive uses GPT.
     gpt_header* gptHeader = (gpt_header*)firstSector;
     if (gptHeader->signature != GPT_HEADER_SIGNATURE)
     {
-        delete[] firstSector;
+        allocator.VirtualFree(firstSector, sizeofSector);
         drive.Close();
         return false;
     }
+    // Verify the CRC32 checksum of the GPT header.
+    // TODO: Find out why this always returns the wrong checksum, even if the checksum calculated __from__ the disk is the same as the one calculated.
+    bool retried = false;
+    retry:
+    uint32_t other_crc32 = gptHeader->headerCRC32;
+    gptHeader->headerCRC32 = 0;
     uint32_t header_crc32 = crc32_bytes(gptHeader, sizeof(*gptHeader));
-    if (header_crc32 != gptHeader->headerCRC32)
+    gptHeader->headerCRC32 = other_crc32;
+    if (header_crc32 != other_crc32)
     {
-        delete[] firstSector;
+        // Oh no!
+        if (retried)
+        {
+            // Corrupt disk...
+            allocator.VirtualFree(firstSector, sizeofSector);
+            drive.Close();
+            return false;
+        }
+        // Try the alternate gpt...
+        if (!drive.ReadSectors(firstSector, nullptr, gptHeader->alternateLBA, 1))
+        {
+            allocator.VirtualFree(firstSector, sizeofSector);
+            drive.Close();
+            return false;
+        }
+        retried = true;
+        goto retry;
+    }
+    // Verify the CRC32 checksum of the GPT partition entries.
+    uint32_t entriesCRC32 = 0;
+    byte* currentSector = (byte*)allocator.VirtualAlloc(nullptr, sizeofSector, 0);
+    const size_t nPartitionEntriesPerSector = sizeofSector / gptHeader->szPartitionEntry;
+    const size_t nSectorsForPartitionTable = gptHeader->nPartitionEntries / nPartitionEntriesPerSector + (gptHeader->nPartitionEntries % nPartitionEntriesPerSector != 0);
+    const uint64_t partitionTableLBA = gptHeader->partitionEntryLBA;
+    for (size_t i = 0; i < nSectorsForPartitionTable; i++)
+    {
+        if (!drive.ReadSectors(currentSector, nullptr, partitionTableLBA + i, 1))
+        {
+            allocator.VirtualFree(firstSector, sizeofSector);
+            allocator.VirtualFree(currentSector, sizeofSector);
+            drive.Close();
+            return false;
+        }
+        entriesCRC32 = crc32_bytes_from_previous(currentSector, sizeofSector, entriesCRC32);
+    }
+    if (entriesCRC32 != gptHeader->partitionTableCRC32)
+    {
+        allocator.VirtualFree(firstSector, sizeofSector);
+        allocator.VirtualFree(currentSector, sizeofSector);
         drive.Close();
         return false;
     }
+    /*byte* currentSector = (byte*)allocator.VirtualAlloc(nullptr, sizeofSector, 0);
+    const size_t nPartitionEntriesPerSector = sizeofSector / gptHeader->szPartitionEntry;
+    const uint64_t partitionTableLBA = gptHeader->partitionEntryLBA;*/
+    gpt_partition* const volatile table = (gpt_partition*)currentSector;
+    driverInterface::partitionInfo* partitions = nullptr;
+    size_t nPartitionEntries = 0;
+    for (size_t i = 0, id = 0; i < nSectorsForPartitionTable; i++)
+    {
+        if (!drive.ReadSectors(currentSector, nullptr, partitionTableLBA + i, 1))
+        {
+            allocator.VirtualFree(firstSector, sizeofSector);
+            allocator.VirtualFree(currentSector, sizeofSector);
+            drive.Close();
+            return false;
+        }
+        size_t nPartitionEntriesOnSector = 0;
+        for (byte* iter = currentSector; iter < (currentSector + sizeofSector); iter += gptHeader->szPartitionEntry, nPartitionEntriesOnSector++)
+            if (utils::memcmp(iter, (uint32_t)0, 16))
+                break;
+        nPartitionEntries += nPartitionEntriesOnSector;
+        partitions = (driverInterface::partitionInfo*)krealloc(partitions, sizeof(driverInterface::partitionInfo) * nPartitionEntries);
+        for (size_t partEntry = 0; partEntry < nPartitionEntriesOnSector; partEntry++)
+        {
+            partitions[id].id = id;
+            partitions[id].lbaOffset = table[partEntry].startLBA;
+            partitions[id].sizeSectors = table[partEntry].endLBA - table[partEntry].startLBA;
+            id++;
+        }
+    }
+    allocator.VirtualFree(firstSector, sizeofSector);
+    allocator.VirtualFree(currentSector, sizeofSector);
+    if (oNPartitions)
+        *oNPartitions = nPartitionEntries;
+    if (oPartInfo)
+        *oPartInfo = partitions;
     return true;
 }
 
-void _start()
+extern "C" void _start()
 {}

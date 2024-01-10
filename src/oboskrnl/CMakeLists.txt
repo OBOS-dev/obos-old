@@ -65,6 +65,10 @@ if (UNIX OR GENERATE_BUILD_FILES_FOR_UNIX)
 		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/sataDriver
 		COMMAND cp -u ${OUTPUT_DIR}/mbrDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/mbrDriver
 		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/mbrDriver
+		COMMAND cp -u ${OUTPUT_DIR}/gptDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/gptDriver
+		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/gptDriver
+		COMMAND cp -u ${OUTPUT_DIR}/fatDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/fatDriver
+		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/fatDriver
 		COMMAND cd scripts
 		COMMAND ./make_initrd.sh
 		COMMAND cd ..
@@ -74,8 +78,12 @@ if (UNIX OR GENERATE_BUILD_FILES_FOR_UNIX)
 		WORKING_DIRECTORY ${OUTPUT_DIR}/../
 		BYPRODUCTS "${OUTPUT_DIR}/obos.iso"
 		DEPENDS oboskrnl
+		DEPENDS fatDriver
+		DEPENDS gptDriver
+	    DEPENDS mbrDriver
 	    DEPENDS sataDriver
-	    DEPENDS initrdDriver)
+	    DEPENDS initrdDriver
+	)
 else (WIN32)
 	string(REPLACE "/" "\\" OUTPUT_DIR ${OUTPUT_DIR})
 	string(REPLACE "/" "\\" SOURCE_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -90,6 +98,10 @@ else (WIN32)
 		COMMAND ${OBJCOPY} -g isodir/obos/initrd/sataDriver > NUL 2>&1
 		COMMAND copy /Y "${OUTPUT_DIR}\\mbrDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrd\\mbrDriver" > NUL 2>&1
 		COMMAND ${OBJCOPY} -g isodir/obos/initrd/mbrDriver > NUL 2>&1
+		COMMAND copy /Y "${OUTPUT_DIR}\\gptDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrd\\gptDriver" > NUL 2>&1
+		COMMAND ${OBJCOPY} -g isodir/obos/initrd/gptDriver > NUL 2>&1
+		COMMAND copy /Y "${OUTPUT_DIR}\\fatDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrd\\fatDriver" > NUL 2>&1
+		COMMAND ${OBJCOPY} -g isodir/obos/initrd/fatDriver > NUL 2>&1
 		COMMAND cd scripts
 		COMMAND make_initrd.bat
 		COMMAND cd ..
@@ -99,8 +111,12 @@ else (WIN32)
         WORKING_DIRECTORY ${OUTPUT_DIR}/../
         BYPRODUCTS "${OUTPUT_DIR}/obos.iso"
 	    DEPENDS oboskrnl
+	    DEPENDS initrdDriver
 	    DEPENDS sataDriver
-	    DEPENDS initrdDriver)
+	    DEPENDS gptDriver
+	    DEPENDS mbrDriver
+	    DEPENDS fatDriver
+	)
 endif()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

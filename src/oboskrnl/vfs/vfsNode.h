@@ -120,6 +120,7 @@ namespace obos
 			{}
 			uint32_t partitionId = 0;
 			uintptr_t lbaOffset = 0;
+			size_t sizeSectors = 0;
 			// Also add the handle to the DriveEntry's handle list.
 			HandleList handlesReferencing;
 			struct DriveEntry* drive;

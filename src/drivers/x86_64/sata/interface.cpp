@@ -74,7 +74,7 @@ bool DriveReadSectors(
 	if (((nSectorsToRead * portDescriptor.sectorSize) % 4096) != 0)
         pagesToRead++;
     size_t blocksToRead = (pagesToRead / 1024) + ((pagesToRead % 1024) != 0);
-    uintptr_t responsePhysicalAddresses[blocksToRead];
+    uintptr_t *responsePhysicalAddresses = new uintptr_t[blocksToRead];
     uintptr_t responsePhysicalAddressBase = memory::allocatePhysicalPage(pagesToRead);
     for (size_t i = 0; i < blocksToRead; i++)
         responsePhysicalAddresses[i] = responsePhysicalAddressBase + i * 1024;
@@ -109,7 +109,7 @@ bool DriveReadSectors(
 	    utils::memzero(command, sizeof(*command));
 	    command->fis_type = FIS_TYPE_REG_H2D;
 	    command->command = ATA_READ_DMA_EXT;
-	    command->device = 0x40;
+	    command->device = 0;
 	    command->c = 1;
         uint16_t count = i == (blocksToRead - 1) ? currentSectorCount : 1024;
 	    command->countl = (uint8_t)(count & 0xff);
@@ -152,6 +152,7 @@ bool DriveReadSectors(
             );
         *buff = response;
     }
+    delete[] responsePhysicalAddresses;
     return true;
 }
 bool DriveWriteSectors(
@@ -231,7 +232,7 @@ bool DriveWriteSectors(
 	    utils::memzero(command, sizeof(*command));
 	    command->fis_type = FIS_TYPE_REG_H2D;
 	    command->command = ATA_WRITE_DMA_EXT;
-	    command->device = 0x40;
+	    command->device = 0;
 	    command->c = 1;
         uint16_t count = i == (blocksToWrite - 1) ? currentSectorCount : 1024;
 	    command->countl = (uint8_t)(count & 0xff);

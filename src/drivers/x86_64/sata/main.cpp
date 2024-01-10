@@ -296,7 +296,7 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 		utils::memzero(command, sizeof(*command));
 		command->fis_type = FIS_TYPE_REG_H2D;
 		command->command = ATA_IDENTIFY_DEVICE;
-		command->device = 0x40;
+		command->device = 0x0;
 		command->c = 1;
 		// Wait for the port.
 		// 0x88: ATA_DEV_BUSY | ATA_DEV_DRQ

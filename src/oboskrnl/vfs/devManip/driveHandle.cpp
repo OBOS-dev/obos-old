@@ -134,15 +134,19 @@ namespace obos
             driverInterface::driverIdentity* identity = ((DriveEntry*)m_driveNode)->storageDriver;
             uintptr_t lbaOffset = _lbaOffset;
             uint32_t driveId = ((DriveEntry*)m_driveNode)->driveId;
+            size_t partitionSizeSectors = 0;
+            bool isPartitionRead = false;
             if (m_driveNode != m_node)
             {
                 PartitionEntry* part = (PartitionEntry*)m_node;
                 lbaOffset += part->lbaOffset;
+                partitionSizeSectors = part->sizeSectors;
+                isPartitionRead = true;
             }
             auto ftable = identity->functionTable.serviceSpecific.storageDevice;
             // Get the sector count.
-            size_t nSectors = 0, sizeofSector = 0;
-            ftable.QueryDiskInfo(driveId, &nSectors, &sizeofSector);
+            size_t nSectors = partitionSizeSectors, sizeofSector = 0;
+            ftable.QueryDiskInfo(driveId, isPartitionRead ? nullptr : &nSectors, &sizeofSector);
             if (lbaOffset + nSectorsToRead > (nSectors + 1))
             {
                 SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
@@ -180,15 +184,19 @@ namespace obos
             driverInterface::driverIdentity* identity = ((DriveEntry*)m_driveNode)->storageDriver;
             uintptr_t lbaOffset = _lbaOffset;
             uint32_t driveId = ((DriveEntry*)m_driveNode)->driveId;
+            size_t partitionSizeSectors = 0;
+            bool isPartitionWrite = false;
             if (m_driveNode != m_node)
             {
                 PartitionEntry* part = (PartitionEntry*)m_node;
                 lbaOffset += part->lbaOffset;
+                partitionSizeSectors = part->sizeSectors;
+                isPartitionWrite = true;
             }
             auto ftable = identity->functionTable.serviceSpecific.storageDevice;
             // Get the sector count.
-            size_t nSectors = 0, sizeofSector = 0;
-            ftable.QueryDiskInfo(driveId, &nSectors, &sizeofSector);
+            size_t nSectors = partitionSizeSectors, sizeofSector = 0;
+            ftable.QueryDiskInfo(driveId, isPartitionWrite ? nullptr : &nSectors, &sizeofSector);
             if (lbaOffset + nSectorsToWrite > (nSectors + 1))
             {
                 SetLastError(OBOS_ERROR_VFS_WRITE_ABORTED);
@@ -204,7 +212,31 @@ namespace obos
             if (_nSectorsWritten)
                 *_nSectorsWritten = nSectorsWrote;
             return true;
-        } 
+        }
+        uint32_t DriveHandle::GetDriveId()
+        {
+            if (!m_node || m_flags & FLAGS_CLOSED)
+            {
+                SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+                return 0xffffffff;
+            }
+            return ((DriveEntry*)m_driveNode)->driveId;
+        }
+        uint32_t DriveHandle::GetPartitionId()
+        {
+            if (!m_node || m_flags & FLAGS_CLOSED)
+            {
+                SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+                return 0xffffffff;
+            }
+            if (((VFSNode*)m_node)->type != VFS_NODE_PARTITION_ENTRY)
+            {
+                SetLastError(OBOS_ERROR_VFS_HANDLE_NOT_REFERRING_TO_PARTITION);
+                return false;
+            }
+            return ((DriveEntry*)m_driveNode)->driveId;
+        }
+
         
         bool DriveHandle::QueryInfo(size_t *_nSectors, size_t *_bytesPerSector)
         {

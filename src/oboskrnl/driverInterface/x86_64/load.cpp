@@ -203,6 +203,35 @@ namespace obos
 				return { nullptr,nullptr };
 			return { symtab_section,strtab_section };
 		}
+		static tables GetDriverSymbolStringTables(byte* file)
+		{
+			process::loader::Elf64_Ehdr* eheader = (process::loader::Elf64_Ehdr*)file;
+			process::loader::Elf64_Shdr* iter = reinterpret_cast<process::loader::Elf64_Shdr*>(file + eheader->e_shoff);
+			process::loader::Elf64_Shdr* symtab_section = nullptr;
+			process::loader::Elf64_Shdr* strtab_section = nullptr;
+
+			for (size_t i = 0; i < eheader->e_shnum; i++, iter++)
+			{
+				const char* section_name = getElfString(eheader, iter->sh_name);
+				if (utils::strcmp(".symtab", section_name))
+				{
+					symtab_section = iter;
+					continue;
+				}
+				if (utils::strcmp(".strtab", section_name))
+				{
+					strtab_section = iter;
+					continue;
+				}
+				if (strtab_section != nullptr && symtab_section != nullptr)
+					break;
+			}
+			if (!symtab_section)
+				return { nullptr,nullptr };
+			if (!strtab_section)
+				return { nullptr,nullptr };
+			return { symtab_section,strtab_section };
+		}
 		static process::loader::Elf64_Sym* GetSymbolFromIndex(
 			process::loader::Elf64_Sym* symbolTable,
 			size_t index)
@@ -543,9 +572,7 @@ namespace obos
 			}
 			return true;
 		}
-		driverIdentity** g_driverInterfaces;
-		size_t g_driverInterfacesCapacity;
-		constexpr static size_t g_driverInterfacesCapacityStep = 4;
+		utils::Hashmap<uint32_t, driverIdentity*> g_driverInterfaces;
 		driverHeader* CheckModule(byte* file, size_t size)
 		{
 			return _CheckModuleImpl(file, size, nullptr);
@@ -572,11 +599,9 @@ namespace obos
 			identity->driverId = header->driverId;
 			identity->_serviceType = header->driverType;
 			identity->functionTable = header->functionTable;
-			identity->header = header;
+			identity->header = new driverHeader{ *header };
 			// We emplace it after the driver finishes initialization.
-			if (identity->driverId >= g_driverInterfacesCapacity)
-				g_driverInterfaces = new driverIdentity*[g_driverInterfacesCapacity + g_driverInterfacesCapacityStep];
-			if(g_driverInterfaces[identity->driverId])
+			if (g_driverInterfaces.contains(identity->driverId))
 			{
 				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
 				return false;
@@ -593,29 +618,53 @@ namespace obos
 					}
 				}
 			}
+			{
+				using namespace process::loader;
+				// Loop over the driver symbols adding them to identity->symbols
+				auto symTable = GetDriverSymbolStringTables(file);
+				if (!symTable.strtab_section || !symTable.symtab_section)
+					goto done;
+				Elf64_Sym* symbolTable = (Elf64_Sym*)(file + symTable.symtab_section->sh_offset);
+				char* stringTable = (char*)(file + symTable.strtab_section->sh_offset);
+				for (size_t symbol = 0; symbol < (symTable.symtab_section->sh_size / sizeof(Elf64_Sym)); symbol++)
+				{
+					Elf64_Sym* sym = symbolTable + symbol;
+					if ((sym->st_info & 0xf) != STT_FUNC)
+						continue;
+					obosDriverSymbol osym = {};
+					osym.addr = baseAddress + sym->st_value;
+					osym.size = sym->st_size;
+					auto name = stringTable + sym->st_name;
+					size_t szName = utils::strlen(name);
+					osym.name = (char*)utils::memcpy(new char[szName + 1], name, szName);
+					identity->symbols.push_back(osym);
+				}
+			}
+		done:
 
 			if (!(header->requests & driverHeader::REQUEST_NO_MAIN_THREAD))
 			{
 				thread::ThreadHandle* thread = new thread::ThreadHandle{};
-				if (mainThread)
-					*mainThread = thread;
 
 				thread->CreateThread(
 					thread::THREAD_PRIORITY_NORMAL, 
 					(header->requests & driverHeader::REQUEST_SET_STACK_SIZE) ? header->stackSize : 0,
 					(void(*)(uintptr_t))entryPoint,
 					0,
-					// thread::g_defaultAffinity,
-					2,
+					thread::g_defaultAffinity,
 					thread::GetCurrentCpuLocalPtr()->idleThread->owner, // The idle thread always uses the kernel's process as it's owner.
 					true);
 				((thread::Thread*)thread->GetUnderlyingObject())->driverIdentity = identity;
 				thread->ResumeThread();
+				if (mainThread)
+					*mainThread = thread;
+				else
+					delete thread;
 			}
 			else
 				header->driver_initialized = true;
 			while (!header->driver_initialized);
-			g_driverInterfaces[identity->driverId] = identity;
+			g_driverInterfaces.emplace_at(header->driverId, identity);
 			header->driver_finished_loading = true;
 			return true;
 		}
