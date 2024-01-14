@@ -72,7 +72,7 @@ bool RegisterMBRPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driver
     drive.OpenDrive(path, vfs::DriveHandle::OpenOptions::OPTIONS_READ_ONLY);
     delete[] path;
     size_t sizeofSector;
-    drive.QueryInfo(nullptr, &sizeofSector);
+    drive.QueryInfo(nullptr, &sizeofSector, nullptr);
     byte* firstSector = new byte[sizeofSector];
     if (!drive.ReadSectors(firstSector, nullptr, 0, 1))
     {

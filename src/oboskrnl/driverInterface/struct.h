@@ -34,7 +34,7 @@ namespace obos
 			FILE_DOESNT_EXIST,
 			// If this is set, the file cannot be written to.
 			FILE_ATTRIBUTES_READ_ONLY = 1,
-			// If this is set, the filesystem messed up.
+			// If this is set, the filesystem driver messed up.
 			FILE_ATTRIBUTES_RESERVED = 2,
 			// If this is set, this is a directory.
 			FILE_ATTRIBUTES_DIRECTORY = 4,
@@ -42,6 +42,8 @@ namespace obos
 			FILE_ATTRIBUTES_HARDLINK = 8,
 			// If this is set, this is a file, not a directory.
 			FILE_ATTRIBUTES_FILE = 16,
+			// Hidden
+			FILE_ATTRIBUTES_HIDDEN = 32,
 		};
 		struct partitionInfo
 		{
@@ -71,7 +73,6 @@ namespace obos
 						const char* path,
 						uint32_t driveId, uint8_t partitionIdOnDrive,
 						size_t* oFsizeBytes,
-						uint64_t* oLBAOffset,
 						fileAttributes* oFAttribs);
 					/// <summary>
 					/// Creates a file iterator.
@@ -87,7 +88,6 @@ namespace obos
 						const char** oFilepath,
 						void(**freeFunction)(void* buf),
 						size_t* oFsizeBytes,
-						uint64_t* oLBAOffset,
 						fileAttributes* oFAttribs);
 					bool(*FileIteratorClose)(uintptr_t iter);
 					bool(*ReadFile)(
@@ -96,7 +96,7 @@ namespace obos
 						size_t nToSkip,
 						size_t nToRead,
 						char* buff);
-					// TODO: Make a write file
+					// TODO: Make a write file callback.
 					void* unused[maxCallbacks - 5]; // Add padding
 				} filesystem;
 				struct

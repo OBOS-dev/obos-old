@@ -8,6 +8,7 @@
 #include <klog.h>
 #include <atomic.h>
 #include <memory_manipulation.h>
+#include <string.h>
 
 #include <stdarg.h>
 
@@ -109,6 +110,13 @@ namespace obos
 						if (!str)
 							break;
 						for (int i = 0; str[i]; i++, ret++)
+							printCallback(str[i], userdata);
+						break;
+					}
+					case 'S':
+					{
+						utils::String& str = va_arg(list, utils::String);
+						for (size_t i = 0; i < str.length(); i++, ret++)
 							printCallback(str[i], userdata);
 						break;
 					}

@@ -147,7 +147,7 @@ bool RegisterGPTPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driver
     drive.OpenDrive(path, vfs::DriveHandle::OpenOptions::OPTIONS_READ_ONLY);
     delete[] path;
     size_t sizeofSector;
-    drive.QueryInfo(nullptr, &sizeofSector);
+    drive.QueryInfo(nullptr, &sizeofSector, nullptr);
     memory::VirtualAllocator allocator{ nullptr };
     byte* firstSector = (byte*)allocator.VirtualAlloc(nullptr, sizeofSector, 0);
     if (!drive.ReadSectors(firstSector, nullptr, 1, 1))
@@ -165,7 +165,6 @@ bool RegisterGPTPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driver
         return false;
     }
     // Verify the CRC32 checksum of the GPT header.
-    // TODO: Find out why this always returns the wrong checksum, even if the checksum calculated __from__ the disk is the same as the one calculated.
     bool retried = false;
     retry:
     uint32_t other_crc32 = gptHeader->headerCRC32;
@@ -193,22 +192,19 @@ bool RegisterGPTPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driver
         goto retry;
     }
     // Verify the CRC32 checksum of the GPT partition entries.
-    uint32_t entriesCRC32 = 0;
-    byte* currentSector = (byte*)allocator.VirtualAlloc(nullptr, sizeofSector, 0);
     const size_t nPartitionEntriesPerSector = sizeofSector / gptHeader->szPartitionEntry;
     const size_t nSectorsForPartitionTable = gptHeader->nPartitionEntries / nPartitionEntriesPerSector + (gptHeader->nPartitionEntries % nPartitionEntriesPerSector != 0);
     const uint64_t partitionTableLBA = gptHeader->partitionEntryLBA;
-    for (size_t i = 0; i < nSectorsForPartitionTable; i++)
+    byte* currentSector = (byte*)allocator.VirtualAlloc(nullptr, sizeofSector * nSectorsForPartitionTable, 0);
+    uint32_t entriesCRC32 = 0;
+    if (!drive.ReadSectors(currentSector, nullptr, partitionTableLBA, nSectorsForPartitionTable))
     {
-        if (!drive.ReadSectors(currentSector, nullptr, partitionTableLBA + i, 1))
-        {
-            allocator.VirtualFree(firstSector, sizeofSector);
-            allocator.VirtualFree(currentSector, sizeofSector);
-            drive.Close();
-            return false;
-        }
-        entriesCRC32 = crc32_bytes_from_previous(currentSector, sizeofSector, entriesCRC32);
+        allocator.VirtualFree(firstSector, sizeofSector);
+        allocator.VirtualFree(currentSector, sizeofSector);
+        drive.Close();
+        return false;
     }
+    entriesCRC32 = crc32_bytes(currentSector, sizeofSector * nSectorsForPartitionTable);
     if (entriesCRC32 != gptHeader->partitionTableCRC32)
     {
         allocator.VirtualFree(firstSector, sizeofSector);
@@ -216,9 +212,6 @@ bool RegisterGPTPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driver
         drive.Close();
         return false;
     }
-    /*byte* currentSector = (byte*)allocator.VirtualAlloc(nullptr, sizeofSector, 0);
-    const size_t nPartitionEntriesPerSector = sizeofSector / gptHeader->szPartitionEntry;
-    const uint64_t partitionTableLBA = gptHeader->partitionEntryLBA;*/
     gpt_partition* const volatile table = (gpt_partition*)currentSector;
     driverInterface::partitionInfo* partitions = nullptr;
     size_t nPartitionEntries = 0;
@@ -237,12 +230,11 @@ bool RegisterGPTPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driver
                 break;
         nPartitionEntries += nPartitionEntriesOnSector;
         partitions = (driverInterface::partitionInfo*)krealloc(partitions, sizeof(driverInterface::partitionInfo) * nPartitionEntries);
-        for (size_t partEntry = 0; partEntry < nPartitionEntriesOnSector; partEntry++)
+        for (size_t partEntry = 0; partEntry < nPartitionEntriesOnSector; partEntry++, id++)
         {
             partitions[id].id = id;
             partitions[id].lbaOffset = table[partEntry].startLBA;
             partitions[id].sizeSectors = table[partEntry].endLBA - table[partEntry].startLBA;
-            id++;
         }
     }
     allocator.VirtualFree(firstSector, sizeofSector);

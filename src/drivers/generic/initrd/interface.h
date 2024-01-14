@@ -16,7 +16,6 @@ namespace initrdInterface
 		const char* path,
 		uint32_t driveId, uint8_t partitionIdOnDrive,
 		size_t* oFsizeBytes,
-		uint64_t* oLBAOffset,
 		obos::driverInterface::fileAttributes* oFAttribs);
 	bool IterCreate(
 		uint32_t driveId, uint8_t partitionIdOnDrive,
@@ -26,7 +25,6 @@ namespace initrdInterface
 		const char** oFilepath,
 		void(**freeFunction)(void* buf),
 		size_t* oFsizeBytes,
-		uint64_t* oLBAOffset,
 		obos::driverInterface::fileAttributes* oFAttribs);
 	bool IterClose(uintptr_t iter);
 	bool ReadFile(

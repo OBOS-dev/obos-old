@@ -42,14 +42,15 @@ namespace obos
 		// %x: Print hex number (lowercase, unsigned).
 		// %X: Print hex number (uppercase, unsigned).
 		// %c: Print character.
-		// %s: Print string
+		// %s: Print string (const char*)
+		// %S: Print string (utils::String)
 		// %p: Print pointer as a hex number with a padding of sizeof(uintptr_t) * 2
 		// %%: Prints a '%'
 		OBOS_EXPORT size_t printf_impl(void(*printCallback)(char ch, void* userdata), void* userdata, const char* format, va_list list);
 
 		OBOS_EXPORT size_t printf(const char* format, ...);
 		OBOS_EXPORT size_t vprintf(const char* format, va_list list);
-		OBOS_EXPORT size_t sprintf(char* dest, const char* format, ...); // TODO: Implement this.
+		OBOS_EXPORT size_t sprintf(char* dest, const char* format, ...);
 
 		constexpr const char* DEBUG_PREFIX_MESSAGE = "[Debug] ";
 		constexpr const char* LOG_PREFIX_MESSAGE = "[Log] ";

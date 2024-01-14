@@ -15,6 +15,12 @@ namespace obos
         {
             T1 first;
             T2 second;
+            bool operator==(const pair& other) const
+            {
+                return 
+                    other.first == other.first &&
+                    other.second == other.second;
+            }
         };
         
     }

@@ -39,15 +39,23 @@ namespace obos
             // To open drive 0, partition 1, D0P1:/
             OBOS_EXPORT bool OpenDrive(const char* path, OpenOptions options = OPTIONS_DEFAULT);
 
-            OBOS_EXPORT bool ReadSectors(void* buff, size_t* nSectorsRead, uoff_t lbaOffset, size_t nSectors); 
-            OBOS_EXPORT bool WriteSectors(void* buff, size_t* nSectorsWritten, uoff_t lbaOffset, size_t nSectors); 
-        
-            OBOS_EXPORT uint32_t GetDriveId();
-            OBOS_EXPORT uint32_t GetPartitionId();
+            OBOS_EXPORT bool ReadSectors(void* buff, size_t* nSectorsRead, uoff_t lbaOffset, size_t nSectors) const;
+            OBOS_EXPORT bool WriteSectors(void* buff, size_t* nSectorsWritten, uoff_t lbaOffset, size_t nSectors);
 
-            OBOS_EXPORT bool QueryInfo(size_t *nSectors, size_t *bytesPerSector);
-        
+            OBOS_EXPORT uint32_t GetDriveId() const;
+            OBOS_EXPORT uint32_t GetPartitionId() const;
+
+            OBOS_EXPORT bool QueryInfo(size_t* nSectors, size_t* bytesPerSector, size_t* nPartitions) const;
+            OBOS_EXPORT bool QueryPartitionInfo(size_t* nSectors, uint64_t* lbaOffset, const char** filesystemName) const;
+
             OBOS_EXPORT bool Close();
+
+            bool IsPartitionHandle() const { return m_driveNode != m_node; }
+
+            // Do not use these next two functions unless you know what you're doing.
+
+            void* GetNode() const { return m_node; }
+            void* GetDriveNode() const { return m_driveNode; }
 
             OBOS_EXPORT ~DriveHandle() { if (m_node && !(m_flags & FLAGS_CLOSED)) Close(); }
         private:

@@ -13,6 +13,8 @@
 
 #include <multitasking/threadAPI/thrHandle.h>
 
+#include "cache.h"
+
 using namespace obos;
 
 #ifdef __GNUC__
@@ -20,6 +22,31 @@ using namespace obos;
 #else
 #define DEFINE_IN_SECTION
 #endif
+
+namespace fatDriver
+{
+	bool QueryFileProperties(
+		const char* path,
+		uint32_t driveId, uint8_t partitionIdOnDrive,
+		size_t* oFsizeBytes,
+		driverInterface::fileAttributes* oFAttribs);
+	bool FileIteratorCreate(
+		uint32_t driveId, uint8_t partitionIdOnDrive,
+		uintptr_t* oIter);
+	bool FileIteratorNext(
+		uintptr_t iter,
+		const char** oFilepath,
+		void(**freeFunction)(void* buf),
+		size_t* oFsizeBytes,
+		driverInterface::fileAttributes* oFAttribs);
+	bool FileIteratorClose(uintptr_t iter);
+	bool ReadFile(
+		uint32_t driveId, uint8_t partitionIdOnDrive,
+		const char* path,
+		size_t nToSkip,
+		size_t nToRead,
+		char* buff);
+}
 
 driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 	.magicNumber = obos::driverInterface::OBOS_DRIVER_HEADER_MAGIC,
@@ -31,11 +58,11 @@ driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 		.GetServiceType = []()->driverInterface::serviceType { return driverInterface::serviceType::OBOS_SERVICE_TYPE_FILESYSTEM; },
 		.serviceSpecific = {
 			.filesystem = {
-				.QueryFileProperties = nullptr,
-				.FileIteratorCreate = nullptr,
-				.FileIteratorNext = nullptr,
-				.FileIteratorClose = nullptr,
-				.ReadFile = nullptr,
+				.QueryFileProperties = fatDriver::QueryFileProperties,
+				.FileIteratorCreate = fatDriver::FileIteratorCreate,
+				.FileIteratorNext = fatDriver::FileIteratorNext,
+				.FileIteratorClose = fatDriver::FileIteratorClose,
+				.ReadFile = fatDriver::ReadFile,
 				.unused = { nullptr,nullptr,nullptr,nullptr }
 			}
 		}
@@ -44,7 +71,8 @@ driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 
 extern "C" void _start()
 {
-	
+	logger::log("FAT Driver: Probing drives for FAT partitions.\n");
+	fatDriver::ProbeDrives();
 	g_driverHeader.driver_initialized = true;
 	while (g_driverHeader.driver_finished_loading);
 	thread::ExitThread(0);

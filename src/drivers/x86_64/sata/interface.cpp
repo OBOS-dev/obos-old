@@ -91,7 +91,7 @@ bool DriveReadSectors(
 	    (HBA_CMD_TBL*)
 	    (
 	    	(byte*)portDescriptor.clBase +
-	    	 ((cmdHeader->ctba | ((uintptr_t)cmdHeader->ctbau << 32)) /* physical address of the HBA_CMD_TBL */ - portDescriptor.clBasePhys) // The offset of the HBA_CMD_TBL
+	    	 ((cmdHeader->ctba | ((uintptr_t)cmdHeader->ctbau << 32)) /* physical address of the HBA_CMD_TBL */ & 0xfff) // The offset of the HBA_CMD_TBL
 	    );
     for (size_t i = 0; i < blocksToRead; i++)
     {
@@ -109,17 +109,17 @@ bool DriveReadSectors(
 	    utils::memzero(command, sizeof(*command));
 	    command->fis_type = FIS_TYPE_REG_H2D;
 	    command->command = ATA_READ_DMA_EXT;
-	    command->device = 0;
+	    command->device = 0x40;
 	    command->c = 1;
         uint16_t count = i == (blocksToRead - 1) ? currentSectorCount : 1024;
 	    command->countl = (uint8_t)(count & 0xff);
 	    command->counth = (uint8_t)((count >> 8) & 0xff);
-        command->lba0 = (currentLBAOffset & 0xff);
-        command->lba1 = ((currentLBAOffset >> 8) & 0xff);
-        command->lba2 = ((currentLBAOffset >> 16) & 0xff);
-        command->lba3 = ((currentLBAOffset >> 24) & 0xff);
-        command->lba4 = ((currentLBAOffset >> 32) & 0xff);
-        command->lba5 = ((currentLBAOffset >> 48) & 0xff);
+        command->lba0 = (uint8_t) (currentLBAOffset & 0xff);
+        command->lba1 = (uint8_t)((currentLBAOffset >>  8) & 0xff);
+        command->lba2 = (uint8_t)((currentLBAOffset >> 16) & 0xff);
+        command->lba3 = (uint8_t)((currentLBAOffset >> 24) & 0xff);
+        command->lba4 = (uint8_t)((currentLBAOffset >> 32) & 0xff);
+        command->lba5 = (uint8_t)((currentLBAOffset >> 48) & 0xff);
 	    // Wait on the port.
 	    // 0x88: ATA_DEV_BUSY | ATA_DEV_DRQ
 	    while ((pPort->tfd & 0x88))

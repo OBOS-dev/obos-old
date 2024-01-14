@@ -37,7 +37,7 @@ namespace obos
 		public:
 			FileHandle() = default;
 
-			// TODO: Remove the default to options when Write is implemented.
+			// TODO: Remove the default for options when Write is implemented.
 			/// <summary>
 			/// Opens a file.
 			/// </summary>

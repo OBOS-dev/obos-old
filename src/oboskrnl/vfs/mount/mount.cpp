@@ -10,19 +10,22 @@
 #include <klog.h>
 
 #include <vfs/mount/mount.h>
+
 #include <vfs/vfsNode.h>
+
+#include <vfs/devManip/driveHandle.h>
 
 #include <driverInterface/struct.h>
 #include <driverInterface/load.h>
 
 #include <multitasking/process/process.h>
 
-
 namespace obos
 {
 	namespace vfs
 	{
 		utils::Vector<MountPoint*> g_mountPoints;
+		// Don't make static!
 		void dividePathToTokens(const char* filepath, const char**& tokens, size_t& nTokens, bool useOffset = true)
 		{
 			for (; filepath[0] == '/'; filepath++);
@@ -52,7 +55,7 @@ namespace obos
 				return false;
 			}
 			auto functions = point->filesystemDriver->functionTable.serviceSpecific.filesystem;
-			uint64_t driveId = point->partitionId >> 24;
+			uint32_t driveId = point->partitionId >> 24;
 			uint8_t drivePartitionId = point->partitionId & 0xff;
 			uintptr_t fileIterator = 0;
 			if (!functions.FileIteratorCreate(driveId, drivePartitionId, &fileIterator))
@@ -67,7 +70,7 @@ namespace obos
 			void(*freeFilepath)(void* buff) = nullptr;
 			while (1)
 			{
-				if (!functions.FileIteratorNext(fileIterator, &filepath, &freeFilepath, &filesize, nullptr, &fAttributes))
+				if (!functions.FileIteratorNext(fileIterator, &filepath, &freeFilepath, &filesize, &fAttributes))
 				{
 					SetLastError(OBOS_ERROR_VFS_DRIVER_FAILURE);
 					return false;
@@ -101,7 +104,7 @@ namespace obos
 						{
 							// If the entry we're making isn't a file we must check if the current part of the path we're parsing
 							// is a directory or not, otherwise we might make a file entry for a directory.
-							if (!functions.QueryFileProperties(sTokens[i], driveId, drivePartitionId, &cFilesize, nullptr, &cFAttributes))
+							if (!functions.QueryFileProperties(sTokens[i], driveId, drivePartitionId, &cFilesize, &cFAttributes))
 							{
 								for (size_t j = 0; j < nTokens; j++)
 									delete[] sTokens[j];
@@ -174,7 +177,7 @@ namespace obos
 						driverInterface::fileAttributes cFAttributes = fAttributes;
 						if(!(fAttributes & driverInterface::FILE_ATTRIBUTES_DIRECTORY))
 						{
-							if (!functions.QueryFileProperties(path, driveId, drivePartitionId, &cFilesize, nullptr, &cFAttributes))
+							if (!functions.QueryFileProperties(path, driveId, drivePartitionId, &cFilesize, &cFAttributes))
 							{
 								for (size_t j = 0; j < nTokens; j++)
 									delete[] sTokens[j];
@@ -255,6 +258,7 @@ namespace obos
 				return false;
 			}
 			MountPoint* newPoint = new MountPoint;
+			utils::memzero(newPoint, sizeof(*newPoint));
 			newPoint->id = point;
 			newPoint->partitionId = partitionId;
 			if (existingMountPoint)
@@ -269,9 +273,28 @@ namespace obos
 					newPoint->filesystemDriver = driverInterface::g_driverInterfaces.at(0);
 				else 
 				{
-					SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
-					return false;
-				} // TODO: Find the filesystem driver associated with the partition.
+					uint32_t driveId = newPoint->partitionId >> 24;
+					uint8_t drivePartitionId = newPoint->partitionId & 0xff;
+					DriveHandle drv;
+					char* path = new char[
+						logger::sprintf(nullptr, "D%dP%d://", driveId, drivePartitionId) + 1
+					];
+					logger::sprintf(path, "D%dP%d://", driveId, drivePartitionId);
+					if (!drv.OpenDrive(path, DriveHandle::OPTIONS_READ_ONLY))
+					{
+						delete newPoint;
+						delete[] path;
+						return false;
+					}
+					delete[] path;
+					newPoint->filesystemDriver = ((PartitionEntry*)drv.GetNode())->filesystemDriver;
+					if (!newPoint->filesystemDriver)
+					{
+						delete newPoint;
+						return false;
+					}
+					drv.Close();
+				}
 				bool ret = setupMountPointEntries(newPoint);
 				if (ret)
 					g_mountPoints.push_back(newPoint);
@@ -282,6 +305,8 @@ namespace obos
 		}
 		bool unmount(uint32_t /*mountPoint*/)
 		{
+			// TODO: Implement.
+			SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
 			return false;
 		}
 

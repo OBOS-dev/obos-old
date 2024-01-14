@@ -133,6 +133,10 @@ namespace obos
 		/// The DriveHandle doesn't refer to a partition.
 		/// </summary>
 		OBOS_ERROR_VFS_HANDLE_NOT_REFERRING_TO_PARTITION,
+		/// <summary>
+		/// The object was read only and Write* was called on it.
+		/// </summary>
+		OBOS_ERROR_VFS_READ_ONLY,
 
 		OBOS_ERROR_HIGHEST_VALUE,
 	};

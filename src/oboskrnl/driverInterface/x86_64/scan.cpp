@@ -185,7 +185,7 @@ namespace obos
 				delete[] path;
 
 				size_t sectorSize = 0, nSectors = 0;
-				drv.QueryInfo(&nSectors, &sectorSize);
+				drv.QueryInfo(&nSectors, &sectorSize, nullptr);
 				if (nSectors <= 2)
 				{
 					loadMBR = true;
@@ -257,7 +257,7 @@ namespace obos
 				mbrDriver = g_driverInterfaces.at(2);
 			if (&g_driverInterfaces.at(3))
 				gptDriver = g_driverInterfaces.at(3);
-			auto iterateDrivesAndRegisterPartitions = [](utils::Vector<uint32_t> drives, driverIdentity* driver)
+			auto iterateDrivesAndRegisterPartitions = [](utils::Vector<uint32_t>& drives, driverIdentity* driver)
 				{
 					for (auto& driveId : drives)
 					{

@@ -38,33 +38,23 @@ namespace obos
         {
             if (!other.m_len)
                 return;
-            m_str = (char*)utils::memcpy(new char[other.m_len + 1], other.m_str, other.m_len);
-            m_len = other.m_len;
+            initialize(other.m_str, other.m_len);
         }
         String& String::operator=(const String& other)
         {
-            if (!other.m_len)
-                return *this;
-            m_str = (char*)utils::memcpy(new char[other.m_len + 1], other.m_str, other.m_len);
-            m_len = other.m_len;            
+            initialize(other.m_str, other.m_len);
             return *this;
         }
         String::String(String&& other)
         {
-            if (!other.m_len)
-                return;
-            m_str = (char*)utils::memcpy(new char[other.m_len + 1], other.m_str, other.m_len);
-            m_len = other.m_len;
+            initialize(other.m_str, other.m_len);
             delete[] other.m_str;
             other.m_str = nullptr;
             other.m_len = 0;
         }
         String& String::operator=(String&& other)
         {
-            if (!other.m_len)
-                return *this;
-            m_str = (char*)utils::memcpy(new char[other.m_len + 1], other.m_str, other.m_len);
-            m_len = other.m_len;
+            initialize(other.m_str, other.m_len);
             delete[] other.m_str;
             other.m_str = nullptr;
             other.m_len = 0;

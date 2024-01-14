@@ -380,7 +380,18 @@ namespace obos
 			memory::VirtualAllocator* valloc = &((process::Process*)currentThread->owner)->vallocator;
 			freeThreadStackInfo((void*)&currentThread->stackInfo, valloc);
 			if(!currentThread->references)
+			{
+				if (currentThread->prev_list)
+					currentThread->prev_list->next_list = currentThread->next_list;
+				if (currentThread->next_list)
+					currentThread->next_list->prev_list = currentThread->prev_list;
+				if (currentThread->threadList->head == currentThread)
+					currentThread->threadList->head = currentThread->next_list;
+				if (currentThread->threadList->tail == currentThread)
+					currentThread->threadList->tail = currentThread->prev_list;
+				currentThread->threadList->size--;
 				delete currentThread;
+			}
 			startTimer(0);
 			schedule();
 			return false;

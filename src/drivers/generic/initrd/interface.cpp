@@ -26,11 +26,8 @@ namespace initrdInterface
 		const char* path,
 		uint32_t, uint8_t,
 		size_t* oFsizeBytes,
-		uint64_t* oLBAOffset,
 		obos::driverInterface::fileAttributes* oFAttribs)
 	{
-		if (oLBAOffset)
-			*oLBAOffset = 0;
 		uint32_t fAttribs = 0;
 		if (!::GetFileAttribute(path, oFsizeBytes, &fAttribs))
 		{
@@ -38,8 +35,6 @@ namespace initrdInterface
 				*oFAttribs = obos::driverInterface::FILE_DOESNT_EXIST;
 			if (oFsizeBytes)
 				*oFsizeBytes = 0;
-			if (oLBAOffset)
-				*oLBAOffset = 0;
 			return false;
 		}
 		if (oFAttribs)
@@ -70,7 +65,6 @@ namespace initrdInterface
 		const char** oFilepath,
 		void(**freeFunction)(void* buf),
 		size_t* oFsizeBytes,
-		uint64_t* oLBAOffset,
 		obos::driverInterface::fileAttributes* oFAttribs)
 	{
 		fileIterator* iter = (fileIterator*)_iter;
@@ -90,11 +84,9 @@ namespace initrdInterface
 				*oFAttribs = obos::driverInterface::FILE_DOESNT_EXIST;
 			if (oFsizeBytes)
 				*oFsizeBytes = 0;
-			if (oLBAOffset)
-				*oLBAOffset = 0;
 			return true;
 		}
-		bool ret = QueryFileProperties(iter->currentNode->cache->entry->path, 0,0, oFsizeBytes, oLBAOffset, oFAttribs);
+		bool ret = QueryFileProperties(iter->currentNode->cache->entry->path, 0,0, oFsizeBytes, oFAttribs);
 		if (!ret)
 			return false;
 		size_t szFilepath = obos::utils::strlen(iter->currentNode->cache->entry->path);

@@ -56,6 +56,7 @@ struct pageBlock
 	
 	alignas (0x10) memBlock* firstBlock = nullptr;
 	alignas (0x10) memBlock* lastBlock = nullptr;
+	alignas (0x10) memBlock* highestBlock = nullptr;
 	alignas (0x10) size_t nMemBlocks = 0;
 	
 	alignas (0x10) size_t nBytesUsed = 0;
@@ -243,16 +244,16 @@ extern "C" {
 				currentPageBlock->lastBlock = block->prev;
 			if (!block)
 			{
-				OBOS_ASSERTP(currentPageBlock->lastBlock->magic == MEMBLOCK_MAGIC, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: %p!", "",
-					currentPageBlock->lastBlock,
-					currentPageBlock->lastBlock->allocAddr,
-					currentPageBlock->lastBlock->size);
-				uintptr_t addr = (uintptr_t)currentPageBlock->lastBlock->allocAddr;
-				addr += currentPageBlock->lastBlock->size;
+				OBOS_ASSERTP(currentPageBlock->highestBlock->magic == MEMBLOCK_MAGIC, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: %p!", "",
+					currentPageBlock->highestBlock,
+					currentPageBlock->highestBlock->allocAddr,
+					currentPageBlock->highestBlock->size);
+				uintptr_t addr = (uintptr_t)currentPageBlock->highestBlock->allocAddr;
+				addr += currentPageBlock->highestBlock->size;
 				OBOS_ASSERTP(addr > 0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: %p!", "",
-					currentPageBlock->lastBlock,
-					currentPageBlock->lastBlock->allocAddr,
-					currentPageBlock->lastBlock->size);
+					currentPageBlock->highestBlock,
+					currentPageBlock->highestBlock->allocAddr,
+					currentPageBlock->highestBlock->size);
 				block = (memBlock*)addr;
 			}
 		}
@@ -267,6 +268,8 @@ extern "C" {
 		if(!currentPageBlock->firstBlock)
 			currentPageBlock->firstBlock = block;
 		block->prev = currentPageBlock->lastBlock;
+		if (block > currentPageBlock->highestBlock)
+			currentPageBlock->highestBlock = block;
 		currentPageBlock->lastBlock = block;
 		currentPageBlock->nMemBlocks++;
 
@@ -354,6 +357,15 @@ extern "C" {
 				currentPageBlock->lastBlock = block->prev;
 			if (currentPageBlock->firstBlock == block)
 				currentPageBlock->firstBlock = block->next;
+			if (currentPageBlock->highestBlock == block)
+			{
+				// Look for the highest block.
+				memBlock* highestBlock = nullptr;
+				for (auto blk = currentPageBlock->firstBlock; blk; blk = blk->next)
+					if (blk > highestBlock)
+						highestBlock = blk;
+				currentPageBlock->highestBlock = highestBlock;
+			}
 			obos::utils::memzero(block->allocAddr, block->size);
  			block->magic = MEMBLOCK_DEAD;
 		}

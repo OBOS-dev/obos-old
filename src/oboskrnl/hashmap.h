@@ -144,7 +144,7 @@ namespace obos
                 return *currentNode->value;
             }
 
-            void emplace_at(const Key& key, ValT& value)
+            void emplace_at(const Key& key, const ValT& value)
             {
                 // The buckets and chains contain an index to key.
                 size_t ourIndex = 0;
@@ -175,7 +175,7 @@ namespace obos
                 ourBucket->lastChain = ourChain;
                 ourBucket->nChains++;
                 m_nodeTable[ourIndex].key   = new Key{ key };
-                m_nodeTable[ourIndex].value = new ValT{value };
+                m_nodeTable[ourIndex].value = new ValT{ value };
                 m_nodeTable[ourIndex].used = true;
                 listNode* node = new listNode;
                 node->data = m_nodeTable + ourIndex;

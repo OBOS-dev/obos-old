@@ -30,6 +30,7 @@
 #include <vfs/fileManip/fileHandle.h>
 
 #include <vfs/devManip/driveHandle.h>
+#include <vfs/devManip/driveIterator.h>
 
 #include <boot/cfg.h>
 
@@ -71,7 +72,7 @@ namespace obos
 		g_liballocVirtualAllocator.~VirtualAllocator();
 		new (&g_liballocVirtualAllocator) memory::VirtualAllocator{ kernelProc };
 
-		logger::log("Loading the initrd driver.\n");
+		logger::log("%s: Loading the initrd driver.\n", __func__);
 		SetLastError(0);
 		if (!driverInterface::LoadModule(initrdDriverData, initrdDriverSize, nullptr))
 			logger::panic(nullptr, "Could not load the initrd driver. GetLastError: %d\n", GetLastError());
@@ -79,7 +80,7 @@ namespace obos
 
 		new (&vfs::g_mountPoints) utils::Vector<vfs::MountPoint*>{};
 
-		logger::log("Mounting the initrd.\n");
+		logger::log("%s: Mounting the initrd.\n", __func__);
 		uint32_t point = 0;
 		// Mount the initrd.
 		if (!vfs::mount(point, 0))
@@ -116,7 +117,7 @@ namespace obos
 			}
 			logger::panic(nullptr, "Could not parse kernel config file! Parser output:\n%s", emsg);
 		}
-		logger::log("Successfully loaded and parsed 0:/boot.cfg\n");
+		logger::log("%s: Successfully loaded and parsed 0:/boot.cfg\n", __func__);
 		if (!kcfg.GetElement("FS_DRIVERS"))
 			logger::panic(nullptr, "Missing required property \"FS_DRIVERS\" in 0:/boot.cfg.\n");
 		const utils::Vector<Element>& fs_drivers = kcfg.GetElement("FS_DRIVERS")->array;
@@ -137,10 +138,11 @@ namespace obos
 				logger::warning("Could not load driver %s. GetLastError: %d\n", driverPath.data(), GetLastError());
 				continue;
 			}
-			char* fdata = new char[fdrv.GetFileSize()];
-			fdrv.Read(fdata, fdrv.GetFileSize());
+			size_t drvFilesize = fdrv.GetFileSize();
+			char* fdata = new char[drvFilesize];
+			fdrv.Read(fdata, drvFilesize);
 			fdrv.Close();
-			driverInterface::driverHeader* header = driverInterface::CheckModule((byte*)fdata, fdrv.GetFileSize());
+			driverInterface::driverHeader* header = driverInterface::CheckModule((byte*)fdata, drvFilesize);
 			if (!header)
 			{
 				fdrv.Close();
@@ -155,19 +157,84 @@ namespace obos
 				logger::warning("Ignoring driver %s of type %d.\n", driverPath, header->driverType);
 				continue;
 			}
-			logger::log("Loading filesystem driver %s.\n", driverPath.data());
-			if (!driverInterface::LoadModule((byte*)fdata, fdrv.GetFileSize(), nullptr))
+			logger::log("Loading filesystem driver %S.\n", driverPath);
+			if (!driverInterface::LoadModule((byte*)fdata, drvFilesize, nullptr))
 			{
 				fdrv.Close();
 				delete[] fdata;
-				logger::warning("Could not load driver %s.\n", driverPath.data());
+				logger::warning("Could not load driver %S.\n", driverPath);
 				continue;
 			}
+			delete[] fdata;
 			nFSDriversLoaded++;
 		}
 		if (!nFSDriversLoaded)
 			logger::panic(nullptr, "No file system drivers loaded!\n");
-		
+		// Mount partitions.
+		logger::log("%s: Mounting partitions!\n", __func__);
+		for (vfs::DriveIterator drvIter; drvIter; )
+		{
+			const char* path = drvIter++;
+			vfs::DriveHandle drv, part;
+			drv.OpenDrive(path, vfs::DriveHandle::OPTIONS_READ_ONLY);
+			size_t nPartitions = 0;
+			drv.QueryInfo(nullptr, nullptr, &nPartitions);
+			utils::String dPath;
+			dPath.initialize(path, utils::strlen(path) - 2);
+			delete[] path;
+			for (size_t _part = 0; _part < nPartitions; _part++)
+			{
+				char* partPath = new char[logger::sprintf(nullptr, "%SP%d:/", dPath, _part)];
+				logger::sprintf(partPath, "%SP%d:/", dPath, _part);
+				part.OpenDrive(partPath);
+				const char* fsName = nullptr;
+				part.QueryPartitionInfo(nullptr, nullptr, &fsName);
+				logger::log("%s: Attempting mount of partition %s.\n", __func__, partPath);
+				if (utils::strcmp(fsName, "UNKNOWN"))
+				{
+					logger::warning("%s: Partition has unknown filesystem, skipping mount.\n", __func__);
+					delete[] partPath;
+					continue;
+				}
+				logger::log("%s: Partition filesystem type: %s\n", __func__, fsName);
+				uint32_t mountPoint = 0xffffffff;
+				if (!vfs::mount(mountPoint, drv.GetDriveId() << 24 | (_part & 0xff), true))
+				{
+					logger::warning("%s: Could not mount partition. GetLastError: %d\n", __func__, GetLastError());
+					delete[] partPath;
+					continue;
+				}
+				logger::log("%s: Mounted partition %s at %d:/.\n", __func__, partPath, mountPoint);
+				delete[] partPath;
+			}
+		}
+		// Test the VFS on the FAT32 file.
+		auto vfsTestOnPath = [](const char* path)
+			{
+				vfs::FileHandle file;
+				if (!file.Open(path))
+				{
+					logger::log("Test failed on %s. GetLastError: %d\n", path, GetLastError());
+					return false;
+				}
+				size_t filesize = file.GetFileSize();
+				char* data = new char[filesize + 1];
+				utils::memzero(data, filesize);
+				if (!file.Read(data, filesize))
+				{
+					logger::log("Test failed on %s. GetLastError: %d\n", path, GetLastError());
+					return false;
+				}
+				file.Close();
+				logger::log("Successfully read %s. File contents:\n", path);
+				logger::printf("%s\n", data);
+				delete[] data;
+				return true;
+			};
+		vfsTestOnPath("1:/test.txt");
+		vfsTestOnPath("1:/dir/other_test.txt");
+		vfsTestOnPath("1:/dir/subdirectory/you_guessed_it_another_test.txt");
+		logger::log("%s: Done early-kernel boot process!\n", __func__);
 		thread::ExitThread(0);
 	}
 }
