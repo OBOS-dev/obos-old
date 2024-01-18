@@ -181,8 +181,15 @@ isr_common_stub:
 	pushaq
 	mov rbp, rsp
 
-	mov rax, ss
+	mov rax, ds
 	push rax
+
+;	mov ax, 0x10
+;	mov ds, ax
+;	mov ss, ax
+;	mov es, ax
+;	mov fs, ax
+;	mov gs, ax
 
 	mov rax, [rsp+0x90]
 	cmp rax, 255

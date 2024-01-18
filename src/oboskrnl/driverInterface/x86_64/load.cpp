@@ -600,7 +600,10 @@ namespace obos
 			identity->_serviceType = header->driverType;
 			identity->functionTable = header->functionTable;
 			identity->header = new driverHeader{ *header };
+			// We emplace it after the driver 
 			// We emplace it after the driver finishes initialization.
+			// We emplace it after the driver finishes initialization.
+			// finishes initialization.
 			if (g_driverInterfaces.contains(identity->driverId))
 			{
 				SetLastError(OBOS_ERROR_ALREADY_EXISTS);

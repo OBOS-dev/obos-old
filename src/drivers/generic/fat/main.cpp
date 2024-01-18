@@ -27,11 +27,11 @@ namespace fatDriver
 {
 	bool QueryFileProperties(
 		const char* path,
-		uint32_t driveId, uint8_t partitionIdOnDrive,
+		uint32_t driveId, uint32_t partitionIdOnDrive,
 		size_t* oFsizeBytes,
 		driverInterface::fileAttributes* oFAttribs);
 	bool FileIteratorCreate(
-		uint32_t driveId, uint8_t partitionIdOnDrive,
+		uint32_t driveId, uint32_t partitionIdOnDrive,
 		uintptr_t* oIter);
 	bool FileIteratorNext(
 		uintptr_t iter,
@@ -41,7 +41,7 @@ namespace fatDriver
 		driverInterface::fileAttributes* oFAttribs);
 	bool FileIteratorClose(uintptr_t iter);
 	bool ReadFile(
-		uint32_t driveId, uint8_t partitionIdOnDrive,
+		uint32_t driveId, uint32_t partitionIdOnDrive,
 		const char* path,
 		size_t nToSkip,
 		size_t nToRead,

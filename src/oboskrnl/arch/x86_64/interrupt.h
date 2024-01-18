@@ -65,7 +65,7 @@ namespace obos
 	struct interrupt_frame
 	{
 		// 0x00
-		uintptr_t ss;
+		uintptr_t ds;
 		// 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50
 		// 0x58, 0x60, 0x68, 0x70, 0x78, 0x80, 0x88
 		uintptr_t rbp, ignored1, r8, r9, r10, r11, r12, r13, r14, r15,
@@ -77,7 +77,7 @@ namespace obos
 		// 0x110
 		x86_64_flags rflags;
 		// 0x118, 0x120
-		uintptr_t rsp, ds;
+		uintptr_t rsp, ss;
 	};
 
 	void RegisterInterruptHandler(byte interrupt, void(*handler)(interrupt_frame* frame));

@@ -34,7 +34,7 @@ namespace fatDriver
 	struct partition
 	{
 		uint32_t driveId = 0;
-		uint8_t  partitionId = 0;
+		uint32_t  partitionId = 0;
 		fatType fat_type = fatType::INVALID;
 		cacheEntry *head = nullptr,
                    *tail = nullptr;

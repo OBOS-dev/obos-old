@@ -71,7 +71,7 @@ namespace obos
 					/// <returns>The function's status.</returns>
 					bool(*QueryFileProperties)(
 						const char* path,
-						uint32_t driveId, uint8_t partitionIdOnDrive,
+						uint32_t driveId, uint32_t partitionIdOnDrive,
 						size_t* oFsizeBytes,
 						fileAttributes* oFAttribs);
 					/// <summary>
@@ -81,7 +81,7 @@ namespace obos
 					/// <param name="partitionIdOnDrive">The partition id on the drive the file is located on.</param>
 					/// <param name="oIter">The variable to store the iterator in.</param>
 					bool(*FileIteratorCreate)(
-						uint32_t driveId, uint8_t partitionIdOnDrive,
+						uint32_t driveId, uint32_t partitionIdOnDrive,
 						uintptr_t* oIter);
 					bool(*FileIteratorNext)(
 						uintptr_t iter,
@@ -91,7 +91,7 @@ namespace obos
 						fileAttributes* oFAttribs);
 					bool(*FileIteratorClose)(uintptr_t iter);
 					bool(*ReadFile)(
-						uint32_t driveId, uint8_t partitionIdOnDrive,
+						uint32_t driveId, uint32_t partitionIdOnDrive,
 						const char* path,
 						size_t nToSkip,
 						size_t nToRead,

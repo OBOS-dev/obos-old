@@ -45,8 +45,8 @@ namespace fatDriver
 		byte    month : 4;
 		byte year1980 : 7;
 	} __attribute__((packed));
-	static_assert(sizeof(fat_date) == 2);
-	static_assert(sizeof(fat_timestamp) == 2);
+	static_assert(sizeof(fat_date) == 2, "sizeof(fat_date) isn't 2 bytes.");
+	static_assert(sizeof(fat_timestamp) == 2, "sizeof(fat_timestamp) isn't 2 bytes.");
 	struct fat_dirEntry
 	{
 		enum fat_dirEntryType
@@ -74,7 +74,7 @@ namespace fatDriver
 	} __attribute__((packed));
 	struct fat_lfn
 	{
-		uint8_t order; // To get the order, and with ~0x40. If (order & 0x40), the current LFN is the last.
+		uint8_t order; // To get the order, bitwise "and" with ~0x40. If (order & 0x40), the current LFN is the last.
 		char16_t name1_5[5];
 		uint8_t attribs; // Must be fat_dirEntry::LFN
 		uint8_t type; 

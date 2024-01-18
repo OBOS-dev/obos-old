@@ -27,6 +27,7 @@ namespace obos
         {
             if (m_node || !(m_flags & FLAGS_CLOSED))
             {
+                logger::debug("%s: m_node = %p, m_flags = %p", __func__, m_node, m_flags);
                 SetLastError(OBOS_ERROR_ALREADY_EXISTS);
                 return false;
             }
@@ -49,11 +50,6 @@ namespace obos
             // Find the drive.
             DriveEntry* cdrive = g_drives.head;
             DriveEntry* drive = nullptr;
-            if (!cdrive)
-            {
-                SetLastError(OBOS_ERROR_VFS_FILE_NOT_FOUND);
-                return false;
-            }
             while (cdrive)
             {
                 if (cdrive->driveId == driveId)

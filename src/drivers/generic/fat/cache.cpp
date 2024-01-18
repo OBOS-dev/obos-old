@@ -19,6 +19,8 @@
 
 #include <multitasking/cpu_local.h>
 
+#include <allocators/vmm/vmm.h>
+
 #include "cache.h"
 #include "fat_structs.h"
 
@@ -26,6 +28,87 @@ using namespace obos;
 
 namespace fatDriver
 {
+	class SectorStorage
+	{
+	public:
+		SectorStorage() = default;
+		SectorStorage(size_t size)
+		{
+			if (!size)
+				return;
+			m_ptr = (byte*)m_valloc.VirtualAlloc(nullptr, size, 0);
+			m_realSize = size;
+			const size_t pageSize = m_valloc.GetPageSize();
+			m_size = size / pageSize * pageSize + ((size % pageSize) != 0);
+		}
+
+		// This pointer should not be stored, as it's subject to relocation.
+		// If you end up storing it, after every resize, update that pointer.
+		byte* data() const { return m_ptr; }
+		void resize(size_t size)
+		{
+			if (!size)
+			{
+				free();
+				return;
+			}
+			const size_t pageSize = m_valloc.GetPageSize();
+			size_t oldSize = m_size;
+			size = m_size = size / pageSize * pageSize + ((size % pageSize) != 0);
+			m_realSize = size;
+			if (size == oldSize)
+				return;
+			if (size < oldSize)
+			{
+				// Truncuate the block.
+				m_valloc.VirtualFree(m_ptr + size, oldSize - size);
+				return;
+			}
+			// Grow the block.
+			// Find out if there's more space after the block.
+			const size_t nPages = size / pageSize + ((size % pageSize) != 0);
+			uintptr_t* flags = new uintptr_t[nPages];
+			m_valloc.VirtualGetProtection(m_ptr + oldSize, oldSize - size, flags);
+			size_t i = 0;
+			for (; i < nPages && !(flags[i] & memory::PROT_IS_PRESENT); i++);
+			if (flags[i] & memory::PROT_IS_PRESENT)
+			{
+				// If so, allocate the pages after m_ptr
+				m_valloc.VirtualAlloc(m_ptr + oldSize, oldSize - size, 0);
+				return;
+			}
+			// If not, relocate m_ptr.
+			_ImplRelocatePtr(oldSize);
+		}
+
+		void free()
+		{
+			if (m_ptr)
+				m_valloc.VirtualFree(m_ptr, m_size);
+			m_ptr = nullptr;
+			m_size = 0;
+			m_realSize = 0;
+		}
+		size_t length() const { return m_realSize; }
+		size_t length_pageSizeAligned() const { return m_size; }
+
+		~SectorStorage()
+		{
+			free();
+		}
+	private:
+		void _ImplRelocatePtr(size_t oldSize)
+		{
+			void* newPtr = m_valloc.VirtualAlloc(nullptr, m_size, 0);
+			utils::memcpy(newPtr, m_ptr, m_size);
+			m_valloc.VirtualFree(m_ptr, oldSize);
+			m_ptr = (byte*)newPtr;
+		}
+		byte* m_ptr = nullptr;
+		size_t m_size = 0;
+		size_t m_realSize = 0;
+		memory::VirtualAllocator m_valloc{ nullptr };
+	};
 	bool operator==(const partition& first, const partition& second)
 	{
 		return
@@ -154,13 +237,13 @@ namespace fatDriver
 			{
 				if (curEnt->fAttribs & fat_dirEntry::DIRECTORY)
 				{
-					curPath.append(curEnt->fname, 11);
+					curPath.append(curEnt->fname, utils::strCountToChar(curEnt->fname, ' ') % 11);
 				}
 				else
 				{
-					curPath.append(curEnt->fname, 8);
+					curPath.append(curEnt->fname, utils::strCountToChar(curEnt->fname, ' ') % 8);
 					curPath.push_back('.');
-					curPath.append(curEnt->fname + 8, 3);
+					curPath.append(curEnt->fname + 8, utils::strCountToChar(curEnt->fname + 8, ' ') % 3);
 				}
 			}
 			temp_directoryEntryCache* cache = new temp_directoryEntryCache;
@@ -178,7 +261,7 @@ namespace fatDriver
 			size_t bytesPerCluster = (bpb->sectorsPerCluster * bpb->bytesPerSector);
 			uint32_t lastCluster = baseCluster + curEnt->filesize / bytesPerCluster + ((curEnt->filesize % bytesPerCluster) != 0);
 			if (curEnt->fAttribs & fat_dirEntry::DIRECTORY)
-				lastCluster++;
+				lastCluster++; // The driver however, needs to find out the amount of clusters the directory takes
 			for (uint32_t curCluster = baseCluster; curCluster < lastCluster; curCluster++)
 				cache->_cacheEntry->clusters.push_back(curCluster);
 			cache->directoryEntry = new fat_dirEntry{ *curEnt };
@@ -207,15 +290,31 @@ namespace fatDriver
 		size_t partLBAOffset = 0;
 		handle.QueryInfo(nullptr, &bytesPerSector, nullptr);
 		handle.QueryPartitionInfo(nullptr, &partLBAOffset, nullptr);
-		utils::Vector<byte> currentCluster, otherCluster;
+		// TODO: Change from Vector to a specialized class specifically made for holding sectors.
+		// This will allow for less heap fragmentation.
+		// Omar Berrow - I'm sure I'll do it tomorrow (January 15, 2024)
+		// We'll see...
+		// Omar Berrow - (4:45 PM, January 14 2024) I ended up doing it now and not forgetting!
+		// Anyway Imma leave these comments for the next person to see them.
+		SectorStorage currentCluster{ bpb->sectorsPerCluster * bytesPerSector }, otherCluster{ bpb->sectorsPerCluster * bytesPerSector };
 		bytesPerSector = bytesPerSector > bpb->bytesPerSector ? bytesPerSector : bpb->bytesPerSector;
-		currentCluster.resize(bpb->sectorsPerCluster * bytesPerSector);
-		otherCluster.resize(bpb->sectorsPerCluster * bytesPerSector);
 		auto sector = fat32FirstSectorOfCluster(ebpb.rootDirectoryCluster, *bpb, part.FirstDataSec);
 		//sector -= partLBAOffset;
 		if (!handle.ReadSectors(currentCluster.data(), nullptr, sector, bpb->sectorsPerCluster))
 			return false;
 		const fat_dirEntry* entry = (fat_dirEntry*)currentCluster.data();
+		{
+			const fat_dirEntry* lastElement = entry + ((bpb->sectorsPerCluster * bytesPerSector - 32) / 32);
+			for (size_t cluster = 1; lastElement->fname[0] != 0; cluster++)
+			{
+				size_t oldLength = currentCluster.length();
+				currentCluster.resize(oldLength + bpb->sectorsPerCluster * bytesPerSector);
+				entry = (fat_dirEntry*)currentCluster.data();
+				lastElement = entry + (oldLength / sizeof(fat_dirEntry)) + ((bpb->sectorsPerCluster * bytesPerSector - 32) / 32);
+				if (!handle.ReadSectors(otherCluster.data() + oldLength, nullptr, sector + (cluster * bpb->sectorsPerCluster), bpb->sectorsPerCluster))
+					return false;
+			}
+		}
 		utils::Vector<temp_directoryEntryCache*> cacheEntries;
 		// Look in the root directory.
 		FAT32LookForEntriesInDirectory(handle,part,bpb, entry,"",cacheEntries);
@@ -225,16 +324,27 @@ namespace fatDriver
 			if (ent->_cacheEntry->fileAttributes & driverInterface::FILE_ATTRIBUTES_FILE)
 				continue;
 			const fat_dirEntry* child = (fat_dirEntry*)otherCluster.data();
-			if (!handle.ReadSectors(otherCluster.data(), nullptr, fat32FirstSectorOfCluster(ent->_cacheEntry->clusters.at(0), *bpb, part.FirstDataSec), bpb->sectorsPerCluster))
+			const fat_dirEntry* lastElement = child + ((bpb->sectorsPerCluster * bytesPerSector - 32) / 32);
+			sector = fat32FirstSectorOfCluster(ent->_cacheEntry->clusters.at(0), *bpb, part.FirstDataSec);
+			if (!handle.ReadSectors(otherCluster.data(), nullptr, sector, bpb->sectorsPerCluster))
 				return false;
+			for (size_t cluster = 1; lastElement->fname[0] != 0; cluster++)
+			{
+				size_t oldLength = otherCluster.length();
+				otherCluster.resize(oldLength + bpb->sectorsPerCluster * bytesPerSector);
+				child = (fat_dirEntry*)otherCluster.data();
+				lastElement = child + (oldLength / sizeof(fat_dirEntry)) + ((bpb->sectorsPerCluster * bytesPerSector - sizeof(fat_dirEntry)) / sizeof(fat_dirEntry));
+				if (!handle.ReadSectors(otherCluster.data() + oldLength, nullptr, sector + cluster * bpb->sectorsPerCluster, bpb->sectorsPerCluster))
+					return false;
+			}
 			utils::String initPath = ent->_cacheEntry->path;
 			initPath.push_back('/');
  			FAT32LookForEntriesInDirectory(handle,part,bpb, child,initPath,cacheEntries);
+			otherCluster.resize(bpb->sectorsPerCluster * bytesPerSector);
 		}
 		for (size_t i = 0; i < cacheEntries.length(); i++)
 		{
 			auto ent = cacheEntries[i];
-			logger::printf("%s\n", ent->_cacheEntry->path);
 			ent->_cacheEntry->filesize = ent->directoryEntry->filesize;
 			if (part.tail)
 				part.tail->next = ent->_cacheEntry;

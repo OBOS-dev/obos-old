@@ -47,24 +47,28 @@ namespace fatDriver
 		size_t nP2Tok = 0;
 		vfs::dividePathToTokens(p1, p1Tok, nP1Tok, false);
 		vfs::dividePathToTokens(p2, p2Tok, nP2Tok, false);
+		bool ret = true;
 		if (nP1Tok != nP2Tok)
 		{
-			delete[] p1Tok;
-			delete[] p2Tok;
-			return false;
+			ret = false;
+			goto finish;
 		}
 		for (size_t i = 0; i < nP1Tok; i++)
 		{
 			if (!utils::strcmp(p1Tok[i], p2Tok[i]))
 			{
-				delete[] p1Tok;
-				delete[] p2Tok;
-				return false;
+				ret = false;
+				goto finish;
 			}
 		}
+		finish:
+		for (size_t i = 0; i < nP1Tok; i++)
+			delete[] p1Tok[i];
+		for (size_t i = 0; i < nP2Tok; i++)
+			delete[] p2Tok[i];
 		delete[] p1Tok;
 		delete[] p2Tok;
-		return true;
+		return ret;
 	}
 	static cacheEntry* FindCacheEntry(partition& part, const char* path)
 	{
@@ -78,7 +82,7 @@ namespace fatDriver
 	}
 	bool QueryFileProperties(
 		const char* path,
-		uint32_t driveId, uint8_t partitionIdOnDrive,
+		uint32_t driveId, uint32_t partitionIdOnDrive,
 		size_t* oFsizeBytes,
 		driverInterface::fileAttributes* oFAttribs)
 	{
@@ -105,7 +109,7 @@ namespace fatDriver
 		return true;
 	}
 	bool FileIteratorCreate(
-		uint32_t driveId, uint8_t partitionIdOnDrive,
+		uint32_t driveId, uint32_t partitionIdOnDrive,
 		uintptr_t* oIter)
 	{
 		partitionIdPair p;
@@ -189,7 +193,7 @@ namespace fatDriver
 		return true;
 	}
 	bool ReadFile(
-		uint32_t driveId, uint8_t partitionIdOnDrive,
+		uint32_t driveId, uint32_t partitionIdOnDrive,
 		const char* path,
 		size_t nToSkip,
 		size_t nToRead,
