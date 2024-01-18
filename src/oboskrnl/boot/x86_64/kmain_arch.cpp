@@ -130,7 +130,8 @@ namespace obos
 		backbuffer.width = framebuffer.width;
 		backbuffer.pitch = framebuffer.width * 4; // Must be initialized.
 		backbuffer.addr = (uint32_t*)memory::VirtualAllocator{ nullptr }.VirtualAlloc((void*)0xffffff0000000000, static_cast<size_t>(backbuffer.width) * backbuffer.height * 4, memory::PROT_NO_COW_ON_ALLOCATE);
-		utils::dwMemset(backbuffer.addr, 0, framebuffer.height* framebuffer.width);
+		utils::dwMemcpy(backbuffer.addr, framebuffer.addr, (size_t)framebuffer.height * framebuffer.width);
+
 		g_kernelConsole.SetBackBuffer(backbuffer);
 		g_kernelConsole.SetDrawBuffer(true);
 		logger::info("%s: Initializing the scheduler.\n", __func__);

@@ -227,11 +227,11 @@ namespace obos
 		x = 0;
 		if (++y == m_nCharsVertical)
 		{
-			utils::dwMemset(m_drawingBuffer->addr + (size_t)m_drawingBuffer->pitch / 4 * 4, 0, (size_t)m_drawingBuffer->pitch / 4 * 16);
-			utils::dwMemcpy(
-				m_drawingBuffer->addr,
-				m_drawingBuffer->addr + m_drawingBuffer->pitch / 4 * 4,
-				(size_t)m_drawingBuffer->pitch / 4 * ((size_t)m_drawingBuffer->height - 12));
+			utils::dwMemset(m_drawingBuffer->addr, 0, (size_t)m_drawingBuffer->pitch / 4 * 16);
+			utils::dwMemcpy(m_drawingBuffer->addr, m_drawingBuffer->addr + (m_drawingBuffer->pitch / 4 * 16), (size_t)m_drawingBuffer->pitch / 4 * ((size_t)m_drawingBuffer->height - 16));
+			utils::dwMemset(m_drawingBuffer->addr + (size_t)m_drawingBuffer->pitch / 4 * ((size_t)m_drawingBuffer->height - 16), 0, (size_t)m_drawingBuffer->pitch / 4 * 16);
+			utils::dwMemset(m_modificationArray, 0xffffffff, m_nCharsVertical);
+			SwapBuffers();
 			y--;
 		}
 	}

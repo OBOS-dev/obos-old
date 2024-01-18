@@ -138,7 +138,7 @@ namespace obos
 		// Only incremented by ConsoleOutput(char ch) when 'ch' is newline. Incremented by ConsoleOutput(const char*) or ConsoleOutput(const char*,size_t)
 		size_t m_nCallsSinceLastSwap = 0;
 #ifdef OBOS_DEBUG
-		constexpr static size_t maxCountsUntilSwap = 3;
+		constexpr static size_t maxCountsUntilSwap = 1;
 #else
 		constexpr static size_t maxCountsUntilSwap = 5;
 #endif
