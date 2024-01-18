@@ -217,6 +217,8 @@ namespace obos
 			void resize(size_t newSize)
 			{
 				m_sz = newSize;
+				if (m_sz < m_capacity)
+					return;
 				m_capacity = m_sz + (m_sz - (m_sz % m_capacityIncrement));
 				m_ptr = (T*)krealloc(m_ptr, m_capacity * sizeof(T));
 			}

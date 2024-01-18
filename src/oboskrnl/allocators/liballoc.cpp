@@ -18,6 +18,7 @@
 #include <memory_manipulation.h>
 
 #include <allocators/vmm/vmm.h>
+#include <allocators/vmm/arch.h>
 
 #if defined(__x86_64__) || defined(_WIN64)
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
@@ -43,7 +44,7 @@ struct memBlock
 	alignas (0x10) memBlock* next = nullptr;
 	alignas (0x10) memBlock* prev = nullptr;
 	
-	alignas (0x10) void* pageBlock = nullptr;
+	alignas (0x10) struct pageBlock* pageBlock = nullptr;
 
 	alignas (0x10) void* whoAllocated = nullptr;
 };
@@ -83,7 +84,7 @@ pageBlock* allocateNewPageBlock(size_t nPages)
 		blockAddr = blockAddr + pageBlockTail->nPagesAllocated * 4096;
 	pageBlock* blk = (pageBlock*)g_liballocVirtualAllocator.VirtualAlloc((void*)blockAddr, nPages * obos::memory::VirtualAllocator::GetPageSize(), 0);
 	if(!blk)
-		obos::logger::panic(nullptr, "Could not allocate a pageBlock at %p.", liballoc_base + totalPagesAllocated * 4096);
+		obos::logger::panic(nullptr, "Could not allocate a pageBlock at %p.\n", liballoc_base + totalPagesAllocated * 4096);
 	blk->magic = PAGEBLOCK_MAGIC;
 	blk->nPagesAllocated = nPages;
 	totalPagesAllocated += nPages;
@@ -188,17 +189,28 @@ extern "C" {
 				//if (((current->nPagesAllocated * 4096) - current->nBytesUsed) >= amountNeeded)
 				/*if ((GET_FUNC_ADDR(current->lastBlock->allocAddr) + current->lastBlock->size + sizeof(memBlock) + amountNeeded) <
 					(GET_FUNC_ADDR(current) + current->nPagesAllocated * 4096))*/
-				if ((GET_FUNC_ADDR(current->lastBlock->allocAddr) + current->lastBlock->size + amountNeeded) <=
+				if (!obos::memory::_Impl_IsValidAddress(current))
+					break;
+				if (!obos::memory::_Impl_IsValidAddress(current->lastBlock))
+					break;
+				// There must be something seriously wrong with this page block if this if statement is executed.
+				if (!current->firstBlock || !current->lastBlock)
+				{
+					current = current->next;
+					if (!current)
+						break;
+					if (!current->firstBlock && !current->lastBlock)
+						freePageBlock(current->prev);
+					continue;
+				}
+				// If the code below for seeing if the page block has enough space if modified, don't forget to modify it in krealloc aswell.
+				if ((GET_FUNC_ADDR(current->highestBlock->allocAddr) + current->highestBlock->size + amountNeeded) <=
 					(GET_FUNC_ADDR(current) + current->nPagesAllocated * 4096)
 					)
 				{
 					currentPageBlock = current;
 					break;
 				}
-#ifdef OBOS_DEBUG
-				else
-					asm("nop");
-#endif
 
 				current = current->next;
 			};
@@ -239,7 +251,7 @@ extern "C" {
 			{
 				block = currentPageBlock->lastBlock;
 			}
-			// This may seem recursive, but it's possible that the loop chose the last block.
+			// This may seem redundant, but it's possible that the loop chose the last block.
 			if (block == currentPageBlock->lastBlock)
 				currentPageBlock->lastBlock = block->prev;
 			if (!block)
@@ -258,6 +270,7 @@ extern "C" {
 			}
 		}
 
+		obos::utils::memzero(block, sizeof(*block));
 		block->magic = MEMBLOCK_MAGIC;
 		block->allocAddr = (void*)((uintptr_t)block + sizeof(memBlock));
 		block->size = amount;
@@ -302,12 +315,40 @@ extern "C" {
 			return ptr; // The block can be kept in the same state.
 		if (newSize < oldSize)
 		{
+			// If the new size is less than the old size.
 			// Truncuate the block to the right size.
 			block->size = newSize;
-			obos::utils::memzero((byte*)ptr + newSize, oldSize - newSize);
+			obos::utils::memzero((byte*)ptr + oldSize, oldSize - newSize);
 			return ptr;
 		}
-
+		if (
+			block->pageBlock->highestBlock == block &&
+				(GET_FUNC_ADDR(block->pageBlock->highestBlock->allocAddr) + block->pageBlock->highestBlock->size + (newSize - oldSize)) <=
+				(GET_FUNC_ADDR(block->pageBlock) + block->pageBlock->nPagesAllocated * 4096)
+				)
+		{
+			// If we're the highest block in the page block, and there's still space in the page block, then expand the block size.
+			block->size = newSize;
+			obos::utils::memzero((byte*)ptr + oldSize, newSize - oldSize);
+			return ptr;
+		}
+		if (((memBlock*)((byte*)(block + 1) + oldSize))->magic != MEMBLOCK_MAGIC && block->pageBlock->highestBlock != block)
+		{
+			// This is rather a corrupted block or free space after the block.
+			void* blkAfter = ((byte*)(block + 1) + oldSize);
+			size_t increment = PTR_ALIGNMENT;
+			void* endBlock = nullptr;
+			for (endBlock = blkAfter; ((memBlock*)endBlock)->magic != MEMBLOCK_MAGIC; endBlock = (byte*)endBlock + increment);
+			size_t nFreeSpace = (byte*)endBlock - (byte*)blkAfter;
+			if ((oldSize + nFreeSpace) >= newSize)
+			{
+				// If we have enough space after the block.
+				block->size = newSize;
+				obos::utils::memzero((byte*)ptr + oldSize, newSize - oldSize);
+				return ptr;
+			}
+			// Otherwise we'll need a new block.
+		}
 		// We need a new block.
 		void* newBlock = kcalloc(newSize, 1);
 		obos::utils::memcpy(newBlock, ptr, oldSize);
@@ -394,6 +435,7 @@ blk--;\
 blk->whoAllocated = (void*)__builtin_extract_return_addr(__builtin_return_address(0));\
 return ret;
 #else
+#define new_impl \
 return kmalloc(count);
 #endif
 

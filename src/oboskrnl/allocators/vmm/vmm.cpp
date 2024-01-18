@@ -221,5 +221,11 @@ namespace obos
 			}
 			return _Impl_FreeUserProcessAddressSpace((process::Process*)m_owner);
 		}
+		size_t VirtualAllocator::GetPageSize() 
+		{
+			if (!m_pageSize)
+				m_pageSize = _Impl_GetPageSize();
+			return m_pageSize; 
+		}
     }
 }

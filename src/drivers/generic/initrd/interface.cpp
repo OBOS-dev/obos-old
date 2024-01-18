@@ -24,7 +24,7 @@ namespace initrdInterface
 {
 	bool QueryFileProperties(
 		const char* path,
-		uint32_t, uint8_t,
+		uint32_t, uint32_t,
 		size_t* oFsizeBytes,
 		obos::driverInterface::fileAttributes* oFAttribs)
 	{
@@ -43,7 +43,7 @@ namespace initrdInterface
 
 	}
 	bool IterCreate(
-		uint32_t, uint8_t,
+		uint32_t, uint32_t,
 		uintptr_t* oIter)
 	{
 		fileIterator* iter = (fileIterator*)kcalloc(1, sizeof(fileIterator));
@@ -122,7 +122,7 @@ namespace initrdInterface
 		return true;
 	}
 	bool ReadFile(
-		uint32_t, uint8_t,
+		uint32_t, uint32_t,
 		const char* path,
 		size_t nToSkip,
 		size_t nToRead,
@@ -131,9 +131,9 @@ namespace initrdInterface
 		auto cache = GetCacheForPath(path);
 		if (!cache)
 			return false;
-		if ((cache->dataStart + nToSkip) >= cache->dataEnd)
+		if (nToSkip >= cache->entryFilesize)
 			return false;
-		if ((cache->dataStart + nToSkip + nToRead) >= cache->dataEnd)
+		if ((nToSkip + nToRead) > cache->entryFilesize)
 			return false;
 		if (buff)
 			obos::utils::memcpy(buff, cache->dataStart + nToSkip, nToRead);

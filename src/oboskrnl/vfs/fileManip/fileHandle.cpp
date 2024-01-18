@@ -156,8 +156,8 @@ namespace obos
 			{
 				auto& functions = node->mountPoint->filesystemDriver->functionTable.serviceSpecific.filesystem;
 
-				uint64_t driveId = node->mountPoint->partitionId >> 24;
-				uint8_t drivePartitionId = node->mountPoint->partitionId & 0xff;
+				uint64_t driveId = node->mountPoint->partition ? node->mountPoint->partition->drive->driveId : 0;
+				uint8_t drivePartitionId = node->mountPoint->partition ? node->mountPoint->partition->partitionId : 0;
 
 				ret = functions.ReadFile(
 						driveId,

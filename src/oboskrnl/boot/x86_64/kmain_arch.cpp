@@ -22,6 +22,8 @@
 
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 
+#include <allocators/vmm/vmm.h>
+
 #include <arch/x86_64/irq/irq.h>
 #include <arch/x86_64/irq/timer.h>
 
@@ -76,13 +78,13 @@ namespace obos
 		void* font = nullptr;
 		if (!framebuffer_request.response->framebuffers)
 			EarlyKPanic();
+		if (framebuffer_request.response->framebuffers[0]->bpp != 32)
+			EarlyKPanic();
 
 		framebuffer.addr = (uint32_t*)framebuffer_request.response->framebuffers[0]->address;
 		framebuffer.width = framebuffer_request.response->framebuffers[0]->width;
 		framebuffer.height = framebuffer_request.response->framebuffers[0]->height;
 		framebuffer.pitch = framebuffer_request.response->framebuffers[0]->pitch;
-		if (framebuffer_request.response->framebuffers[0]->bpp != 32)
-			EarlyKPanic();
 		for (size_t i = 0; i < module_request.response->module_count; i++)
 		{
 			if (utils::strcmp(module_request.response->modules[i]->path, "/obos/font.bin"))
@@ -91,7 +93,7 @@ namespace obos
 				break;
 			}
 		}
-		new (&g_kernelConsole) Console { font, framebuffer, false };
+		new (&g_kernelConsole) Console{ font, framebuffer, false };
 		g_kernelConsole.SetColour(0xCCCCCCCC, 0);
 		logger::info("%s: Initializing the boot GDT.\n", __func__);
 		InitializeGdt();
@@ -120,6 +122,18 @@ namespace obos
 		initialize_syscall_instruction();
 		logger::info("%s: Registering all syscalls.\n", __func__);
 		syscalls::RegisterSyscalls();
+		logger::info("%s: Enabling back-buffering in the kernel console.\n", __func__);
+		// We need to initialize it ourselves, as it can't be initialized before the vmm is initialized.
+		g_kernelConsole.m_modificationArray = new uint32_t[g_kernelConsole.m_nCharsVertical];
+		con_framebuffer backbuffer;
+		backbuffer.height = framebuffer.height;
+		backbuffer.width = framebuffer.width;
+		backbuffer.pitch = framebuffer.width * 4; // Must be initialized.
+		backbuffer.addr = (uint32_t*)memory::VirtualAllocator{ nullptr }.VirtualAlloc((void*)0xffffff0000000000, static_cast<size_t>(backbuffer.width) * backbuffer.height * 4, memory::PROT_NO_COW_ON_ALLOCATE);
+		utils::dwMemcpy(backbuffer.addr, framebuffer.addr, (size_t)framebuffer.height * framebuffer.width);
+
+		g_kernelConsole.SetBackBuffer(backbuffer);
+		g_kernelConsole.SetDrawBuffer(true);
 		logger::info("%s: Initializing the scheduler.\n", __func__);
 		thread::InitializeScheduler();
 		logger::panic(nullptr, "Failed to initialize the scheduler.");

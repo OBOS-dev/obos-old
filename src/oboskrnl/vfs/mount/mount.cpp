@@ -41,22 +41,27 @@ namespace obos
 				if (filepath[i] == '/' || i == 0)
 				{
 					if (!useOffset)
-						tokens[nTokensCounted++] = (const char*)utils::memcpy(new char[utils::strCountToChar(filepath + i + 1, '/') + 2], filepath + i + (i != 0), utils::strCountToChar(filepath + i + (i != 0), '/') + 1);
+					{
+						size_t szCurrentToken = utils::strCountToChar(filepath + i + (i != 0), '/');
+						tokens[nTokensCounted++] = (const char*)utils::memcpy(utils::memzero(new char[szCurrentToken + 1], szCurrentToken + 1), filepath + i + (i != 0), szCurrentToken);
+					}
 					else
+					{
 						tokens[nTokensCounted++] = filepath + i + (i != 0);
+					}
 				}
 			}
 		}
 		static bool setupMountPointEntries(MountPoint* point)
 		{
-			if (point->filesystemDriver->_serviceType != ((point->partitionId == 0) + driverInterface::OBOS_SERVICE_TYPE_FILESYSTEM))
+			if (point->filesystemDriver->_serviceType != (point->isInitrd + driverInterface::OBOS_SERVICE_TYPE_FILESYSTEM))
 			{
 				SetLastError(OBOS_ERROR_VFS_NOT_A_FILESYSTEM_DRIVER);
 				return false;
 			}
 			auto functions = point->filesystemDriver->functionTable.serviceSpecific.filesystem;
-			uint32_t driveId = point->partitionId >> 24;
-			uint8_t drivePartitionId = point->partitionId & 0xff;
+			uint32_t driveId = !point->partition ? 0 : point->partition->drive->driveId;
+			uint8_t drivePartitionId = !point->partition ? 0 : point->partition->partitionId;
 			uintptr_t fileIterator = 0;
 			if (!functions.FileIteratorCreate(driveId, drivePartitionId, &fileIterator))
 			{
@@ -120,6 +125,7 @@ namespace obos
 						else
 							directoryEntry = new DirectoryEntry{};
 						directoryEntry->path = (char*)utils::memcpy(new char[utils::strlen(sTokens[i]) + 1], sTokens[i], utils::strlen(sTokens[i]));
+						directoryEntry->path.str[directoryEntry->path.strLen] = 0;
 						directoryEntry->fileAttrib = cFAttributes;
 						directoryEntry->filesize = cFilesize;
 						if (point->children.tail)
@@ -137,7 +143,10 @@ namespace obos
 					DirectoryEntry* newDirectoryEntry = nullptr;
 					char* path = nullptr;
 					if ((i + 1) == nTokens)
-						path = (char*)utils::memcpy(new char[utils::strlen(filepath) + 1], filepath, utils::strlen(filepath));
+					{
+						size_t fpathSz = utils::strlen(filepath);
+						path = (char*)utils::memcpy(utils::memzero(new char[fpathSz + 1], fpathSz), filepath, fpathSz);
+					}
 					else
 					{
 						// Calculate the size of the path.
@@ -145,6 +154,7 @@ namespace obos
 						for (size_t j = 0; j < (i + 1); j++)
 							szPath += utils::strlen(sTokens[j]) + ((j + 1) != (i + 1)); // The size of the token+'/' if this token isn't the last token
 						path = new char[szPath];
+						utils::memzero(path, szPath);
 						char* iter = path;
 						for (size_t j = 0; j < (i + 1); j++)
 						{
@@ -189,7 +199,9 @@ namespace obos
 							}
 						}
 					if (cFAttributes & driverInterface::FILE_ATTRIBUTES_DIRECTORY)
+					{
 						newDirectoryEntry = new Directory{};
+					}
 					else
 					{
 						newDirectoryEntry = new DirectoryEntry{};
@@ -228,7 +240,7 @@ namespace obos
 
 			return true;
 		}
-		bool mount(uint32_t& point, uint32_t partitionId, bool failIfPartitionHasMountPoint)
+		bool mount(uint32_t& point, uint32_t driveId, uint32_t partitionId, bool isInitrd, bool failIfPartitionHasMountPoint)
 		{
 			if (point != 0xffffffff && point < g_mountPoints.length())
 			{
@@ -245,7 +257,15 @@ namespace obos
 			{
 				if (g_mountPoints[i])
 				{
-					if (g_mountPoints[i]->partitionId == partitionId)
+					uint32_t mPointDrvId = 0;
+					uint32_t mPointPartId = 0;
+					if (g_mountPoints[i]->partition)
+					{
+						auto part = g_mountPoints[i]->partition;
+						mPointDrvId = part->drive->driveId;
+						mPointPartId = part->partitionId;
+					}
+					if ((mPointDrvId == driveId && mPointPartId == partitionId) || g_mountPoints[i]->isInitrd == isInitrd)
 					{
 						existingMountPoint = g_mountPoints[i];
 						break;
@@ -254,46 +274,53 @@ namespace obos
 			}
 			if (existingMountPoint && failIfPartitionHasMountPoint)
 			{
+				point = existingMountPoint->id;
 				SetLastError(OBOS_ERROR_VFS_PARTITION_ALREADY_MOUNTED);
 				return false;
 			}
 			MountPoint* newPoint = new MountPoint;
 			utils::memzero(newPoint, sizeof(*newPoint));
 			newPoint->id = point;
-			newPoint->partitionId = partitionId;
+			newPoint->isInitrd = isInitrd;
 			if (existingMountPoint)
 			{
 				newPoint->filesystemDriver = existingMountPoint->filesystemDriver;
+				newPoint->partition = existingMountPoint->partition;
 				newPoint->children = existingMountPoint->children;
 				newPoint->otherMountPointsReferencing++;
 			}
 			else
 			{
-				if (partitionId == 0)
+				if (partitionId == 0 && isInitrd)
+				{
 					newPoint->filesystemDriver = driverInterface::g_driverInterfaces.at(0);
+					newPoint->partition = nullptr;
+				}
 				else 
 				{
-					uint32_t driveId = newPoint->partitionId >> 24;
-					uint8_t drivePartitionId = newPoint->partitionId & 0xff;
-					DriveHandle drv;
+					size_t szPath = logger::sprintf(nullptr, "D%dP%d://", driveId, partitionId);
 					char* path = new char[
-						logger::sprintf(nullptr, "D%dP%d://", driveId, drivePartitionId) + 1
+						szPath + 1
 					];
-					logger::sprintf(path, "D%dP%d://", driveId, drivePartitionId);
-					if (!drv.OpenDrive(path, DriveHandle::OPTIONS_READ_ONLY))
+					utils::memzero(path, szPath + 1);
+					logger::sprintf(path, "D%dP%d://", driveId, partitionId);
+					DriveHandle* drv = new DriveHandle{};
+					if (!drv->OpenDrive(path, DriveHandle::OPTIONS_READ_ONLY))
 					{
 						delete newPoint;
 						delete[] path;
 						return false;
 					}
 					delete[] path;
-					newPoint->filesystemDriver = ((PartitionEntry*)drv.GetNode())->filesystemDriver;
+					newPoint->partition = (PartitionEntry*)drv->GetNode();
+					newPoint->filesystemDriver = ((PartitionEntry*)drv->GetNode())->filesystemDriver;
 					if (!newPoint->filesystemDriver)
 					{
 						delete newPoint;
+						SetLastError(OBOS_ERROR_VFS_UNRECOGNIZED_PARTITION_FS);
 						return false;
 					}
-					drv.Close();
+					delete drv;
 				}
 				bool ret = setupMountPointEntries(newPoint);
 				if (ret)
@@ -310,7 +337,7 @@ namespace obos
 			return false;
 		}
 
-		uint32_t getPartitionIDForMountPoint(uint32_t mountPoint)
+		uint64_t getPartitionIDForMountPoint(uint32_t mountPoint)
 		{
 			MountPoint* _mountPoint = nullptr;
 			for (size_t i = 0; i < g_mountPoints.length(); i++)
@@ -325,11 +352,13 @@ namespace obos
 				}
 			}
 			if (!_mountPoint)
-				return 0;
-			return _mountPoint->partitionId;
+				return 0xffffffffffffffff;
+			if (!_mountPoint->partition)
+				return 0; // InitRD Partition Id
+			return _mountPoint->partition->partitionId | (((uint64_t)_mountPoint->partition->drive->driveId) << 32);
 		}
 
-		void getMountPointsForPartitionID(uint32_t partitionId, uint32_t** oMountPoints)
+		void getMountPointsForPartitionID(uint32_t driveId, uint32_t partitionId, uint32_t** oMountPoints)
 		{
 			if (!oMountPoints)
 				return;
@@ -337,7 +366,8 @@ namespace obos
 			for (size_t i = 0; i < g_mountPoints.length(); i++)
 			{
 				auto mountPoint = g_mountPoints[i];
-				if (mountPoint->partitionId == partitionId)
+				if (!mountPoint->partition)
+				if (mountPoint->partition->drive->driveId == driveId && mountPoint->partition->partitionId == partitionId)
 					mPoints.push_back(mountPoint->id);
 			}
 			if (mPoints.length() == 0)

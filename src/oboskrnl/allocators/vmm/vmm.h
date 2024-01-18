@@ -106,7 +106,7 @@ namespace obos
 
 			OBOS_EXPORT ~VirtualAllocator() { m_owner = nullptr; }
 
-			static OBOS_EXPORT size_t GetPageSize() { return m_pageSize; }
+			static OBOS_EXPORT size_t GetPageSize();
 		private:
 			process::Process* m_owner;
 			static size_t m_pageSize;

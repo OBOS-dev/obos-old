@@ -137,6 +137,10 @@ namespace obos
 		/// The object was read only and Write* was called on it.
 		/// </summary>
 		OBOS_ERROR_VFS_READ_ONLY,
+		/// <summary>
+		/// A mount on a partition with an unrecognized filesystem was made.
+		/// </summary>
+		OBOS_ERROR_VFS_UNRECOGNIZED_PARTITION_FS,
 
 		OBOS_ERROR_HIGHEST_VALUE,
 	};

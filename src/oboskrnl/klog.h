@@ -10,8 +10,6 @@
 #include <export.h>
 #include <stdarg.h>
 
-#include <console.h>
-
 #ifdef OBOS_DEBUG
 #define OBOS_ASSERTP(expr, msg, ...) if (!(expr)) { obos::logger::panic(nullptr, "Function %s, File %s, Line %d: Assertion failed, \"%s\". " msg "\n", __func__, __FILE__, __LINE__, #expr __VA_ARGS__); }
 #define OBOS_ASSERT(expr, msg, ...) if (!(expr)) { obos::logger::error("Function %s, File %s, Line %d: Assertion failed, \"%s\". " msg "\n", __func__, __FILE__, __LINE__, #expr __VA_ARGS__); }
@@ -22,7 +20,6 @@
 
 namespace obos
 {
-	extern OBOS_EXPORT Console g_kernelConsole;
 	namespace logger
 	{
 		enum

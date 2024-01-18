@@ -32,6 +32,8 @@
 #include <vfs/devManip/driveHandle.h>
 #include <vfs/devManip/driveIterator.h>
 
+#include <vfs/vfsNode.h>
+
 #include <boot/cfg.h>
 
 #define LITERAL(str) (char*)(str), sizeof((str))
@@ -40,6 +42,10 @@ extern obos::memory::VirtualAllocator g_liballocVirtualAllocator;
 
 namespace obos
 {
+	namespace vfs
+	{
+		DirectoryEntry* SearchForNode(DirectoryEntry* root, void* userdata, bool(*compare)(DirectoryEntry* current, void* userdata));
+	}
 	void kmain_common(byte* initrdDriverData, size_t initrdDriverSize)
 	{
 		logger::log("Multitasking initialized! In \"%s\" now.\n", __func__);
@@ -83,7 +89,7 @@ namespace obos
 		logger::log("%s: Mounting the initrd.\n", __func__);
 		uint32_t point = 0;
 		// Mount the initrd.
-		if (!vfs::mount(point, 0))
+		if (!vfs::mount(point, 0,0, true))
 			logger::panic(nullptr, "Could not mount the initrd, GetLastError: %d!\n", GetLastError());
 
 		// Load all modules under the initrd.
@@ -193,47 +199,71 @@ namespace obos
 				if (utils::strcmp(fsName, "UNKNOWN"))
 				{
 					logger::warning("%s: Partition has unknown filesystem, skipping mount.\n", __func__);
+					part.Close();
 					delete[] partPath;
 					continue;
 				}
 				logger::log("%s: Partition filesystem type: %s\n", __func__, fsName);
 				uint32_t mountPoint = 0xffffffff;
-				if (!vfs::mount(mountPoint, drv.GetDriveId() << 24 | (_part & 0xff), true))
+				if (!vfs::mount(mountPoint, drv.GetDriveId(), _part, false, true))
 				{
 					logger::warning("%s: Could not mount partition. GetLastError: %d\n", __func__, GetLastError());
+					part.Close();
 					delete[] partPath;
 					continue;
 				}
 				logger::log("%s: Mounted partition %s at %d:/.\n", __func__, partPath, mountPoint);
 				delete[] partPath;
+				part.Close();
 			}
 		}
 		// Test the VFS on the FAT32 file.
-		auto vfsTestOnPath = [](const char* path)
+		[[maybe_unused]]
+		auto vfsTestOnPath = [](uint32_t mountPoint, const char* _path)
 			{
+				char* path = new char[logger::sprintf(nullptr, "%d:/%s", mountPoint, _path) + 1];
+				logger::sprintf(path, "%d:/%s", mountPoint, _path);
 				vfs::FileHandle file;
 				if (!file.Open(path))
 				{
-					logger::log("Test failed on %s. GetLastError: %d\n", path, GetLastError());
+					logger::log("Open(%s): GetLastError: %d\n", path, GetLastError());
+					delete[] path;
 					return false;
 				}
 				size_t filesize = file.GetFileSize();
 				char* data = new char[filesize + 1];
-				utils::memzero(data, filesize);
+				utils::memzero(data, filesize + 1);
 				if (!file.Read(data, filesize))
 				{
-					logger::log("Test failed on %s. GetLastError: %d\n", path, GetLastError());
+					logger::log("Read(%s): GetLastError: %d\n", path, GetLastError());
+					delete[] path;
 					return false;
 				}
 				file.Close();
 				logger::log("Successfully read %s. File contents:\n", path);
 				logger::printf("%s\n", data);
 				delete[] data;
+				delete[] path;
 				return true;
 			};
-		vfsTestOnPath("1:/test.txt");
-		vfsTestOnPath("1:/dir/other_test.txt");
-		vfsTestOnPath("1:/dir/subdirectory/you_guessed_it_another_test.txt");
+		[[maybe_unused]] uint32_t id = 0xffffffff;
+		for (auto& mountPoint : vfs::g_mountPoints)
+		{
+			if (!vfs::SearchForNode(mountPoint->children.head, nullptr, [](vfs::DirectoryEntry* ent, void*)->bool {
+				logger::printf("%d:/%s\n", ent->mountPoint->id, ent->path);
+				return utils::strcmp(ent->path, "dir") || utils::strcmp(ent->path, "dir/");
+				}))
+				continue;
+			id = mountPoint->id;
+			break;
+		}
+		/*if (id == 0xffffffff)
+			goto end;*/
+		id = 1;
+		vfsTestOnPath(id, "test.txt");
+		vfsTestOnPath(id, "dir/other_test.txt");
+		vfsTestOnPath(id, "dir/subdirectory/you_guessed_it_another_test.txt");
+	[[maybe_unused]] end:
 		logger::log("%s: Done early-kernel boot process!\n", __func__);
 		thread::ExitThread(0);
 	}

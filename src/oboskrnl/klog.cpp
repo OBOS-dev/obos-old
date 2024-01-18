@@ -6,6 +6,7 @@
 
 #include <int.h>
 #include <klog.h>
+#include <console.h>
 #include <atomic.h>
 #include <memory_manipulation.h>
 #include <string.h>
@@ -278,21 +279,9 @@ namespace obos
 				stackTrace(stackTraceParameter);
 			else
 				warning("No stack trace avaliable.");
+			g_kernelConsole.SwapBuffers();
 			thread::StopCPUs(true);
 			while (1);
-		}
-		static void dumpAddr_impl(int a, ...)
-		{
-#ifdef __x86_64__
-			va_list list;
-			va_start(list, a);
-			printf_impl([](char ch, void*) { outb(0xE9, ch); }, nullptr, "%p: %p\n", list);
-			va_end(list);
-#endif
-		}
-		void dumpAddr(uint32_t* addr)
-		{
-			dumpAddr_impl(0, addr, *addr);
 		}
 	}
 }

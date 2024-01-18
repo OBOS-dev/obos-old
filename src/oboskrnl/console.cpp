@@ -14,32 +14,42 @@
 
 #include <multitasking/arch.h>
 
+#include <allocators/liballoc.h>
+
 namespace obos
 {	
-	Console::Console(void* font, con_framebuffer output, bool lockCanUseMultitasking)
+	Console::Console(void* font, const con_framebuffer& output, bool lockCanUseMultitasking)
 	{
 		Initialize(font, output, lockCanUseMultitasking);
 	}
 
-	void Console::Initialize(void* font, con_framebuffer output, bool lockCanUseMultitasking)
+	void Console::Initialize(void* font, const con_framebuffer& output, bool lockCanUseMultitasking)
 	{
+		if (m_modificationArray)
+			delete[] m_modificationArray;
 		m_font = (uint8_t*)font;
 		m_framebuffer = output;
 		m_nCharsHorizontal = output.width / 8;
 		m_nCharsVertical = output.height / 16;
 		m_lock.CanUseMultitasking(lockCanUseMultitasking);
+		if (CanAllocateMemory())
+			m_modificationArray = new uint32_t[m_nCharsVertical];
 	}
 
 	void Console::ConsoleOutput(const char* string)
 	{
 		m_lock.Lock();
-		for(size_t i = 0; string[i]; __ImplConsoleOutputChar(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
+		for(size_t i = 0; string[i]; __ImplConsoleOutputChar(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY, false));
+		if (++m_nCallsSinceLastSwap >= maxCountsUntilSwap)
+			SwapBuffers();
 		m_lock.Unlock();
 	}
 	void Console::ConsoleOutput(const char* string, size_t size)
 	{
 		m_lock.Lock();
-		for (size_t i = 0; i < size; __ImplConsoleOutputChar(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY));
+		for (size_t i = 0; i < size; __ImplConsoleOutputChar(string[i++], m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY, false));
+		if (++m_nCallsSinceLastSwap >= maxCountsUntilSwap)
+			SwapBuffers();
 		m_lock.Unlock();
 	}
 	void Console::ConsoleOutput(char ch)
@@ -75,7 +85,7 @@ namespace obos
 			*y = m_terminalY;
 	}
 
-	void fillBackgroundTransparent(con_framebuffer& framebuffer, uint32_t backgroundColour, uint32_t initialBackgroundColour)
+	static void fillBackgroundTransparent(con_framebuffer& framebuffer, uint32_t backgroundColour, uint32_t initialBackgroundColour)
 	{
 		for (uint32_t i = 0; i < framebuffer.height * framebuffer.width; i++)
 			framebuffer.addr[i] = (framebuffer.addr[i] == initialBackgroundColour) ? backgroundColour : framebuffer.addr[i];
@@ -84,17 +94,20 @@ namespace obos
 	void Console::SetColour(uint32_t foregroundColour, uint32_t backgroundColour, bool clearConsole)
 	{
 		if (clearConsole)
-			utils::dwMemset(m_framebuffer.addr, backgroundColour, static_cast<size_t>(m_framebuffer.height) * m_framebuffer.width);
-		if (backgroundColour != m_backgroundColour)
-			if (!clearConsole)
-				fillBackgroundTransparent(m_framebuffer, backgroundColour, m_backgroundColour);
-			else {}
-		else {}
+		{
+			utils::dwMemset(m_drawingBuffer->addr, backgroundColour, static_cast<size_t>(m_drawingBuffer->height) * m_drawingBuffer->width);
+			utils::dwMemset(m_modificationArray, 0xffffffff, m_nCharsVertical);
+		}
+		if (backgroundColour != m_backgroundColour && !clearConsole)
+		{
+			fillBackgroundTransparent(*m_drawingBuffer, backgroundColour, m_backgroundColour);
+			utils::dwMemset(m_modificationArray, 0xffffffff, m_nCharsVertical);
+		}
 				
 		m_foregroundColour = foregroundColour;
 		m_backgroundColour = backgroundColour;
 	}
-	void Console::GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour)
+	void Console::GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour) const
 	{
 		if (foregroundColour)
 			*foregroundColour = m_foregroundColour;
@@ -114,14 +127,9 @@ namespace obos
 
 	void Console::SetFramebuffer(con_framebuffer framebuffer)
 	{
-		m_framebuffer.addr = framebuffer.addr;
-		m_framebuffer.width = framebuffer.width;
-		m_framebuffer.height = framebuffer.height;
-		m_framebuffer.pitch = framebuffer.pitch;
-		m_nCharsHorizontal = framebuffer.width / 8;
-		m_nCharsVertical = framebuffer.height / 16;
+		m_framebuffer = framebuffer;
 	}
-	void Console::GetFramebuffer(con_framebuffer* framebuffer)
+	void Console::GetFramebuffer(con_framebuffer* framebuffer) const
 	{
 		if (!framebuffer)
 			return;
@@ -131,7 +139,23 @@ namespace obos
 		framebuffer->pitch = m_framebuffer.pitch;
 	}
 
-	void Console::GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical)
+	OBOS_EXPORT void Console::SetBackBuffer(const con_framebuffer& buffer)
+	{
+		if (buffer.height != m_framebuffer.height || buffer.width != m_framebuffer.width)
+			return;
+		if (buffer.addr == m_framebuffer.addr)
+			return;
+		m_backbuffer = buffer;
+	}
+
+	void Console::GetBackBuffer(con_framebuffer* buffer) const
+	{
+		if (!buffer)
+			return;
+		*buffer = m_backbuffer;
+	}
+
+	void Console::GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical) const
 	{
 		if (horizontal)
 		*horizontal = m_nCharsHorizontal;
@@ -139,16 +163,40 @@ namespace obos
 			*vertical = m_nCharsVertical;
 	}
 
-
-	void Console::CopyFrom(con_framebuffer* buffer)
+	void Console::SwapBuffers()
 	{
-		if (buffer->height != m_framebuffer.height || buffer->width != m_framebuffer.width)
+		m_nCallsSinceLastSwap = 0;
+		if (!m_backbuffer.addr)
 			return;
-		utils::dwMemcpy(m_framebuffer.addr, buffer->addr, m_framebuffer.width * m_framebuffer.height);
+		if (!m_modificationArray)
+		{
+			if ((m_framebuffer.pitch / 4) != m_backbuffer.width)
+			{
+				// Oh come on!
+				for (size_t y = 0; y < m_framebuffer.height; y++)
+					utils::dwMemcpy(m_framebuffer.addr + y * m_framebuffer.pitch / 4, m_backbuffer.addr + y * m_backbuffer.width, m_framebuffer.width);
+				return;
+			}
+			utils::dwMemcpy(m_framebuffer.addr, m_backbuffer.addr, m_backbuffer.height * m_backbuffer.width);
+			return;
+		}
+		const size_t bitLength = (sizeof(*m_modificationArray) * 4);
+		for (size_t ty = 0; ty < m_nCharsVertical; ty++)
+		{
+			if ((m_modificationArray[ty / bitLength] >> (ty % bitLength)) & 1)
+			{
+				// Copy the line.
+				uint32_t cy = ty * 16;
+				for (uint32_t y = cy; y < (cy + 16); y++)
+					utils::dwMemcpy(m_framebuffer.addr + y * m_framebuffer.pitch / 4, m_backbuffer.addr + y * m_backbuffer.width, m_framebuffer.width);
+			}
+		}
+		utils::dwMemset(m_modificationArray, 0, m_nCharsVertical);
 	}
-
-#pragma GCC push_options
-#pragma GCC optimize("O3")
+	void Console::SetDrawBuffer(bool isBackbuffer)
+	{
+		m_drawingBuffer = isBackbuffer ? &m_backbuffer : &m_framebuffer;
+	}
 	void Console::putChar(char ch, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor)
 	{
 		int cy;
@@ -156,14 +204,14 @@ namespace obos
 		const uint8_t* glyph = m_font + (int)ch * 16;
 		y = y * 16 + 16;
 		x <<= 3;
-		if (x > m_framebuffer.width)
+		if (x > m_drawingBuffer->width)
 			x = 0;
-		if (y > m_framebuffer.height)
-			y = 0;
+		if (y >= m_drawingBuffer->height)
+			y = m_drawingBuffer->height - 16;
 		for (cy = 0; cy < 16; cy++) 
 		{
 			uint32_t realY = y + cy - 12;
-			uint32_t* framebuffer = m_framebuffer.addr + realY * (m_framebuffer.pitch / 4);
+			uint32_t* framebuffer = m_drawingBuffer->addr + realY * (m_drawingBuffer->pitch / 4);	
 			framebuffer[x + 0] = (glyph[cy] & mask[0]) ? fgcolor : bgcolor;
 			framebuffer[x + 1] = (glyph[cy] & mask[1]) ? fgcolor : bgcolor;
 			framebuffer[x + 2] = (glyph[cy] & mask[2]) ? fgcolor : bgcolor;
@@ -174,28 +222,32 @@ namespace obos
 			framebuffer[x + 7] = (glyph[cy] & mask[7]) ? fgcolor : bgcolor;
 		}
 	}
-#pragma GCC pop_options
-
 	void Console::newlineHandler(uint32_t& x, uint32_t& y)
 	{
 		x = 0;
 		if (++y == m_nCharsVertical)
 		{
-			utils::dwMemset(m_framebuffer.addr, 0, static_cast<size_t>(m_framebuffer.pitch) * 16 / 4);
-			utils::dwMemcpy(m_framebuffer.addr, m_framebuffer.addr + m_framebuffer.pitch * 16 / 4, ((m_framebuffer.pitch / 4) * m_framebuffer.height * 4) - m_framebuffer.pitch * 16 / 4);
-			utils::dwMemset((uint32_t*)(reinterpret_cast<uintptr_t>(m_framebuffer.addr) + (m_framebuffer.pitch * m_framebuffer.height) - m_framebuffer.pitch * 16),
-				m_backgroundColour, m_framebuffer.pitch * 16 / 4);
+			utils::dwMemset(m_drawingBuffer->addr, 0, (size_t)m_drawingBuffer->pitch / 4 * 16);
+			utils::dwMemcpy(m_drawingBuffer->addr, m_drawingBuffer->addr + (m_drawingBuffer->pitch / 4 * 16), (size_t)m_drawingBuffer->pitch / 4 * ((size_t)m_drawingBuffer->height - 16));
+			utils::dwMemset(m_drawingBuffer->addr + (size_t)m_drawingBuffer->pitch / 4 * ((size_t)m_drawingBuffer->height - 16), 0, (size_t)m_drawingBuffer->pitch / 4 * 16);
+			utils::dwMemset(m_modificationArray, 0xffffffff, m_nCharsVertical);
+			SwapBuffers();
 			y--;
 		}
 	}
-	void Console::__ImplConsoleOutputChar(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y)
+	void Console::__ImplConsoleOutputChar(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y, bool incrementCallsSinceSwap)
 	{
-		if (!m_framebuffer.addr)
+		if (!m_drawingBuffer->addr)
 			return;
+		if (m_modificationArray)
+			m_modificationArray[y / (sizeof(*m_modificationArray) * 4)] |= 1<<(y % (sizeof(*m_modificationArray) * 4));
 		switch (ch)
 		{
 		case '\n':
 			newlineHandler(x, y);
+			m_nCallsSinceLastSwap += incrementCallsSinceSwap;
+			if (m_nCallsSinceLastSwap >= maxCountsUntilSwap)
+				SwapBuffers();
 			break;
 		case '\r':
 			x = 0;
