@@ -28,6 +28,7 @@ namespace obos
 			uint32_t driveId = entry->driveId;
 			size_t szPath = logger::sprintf(nullptr, "D%d:/", driveId);
 			char* path = new char[szPath + 1];
+			utils::memzero(path, szPath + 1);
 			logger::sprintf(path, "D%d:/", driveId);
 			return path;
 		}

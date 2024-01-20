@@ -18,8 +18,8 @@ namespace obos
             bool operator==(const pair& other) const
             {
                 return 
-                    other.first == other.first &&
-                    other.second == other.second;
+                    first == other.first &&
+                    second == other.second;
             }
         };
         

@@ -26,6 +26,7 @@
 
 #include <vfs/devManip/driveHandle.h>
 #include <vfs/devManip/driveIterator.h>
+#include <vfs/devManip/sectorStore.h>
 
 #include <multitasking/process/x86_64/loader/elfStructures.h>
 
@@ -83,7 +84,7 @@ namespace obos
 			uint8_t subclass : 8;
 			uint8_t progIF : 8;
 		};
-		void ScanPCIBus(const utils::Vector<LoadableDriver>& driverList)
+		static void ScanPCIBus(const utils::Vector<LoadableDriver>& driverList)
 		{
 			utils::Hashmap<
 				LoadableDriver, pciDevice, utils::defaultEquals<LoadableDriver>, LoadableDriver::hasher> driversToLoad;
@@ -148,10 +149,10 @@ namespace obos
 					}, &udata);
 			for(auto iter = driversToLoad.begin(); iter; iter++)
 			{
-				auto&[driver, unused1, unused2, unused3] = *iter;
-				(unused1 = unused1);
-				(unused2 = unused2);
-				(unused3 = unused3);
+				auto driver = (*iter).key;
+				if (g_driverInterfaces.contains(driver->header->driverId))
+					continue;
+				logger::debug("%s: Loading driver %S\n", __func__, driver->fullPath);
 				vfs::FileHandle file;
 				file.Open(driver->fullPath.data(), vfs::FileHandle::OPTIONS_READ_ONLY);
 				// Load the driver's data.
@@ -166,6 +167,7 @@ namespace obos
 					delete[] data;
 					continue;
 				}
+				logger::debug("%s: Loaded driver.\n", __func__, driver->fullPath);
 				delete[] data;
 			}
 		}
@@ -194,9 +196,8 @@ namespace obos
 					continue;
 				}
 
-				utils::Vector<byte> currentSector;
-				currentSector.resize(sectorSize);
-
+				utils::SectorStorage currentSector{ sectorSize };
+				
 				if (!drv.ReadSectors((void*)currentSector.data(), &nSectorsRead, 1, 1))
 					continue;
 				if (nSectorsRead != 1)
@@ -210,7 +211,7 @@ namespace obos
 					continue;
 				if (nSectorsRead != 1)
 					continue;
-				if (utils::memcmp(&currentSector[510], "\x55\xAA", 2))
+				if (utils::memcmp(currentSector.data() + 510, "\x55\xAA", 2))
 				{
 					mbrDrives.push_back(drv.GetDriveId());
 					continue;

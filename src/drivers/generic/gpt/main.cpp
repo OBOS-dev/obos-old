@@ -9,6 +9,7 @@
 #include <memory_manipulation.h>
 
 #include <vfs/devManip/driveHandle.h>
+#include <vfs/devManip/sectorStore.h>
 
 #include <driverInterface/struct.h>
 

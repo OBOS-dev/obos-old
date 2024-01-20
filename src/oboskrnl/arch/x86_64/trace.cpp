@@ -81,6 +81,8 @@ namespace obos
 				// Look in the driver symbol tables
 				auto searchDriver = [&_addr](driverInterface::driverIdentity* driver)->driverInterface::obosDriverSymbol*
 					{
+						if (!driver)
+							return nullptr;
 						for (auto& sym : driver->symbols)
 							if (_addr >= sym.addr && _addr < (sym.addr + sym.size))
 								return &sym;
@@ -88,8 +90,12 @@ namespace obos
 					};
 				driverInterface::obosDriverSymbol* symbol = nullptr;
 				for (auto iter = driverInterface::g_driverInterfaces.begin(); iter; iter++)
+				{
+					if (!(&(*iter)))
+						continue;
 					if ((symbol = searchDriver(*(*iter).value)))
 						break;
+				}
 				if (!symbol)
 					return;
 				str = symbol->name;

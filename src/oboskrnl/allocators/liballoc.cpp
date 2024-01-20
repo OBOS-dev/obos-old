@@ -81,10 +81,10 @@ pageBlock* allocateNewPageBlock(size_t nPages)
 	if (!blockAddr)
 		blockAddr = liballoc_base;
 	else
-		blockAddr = blockAddr + pageBlockTail->nPagesAllocated * 4096;
+		blockAddr = blockAddr + pageBlockTail->nPagesAllocated * g_liballocVirtualAllocator.GetPageSize();
 	pageBlock* blk = (pageBlock*)g_liballocVirtualAllocator.VirtualAlloc((void*)blockAddr, nPages * obos::memory::VirtualAllocator::GetPageSize(), 0);
 	if(!blk)
-		obos::logger::panic(nullptr, "Could not allocate a pageBlock at %p.\n", liballoc_base + totalPagesAllocated * 4096);
+		obos::logger::panic(nullptr, "Could not allocate a pageBlock at %p.\n", liballoc_base + totalPagesAllocated * g_liballocVirtualAllocator.GetPageSize());
 	blk->magic = PAGEBLOCK_MAGIC;
 	blk->nPagesAllocated = nPages;
 	totalPagesAllocated += nPages;
@@ -174,7 +174,7 @@ extern "C" {
 
 		if (nPageBlocks == 0)
 		{
-			currentPageBlock = allocateNewPageBlock(amount / 4096);
+			currentPageBlock = allocateNewPageBlock(amount / g_liballocVirtualAllocator.GetPageSize());
 			if (!currentPageBlock)
 				return nullptr;
 			goto foundPageBlock;
@@ -186,9 +186,9 @@ extern "C" {
 			// We need to look for pageBlock structures.
 			while (current)
 			{
-				//if (((current->nPagesAllocated * 4096) - current->nBytesUsed) >= amountNeeded)
+				//if (((current->nPagesAllocated * g_liballocVirtualAllocator.GetPageSize()) - current->nBytesUsed) >= amountNeeded)
 				/*if ((GET_FUNC_ADDR(current->lastBlock->allocAddr) + current->lastBlock->size + sizeof(memBlock) + amountNeeded) <
-					(GET_FUNC_ADDR(current) + current->nPagesAllocated * 4096))*/
+					(GET_FUNC_ADDR(current) + current->nPagesAllocated * g_liballocVirtualAllocator.GetPageSize()))*/
 				if (!obos::memory::_Impl_IsValidAddress(current))
 					break;
 				if (!obos::memory::_Impl_IsValidAddress(current->lastBlock))
@@ -205,7 +205,7 @@ extern "C" {
 				}
 				// If the code below for seeing if the page block has enough space if modified, don't forget to modify it in krealloc aswell.
 				if ((GET_FUNC_ADDR(current->highestBlock->allocAddr) + current->highestBlock->size + amountNeeded) <=
-					(GET_FUNC_ADDR(current) + current->nPagesAllocated * 4096)
+					(GET_FUNC_ADDR(current) + current->nPagesAllocated * g_liballocVirtualAllocator.GetPageSize())
 					)
 				{
 					currentPageBlock = current;
@@ -220,7 +220,7 @@ extern "C" {
 
 		// We couldn't find a page block big enough :(
 		if (!currentPageBlock)
-			currentPageBlock = allocateNewPageBlock(amount / 4096);
+			currentPageBlock = allocateNewPageBlock(amount / g_liballocVirtualAllocator.GetPageSize());
 
 		if (!currentPageBlock)
 			return nullptr;
@@ -324,7 +324,7 @@ extern "C" {
 		if (
 			block->pageBlock->highestBlock == block &&
 				(GET_FUNC_ADDR(block->pageBlock->highestBlock->allocAddr) + block->pageBlock->highestBlock->size + (newSize - oldSize)) <=
-				(GET_FUNC_ADDR(block->pageBlock) + block->pageBlock->nPagesAllocated * 4096)
+				(GET_FUNC_ADDR(block->pageBlock) + block->pageBlock->nPagesAllocated * g_liballocVirtualAllocator.GetPageSize())
 				)
 		{
 			// If we're the highest block in the page block, and there's still space in the page block, then expand the block size.
@@ -332,6 +332,8 @@ extern "C" {
 			obos::utils::memzero((byte*)ptr + oldSize, newSize - oldSize);
 			return ptr;
 		}
+		if (((byte*)(block + 1) + oldSize) >= ((byte*)block->pageBlock + block->pageBlock->nPagesAllocated * g_liballocVirtualAllocator.GetPageSize()))
+			goto newBlock;
 		if (((memBlock*)((byte*)(block + 1) + oldSize))->magic != MEMBLOCK_MAGIC && block->pageBlock->highestBlock != block)
 		{
 			// This is rather a corrupted block or free space after the block.
@@ -349,6 +351,7 @@ extern "C" {
 			}
 			// Otherwise we'll need a new block.
 		}
+		newBlock:
 		// We need a new block.
 		void* newBlock = kcalloc(newSize, 1);
 		obos::utils::memcpy(newBlock, ptr, oldSize);
