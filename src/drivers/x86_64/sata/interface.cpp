@@ -74,7 +74,7 @@ bool DriveReadSectors(
 	if (((nSectorsToRead * portDescriptor.sectorSize) % 4096) != 0)
         pagesToRead++;
     size_t blocksToRead = (pagesToRead / 1024) + ((pagesToRead % 1024) != 0);
-    uintptr_t responsePhysicalAddresses[blocksToRead];
+    uintptr_t *responsePhysicalAddresses = new uintptr_t[blocksToRead];
     uintptr_t responsePhysicalAddressBase = memory::allocatePhysicalPage(pagesToRead);
     for (size_t i = 0; i < blocksToRead; i++)
         responsePhysicalAddresses[i] = responsePhysicalAddressBase + i * 1024;
@@ -91,7 +91,7 @@ bool DriveReadSectors(
 	    (HBA_CMD_TBL*)
 	    (
 	    	(byte*)portDescriptor.clBase +
-	    	 ((cmdHeader->ctba | ((uintptr_t)cmdHeader->ctbau << 32)) /* physical address of the HBA_CMD_TBL */ - portDescriptor.clBasePhys) // The offset of the HBA_CMD_TBL
+	    	 ((cmdHeader->ctba | ((uintptr_t)cmdHeader->ctbau << 32)) /* physical address of the HBA_CMD_TBL */ & 0xfff) // The offset of the HBA_CMD_TBL
 	    );
     for (size_t i = 0; i < blocksToRead; i++)
     {
@@ -99,9 +99,9 @@ bool DriveReadSectors(
 	    // Setup the command slot.
 	    cmdTBL->prdt_entry[0].dba = responsePhys & 0xffffffff;
 	    if (g_generalHostControl->cap.s64a)
-	    	cmdTBL->prdt_entry[0].dbau = responsePhys & ~(0xffffffff);
+	    	cmdTBL->prdt_entry[0].dbau = responsePhys >> 32;
 	    else
-	    	if (responsePhys & ~(0xffffffff))
+	    	if (responsePhys >> 32)
 	    		logger::panic(nullptr, "AHCI: %s: responsePhys has its upper 32-bits set and cap.s64a is false.\n", __func__);
 	    cmdTBL->prdt_entry[0].dbc = currentPageCount * 4096 - 1;
 	    cmdTBL->prdt_entry[0].i = 1;
@@ -114,12 +114,12 @@ bool DriveReadSectors(
         uint16_t count = i == (blocksToRead - 1) ? currentSectorCount : 1024;
 	    command->countl = (uint8_t)(count & 0xff);
 	    command->counth = (uint8_t)((count >> 8) & 0xff);
-        command->lba0 = (currentLBAOffset & 0xff);
-        command->lba1 = ((currentLBAOffset >> 8) & 0xff);
-        command->lba2 = ((currentLBAOffset >> 16) & 0xff);
-        command->lba3 = ((currentLBAOffset >> 24) & 0xff);
-        command->lba4 = ((currentLBAOffset >> 32) & 0xff);
-        command->lba5 = ((currentLBAOffset >> 48) & 0xff);
+        command->lba0 = (uint8_t) (currentLBAOffset & 0xff);
+        command->lba1 = (uint8_t)((currentLBAOffset >>  8) & 0xff);
+        command->lba2 = (uint8_t)((currentLBAOffset >> 16) & 0xff);
+        command->lba3 = (uint8_t)((currentLBAOffset >> 24) & 0xff);
+        command->lba4 = (uint8_t)((currentLBAOffset >> 32) & 0xff);
+        command->lba5 = (uint8_t)((currentLBAOffset >> 48) & 0xff);
 	    // Wait on the port.
 	    // 0x88: ATA_DEV_BUSY | ATA_DEV_DRQ
 	    while ((pPort->tfd & 0x88))
@@ -152,6 +152,7 @@ bool DriveReadSectors(
             );
         *buff = response;
     }
+    delete[] responsePhysicalAddresses;
     return true;
 }
 bool DriveWriteSectors(
@@ -221,9 +222,9 @@ bool DriveWriteSectors(
 	    // Setup the command slot.
 	    cmdTBL->prdt_entry[0].dba = dataPhys & 0xffffffff;
 	    if (g_generalHostControl->cap.s64a)
-	    	cmdTBL->prdt_entry[0].dbau = dataPhys & ~(0xffffffff);
+	    	cmdTBL->prdt_entry[0].dbau = dataPhys >> 32;
 	    else
-	    	if (dataPhys & ~(0xffffffff))
+	    	if (dataPhys >> 32)
 	    		logger::panic(nullptr, "AHCI: %s: dataPhys has its upper 32-bits set and cap.s64a is false.\n", __func__);
 	    cmdTBL->prdt_entry[0].dbc = currentPageCount * 4096 - 1;
 	    cmdTBL->prdt_entry[0].i = 1;
@@ -231,7 +232,7 @@ bool DriveWriteSectors(
 	    utils::memzero(command, sizeof(*command));
 	    command->fis_type = FIS_TYPE_REG_H2D;
 	    command->command = ATA_WRITE_DMA_EXT;
-	    command->device = 0x40;
+	    command->device = 0;
 	    command->c = 1;
         uint16_t count = i == (blocksToWrite - 1) ? currentSectorCount : 1024;
 	    command->countl = (uint8_t)(count & 0xff);

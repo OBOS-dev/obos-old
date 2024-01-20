@@ -1,5 +1,5 @@
 /*
-    drivers/x86_64/sata/new.cpp
+    drivers/x86_64/common/new.cpp
 
     Copyright (c) 2023-2024 Omar Berrow
 */

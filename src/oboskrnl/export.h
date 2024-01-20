@@ -1,5 +1,10 @@
 #pragma once
 
+#ifndef __INTELLISENSE__
+#	define OBOS_WEAK __attribute__((weak))
+#else
+#	define OBOS_WEAK
+#endif
 #ifdef OBOS_DRIVER
 #	ifndef __INTELLISENSE__
 #		define OBOS_EXPORT __attribute__((weak))

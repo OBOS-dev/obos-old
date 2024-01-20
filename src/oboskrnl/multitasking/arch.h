@@ -9,6 +9,7 @@
 // This file defines all platform-specific functions/structures that a port of the kernel to get the scheduler to work.
 
 #include <int.h>
+#include <export.h>
 
 #if defined(__x86_64__) || defined(_WIN64)
 #include <multitasking/x86_64/arch_structs.h>
@@ -32,15 +33,16 @@ namespace obos
 		void freeThreadStackInfo(void* stackInfo, memory::VirtualAllocator* vallocator);
 		void setupTimerInterrupt();
 
-
-		uintptr_t stopTimer();
-		void startTimer(uintptr_t);
+		OBOS_EXPORT uintptr_t stopTimer();
+		OBOS_EXPORT void startTimer(uintptr_t);
 		
-		void callScheduler(bool allCores);
+		OBOS_EXPORT void callScheduler(bool allCores);
 
 		void* getCurrentCpuLocalPtr();
+		// For any kernel/driver developers, this does nothing but send the other cores to a trampoline.
+		// It DOES NOT undo the action of StopCPUs()
 		bool StartCPUs();
-		void StopCPUs(bool includingSelf);
+		OBOS_EXPORT void StopCPUs(bool includingSelf);
 
 		bool inSchedulerFunction(struct Thread* thr);
 	}

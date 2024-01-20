@@ -7,6 +7,7 @@
 #pragma once
 
 #include <int.h>
+#include <export.h>
 
 #include <multitasking/thread.h>
 #include <multitasking/arch.h>
@@ -29,6 +30,6 @@ namespace obos
 		};
 		extern cpu_local* g_cpuInfo;
 		extern size_t g_nCPUs;
-		cpu_local* GetCurrentCpuLocalPtr();
+		OBOS_EXPORT cpu_local* GetCurrentCpuLocalPtr();
 	}
 }

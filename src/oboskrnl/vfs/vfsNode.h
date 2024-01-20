@@ -16,8 +16,8 @@ namespace obos
 	{
 		struct VFSString
 		{
-			char* str;
-			size_t strLen;
+			char* str = nullptr;
+			size_t strLen = 0;
 			VFSString() = default;
 			VFSString(const char* str) : str{ (char*)str }
 			{
@@ -52,8 +52,8 @@ namespace obos
 		// General
 		struct DirectoryEntryList
 		{
-			struct DirectoryEntry *head, *tail;
-			size_t size;
+			struct DirectoryEntry *head = nullptr, *tail = nullptr;
+			size_t size = 0;
 		};
 		struct VFSNode
 		{
@@ -69,28 +69,29 @@ namespace obos
 			GeneralFSNode() = delete;
 			GeneralFSNode(NodeType type) : VFSNode{ type }
 			{}
-			struct DirectoryEntry *next, *prev; // used for the children.
-			struct DirectoryEntry *parent;
-			DirectoryEntryList children;
+			struct DirectoryEntry *next = nullptr, *prev = nullptr; // used for the children.
+			struct DirectoryEntry *parent = nullptr;
+			DirectoryEntryList children{};
 		};
 		struct MountPoint : public GeneralFSNode
 		{
 			MountPoint() : GeneralFSNode{ VFS_NODE_MOUNTPOINT }
 			{}
-			uint32_t id;
-			uint32_t partitionId = ((uint32_t)-1);
-			driverInterface::driverIdentity* filesystemDriver; // The filesystem driver to invoke.
-			uint32_t otherMountPointsReferencing;
+			uint32_t id = 0;
+			struct PartitionEntry* partition;
+			bool isInitrd = false;
+			driverInterface::driverIdentity* filesystemDriver = nullptr; // The filesystem driver to invoke.
+			uint32_t otherMountPointsReferencing = 0;
 		};
 		struct HandleListNode
 		{
-			HandleListNode *next, *prev;
-			void* handle;
+			HandleListNode *next = nullptr, *prev = nullptr;
+			void* handle = nullptr;
 		};
 		struct HandleList
 		{
-			HandleListNode *head, *tail;
-			size_t size;
+			HandleListNode *head = nullptr, *tail = nullptr;
+			size_t size = 0;
 		};
 		struct DirectoryEntry : public GeneralFSNode
 		{
@@ -99,12 +100,12 @@ namespace obos
 			DirectoryEntry(DirectoryEntryType _direntType) : GeneralFSNode{ VFS_NODE_DIRECTORY_ENTRY }, direntType{ _direntType }
 			{}
 			DirectoryEntryType direntType = DIRECTORY_ENTRY_TYPE_INVALID;
-			uint32_t fileAttrib;
-			size_t filesize;
-			VFSString path; // Never should be null.
-			DirectoryEntry* linkedNode; // Only non-null when direntType == DIRECTORY_ENTRY_TYPE_SYMLINK
-			struct MountPoint* mountPoint;
-			HandleList fileHandlesReferencing;
+			uint32_t fileAttrib = 0;
+			size_t filesize = 0;
+			VFSString path{}; // Never should be null.
+			DirectoryEntry* linkedNode = nullptr; // Only non-null when direntType == DIRECTORY_ENTRY_TYPE_SYMLINK
+			struct MountPoint* mountPoint = nullptr;
+			HandleList fileHandlesReferencing{};
 		};
 		struct Directory : public DirectoryEntry
 		{
@@ -119,10 +120,13 @@ namespace obos
 			PartitionEntry() : VFSNode{ VFS_NODE_PARTITION_ENTRY }
 			{}
 			uint32_t partitionId = 0;
-			uintptr_t lbaOffset = 0;
+			uint64_t lbaOffset = 0;
+			size_t sizeSectors = 0;
 			// Also add the handle to the DriveEntry's handle list.
 			HandleList handlesReferencing;
 			struct DriveEntry* drive;
+			driverInterface::driverIdentity* filesystemDriver;
+			const char* friendlyFilesystemName = "UNKNOWN";
 			PartitionEntry *next = nullptr, *prev = nullptr;
 		};
 		struct DriveEntry : public VFSNode

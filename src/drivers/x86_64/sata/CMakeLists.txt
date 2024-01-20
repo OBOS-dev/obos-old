@@ -2,7 +2,7 @@
 
 # Copyright (c) 2023-2024 Omar Berrow
 
-add_executable(sataDriver "main.cpp" "new.cpp" "command.cpp" "interface.cpp")
+add_executable(sataDriver "main.cpp" "../../generic/common/new.cpp" "command.cpp" "interface.cpp")
 
 target_compile_options(sataDriver
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>
@@ -23,7 +23,6 @@ set_target_properties(sataDriver PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_D
 target_compile_definitions(sataDriver PRIVATE OBOS_DRIVER=1)
 
 target_include_directories(sataDriver PRIVATE "${CMAKE_SOURCE_DIR}/src/oboskrnl")
-target_include_directories(sataDriver PRIVATE "${CMAKE_SOURCE_DIR}/src/drivers/x86_64/common/")
 
 target_link_options(sataDriver
 	PRIVATE "-ffreestanding"

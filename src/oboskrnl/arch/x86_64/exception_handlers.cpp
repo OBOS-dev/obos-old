@@ -31,6 +31,7 @@ extern "C" char _sched_text_end;
 
 namespace obos
 {
+	extern void EarlyKPanic();
 	namespace memory
 	{
 		uintptr_t DecodeProtectionFlags(uintptr_t _flags);
@@ -43,6 +44,8 @@ namespace obos
 		extern locks::Mutex g_coreGlobalSchedulerLock;
 	}
 	bool g_halt;
+	static size_t s_kModeExceptions = 0;
+	static constexpr const size_t kmodeExceptionsLimit = 3;
 	void exception14(interrupt_frame* frame)
 	{
 		uintptr_t entry = 0;
@@ -100,6 +103,8 @@ namespace obos
 			process::CallSignalOrTerminate(currentThread, process::SIGPF);
 			return;
 		}
+		if (s_kModeExceptions++ == kmodeExceptionsLimit)
+			EarlyKPanic();
 		logger::panic(
 			nullptr,
 			"Page fault in %s-mode at %p (cpu %d, pid %d, tid %d) while trying to %s a %s page. The address of this page is %p. Error code: %d. whileInScheduler = %s\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\nDumping registers:\n"
@@ -182,6 +187,8 @@ namespace obos
 				return;
 			}
 		}
+		if (s_kModeExceptions++ == kmodeExceptionsLimit)
+			EarlyKPanic();
 		logger::panic(
 			nullptr,
 			"Exception %d at %p (cpu %d, pid %d, tid %d). Error code: %d.\nDumping registers:\n"

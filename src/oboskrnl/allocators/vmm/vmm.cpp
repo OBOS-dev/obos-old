@@ -48,6 +48,11 @@ namespace obos
 				return nullptr;
 			}
 			const size_t nPages = size / m_pageSize + ((size % m_pageSize) != 0);
+			if (!nPages)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return nullptr;
+			}
 			if (!_base)
 			{
 				_base = _Impl_FindUsableAddress(m_owner, nPages);
@@ -215,6 +220,12 @@ namespace obos
 				return false;
 			}
 			return _Impl_FreeUserProcessAddressSpace((process::Process*)m_owner);
+		}
+		size_t VirtualAllocator::GetPageSize() 
+		{
+			if (!m_pageSize)
+				m_pageSize = _Impl_GetPageSize();
+			return m_pageSize; 
 		}
     }
 }

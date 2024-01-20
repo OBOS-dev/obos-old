@@ -11,8 +11,17 @@ global _ZN4obos5utils6memcpyEPvPKvm
 global _ZN4obos3vfs20_VectorizedMemcpy64BEPvPKvm
 
 _ZN4obos5utils8dwMemcpyEPjPKjm:
-	lea rdx, [rdx*4]
-	call _ZN4obos5utils6memcpyEPvPKvm
+	push rbp
+	mov rbp, rsp
+
+	xor rax, rax
+
+	mov rax, rdi
+
+	mov rcx, rdx
+	rep movsd
+	
+	leave
 	ret
 _ZN4obos5utils8dwMemsetEPjjm:
 	push rdi

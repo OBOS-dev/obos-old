@@ -2,11 +2,11 @@
 ## Goals
 - [x] A module loader/interface
 - [x] An initrd driver
-- [ ] A VFS
+- [x] A VFS
 - [ ] PS2 Keyboard driver
-- [ ] Disk drivers for AHCI and NVME.
+- [x] AHCI Driver
+- [ ] NVME Driver.
 - [ ] A FAT driver and ext2/3/4 driver.
-- [ ] PS2 Keyboard driver.
 - [ ] Support for USB.
 - [ ] Support for ACPI power management.
 - [ ] POSIX Compatibility Layer

@@ -13,6 +13,9 @@
 
 #include <multitasking/process/x86_64/loader/elfStructures.h>
 
+#include <driverInterface/struct.h>
+#include <driverInterface/load.h>
+
 namespace obos
 {
 	extern volatile limine_module_request module_request;
@@ -74,7 +77,25 @@ namespace obos
 				}
 			}
 			if (!symbol)
+			{
+				// Look in the driver symbol tables
+				auto searchDriver = [&_addr](driverInterface::driverIdentity* driver)->driverInterface::obosDriverSymbol*
+					{
+						for (auto& sym : driver->symbols)
+							if (_addr >= sym.addr && _addr < (sym.addr + sym.size))
+								return &sym;
+						return nullptr;
+					};
+				driverInterface::obosDriverSymbol* symbol = nullptr;
+				for (auto iter = driverInterface::g_driverInterfaces.begin(); iter; iter++)
+					if ((symbol = searchDriver(*(*iter).value)))
+						break;
+				if (!symbol)
+					return;
+				str = symbol->name;
+				functionAddress = symbol->addr;
 				return;
+			}
 			str = getElfStringFromSection(eheader, strtab_section, symbol->st_name);
 			functionAddress = symbol->st_value;
 		}
@@ -125,7 +146,7 @@ namespace obos
 			{
 				const char* functionName = nullptr;
 				uintptr_t functionStart = 0;
-				if (frame->rip > (void*)0xffffffff80000000)
+				if (frame->rip > (void*)0xffffffff00000000)
 					addr2func(frame->rip, functionName, functionStart);
 				if(functionName)
 					printf("\t%p: %s+%d\n", frame->rip, functionName, (uintptr_t)frame->rip - functionStart);

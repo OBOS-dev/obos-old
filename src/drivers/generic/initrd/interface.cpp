@@ -24,13 +24,10 @@ namespace initrdInterface
 {
 	bool QueryFileProperties(
 		const char* path,
-		uint32_t, uint8_t,
+		uint32_t, uint32_t,
 		size_t* oFsizeBytes,
-		uint64_t* oLBAOffset,
 		obos::driverInterface::fileAttributes* oFAttribs)
 	{
-		if (oLBAOffset)
-			*oLBAOffset = 0;
 		uint32_t fAttribs = 0;
 		if (!::GetFileAttribute(path, oFsizeBytes, &fAttribs))
 		{
@@ -38,8 +35,6 @@ namespace initrdInterface
 				*oFAttribs = obos::driverInterface::FILE_DOESNT_EXIST;
 			if (oFsizeBytes)
 				*oFsizeBytes = 0;
-			if (oLBAOffset)
-				*oLBAOffset = 0;
 			return false;
 		}
 		if (oFAttribs)
@@ -48,7 +43,7 @@ namespace initrdInterface
 
 	}
 	bool IterCreate(
-		uint32_t, uint8_t,
+		uint32_t, uint32_t,
 		uintptr_t* oIter)
 	{
 		fileIterator* iter = (fileIterator*)kcalloc(1, sizeof(fileIterator));
@@ -70,7 +65,6 @@ namespace initrdInterface
 		const char** oFilepath,
 		void(**freeFunction)(void* buf),
 		size_t* oFsizeBytes,
-		uint64_t* oLBAOffset,
 		obos::driverInterface::fileAttributes* oFAttribs)
 	{
 		fileIterator* iter = (fileIterator*)_iter;
@@ -90,11 +84,9 @@ namespace initrdInterface
 				*oFAttribs = obos::driverInterface::FILE_DOESNT_EXIST;
 			if (oFsizeBytes)
 				*oFsizeBytes = 0;
-			if (oLBAOffset)
-				*oLBAOffset = 0;
 			return true;
 		}
-		bool ret = QueryFileProperties(iter->currentNode->cache->entry->path, 0,0, oFsizeBytes, oLBAOffset, oFAttribs);
+		bool ret = QueryFileProperties(iter->currentNode->cache->entry->path, 0,0, oFsizeBytes, oFAttribs);
 		if (!ret)
 			return false;
 		size_t szFilepath = obos::utils::strlen(iter->currentNode->cache->entry->path);
@@ -130,7 +122,7 @@ namespace initrdInterface
 		return true;
 	}
 	bool ReadFile(
-		uint32_t, uint8_t,
+		uint32_t, uint32_t,
 		const char* path,
 		size_t nToSkip,
 		size_t nToRead,
@@ -139,9 +131,9 @@ namespace initrdInterface
 		auto cache = GetCacheForPath(path);
 		if (!cache)
 			return false;
-		if ((cache->dataStart + nToSkip) >= cache->dataEnd)
+		if (nToSkip >= cache->entryFilesize)
 			return false;
-		if ((cache->dataStart + nToSkip + nToRead) >= cache->dataEnd)
+		if ((nToSkip + nToRead) > cache->entryFilesize)
 			return false;
 		if (buff)
 			obos::utils::memcpy(buff, cache->dataStart + nToSkip, nToRead);

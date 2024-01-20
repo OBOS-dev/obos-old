@@ -193,7 +193,9 @@ namespace obos
 				m_capacity = 0;
 			}
 
-			const T* data() const
+			// The parameter returned by this function should not be stored anywhere, as it is subject
+			// to reallocations that move the vector's data.
+			T* data() const
 			{ return m_ptr; }
 
 			T& front() const
@@ -210,6 +212,15 @@ namespace obos
 			{
 				VectorIter<T> iter{ this, m_sz };
 				return iter;
+			}
+
+			void resize(size_t newSize)
+			{
+				m_sz = newSize;
+				if (m_sz < m_capacity)
+					return;
+				m_capacity = m_sz + (m_sz - (m_sz % m_capacityIncrement));
+				m_ptr = (T*)krealloc(m_ptr, m_capacity * sizeof(T));
 			}
 
 			~Vector()

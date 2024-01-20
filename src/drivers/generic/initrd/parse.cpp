@@ -52,7 +52,7 @@ void InitializeFilesystemCache()
 		cache->entryFilesize = filesize;
 		cache->dataStart = (uint8_t*)(entry + 1);
 		if (filesize)
-			cache->dataEnd = cache->dataStart + ((filesize / 512 + 1) * 512);
+			cache->dataEnd = cache->dataStart + ((filesize / 512 + (filesize % 512 != 0)) * 512);
 		else
 			cache->dataEnd = cache->dataStart;
 		node->cache = cache;
@@ -60,7 +60,8 @@ void InitializeFilesystemCache()
 		{
 		case ustarEntry::NORMAL_FILE:
 			cache->entryAttributes = driverInterface::FILE_ATTRIBUTES_FILE | driverInterface::FILE_ATTRIBUTES_READ_ONLY;
-			cache->entryFilesize++; // Add one to the filesize.
+			// TODO: Find out what the point of this was?
+			//cache->entryFilesize++; // Add one to the filesize.
 			break;
 		case ustarEntry::DIRECTORY:
 			cache->entryAttributes = driverInterface::FILE_ATTRIBUTES_DIRECTORY;

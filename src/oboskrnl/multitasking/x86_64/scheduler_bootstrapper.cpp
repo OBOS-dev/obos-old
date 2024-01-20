@@ -7,6 +7,7 @@
 #include <int.h>
 #include <klog.h>
 #include <memory_manipulation.h>
+#include <hashmap.h>
 
 #include <arch/interrupt.h>
 
@@ -16,6 +17,8 @@
 #include <multitasking/scheduler.h>
 #include <multitasking/arch.h>
 #include <multitasking/cpu_local.h>
+
+#include <multitasking/locks/mutex.h>
 
 #include <x86_64-utils/asm.h>
 
@@ -46,12 +49,23 @@ namespace obos
 			g_HPETAddr->generalConfig |= (1<<0);
 			return comparatorValue;
 		}
+
+		static utils::Hashmap<uint64_t, uint64_t> s_freqToCounterValue;
+		static locks::Mutex s_hpetLock;
 		// Assumes the timer divisor is one.
-		uint64_t FindCounterValueFromFrequency(uint64_t freq)
+		static uint64_t FindCounterValueFromFrequency(uint64_t freq)
 		{
+			s_hpetLock.Lock();
+			if (s_freqToCounterValue.contains(freq))
+			{
+				s_hpetLock.Unlock();
+				return s_freqToCounterValue.at(freq);
+			}
 			logger::debug("%s, cpu %d: Calibrating the timer at a frequency of %d.\n", __func__, getCPULocal()->cpuId, freq);
 			uint64_t ret = calibrateTimer(freq);
 			logger::debug("%s, cpu %d: Timer count is %d.\n", __func__, getCPULocal()->cpuId, ret);
+			s_freqToCounterValue.emplace_at(freq, ret);
+			s_hpetLock.Unlock();
 			return ret;
 		}
 

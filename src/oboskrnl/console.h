@@ -15,18 +15,18 @@ namespace obos
 { 
 	struct con_framebuffer
 	{
-		uint32_t* addr;
-		uint32_t width;
-		uint32_t height;
-		uint32_t pitch;
+		uint32_t* addr = nullptr;
+		uint32_t width = 0;
+		uint32_t height = 0;
+		uint32_t pitch = 0;
 	};
 
 	class Console
 	{
 	public:
 		OBOS_EXPORT Console() = default;
-		OBOS_EXPORT Console(void* font, con_framebuffer output, bool lockCanUseMultitasking = true);
-		OBOS_EXPORT void Initialize(void* font, con_framebuffer output, bool lockCanUseMultitasking = true);
+		OBOS_EXPORT Console(void* font, const con_framebuffer& output, bool lockCanUseMultitasking = true);
+		OBOS_EXPORT void Initialize(void* font, const con_framebuffer& output, bool lockCanUseMultitasking = true);
 
 		/// <summary>
 		/// Prints a string.
@@ -85,7 +85,7 @@ namespace obos
 		/// </summary>
 		/// <param name="foregroundColour">A pointer to where the foreground colour should be stored.</param>
 		/// <param name="backgroundColour">A pointer to where the background colour should be stored.</param>
-		OBOS_EXPORT void GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour);
+		OBOS_EXPORT void GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour) const;
 		/// <summary>
 		/// Sets the console's font. This must be a 8x16 bitmap font.
 		/// </summary>
@@ -105,24 +105,28 @@ namespace obos
 		/// Retrieves the framebuffer that's being drawn to.
 		/// </summary>
 		/// <param name="framebuffer">A pointer to where the framebuffer should be stored.</param>
-		OBOS_EXPORT void GetFramebuffer(con_framebuffer* framebuffer);
+		OBOS_EXPORT void GetFramebuffer(con_framebuffer* framebuffer) const;
 		/// <summary>
 		/// Retrieves the console bounds.
 		/// </summary>
 		/// <param name="horizontal">A pointer to where the horizontal bounds should be stored.</param>
 		/// <param name="vertical">A pointer to where the vertical bounds should be stored.</param>
-		OBOS_EXPORT void GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical);
+		OBOS_EXPORT void SetBackBuffer(const con_framebuffer& buffer);
+		OBOS_EXPORT void GetBackBuffer(con_framebuffer* buffer) const;
+		OBOS_EXPORT void GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical) const;
 
 		OBOS_EXPORT void Unlock() { m_lock.Unlock(); };
 
-		// Copies from the framebuffer specified in the parameter to the this->m_framebuffer.
-		// This function can be used for back buffering.
-		OBOS_EXPORT void CopyFrom(con_framebuffer* buffer);
+		OBOS_EXPORT void SwapBuffers();
+		OBOS_EXPORT void SetDrawBuffer(bool isBackbuffer);
 	private:
+		friend void arch_kmain();
 		void putChar(char ch, uint32_t x, uint32_t y, uint32_t fgcolor, uint32_t bgcolor);
 		void newlineHandler(uint32_t& x, uint32_t& y);
-		void __ImplConsoleOutputChar(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y);
-		con_framebuffer m_framebuffer;
+		void __ImplConsoleOutputChar(char ch, uint32_t foregroundColour, uint32_t backgroundColour, uint32_t& x, uint32_t& y, bool incrementCallsSinceSwap = true);
+		con_framebuffer m_framebuffer{};
+		con_framebuffer m_backbuffer{};
+		con_framebuffer* m_drawingBuffer = &m_framebuffer;
 		uint32_t m_terminalX = 0;
 		uint32_t m_terminalY = 0;
 		uint32_t m_nCharsHorizontal = 0;
@@ -130,6 +134,15 @@ namespace obos
 		uint32_t m_foregroundColour = 0;
 		uint32_t m_backgroundColour = 0;
 		uint8_t* m_font = nullptr;
+		uint32_t* m_modificationArray = nullptr; // The size of this array should be m_nCharsVertical, or nullptr when it doesn't exist.
+		// Only incremented by ConsoleOutput(char ch) when 'ch' is newline. Incremented by ConsoleOutput(const char*) or ConsoleOutput(const char*,size_t)
+		size_t m_nCallsSinceLastSwap = 0;
+#ifdef OBOS_DEBUG
+		constexpr static size_t maxCountsUntilSwap = 1;
+#else
+		constexpr static size_t maxCountsUntilSwap = 5;
+#endif
 		locks::Mutex m_lock;
 	};
+	extern OBOS_EXPORT Console g_kernelConsole;
 }
