@@ -6,7 +6,8 @@
 - [ ] PS2 Keyboard driver
 - [x] AHCI Driver
 - [ ] NVME Driver.
-- [ ] A FAT driver and ext2/3/4 driver.
+- [x] A FAT driver.
+- [ ] Ext2/3/4 Driver.
 - [ ] Support for USB.
 - [ ] Support for ACPI power management.
 - [ ] POSIX Compatibility Layer
