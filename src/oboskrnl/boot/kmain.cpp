@@ -207,7 +207,10 @@ namespace obos
 				uint32_t mountPoint = 0xffffffff;
 				if (!vfs::mount(mountPoint, drv.GetDriveId(), _part, false, true))
 				{
-					logger::warning("%s: Could not mount partition. GetLastError: %d\n", __func__, GetLastError());
+					if (GetLastError() != OBOS_ERROR_VFS_PARTITION_ALREADY_MOUNTED)
+						logger::warning("%s: Could not mount partition. GetLastError: %d\n", __func__, GetLastError());
+					else
+						logger::warning("%s: Could not mount partition as the partition is already mounted. Mount point: %d\n", __func__, mountPoint);
 					part.Close();
 					delete[] partPath;
 					continue;
@@ -250,16 +253,14 @@ namespace obos
 		for (auto& mountPoint : vfs::g_mountPoints)
 		{
 			if (!vfs::SearchForNode(mountPoint->children.head, nullptr, [](vfs::DirectoryEntry* ent, void*)->bool {
-				logger::printf("%d:/%s\n", ent->mountPoint->id, ent->path);
-				return utils::strcmp(ent->path, "dir") || utils::strcmp(ent->path, "dir/");
+				return utils::strcmp(ent->path, "test.txt");
 				}))
 				continue;
 			id = mountPoint->id;
 			break;
 		}
-		/*if (id == 0xffffffff)
-			goto end;*/
-		id = 1;
+		if (id == 0xffffffff)
+			goto end;
 		vfsTestOnPath(id, "test.txt");
 		vfsTestOnPath(id, "dir/other_test.txt");
 		vfsTestOnPath(id, "dir/subdirectory/you_guessed_it_another_test.txt");

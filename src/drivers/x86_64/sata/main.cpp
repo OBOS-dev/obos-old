@@ -199,7 +199,7 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 
 		if (det != HBA_PORT_DET_PRESENT || ipm != HBA_PORT_IPM_ACTIVE)
 		{
-			logger::debug("AHCI: No drive found on port %d, even though it is implemented.\n", port);
+			logger::warning("AHCI: No drive found on port %d, even though it is implemented.\n", port);
 			continue;
 		}
 
@@ -271,7 +271,7 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 		uint32_t cmdSlot = FindCMDSlot(pPort);
 		memory::VirtualAllocator vallocator{ nullptr };
 		uintptr_t responsePhys = 0;
-		volatile byte* response = (volatile byte*)vallocator.VirtualAlloc(nullptr, 4096, memory::PROT_DISABLE_CACHE | memory::PROT_NO_COW_ON_ALLOCATE);
+		volatile byte* response = (volatile byte*)vallocator.VirtualAlloc(nullptr, 4096, memory::PROT_NO_COW_ON_ALLOCATE);
 		responsePhys = (uintptr_t)memory::getCurrentPageMap()->getL1PageMapEntryAt((uintptr_t)response) & 0xFFFFFFFFFF000;
 		// Setup the command slot.
 		HBA_CMD_HEADER* cmdHeader = (HBA_CMD_HEADER*)portDescriptor.clBase + cmdSlot;
@@ -315,7 +315,7 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 		portDescriptor.driveType = pPort->sig == SATA_SIG_ATA ? Port::DRIVE_TYPE_SATA : Port::DRIVE_TYPE_SATAPI;
 		vallocator.VirtualFree((void*)response, 4096);
 		// Register the drive with the kernel.
-		portDescriptor.kernelID = driverInterface::RegisterDrive();
+		portDescriptor.kernelID = portDescriptor.driveType == Port::DRIVE_TYPE_SATA ? driverInterface::RegisterDrive() : 0xffffffff;
 		logger::info("AHCI: Found %s drive at port %d. Kernel drive ID: %d, sector count: %e0x%X, sector size %e0x%X.\n",
 			portDescriptor.driveType == Port::DRIVE_TYPE_SATA ? "SATA" : "SATAPI",
 			port,

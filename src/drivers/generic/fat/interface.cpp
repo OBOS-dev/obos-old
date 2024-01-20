@@ -128,6 +128,42 @@ namespace fatDriver
 		newIter->prev = g_iterators.tail;
 		g_iterators.tail = newIter;
 		g_iterators.size++;
+		// Omar Berrow, January 19th, 2024 at 7:22 PM:
+		// Wtf. For some reason, the drive/partition id is zero no matter what in the partition.
+		// But it isn't in the partitionIdPair.
+		// To circumvent this, we check if the partition's drive/partition id is different from the partition id pair.
+		// If it is, we'll set the appropriate variables.
+		if (partition.driveId != p.first)
+			partition.driveId = p.first;
+		if (partition.partitionId != p.second)
+			partition.partitionId = p.second;
+		// Omar Berrow, January 19th, 2024 at 4:47 PM:
+		// Well this is weird.
+		// newIter->currentNode->owner was pretty much guaranteed to be nullptr because it wasn't set anywhere, and it didn't page fault in FileIteratorNext.
+		// In fact the bug it caused is that drive id and partition id seemed to be always zero, so mounting two separate fat partitions might not work properly.
+		// Omar Berrow, January 19th, 2024 at 8:12 PM:
+		// Wait I'm dumb.
+		// This is a cache entry.
+		// But wait, the cache never sets it?
+		// Wtf is happening?
+		// newIter->currentNode->owner = &partition;
+		// Omar Berrow, January 19th, 2024 at 8:38 PM:
+		// I am a f*****g idiot.
+		// The problem was because of:
+		// struct pair
+		// {
+		// 	T1 first;
+		// 	T2 second;
+		// 	bool operator==(const pair & other) const
+		// 	{
+		// 		return
+		// 			other.first == other.first &&
+		// 			other.second == other.second;
+		// 	}
+		// };
+		// Spot the problem?
+		// Anyway this should be the last comment I write today.
+		//logger::debug("%s: Created file iterator for drive D%dP%d:/\n", __func__, partition.driveId, partition.partitionId);
 		*oIter = (uintptr_t)newIter;
 		return true;
 	}

@@ -12,6 +12,7 @@
 
 #include <vfs/devManip/driveHandle.h>
 #include <vfs/devManip/driveIterator.h>
+#include <vfs/devManip/sectorStore.h>
 
 #include <vfs/vfsNode.h>
 
@@ -28,87 +29,6 @@ using namespace obos;
 
 namespace fatDriver
 {
-	class SectorStorage
-	{
-	public:
-		SectorStorage() = default;
-		SectorStorage(size_t size)
-		{
-			if (!size)
-				return;
-			m_ptr = (byte*)m_valloc.VirtualAlloc(nullptr, size, 0);
-			m_realSize = size;
-			const size_t pageSize = m_valloc.GetPageSize();
-			m_size = size / pageSize * pageSize + ((size % pageSize) != 0);
-		}
-
-		// This pointer should not be stored, as it's subject to relocation.
-		// If you end up storing it, after every resize, update that pointer.
-		byte* data() const { return m_ptr; }
-		void resize(size_t size)
-		{
-			if (!size)
-			{
-				free();
-				return;
-			}
-			const size_t pageSize = m_valloc.GetPageSize();
-			size_t oldSize = m_size;
-			size = m_size = size / pageSize * pageSize + ((size % pageSize) != 0);
-			m_realSize = size;
-			if (size == oldSize)
-				return;
-			if (size < oldSize)
-			{
-				// Truncuate the block.
-				m_valloc.VirtualFree(m_ptr + size, oldSize - size);
-				return;
-			}
-			// Grow the block.
-			// Find out if there's more space after the block.
-			const size_t nPages = size / pageSize + ((size % pageSize) != 0);
-			uintptr_t* flags = new uintptr_t[nPages];
-			m_valloc.VirtualGetProtection(m_ptr + oldSize, oldSize - size, flags);
-			size_t i = 0;
-			for (; i < nPages && !(flags[i] & memory::PROT_IS_PRESENT); i++);
-			if (flags[i] & memory::PROT_IS_PRESENT)
-			{
-				// If so, allocate the pages after m_ptr
-				m_valloc.VirtualAlloc(m_ptr + oldSize, oldSize - size, 0);
-				return;
-			}
-			// If not, relocate m_ptr.
-			_ImplRelocatePtr(oldSize);
-		}
-
-		void free()
-		{
-			if (m_ptr)
-				m_valloc.VirtualFree(m_ptr, m_size);
-			m_ptr = nullptr;
-			m_size = 0;
-			m_realSize = 0;
-		}
-		size_t length() const { return m_realSize; }
-		size_t length_pageSizeAligned() const { return m_size; }
-
-		~SectorStorage()
-		{
-			free();
-		}
-	private:
-		void _ImplRelocatePtr(size_t oldSize)
-		{
-			void* newPtr = m_valloc.VirtualAlloc(nullptr, m_size, 0);
-			utils::memcpy(newPtr, m_ptr, m_size);
-			m_valloc.VirtualFree(m_ptr, oldSize);
-			m_ptr = (byte*)newPtr;
-		}
-		byte* m_ptr = nullptr;
-		size_t m_size = 0;
-		size_t m_realSize = 0;
-		memory::VirtualAllocator m_valloc{ nullptr };
-	};
 	bool operator==(const partition& first, const partition& second)
 	{
 		return
@@ -136,27 +56,51 @@ namespace fatDriver
 	static fatType GetFatType(generic_bpb* bpb)
 	{
 		fatType type = fatType::INVALID;
-		// Get the FAT type.
-		auto RootDirSectors = ((bpb->nRootDirectoryEntries * 32) + (bpb->bytesPerSector - 1)) / bpb->bytesPerSector;
-		uint16_t FatSz = 0;
-		uint32_t TotSec = 0;
-		if (bpb->sectorsPerFAT != 0)
-			FatSz = bpb->sectorsPerFAT;
+		// Get the FAT type. We might need to infer it from the cluster count if we don't have a trusted OEM string.
+		logger::debug("FAT: Partition OEM Identifier: %c%c%c%c%c%c%c%c\n",
+			bpb->oem_identifer[0], bpb->oem_identifer[1], bpb->oem_identifer[2], bpb->oem_identifer[3],
+			bpb->oem_identifer[4], bpb->oem_identifer[5], bpb->oem_identifer[6], bpb->oem_identifer[7]);
+		// TODO: Add ourselves to this list when we support making partitions.
+		if (utils::memcmp(bpb->oem_identifer, "MSDOS5.1", 8) || 
+			utils::memcmp(bpb->oem_identifer, "MSWIN4.1", 8) ||
+			utils::memcmp(bpb->oem_identifer,  "mkdosfs", 7) ||
+			utils::memcmp(bpb->oem_identifer, "mkfs.fat", 8) ||
+			utils::memcmp(bpb->oem_identifer, "FRDOS5.1", 8))
+		{
+			logger::debug("FAT: Trusted OEM Identifier. Inferring FAT type from system identifier string.\n");
+			// We should be able to trust the ebpb's system identifier string.
+			if (utils::memcmp((char*)bpb + 0x36, "FAT12", 5))
+				type = fatType::FAT12;
+			else if (utils::memcmp((char*)bpb + 0x36, "FAT16", 5))
+				type = fatType::FAT16;
+			else if (utils::memcmp(bpb->ebpb.fat32_ebpb.sysIdentifierString, "FAT32", 5))
+				type = fatType::FAT32;
+		}
 		else
-			FatSz = bpb->ebpb.fat32_ebpb.sectorsPerFAT;
+		{
+			// This is an untrustworthy FAT partition, infer from cluster count.
+			logger::debug("FAT: Untrusted OEM Identifier. Inferring FAT type from cluster count.\n");
+			auto RootDirSectors = ((bpb->nRootDirectoryEntries * 32) + (bpb->bytesPerSector - 1)) / bpb->bytesPerSector;
+			uint16_t FatSz = 0;
+			uint32_t TotSec = 0;
+			if (bpb->sectorsPerFAT != 0)
+				FatSz = bpb->sectorsPerFAT;
+			else
+				FatSz = bpb->ebpb.fat32_ebpb.sectorsPerFAT;
 
-		if (bpb->totalSectorCountOnVolume16 != 0)
-			TotSec = bpb->totalSectorCountOnVolume16;
-		else
-			TotSec = bpb->totalSectorCountOnVolume32;
-		auto DataSec = TotSec - (bpb->nResvSectors + (bpb->nFats * FatSz) + RootDirSectors);
-		auto clusterCount = DataSec / bpb->sectorsPerCluster;
-		if (clusterCount < 4085)
-			type = fatType::FAT12;
-		else if (clusterCount < 65525)
-			type = fatType::FAT16;
-		else
-			type = fatType::FAT32;
+			if (bpb->totalSectorCountOnVolume16 != 0)
+				TotSec = bpb->totalSectorCountOnVolume16;
+			else
+				TotSec = bpb->totalSectorCountOnVolume32;
+			auto DataSec = TotSec - (bpb->nResvSectors + (bpb->nFats * FatSz) + RootDirSectors);
+			auto clusterCount = DataSec / bpb->sectorsPerCluster;
+			if (clusterCount < 4085)
+				type = fatType::FAT12;
+			else if (clusterCount < 65525)
+				type = fatType::FAT16;
+			else
+				type = fatType::FAT32;
+		}
 		return type;
 	}
 	struct temp_directoryEntryCache
@@ -296,7 +240,8 @@ namespace fatDriver
 		// We'll see...
 		// Omar Berrow - (4:45 PM, January 14 2024) I ended up doing it now and not forgetting!
 		// Anyway Imma leave these comments for the next person to see them.
-		SectorStorage currentCluster{ bpb->sectorsPerCluster * bytesPerSector }, otherCluster{ bpb->sectorsPerCluster * bytesPerSector };
+		// Omar Berrow - (6:37 PM, January 18 2024) Lol it's kind of surprising how I didn't forget. I also decided to move the class into vfs/devManip/ so it can be used by all.
+		utils::SectorStorage currentCluster{ bpb->sectorsPerCluster * bytesPerSector }, otherCluster{ bpb->sectorsPerCluster * bytesPerSector };
 		bytesPerSector = bytesPerSector > bpb->bytesPerSector ? bytesPerSector : bpb->bytesPerSector;
 		auto sector = fat32FirstSectorOfCluster(ebpb.rootDirectoryCluster, *bpb, part.FirstDataSec);
 		//sector -= partLBAOffset;
@@ -353,6 +298,10 @@ namespace fatDriver
 			ent->_cacheEntry->prev = part.tail;
 			part.tail = ent->_cacheEntry;
 			part.nCacheEntries++;
+			// Omar Berrow, January 19 2024 at 8:31 PM:
+			// If anyone read the comment in interface.cpp today at 8:12 PM and is wondering, "but wait, the cache DOES set it," I had done that after writing the comment.
+			// Decided to say it so it's clear.
+			ent->_cacheEntry->owner = &part;
 			delete ent->directoryEntry;
 			delete ent;
 		}
@@ -375,6 +324,7 @@ namespace fatDriver
 		}
 		if (ret)
 		{
+			// FIXME: part.owner.*id is always zero.
 			part.bpb = bpb;
 			g_partitions.push_back(part);
 			auto& owner = g_partitions[g_partitions.length() - 1];
@@ -419,7 +369,10 @@ namespace fatDriver
 					_part.driveId = partHandle.GetDriveId();
 					_part.partitionId = partHandle.GetPartitionId();
 					_part.fat_type = GetFatType(bpb);
-					logger::log("FAT Driver: Partition contains a FAT%d filesystem (we hope). Initializing cache for partition.\n", _part.fat_type);
+					logger::log("FAT Driver: Partition at D%dP%d:/ contains a FAT%d filesystem (we hope). Initializing cache for partition.\n", 
+						_part.driveId,
+						_part.partitionId, 
+						_part.fat_type);
 					vfs::PartitionEntry* entry = (vfs::PartitionEntry*)partHandle.GetNode();
 					entry->filesystemDriver = (driverInterface::driverIdentity*)thread::GetCurrentCpuLocalPtr()->currentThread->driverIdentity;
 					switch (_part.fat_type)

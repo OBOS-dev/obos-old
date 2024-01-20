@@ -242,13 +242,14 @@ namespace obos
 		}
 		bool mount(uint32_t& point, uint32_t driveId, uint32_t partitionId, bool isInitrd, bool failIfPartitionHasMountPoint)
 		{
-			if (point != 0xffffffff && point < g_mountPoints.length())
+			if (point != 0xffffffff)
 			{
-				if (g_mountPoints[point])
-				{
-					SetLastError(OBOS_ERROR_VFS_ALREADY_MOUNTED);
-					return false;
-				}
+				uint32_t prevError = GetLastError();
+				SetLastError(OBOS_ERROR_VFS_ALREADY_MOUNTED);
+				for(auto _point : g_mountPoints)
+					if (_point && _point->id == point)
+						return false;
+				SetLastError(prevError);
 			}
 			if (point == 0xffffffff)
 				point = g_mountPoints.length();
@@ -265,7 +266,9 @@ namespace obos
 						mPointDrvId = part->drive->driveId;
 						mPointPartId = part->partitionId;
 					}
-					if ((mPointDrvId == driveId && mPointPartId == partitionId) || g_mountPoints[i]->isInitrd == isInitrd)
+					if (g_mountPoints[i]->isInitrd != isInitrd)
+						continue;
+					if ((mPointDrvId == driveId && mPointPartId == partitionId))
 					{
 						existingMountPoint = g_mountPoints[i];
 						break;
@@ -291,7 +294,7 @@ namespace obos
 			}
 			else
 			{
-				if (partitionId == 0 && isInitrd)
+				if (isInitrd)
 				{
 					newPoint->filesystemDriver = driverInterface::g_driverInterfaces.at(0);
 					newPoint->partition = nullptr;

@@ -18,10 +18,9 @@ qemu-system-x86_64 ^
 -M smm=off ^
 -d int ^
 -D qemu_log.txt
-rem  ^
-rem -no-reboot
 rem -drive if=pflash,format=raw,unit=1,file=ovmf/OVMF_VARS_4M.fd ^
 rem -drive if=pflash,format=raw,unit=0,file=ovmf/OVMF_CODE_4M.fd,readonly=on ^
+rem -no-reboot
 rem -no-shutdown
 
 cd scripts
