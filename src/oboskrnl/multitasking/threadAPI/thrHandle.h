@@ -95,7 +95,7 @@ namespace obos
 			/// <returns>Whether the function succeeded or not.</returns>
 			OBOS_EXPORT bool CloseHandle();
 
-			OBOS_EXPORT ~ThreadHandle() { CloseHandle(); }
+			OBOS_EXPORT ~ThreadHandle() { if (!m_obj) return; CloseHandle(); }
 		private:
 			void* m_obj = nullptr;
 		};

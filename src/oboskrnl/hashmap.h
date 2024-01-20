@@ -198,16 +198,16 @@ namespace obos
                 if (!currentBucket->nChains)
                     return;
                 chain* currentChain = currentBucket->firstChain;
-                node* currentNode = m_nodeTable + currentChain->index;
-                while (!equals(key, currentNode->key) && currentChain)
+                node* currentNode = m_nodeTable + currentChain->tableIndex;
+                while (!equals(key, *currentNode->key) && currentChain)
                 {
-                    currentChain = currentBucket->next;
+                    currentChain = currentChain->next;
                     if (currentChain)
-                        currentNode = m_nodeTable + currentChain->index;
+                        currentNode = m_nodeTable + currentChain->tableIndex;
                 }
                 if (!currentBucket)
                     return;
-                if (!equals(key, currentNode->key))
+                if (!equals(key, *currentNode->key))
                     return;
                 if (currentChain->next)
                     currentChain->next->prev = currentChain->prev;
@@ -218,14 +218,14 @@ namespace obos
                 if (currentBucket->lastChain == currentChain)
                     currentBucket->lastChain = currentChain->prev;
 
-                if (currentNode->next)
-                    currentNode->next->prev = currentNode->prev;
-                if (currentNode->prev)
-                    currentNode->prev->next = currentNode->next;
-                if (m_head == currentNode)
-                    m_head = currentNode->next;
-                if (m_tail->lastChain == currentNode)
-                    m_tail->lastChain = currentNode->prev;
+                if (currentNode->referencingNode->next)
+                    currentNode->referencingNode->next->prev = currentNode->referencingNode->prev;
+                if (currentNode->referencingNode->prev)
+                    currentNode->referencingNode->prev->next = currentNode->referencingNode->next;
+                if (m_head == currentNode->referencingNode)
+                    m_head = currentNode->referencingNode->next;
+                if (m_tail == currentNode->referencingNode)
+                    m_tail = currentNode->referencingNode->prev;
                 m_nNodes--;
                 kfree(currentChain);
                 currentNode->used = false;

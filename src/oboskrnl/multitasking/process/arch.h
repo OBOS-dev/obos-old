@@ -19,6 +19,8 @@ namespace obos
 	namespace process
 	{
 		void setupContextInfo(procContextInfo* info);
+		// Don't free the process' virtual address space, as that's done with virtual allocator in TerminateProcess.
+		void freeProcessContext(procContextInfo* info);
 		void switchToProcessContext(procContextInfo* info);
 
 		// Makes the thread be at "function" with the current cpu's temporary stack, and passes par1 and par2 to the function.

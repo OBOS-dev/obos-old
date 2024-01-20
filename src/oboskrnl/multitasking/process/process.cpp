@@ -18,6 +18,10 @@
 
 namespace obos
 {
+	namespace thread
+	{
+		extern void schedule();
+	}
 	namespace process
 	{
 		Process::ProcessList g_processes;
@@ -50,9 +54,15 @@ namespace obos
 			
 			return ret;
 		}
-		bool ExitProcessCallback(thread::Thread*, Process* process)
+		static bool ExitProcessCallback(thread::Thread* thr, Process* process)
 		{
 			process->vallocator.FreeUserProcessAddressSpace();
+			if (thr->status == thread::THREAD_STATUS_DEAD)
+			{
+				thread::startTimer(0);
+				// schedule in this case is noreturn.
+				thread::schedule();
+			}
 			thread::ExitThread(0);
 		}
 		bool TerminateProcess(Process *process)
@@ -82,6 +92,7 @@ namespace obos
 				thr.TerminateThread(0);
 				thr.CloseHandle();
 			}
+			freeProcessContext(&process->context);
 			thread::Thread* currentThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
 			// Freeing the address space should comes last.
 			if (currentThread->owner != process)

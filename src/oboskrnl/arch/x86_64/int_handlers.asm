@@ -246,6 +246,9 @@ isr50:
 	cmovz rdx, r15
 	jz .finish
 
+	; Pass the syscall number into the syscall handler as the first parameter, and the argument pointer in the second.
+	mov rsi, rdi
+	mov rdi, [rsp+0x80]
 	call rax
 
 .finish:
@@ -311,7 +314,10 @@ syscall_instruction_handler:
 	mov r15, 0xEF15B00B1E500000
 	cmovz rdx, r15
 	jz .finish
-
+	
+; Pass the syscall number into the syscall handler as the first parameter, and the argument pointer in the second.
+	mov rsi, rdi
+	mov rdi, [rsp+0x80]
 	call rax
 
 .finish:

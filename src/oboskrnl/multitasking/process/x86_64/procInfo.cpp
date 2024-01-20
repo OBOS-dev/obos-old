@@ -11,6 +11,8 @@
 #include <multitasking/cpu_local.h>
 #include <multitasking/arch.h>
 
+#include <multitasking/threadAPI/thrHandle.h>
+
 #include <arch/x86_64/memory_manager/virtual/initialize.h>
 #include <arch/x86_64/memory_manager/physical/allocate.h>
 
@@ -42,6 +44,27 @@ namespace obos
 				[memory::PageMap::addressToIndex(0xfffffffffffff000, 2)] = memory::s_pageDirectoryPhys | 3;
 			info->cr3 = newPageMap;
 			restorePreviousInterruptStatus(flags);
+		}
+		void freeProcessContext(procContextInfo* info)
+		{
+			//memory::freePhysicalPage((uintptr_t)info->cr3);
+			for (auto iter = info->handleTable.begin(); iter; iter++)
+			{
+				auto &hnd_val = *(*iter).value;
+				switch (hnd_val.second)
+				{
+					// TODO: Implement freeing file/drive handles.
+				case obos::syscalls::ProcessHandleType::FILE_HANDLE:
+					break;
+				case obos::syscalls::ProcessHandleType::DRIVE_HANDLE:
+					break;
+				case obos::syscalls::ProcessHandleType::THREAD_HANDLE:
+					delete ((thread::ThreadHandle*)hnd_val.first);
+					break;
+				default:
+					break;
+				}
+			}
 		}
 		void switchToProcessContext(procContextInfo* info)
 		{

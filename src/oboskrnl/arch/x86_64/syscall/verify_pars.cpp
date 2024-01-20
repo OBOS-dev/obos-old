@@ -20,12 +20,10 @@ namespace obos
 {
 	namespace syscalls
 	{
-		bool canAccessUserMemory(void* addr, size_t size, bool hasToWrite, bool checkingHandle)
+		bool canAccessUserMemory(void* addr, size_t size, bool hasToWrite)
 		{
-			if (checkingHandle && (uintptr_t)addr < 0xfffffffff0000070)
-				return false;
 			memory::VirtualAllocator* vallocator = &((process::Process*)getCPULocal()->currentThread->owner)->vallocator;
-			bool checkUsermode = checkingHandle && ((process::Process*)getCPULocal()->currentThread->owner)->isUsermode;
+			bool checkUsermode = ((process::Process*)getCPULocal()->currentThread->owner)->isUsermode;
 			size_t nPagesToCheck = ((size + 0xfff) & ~0xfff) / 4096;
 			uintptr_t* pageFlags = new uintptr_t[nPagesToCheck];
 			uintptr_t requiredFlags = memory::PROT_IS_PRESENT | ((uintptr_t)checkUsermode * memory::PROT_USER_MODE_ACCESS);

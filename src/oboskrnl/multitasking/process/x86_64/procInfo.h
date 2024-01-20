@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <arch/x86_64/syscall/handle.h>
+#include <hashmap.h>
+
 namespace obos
 {
 	namespace process
@@ -13,6 +16,7 @@ namespace obos
 		struct procContextInfo
 		{
 			void* cr3;
+			utils::Hashmap<syscalls::user_handle, syscalls::handle> handleTable;
 		};
 	}
 }

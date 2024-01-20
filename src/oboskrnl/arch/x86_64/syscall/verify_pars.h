@@ -12,6 +12,6 @@ namespace obos
 {
 	namespace syscalls
 	{
-		bool canAccessUserMemory(void* addr, size_t size, bool hasToWrite, bool checkingHandle = false);
+		bool canAccessUserMemory(void* addr, size_t size, bool hasToWrite);
 	}
 }

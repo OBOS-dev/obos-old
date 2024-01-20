@@ -50,10 +50,9 @@ set (oboskrnl_platformSpecificSources
 	"arch/x86_64/memory_manager/virtual/initialize.cpp" "arch/x86_64/memory_manager/virtual/allocate.cpp" "arch/x86_64/irq/timer.cpp" "multitasking/x86_64/taskSwitchImpl.asm"
 	"multitasking/x86_64/setupFrameInfo.cpp" "multitasking/x86_64/scheduler_bootstrapper.cpp" "multitasking/process/x86_64/procInfo.cpp" "multitasking/process/x86_64/loader/elf.cpp"
 	"driverInterface/x86_64/load.cpp" "multitasking/x86_64/calibrate_timer.asm" "arch/x86_64/stack_canary.cpp" "arch/x86_64/fpu.asm"
-	"arch/x86_64/syscall/register.cpp" "arch/x86_64/syscall/memory_syscalls.cpp" "arch/x86_64/syscall/verify_pars.cpp" "arch/x86_64/syscall/console_syscalls.cpp"
-	"arch/x86_64/syscall/thread_syscalls.cpp" "arch/x86_64/sse.asm" "arch/x86_64/smp_start.cpp" "arch/x86_64/smp_trampoline.asm"
+	"arch/x86_64/syscall/register.cpp" "arch/x86_64/sse.asm" "arch/x86_64/smp_start.cpp" "arch/x86_64/smp_trampoline.asm"
 	"arch/x86_64/gdbstub/communicate.cpp" "arch/x86_64/gdbstub/stub.cpp" "arch/x86_64/signals.cpp" "driverInterface/x86_64/scan.cpp"
-	"driverInterface/x86_64/enumerate_pci.cpp"
+	"driverInterface/x86_64/enumerate_pci.cpp" "arch/x86_64/syscall/handle.cpp" "arch/x86_64/syscall/thread.cpp" "arch/x86_64/syscall/verify_pars.cpp"
 )
 
 set (OBOS_ARCHITECTURE "x86_64")

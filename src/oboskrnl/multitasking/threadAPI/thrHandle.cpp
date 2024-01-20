@@ -390,7 +390,13 @@ namespace obos
 				if (currentThread->threadList->tail == currentThread)
 					currentThread->threadList->tail = currentThread->prev_list;
 				currentThread->threadList->size--;
-				delete currentThread;
+				if (!currentThread->threadList->size)
+				{
+					auto proc = (process::Process*)currentThread->owner;
+					delete currentThread;
+					// TerminateProcess only uses ExitThread if the current thread's status is not THREAD_STATUS_DEAD, otherwise it starts the timer and calls the scheduler.
+					process::TerminateProcess(proc);
+				}
 			}
 			startTimer(0);
 			schedule();

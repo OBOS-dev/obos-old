@@ -22,17 +22,17 @@ namespace obos
 				OPTIONS_READ_ONLY = 0b1, // Open the file read only.
 				OPTIONS_APPEND = 0b10, // Open the file, then seek to the end.
 			};
-			enum Flags
-			{
-				//FLAGS_REACHED_EOF = 0b1,
-				FLAGS_ALLOW_WRITE = 0b10,
-				FLAGS_CLOSED = 0b100,
-			};
 			enum SeekPlace
 			{
 				SEEKPLACE_CUR,
 				SEEKPLACE_BEG,
 				SEEKPLACE_END,
+			};
+			enum Flags
+			{
+				//FLAGS_REACHED_EOF = 0b1,
+				FLAGS_ALLOW_WRITE = 0b10,
+				FLAGS_CLOSED = 0b100,
 			};
 		public:
 			FileHandle() = default;
@@ -56,6 +56,7 @@ namespace obos
 			/// <returns>Whether the file could be read (true) or not (false). If it fails, use GetLastError for an error code.</returns>
 			bool Read(char* data, size_t nToRead, bool peek = false);
 
+			// TODO: Add a Write syscall when Write is implemented.
 			bool Write(); // Not implemented.
 
 			/// <summary>
