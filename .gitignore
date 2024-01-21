@@ -17,3 +17,5 @@
 /scripts/copy_files_to_disk.bat
 /bck
 /disk.img
+/scripts/mount_disk_image.sh
+/scripts/umount_disk_image.sh
