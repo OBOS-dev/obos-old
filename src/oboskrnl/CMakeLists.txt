@@ -30,13 +30,13 @@ target_compile_options(oboskrnl
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Werror>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-ffreestanding>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-nostdlib>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-rtti>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-exceptions>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-missing-field-initializers>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-error=implicit-fallthrough>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-Wno-error=array-bounds>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-use-cxa-atexit>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-use-cxa-atexit>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=gnu++20>
 	PRIVATE $<$<COMPILE_LANGUAGE:C>:${TARGET_COMPILE_OPTIONS_C}>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:${TARGET_COMPILE_OPTIONS_CPP}>
@@ -45,7 +45,6 @@ target_compile_options(oboskrnl
 
 target_link_options(oboskrnl
 	PUBLIC "-T" PUBLIC "${LINKER_SCRIPT}"
-	PUBLIC "-ffreestanding"
 	PUBLIC "-nostdlib"
 	PUBLIC ${TARGET_LINKER_OPTIONS}
 )

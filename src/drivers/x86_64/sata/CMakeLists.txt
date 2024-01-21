@@ -6,8 +6,8 @@ add_executable(sataDriver "main.cpp" "../../generic/common/new.cpp" "command.cpp
 
 target_compile_options(sataDriver
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-use-cxa-atexit>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-rtti>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-use-cxa-atexit>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-nostdlib>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-exceptions>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-ffreestanding>

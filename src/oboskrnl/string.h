@@ -45,8 +45,7 @@ namespace obos
             OBOS_EXPORT char* data() const { return m_str; }
 
             OBOS_EXPORT size_t length() const { return m_len; }
-
-            OBOS_EXPORT size_t shrink(size_t newSize);
+            OBOS_EXPORT size_t resize(size_t newSize);
 
             OBOS_EXPORT void erase();
 

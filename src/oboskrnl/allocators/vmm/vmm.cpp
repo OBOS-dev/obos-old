@@ -182,7 +182,7 @@ namespace obos
 			return ret;
 		}
 
-		void* VirtualAllocator::Memcpy(void* remoteDest, void* localSrc, size_t size)
+		void* VirtualAllocator::Memcpy(void* remoteDest, const void* localSrc, size_t size)
 		{
 			if (!m_pageSize)
 				m_pageSize = _Impl_GetPageSize();

@@ -197,7 +197,8 @@ namespace obos
 			if (currentThread)
 			{
 				currentThread->lastTimePreempted = g_timerTicks;
-				currentThread->status |= THREAD_STATUS_CAN_RUN;
+				if (!(currentThread->status & THREAD_STATUS_DEAD))
+					currentThread->status |= THREAD_STATUS_CAN_RUN;
 				currentThread->status &= ~THREAD_STATUS_RUNNING;
 				currentThread->affinity = currentThread->ogAffinity;
 			}

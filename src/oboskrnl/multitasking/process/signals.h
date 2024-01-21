@@ -26,7 +26,7 @@ namespace obos
             SIGUDOC,
             SIGUEXC,
 
-            SIGMAX = SIGUDOC,
+            SIGMAX = SIGUEXC,
             INVALID_SIGNAL,
         };
 

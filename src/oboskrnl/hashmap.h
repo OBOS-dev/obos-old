@@ -217,6 +217,7 @@ namespace obos
                     currentBucket->firstChain = currentChain->next;
                 if (currentBucket->lastChain == currentChain)
                     currentBucket->lastChain = currentChain->prev;
+                currentBucket->nChains--;
 
                 if (currentNode->referencingNode->next)
                     currentNode->referencingNode->next->prev = currentNode->referencingNode->prev;

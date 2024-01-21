@@ -59,5 +59,21 @@ namespace obos
 		/// <param name="handle">The handle value to retrieve.</param>
 		/// <returns>The type of thehandle on success, or ProcessHandleType::INVALID on failure.</returns>
 		ProcessHandleType ProcessGetHandleType(void* proc, user_handle handle);
+
+		/// <summary>
+		/// Syscall Number: 24<para></para>
+		/// Frees a handle. After this function is called on a handle, the handle can no longer be used for any purpose.
+		/// You should call this function after calling Syscall*CloseHandle.
+		/// </summary>
+		/// <code>uint64_t thrHandle = SyscallMakeThreadHandle();</code>
+		/// <code>SyscallCreateThread(thrHandle, 0,0,ThreadEntry,0, nullptr, false);</code>
+		/// <code>// Do stuff with the handle.</code>
+		/// <code>SyscallThreadCloseHandle(thrHandle);</code>
+		/// <code>SyscallInvalidateHandle(thrHandle);</code>
+		/// 
+		/// <param name="syscall">Only here because of the syscall abi on OBOS x86-64</param>
+		/// <param name="handle">The handle to free. This is a pointer because of the syscall abi on OBOS x86-64, when 'syscall'ing, you just pass a user_handle.</param>
+		/// <returns>Whether the handle was freed properly (true) or false on failure.</returns>
+		bool SyscallInvalidateHandle(uint64_t syscall, user_handle* handle);
 	}
 }

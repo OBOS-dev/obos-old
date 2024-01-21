@@ -54,7 +54,7 @@ namespace obos
 		extern Process::ProcessList g_processes;
 		Process* CreateProcess(bool isUsermode);
 		// If process is the current thread's process, this function will not return.
-		bool TerminateProcess(Process* process);
+		bool TerminateProcess(Process* process, bool isCurrentProcess = false);
 		bool GracefullyTerminateProcess(Process* process);
 	}
 }

@@ -114,7 +114,7 @@ namespace obos
 		/// <param name="size">The amount of bytes to copy.</param>
 		/// <param name="status">(out) The function's status (enum MemcpyStatus)</param>
 		/// <returns>remoteDest on success, otherwise nullptr.</returns>
-		void* _Impl_Memcpy(process::Process* proc, void* remoteDest, void* localSrc, size_t size, uint32_t* status);
+		void* _Impl_Memcpy(process::Process* proc, void* remoteDest, const void* localSrc, size_t size, uint32_t* status);
 
 		/// <summary>
 		/// Frees the user process's address space.

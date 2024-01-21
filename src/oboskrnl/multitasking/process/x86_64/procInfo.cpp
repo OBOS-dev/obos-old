@@ -20,6 +20,9 @@
 
 #include <x86_64-utils/asm.h>
 
+#include <vfs/devManip/driveHandle.h>
+#include <vfs/fileManip/fileHandle.h>
+
 namespace obos
 {
 	extern void SetIST(void* rsp);
@@ -32,17 +35,11 @@ namespace obos
 		void setupContextInfo(procContextInfo* info)
 		{
 			uintptr_t flags = saveFlagsAndCLI();
-			memory::PageMap* currentPageMap = memory::getCurrentPageMap();
-			uintptr_t entry80000000 = (uintptr_t)currentPageMap->getL4PageMapEntryAt(0xffffffff80000000);
-			uintptr_t entryffff80000000_0 = (uintptr_t)currentPageMap->getL4PageMapEntryAt(0xffff800000000000);
-			memory::PageMap* newPageMap = (memory::PageMap*)memory::allocatePhysicalPage();
-			uintptr_t* pPageMap = (uintptr_t*)newPageMap;
-			utils::memzero(memory::mapPageTable(pPageMap), 4096);
-			memory::mapPageTable(pPageMap)[511] = entry80000000;
-			memory::mapPageTable(pPageMap)[memory::PageMap::addressToIndex(0xffff800000000000, 3)] = entryffff80000000_0;
-			memory::mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)newPageMap->getL4PageMapEntryAt(0xfffffffffffff000) & 0xFFFFFFFFFF000))
-				[memory::PageMap::addressToIndex(0xfffffffffffff000, 2)] = memory::s_pageDirectoryPhys | 3;
-			info->cr3 = newPageMap;
+			info->cr3 = (void*)memory::allocatePhysicalPage();
+			uintptr_t* newPageMap = memory::mapPageTable((uintptr_t*)info->cr3);
+			uintptr_t* pageMap = memory::mapPageTable((uintptr_t*)memory::getCurrentPageMap());
+			for (size_t pml4I = memory::PageMap::addressToIndex(0xffff'8000'0000'0000, 3); pml4I < 512; pml4I++)
+				newPageMap[pml4I] = pageMap[pml4I];
 			restorePreviousInterruptStatus(flags);
 		}
 		void freeProcessContext(procContextInfo* info)
@@ -53,18 +50,20 @@ namespace obos
 				auto &hnd_val = *(*iter).value;
 				switch (hnd_val.second)
 				{
-					// TODO: Implement freeing file/drive handles.
 				case obos::syscalls::ProcessHandleType::FILE_HANDLE:
+					delete (vfs::FileHandle*)hnd_val.first;
 					break;
 				case obos::syscalls::ProcessHandleType::DRIVE_HANDLE:
+					delete (vfs::DriveHandle*)hnd_val.first;
 					break;
 				case obos::syscalls::ProcessHandleType::THREAD_HANDLE:
-					delete ((thread::ThreadHandle*)hnd_val.first);
+					delete (thread::ThreadHandle*)hnd_val.first;
 					break;
 				default:
 					break;
 				}
 			}
+			info->handleTable.erase();
 		}
 		void switchToProcessContext(procContextInfo* info)
 		{
@@ -82,6 +81,10 @@ namespace obos
 			thread->context.frame.rdi = (uintptr_t)par1;
 			thread->context.frame.rsi = (uintptr_t)par2;
 			thread->context.frame.rsp =            rsp;
+			thread->context.frame.cs = 0x08;
+			thread->context.frame.ss = 0x10;
+			thread->context.frame.ds = 0x10;
+			thread->context.frame.rflags = getEflags();
 			thread::switchToThreadImpl(&thread->context, thread);
 			// Should never get hit, as switchToThreadImpl on x86_64 is [[noreturn]].
 			while(1);

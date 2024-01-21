@@ -5,13 +5,20 @@
 */
 
 #include <int.h>
+#include <error.h>
 #include <hashmap.h>
 
 #include <arch/x86_64/syscall/handle.h>
+#include <arch/x86_64/syscall/verify_pars.h>
 
 #include <multitasking/process/process.h>
 
 #include <multitasking/cpu_local.h>
+
+#include <multitasking/threadAPI/thrHandle.h>
+
+#include <vfs/devManip/driveHandle.h>
+#include <vfs/fileManip/fileHandle.h>
 
 namespace obos
 {
@@ -78,6 +85,39 @@ namespace obos
 			process::Process* proc = (process::Process*)_proc;
 			auto& handleTable = proc->context.handleTable;
 			return handleTable.at(handle).second;
+		}
+
+		bool SyscallInvalidateHandle(uint64_t, user_handle* _handle)
+		{
+			if (!canAccessUserMemory(_handle, sizeof(*_handle), false))
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return false;
+			}
+			auto handle = *_handle;
+			if (!ProcessVerifyHandle(nullptr, handle))
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return false;
+			}
+			auto type = ProcessGetHandleType(nullptr, handle);
+			void* val = ProcessGetHandleObject(nullptr, handle);
+			switch (type)
+			{
+			case obos::syscalls::ProcessHandleType::FILE_HANDLE:
+				delete (vfs::FileHandle*)val;
+				break;
+			case obos::syscalls::ProcessHandleType::DRIVE_HANDLE:
+				delete (vfs::DriveHandle*)val;
+				break;
+			case obos::syscalls::ProcessHandleType::THREAD_HANDLE:
+				delete (thread::ThreadHandle*)val;
+				break;
+			default:
+				break;
+			}
+			ProcessReleaseHandle(nullptr, handle);
+			return true;
 		}
 	}
 }

@@ -167,7 +167,7 @@ namespace obos
 		if (whileInScheduler)
 			tid = pid = (uint32_t)-1;
 		// If in user mode...
-		if (frame->cs != 0x08 && frame->ds != 0x10)
+		if (frame->cs != 0x08 && frame->ss != 0x10)
 		{
 			constexpr const process::signals intToSignal[] = {
 				process::signals::SIGME         ,process::signals::SIGDG         ,process::signals::INVALID_SIGNAL,process::signals::         SIGDG,

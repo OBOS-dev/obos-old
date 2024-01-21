@@ -6,10 +6,6 @@
 
 // __ALL__ code in this file must be platform-independent.
 
-#if defined(__x86_64__) || defined(_WIN64)
-#include <limine.h>
-#endif
-
 #include <int.h>
 #include <klog.h>
 #include <memory_manipulation.h>
@@ -35,6 +31,10 @@
 #include <vfs/vfsNode.h>
 
 #include <boot/cfg.h>
+
+#if defined(__x86_64__) || defined(_WIN64)
+#include <multitasking/process/x86_64/loader/elf.h>
+#endif
 
 #define LITERAL(str) (char*)(str), sizeof((str))
 
@@ -220,51 +220,36 @@ namespace obos
 				part.Close();
 			}
 		}
-		// Test the VFS on the FAT32 file.
-		[[maybe_unused]]
-		auto vfsTestOnPath = [](uint32_t mountPoint, const char* _path)
-			{
-				char* path = new char[logger::sprintf(nullptr, "%d:/%s", mountPoint, _path) + 1];
-				logger::sprintf(path, "%d:/%s", mountPoint, _path);
-				vfs::FileHandle file;
-				if (!file.Open(path))
-				{
-					logger::log("Open(%s): GetLastError: %d\n", path, GetLastError());
-					delete[] path;
-					return false;
-				}
-				size_t filesize = file.GetFileSize();
-				char* data = new char[filesize + 1];
-				utils::memzero(data, filesize + 1);
-				if (!file.Read(data, filesize))
-				{
-					logger::log("Read(%s): GetLastError: %d\n", path, GetLastError());
-					delete[] path;
-					return false;
-				}
-				file.Close();
-				logger::log("Successfully read %s. File contents:\n", path);
-				logger::printf("%s\n", data);
-				delete[] data;
-				delete[] path;
-				return true;
-			};
-		[[maybe_unused]] uint32_t id = 0xffffffff;
-		for (auto& mountPoint : vfs::g_mountPoints)
-		{
-			if (!vfs::SearchForNode(mountPoint->children.head, nullptr, [](vfs::DirectoryEntry* ent, void*)->bool {
-				return utils::strcmp(ent->path, "test.txt");
-				}))
-				continue;
-			id = mountPoint->id;
-			break;
-		}
-		if (id == 0xffffffff)
-			goto end;
-		vfsTestOnPath(id, "test.txt");
-		vfsTestOnPath(id, "dir/other_test.txt");
-		vfsTestOnPath(id, "dir/subdirectory/you_guessed_it_another_test.txt");
-	[[maybe_unused]] end:
+		if (!kcfg.GetElement("INIT_PROGRAM"))
+			logger::panic(nullptr, "Missing required property \"INIT_PROGRAM\" in 0:/boot.cfg.\n");
+		const utils::String &initProgramPath = kcfg.GetElement("INIT_PROGRAM")->string;
+		logger::log("%s: Attempting load of init program '%S'.\n", __func__, initProgramPath);
+		vfs::FileHandle handle;
+		if (!handle.Open(initProgramPath.data(), vfs::FileHandle::OPTIONS_READ_ONLY))
+			logger::panic(nullptr, "%s: Open(): Could not find init program '%S'. GetLastError: %d.\n", __func__, initProgramPath, GetLastError());
+		utils::String initProgramContents;
+		initProgramContents.resize(handle.GetFileSize());
+		if (!handle.Read(initProgramContents.data(), initProgramContents.length(), false))
+			logger::panic(nullptr, "%s: While calling Read(): Could not load init program '%S'. GetLastError: %d.\n", __func__, initProgramPath, GetLastError());
+		process::Process* proc = process::CreateProcess(true);
+		uintptr_t entry = 0;
+		uintptr_t baseAddress = 0;
+		// Loading programs into memory is unfortunately arch-specific.
+#if defined(__x86_64__) || defined(_WIN64)
+		using namespace process::loader;
+		if (LoadElfFile((byte*)initProgramContents.data(), initProgramContents.length(), entry, baseAddress, proc->vallocator, false) != 0)
+			logger::panic(nullptr, "%s: While calling LoadElfFile(), Could not load '%S'. GetLastError: %d.\n", __func__, initProgramPath, GetLastError());
+#endif
+		thread::ThreadHandle initProgramMainThread;
+		initProgramMainThread.CreateThread(
+			4,
+			0x10000,
+			(void(*)(uintptr_t))entry,
+			0,
+			thread::g_defaultAffinity,
+			proc
+		);
+		initProgramMainThread.CloseHandle();
 		logger::log("%s: Done early-kernel boot process!\n", __func__);
 		thread::ExitThread(0);
 	}

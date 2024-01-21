@@ -6,8 +6,8 @@ add_executable(gptDriver "main.cpp" "../common/new.cpp")
 
 target_compile_options(gptDriver
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-use-cxa-atexit>
-	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-rtti>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-use-cxa-atexit>
+	PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-nostdlib>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-exceptions>
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-ffreestanding>

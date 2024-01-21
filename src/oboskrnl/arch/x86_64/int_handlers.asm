@@ -167,11 +167,7 @@ ISR_NOERRCODE 28
 ISR_ERRCODE   29
 ISR_ERRCODE   30
 ISR_NOERRCODE 31
-%rep 18
-ISR_NOERRCODE current_isr
-%endrep
-%assign current_isr current_isr + 1
-%rep 205
+%rep 224
 ISR_NOERRCODE current_isr
 %endrep
 
@@ -216,47 +212,6 @@ isr_common_stub:
 	iretq
 
 extern _ZN4obos8syscalls14g_syscallTableE
-global isr50
-; (in) rdi: A pointer to a structure with the parameters.
-; (in) rax: The syscall number.
-; (out) rax: Lower 64 bits of the return value.
-; (out) rdx: Upper 64 bits of the return value.
-; Registers are preserved except for rax and rdx.
-isr50:
-	cld
-	pushaq_syscall
-	mov rbp, rsp
-
-	mov rax, [rsp+0x80]
-	mov rax, [_ZN4obos8syscalls14g_syscallTableE+rax*8]
-
-	swapgs
-
-	mov r15, cr4
-	test r15, (1<<21) ; cr4.SMAP[bit 21]
-	jz .jump
-	stac
-
-.jump:
-
-	test rax,rax
-	mov r15, 0xB16B00B1E5DEADBE
-	cmovz rax, r15
-	mov r15, 0xEF15B00B1E500000
-	cmovz rdx, r15
-	jz .finish
-
-	; Pass the syscall number into the syscall handler as the first parameter, and the argument pointer in the second.
-	mov rsi, rdi
-	mov rdi, [rsp+0x80]
-	call rax
-
-.finish:
-
-	swapgs
-	
-	popaq_syscall
-	iretq
 ; (in) rdi: A pointer to a structure with the parameters.
 ; (in) rax: The syscall number.
 ; (out) rax: Lower 64 bits of the return value.
@@ -271,12 +226,13 @@ syscall_instruction_handler:
 	swapgs
 	; r10 and r9 is the only register we are going to be using before saving all registers.
 	mov r10, rsp
-	; $RSP = GetCurrentCpuLocal()->currentThread->context.tssStackBottom + 0x4000
+	; $RSP = GetCurrentCpuLocalPtr()->currentThread->context.syscallStackBottom + 0x4000
 	rdgsbase r9
-	mov r9, [r9+0x10]
-	mov r9, [r9+0x98]
+ 	mov r9, [r9+0x10]
+	mov r9, [r9+0x370]
 	add r9, 0x4000
 	mov rsp, r9
+	sub rsp, 8
 
 .save:
 	pushaq_syscalli
@@ -293,7 +249,7 @@ syscall_instruction_handler:
 .check_kmode:
 	rdgsbase r10
 	mov r10, [r10+0x10]
-	mov r9, [r10+0x100]
+	mov r9, [r10+0x130]
 	cmp r9, 0x10
 	jne .call
 	; A kernel-mode thread can't syscall with the "syscall" instruction.
@@ -385,10 +341,10 @@ initialize_syscall_instruction:
 	; Jump to syscall_instruction_handler
 
 	mov rdi, IA32_STAR
-	mov rsi, 0x1B0000800000000 ; CS: 0x08, SS: 0x10, User CS: 0x1b, User SS: 0x23
+	mov rsi, 0x0013000800000000 ; CS: 0x08, SS: 0x10, User CS: 0x1b, User SS: 0x23
 	call _wrmsr
 	mov rdi, IA32_FSTAR
-	mov rsi, 0x40700 ; Clear IF,TF,AC, and DF
+	mov rsi, 0x43700 ; Clear IF,TF,AC, and DF
 	call _wrmsr
 	mov rdi, IA32_LSTAR
 	mov rsi, syscall_instruction_handler

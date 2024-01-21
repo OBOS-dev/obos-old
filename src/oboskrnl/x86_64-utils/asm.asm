@@ -349,3 +349,8 @@ _ZN4obos3bsrEo:
 	bsr rax, rsi
 .ret:
 	ret
+global _ZN4obos9getEflagsEv
+_ZN4obos9getEflagsEv:
+	pushfq
+	pop rax
+	ret

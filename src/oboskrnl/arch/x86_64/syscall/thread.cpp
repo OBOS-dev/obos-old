@@ -52,6 +52,9 @@ namespace obos
 			case 4:
 				bool_handler = SyscallResumeThread;
 				goto _bool_handler;
+			case 23:
+				bool_handler = SyscallThreadCloseHandle;
+				goto _bool_handler;
 			case 3:
 				bool_handler = SyscallPauseThread;
 			{
@@ -243,6 +246,17 @@ namespace obos
 			}
 			thread::ThreadHandle* handle = (thread::ThreadHandle*)ProcessGetHandleObject(nullptr, hnd);
 			return handle->GetThreadTID();
+		}
+
+		bool SyscallThreadCloseHandle(user_handle hnd)
+		{
+			if (!ProcessVerifyHandle(nullptr, hnd, ProcessHandleType::THREAD_HANDLE))
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return false;
+			}
+			thread::ThreadHandle* handle = (thread::ThreadHandle*)ProcessGetHandleObject(nullptr, hnd);
+			return handle->CloseHandle();
 		}
 
 		uint32_t GetCurrentTID()

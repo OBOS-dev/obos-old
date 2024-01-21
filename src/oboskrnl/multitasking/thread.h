@@ -35,7 +35,8 @@ namespace obos
 		{
 			THREAD_FLAGS_IN_SIGNAL               = 0x01,
 			THREAD_FLAGS_SINGLE_STEPPING         = 0x02,
-			THREAD_FLAGS_CALLING_BLOCK_CALLBACK = 0x04,
+			THREAD_FLAGS_CALLING_BLOCK_CALLBACK  = 0x04,
+			THREAD_FLAGS_IS_EXITING_PROCESS      = 0x08,
 		};
 		enum thrPriority
 		{

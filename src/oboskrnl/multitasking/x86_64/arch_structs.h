@@ -20,6 +20,7 @@ namespace obos
 			void* tssStackBottom;
 			interrupt_frame frame;
 			alignas(0x10) uint8_t fpuState[512];
+			void* syscallStackBottom;
 		};
 		struct cpu_local_arch
 		{

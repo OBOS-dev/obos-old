@@ -98,7 +98,7 @@ namespace obos
 			/// <param name="localSrc">The local source's address.</param>
 			/// <param name="size">The size of the buffer.</param>
 			/// <returns>remoteDest on success, or nullptr.</returns>
-			OBOS_EXPORT void* Memcpy(void* remoteDest, void* localSrc, size_t size);
+			OBOS_EXPORT void* Memcpy(void* remoteDest, const void* localSrc, size_t size);
 
 			OBOS_EXPORT bool IsUsermodeAllocator();
 

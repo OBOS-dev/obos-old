@@ -42,15 +42,20 @@ namespace obos
 
 			bool isUsermodeProgram = _proc ? _proc->isUsermode : false;
 
-			info->frame.cs = isUsermodeProgram ? 0x1b : 0x08;
-			info->frame.ds = isUsermodeProgram ? 0x23 : 0x10;
-			info->frame.ss = info->frame.ds;
+			info->frame.cs = isUsermodeProgram ? 0x23 : 0x08;
+			info->frame.ss = isUsermodeProgram ? 0x1b : 0x10;
+			info->frame.ds = info->frame.ss;
 
 			info->frame.rip = entry;
 			info->frame.rdi = userdata;
 			info->frame.rbp = 0;
 			if (entry != (uintptr_t)kmain_common)
-				info->frame.rsp = ((uintptr_t)vallocator->VirtualAlloc(nullptr, stackSize, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS)) + (stackSize - 8);
+			{
+				uintptr_t stackProtFlags = memory::PROT_NO_COW_ON_ALLOCATE;
+				if (isUsermodeProgram)
+					stackProtFlags |= memory::PROT_USER_MODE_ACCESS;
+				info->frame.rsp = ((uintptr_t)vallocator->VirtualAlloc(nullptr, stackSize, stackProtFlags)) + (stackSize - 8);
+			}
 			else
 			{
 				info->frame.rsp = ((uintptr_t)vallocator->VirtualAlloc((void*)0xFFFFFFFF90000000, stackSize, memory::PROT_NO_COW_ON_ALLOCATE)) + (stackSize - 8);
@@ -69,7 +74,6 @@ namespace obos
 				info->frame.rdi = (uintptr_t)utils::memcpy(new byte[procExecutableSize + 1], procExecutable, procExecutableSize);
 				info->frame.rsi = (uintptr_t)procExecutableSize;
 			}
-			*(uintptr_t*)info->frame.rsp = 0;
 			info->frame.rflags.setBit(x86_64_flags::RFLAGS_INTERRUPT_ENABLE | x86_64_flags::RFLAGS_CPUID);
 			asm volatile("fninit; fxsave (%0)" : : "r"(info->fpuState) : "memory");
 
@@ -79,10 +83,12 @@ namespace obos
 			stackInfo->addr = reinterpret_cast<void*>(info->frame.rsp - (stackSize - 8));
 
 			if(isUsermodeProgram)
-				info->frame.rflags.setBit(BIT(12) | BIT(13)); // IOPL=3
+				info->frame.rflags.setBit(x86_64_flags::RFLAGS_IOPL_3);
 
 			info->cr3 = _proc ? _proc->context.cr3 : memory::getCurrentPageMap();
-			info->tssStackBottom = vallocator->VirtualAlloc(nullptr, 0x4000, static_cast<uintptr_t>(isUsermodeProgram) * memory::PROT_USER_MODE_ACCESS | memory::PROT_NO_COW_ON_ALLOCATE);
+			info->tssStackBottom = vallocator->VirtualAlloc(nullptr, 0x4000, memory::PROT_NO_COW_ON_ALLOCATE);
+			if (isUsermodeProgram)
+				info->syscallStackBottom = vallocator->VirtualAlloc(nullptr, 0x4000, memory::PROT_NO_COW_ON_ALLOCATE); // Do not set user mode, or you'll page fault (SMAP).
 		}
 		void freeThreadStackInfo(void* _stackInfo, memory::VirtualAllocator* vallocator)
 		{

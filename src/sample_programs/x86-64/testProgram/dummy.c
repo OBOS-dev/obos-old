@@ -1,0 +1,1 @@
+// The only purpose of this file is so cmake doesn't complain about link commands and stuff.

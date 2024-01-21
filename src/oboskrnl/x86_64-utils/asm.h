@@ -62,6 +62,8 @@ namespace obos
 	OBOS_EXPORT uint64_t getDR6(void);
 	OBOS_EXPORT uint64_t getDR7(void);
 
+	OBOS_EXPORT uint64_t getEflags(void);
+
 	OBOS_EXPORT void setDR0(uint64_t val);
 	OBOS_EXPORT void setDR1(uint64_t val);
 	OBOS_EXPORT void setDR2(uint64_t val);

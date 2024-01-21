@@ -377,8 +377,6 @@ namespace obos
 			if (currentThread->priorityList->tail == currentThread)
 				currentThread->priorityList->tail = currentThread->prev_run;
 			currentThread->priorityList->size--;
-			memory::VirtualAllocator* valloc = &((process::Process*)currentThread->owner)->vallocator;
-			freeThreadStackInfo((void*)&currentThread->stackInfo, valloc);
 			if(!currentThread->references)
 			{
 				if (currentThread->prev_list)
@@ -393,13 +391,13 @@ namespace obos
 				if (!currentThread->threadList->size)
 				{
 					auto proc = (process::Process*)currentThread->owner;
-					delete currentThread;
-					// TerminateProcess only uses ExitThread if the current thread's status is not THREAD_STATUS_DEAD, otherwise it starts the timer and calls the scheduler.
-					process::TerminateProcess(proc);
+					process::TerminateProcess(proc, true);
 				}
 			}
+			memory::VirtualAllocator* valloc = &((process::Process*)currentThread->owner)->vallocator;
+			freeThreadStackInfo((void*)&currentThread->stackInfo, valloc);
 			startTimer(0);
-			schedule();
+			callScheduler(false);
 			return false;
 		}
 		uint32_t GetTID()

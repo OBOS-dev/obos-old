@@ -57,15 +57,19 @@ namespace obos
 		static bool ExitProcessCallback(thread::Thread* thr, Process* process)
 		{
 			process->vallocator.FreeUserProcessAddressSpace();
-			if (thr->status == thread::THREAD_STATUS_DEAD)
+			bool isThrDead = thr->status == thread::THREAD_STATUS_DEAD;
+			if (thr->flags & thread::THREAD_FLAGS_IS_EXITING_PROCESS)
+				delete thr;
+			if (isThrDead)
 			{
 				thread::startTimer(0);
-				// schedule in this case is noreturn.
-				thread::schedule();
+				thread::callScheduler(false); // noreturn.
 			}
 			thread::ExitThread(0);
+			while (1);
+			return false;
 		}
-		bool TerminateProcess(Process *process)
+		bool TerminateProcess(Process *process, bool isCurrentProcess)
 		{
 			bool found = false;
 			for (auto node = g_processes.head; node; )
@@ -95,10 +99,13 @@ namespace obos
 			freeProcessContext(&process->context);
 			thread::Thread* currentThread = (thread::Thread*)thread::GetCurrentCpuLocalPtr()->currentThread;
 			// Freeing the address space should comes last.
-			if (currentThread->owner != process)
+			if (currentThread->owner != process && !isCurrentProcess /* sometimes currentThread->owner can be nullptr because of ExitThread calling this function. */)
 				process->vallocator.FreeUserProcessAddressSpace();
 			else
+			{
+				currentThread->flags |= thread::THREAD_FLAGS_IS_EXITING_PROCESS;
 				putThreadAtFunctionWithCPUTempStack(currentThread, (void*)ExitProcessCallback, currentThread, process);
+			}
 			return true; // Only reached if currentThread->owner != process
 		}
 		bool GracefullyTerminateProcess(Process *process)

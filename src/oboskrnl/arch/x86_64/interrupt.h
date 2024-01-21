@@ -25,6 +25,7 @@ namespace obos
 			RFLAGS_INTERRUPT_ENABLE = BITFIELD_FROM_BIT(9),
 			RFLAGS_DIRECTION = BITFIELD_FROM_BIT(10),
 			RFLAGS_OVERFLOW = BITFIELD_FROM_BIT(11),
+			RFLAGS_IOPL_3 = BITFIELD_FROM_BIT(12) | BITFIELD_FROM_BIT(13),
 			RFLAGS_NESTED_TASK = BITFIELD_FROM_BIT(14),
 			RFLAGS_RESUME = BITFIELD_FROM_BIT(16),
 			RFLAGS_VIRTUAL8086 = BITFIELD_FROM_BIT(17),
@@ -51,7 +52,7 @@ namespace obos
 		}
 		bool getBit(uintptr_t bitmask) const
 		{
-			return m_bitfield & bitmask;
+			return (m_bitfield & bitmask) == bitmask;
 		}
 
 		bool operator[](uintptr_t bitmask) const

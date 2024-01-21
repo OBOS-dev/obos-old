@@ -20,7 +20,7 @@ namespace obos
 	{
 		namespace loader
 		{
-			static uint32_t load(byte* startAddress, size_t, uintptr_t& baseAddress, memory::VirtualAllocator& allocator, bool lazyLoad)
+			static uint32_t load(const byte* startAddress, size_t, uintptr_t& baseAddress, memory::VirtualAllocator& allocator, bool lazyLoad)
 			{
 				baseAddress = 0;
 				Elf64_Ehdr* elfHeader = (Elf64_Ehdr*)startAddress;
@@ -44,7 +44,11 @@ namespace obos
 						uint32_t nPages = programHeader->p_memsz >> 12;
 						if ((programHeader->p_memsz % 4096) != 0)
 							nPages++;
-						byte* addr = (byte*)allocator.VirtualAlloc((void*)programHeader->p_vaddr, (size_t)nPages * 4096, 0);
+						byte* addr = (byte*)allocator.VirtualAlloc(
+							(void*)programHeader->p_vaddr, 
+							(size_t)nPages * 4096,
+							/* allocator.Memcpy requires user mode access to be enabled for the pages if allocator.IsUsermodeAllocator() is true, otherwise it will fail. */
+							(uintptr_t)allocator.IsUsermodeAllocator() * memory::PROT_USER_MODE_ACCESS);
 						if (programHeader->p_filesz)
 						{
 							uintptr_t offset = programHeader->p_vaddr - (uintptr_t)addr;
@@ -59,7 +63,7 @@ namespace obos
 				return OBOS_SUCCESS;
 			}
 
-			uint32_t LoadElfFile(byte* startAddress, size_t size, uintptr_t& entry, uintptr_t& baseAddress, memory::VirtualAllocator& allocator, bool lazyLoad)
+			uint32_t LoadElfFile(const byte* startAddress, size_t size, uintptr_t& entry, uintptr_t& baseAddress, memory::VirtualAllocator& allocator, bool lazyLoad)
 			{
 				uint32_t err = CheckElfFile(startAddress, size, true);
 				if (err != 0)
@@ -68,7 +72,7 @@ namespace obos
 				entry = elfHeader->e_entry;
 				return load(startAddress, size, baseAddress, allocator, lazyLoad);
 			}
-			uint32_t CheckElfFile(byte* startAddress, size_t size, bool setLastError)
+			uint32_t CheckElfFile(const byte* startAddress, size_t size, bool setLastError)
 			{
 				if (size <= sizeof(Elf64_Ehdr))
 				{

@@ -159,6 +159,8 @@ loadGDT:
 	
 	mov ax, 0x28
 	ltr ax
+	xor ax,ax
+	lldt ax
 
 	pop rax
 	push 0x8

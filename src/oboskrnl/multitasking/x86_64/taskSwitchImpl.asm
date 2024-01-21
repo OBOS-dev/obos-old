@@ -65,8 +65,8 @@ _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoEPNS0_6ThreadE:
 	add rdi, 16
 
 ;	Restore all registers in the interrupt frame
-	mov rax, [rdi]
-	mov ss, ax
+	; mov rax, [rdi]
+	; mov ss, ax
 
 	add rdi, 8
 
@@ -86,11 +86,12 @@ _ZN4obos6thread25callBlockCallbackOnThreadEPNS0_14taskSwitchInfoEPFbPvS3_ES3_S3_
 	mov rsp, [rdi+8]
 	add rsp, 0x4000
 	
-	mov rax, cr3
-	push rax
-
+	mov r10, cr3
+	
 	mov rax, [rdi]
 	mov cr3, rax
+	
+	push r10
 
 	mov r8, rsi
 

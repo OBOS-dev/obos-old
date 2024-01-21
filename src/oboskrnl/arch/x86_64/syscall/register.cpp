@@ -10,6 +10,8 @@
 
 #include <arch/x86_64/syscall/register.h>
 #include <arch/x86_64/syscall/thread.h>
+#include <arch/x86_64/syscall/file.h>
+#include <arch/x86_64/syscall/handle.h>
 
 namespace obos
 {
@@ -18,8 +20,10 @@ namespace obos
 		uintptr_t g_syscallTable[g_syscallTableLimit + 1];
 		void RegisterSyscalls()
 		{
-			uint16_t currentSyscall = 0;
-			for (; currentSyscall < 13; RegisterSyscall(currentSyscall++, (uintptr_t)ThreadSyscallHandler));
+			for (uint16_t currentSyscall = 0; currentSyscall < 13; RegisterSyscall(currentSyscall++, (uintptr_t)ThreadSyscallHandler));
+			for (uint16_t currentSyscall = 13; currentSyscall < 23; RegisterSyscall(currentSyscall++, (uintptr_t)FileHandleSyscallHandler));
+			RegisterSyscall(23, (uintptr_t)ThreadSyscallHandler);
+			RegisterSyscall(24, (uintptr_t)SyscallInvalidateHandle);
 		}
 		void RegisterSyscall(uint16_t n, uintptr_t func)
 		{

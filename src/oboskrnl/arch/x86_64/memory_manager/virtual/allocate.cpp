@@ -120,7 +120,7 @@ namespace obos
 			return _pageMap;
 		}
 
-		static bool PagesAllocated(void* _base, size_t nPages, PageMap* pageMap)
+		static bool PagesAllocated(const void* _base, size_t nPages, PageMap* pageMap)
 		{
 			uintptr_t base = (uintptr_t)_base & ~0xfff;
 			for (uintptr_t addr = base; addr != (base + nPages * 4096); addr += 4096)
@@ -157,6 +157,8 @@ namespace obos
 				ret |= PROT_IS_PRESENT;
 			else
 				return 0;
+			if (entry & ((uintptr_t)1 << 9))
+				return ret | ((entry >> 52) & 0b1111111);
 			if (!(entry & ((uintptr_t)1 << 1)))
 				ret |= PROT_READ_ONLY;
 			if (entry & ((uintptr_t)1 << 4))
@@ -359,7 +361,7 @@ namespace obos
 				uintptr_t entry = _pageMap[PageMap::addressToIndex(addr, 0)];
 				uintptr_t newEntry = 0;
 				if (entry & ((uintptr_t)1 << 9))
-					newEntry = 1 | (_flags << 52) | ((uintptr_t)1 << 9);
+					newEntry = 1 | (_flags << 52) | ((uintptr_t)1 << 9) | ((uintptr_t)1 << 63);
 				else
 					newEntry = (entry & 0xFFFFFFFFFF000) | DecodeProtectionFlags(_flags) | 1;
 				_pageMap = allocatePagingStructures(addr, pageMap, DecodeProtectionFlags(_flags) | 1);
@@ -432,7 +434,7 @@ namespace obos
 			invlpg(addr);
 			restorePreviousInterruptStatus(eflags);
 		}
-		void* _Impl_Memcpy(process::Process* proc, void* remoteDest, void* localSrc, size_t size, uint32_t* status)
+		void* _Impl_Memcpy(process::Process* proc, void* remoteDest, const void* localSrc, size_t size, uint32_t* status)
 		{
 			pageMapTuple tuple = GetPageMapFromProcess(proc);
 			bool& isUserProcess = tuple.isUserMode;
@@ -455,7 +457,7 @@ namespace obos
 					*status = MEMCPY_DESTINATION_PFAULT;
 					return nullptr;
 				}
-				if (!(flags & PROT_IS_PRESENT) || !(flags & PROT_READ_ONLY) || (!(flags & PROT_USER_MODE_ACCESS) && isUserProcess))
+				if (!(flags & PROT_IS_PRESENT) && flags & PROT_READ_ONLY && (!(flags & PROT_USER_MODE_ACCESS) && isUserProcess))
 				{
 					*status = MEMCPY_DESTINATION_PFAULT;
 					return nullptr;
@@ -517,6 +519,8 @@ namespace obos
 			{
 				for (; index < nToIterate; index++)
 				{
+					if (!((mapPageTable(currentPM)[index]) & 1))
+						continue;
 					indices[level] = index;
 					if (level == 0)
 					{
@@ -525,10 +529,10 @@ namespace obos
 						virt |= (indices[2] << 30);
 						virt |= (indices[1] << 21);
 						virt |= (indices[0] << 12);
-						callback(headPM, virt, currentPM[index]);
+						callback(headPM, virt, (mapPageTable(currentPM)[index]));
 						continue;
 					}
-					IteratePages(headPM, (uintptr_t*)(currentPM[index] & 0xFFFFFFFFFF000), level - 1, end, callback, indices);
+					IteratePages(headPM, (uintptr_t*)((mapPageTable(currentPM)[index]) & 0xFFFFFFFFFF000), level - 1, end, callback, indices);
 				}
 			}
 		}
@@ -540,7 +544,7 @@ namespace obos
 			auto[_pageMap, isUserProcess] = GetPageMapFromProcess(proc);
 			if (!isUserProcess)
 				return false;
-			uintptr_t* pml4 = mapPageTable(_pageMap->getPageMap());
+			uintptr_t* pml4 = _pageMap->getPageMap();
 			[[maybe_unused]] uintptr_t start = 0, end = 0x7FFFFFFFFFFF;
 			// Iterate over the page tables, going into them if present == true.
 			uintptr_t indices[4];
@@ -551,6 +555,7 @@ namespace obos
 				uintptr_t _pml2Phys = (uintptr_t)_pm->getL2PageMapEntryAt(virt) & 0xFFFFFFFFFF000;
 				if (!(entry & ((uintptr_t)1 << 9)))
 					freePhysicalPage(entry & 0xFFFFFFFFFF000);
+				mapPageTable((uintptr_t*)_pml2Phys)[PageMap::addressToIndex(virt, 0)] = 0;
 				freePagingStructures(mapPageTable((uintptr_t*)_pml2Phys), _pml2Phys, _pm, virt);
 			}, indices);
 			return true;

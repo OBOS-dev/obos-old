@@ -16,6 +16,12 @@
 #include <driverInterface/struct.h>
 #include <driverInterface/load.h>
 
+#include <x86_64-utils/asm.h>
+
+#include <arch/interrupt.h>
+
+#define CR4_SMAP ((uintptr_t)1<<21)
+
 namespace obos
 {
 	extern volatile limine_module_request module_request;
@@ -114,6 +120,8 @@ namespace obos
 		void stackTrace(void* parameter)
 		{
 			memory::VirtualAllocator valloc{ nullptr };
+			if (getCR4() & CR4_SMAP)
+				restorePreviousInterruptStatus(getEflags() | x86_64_flags::RFLAGS_ALIGN_CHECK); // Ensure that we won't page fault while accessing a user stack
 			volatile stack_frame* frame = parameter ? (volatile stack_frame*)parameter : (volatile stack_frame*)__builtin_frame_address(0);
 			{
 				uintptr_t attrib = 0;

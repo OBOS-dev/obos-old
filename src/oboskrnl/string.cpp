@@ -118,18 +118,24 @@ namespace obos
             utils::memcpy(m_str + m_len, str, len);
             m_len += len;
         }
-        size_t String::shrink(size_t newSize)
+        size_t String::resize(size_t newSize)
         {
-            if (newSize > m_len)
-                return 0;
-            m_str = (char*)krealloc(m_str, newSize);
+            if (!newSize)
+            {
+                kfree(m_str);
+                m_str = nullptr;
+            }
+            else
+            {
+                m_str = (char*)krealloc(m_str, newSize);
+            }
             size_t ret = m_len;
             m_len = newSize;
             return ret;
         }
         void String::erase()
         {
-            shrink(0);
+            resize(0);
         }
     }
 }

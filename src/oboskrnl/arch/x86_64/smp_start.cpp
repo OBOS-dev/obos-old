@@ -73,10 +73,10 @@ namespace obos
 				uint64_t baseHigh;
 			} __attribute__((packed));
 			info->arch_specific.gdt[0] = 0;
-			info->arch_specific.gdt[1] = 0x00209A0000000000;
-			info->arch_specific.gdt[2] = 0x0000920000000000;
-			info->arch_specific.gdt[3] = 0x00affb000000ffff;
-			info->arch_specific.gdt[4] = 0x00aff3000000ffff;
+			info->arch_specific.gdt[1] = 0x00209A0000000000; // Kernel mode code selector
+			info->arch_specific.gdt[2] = 0x0000920000000000; // Kernel mode data selector
+			info->arch_specific.gdt[3] = 0x00aff3000000ffff; // User mode **data** selector
+			info->arch_specific.gdt[4] = 0x00affb000000ffff; // User mode **code** selector
 			gdtEntry* tss = (gdtEntry*)&info->arch_specific.gdt[5];
 			uintptr_t base = (uintptr_t)&info->arch_specific.tss;
 			tss->access = 0x89;

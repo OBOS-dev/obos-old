@@ -10,10 +10,10 @@ GDT:
 	dq 0x00209A0000000000
 ; Data segment.
 	dq 0x0000920000000000
+; User mode data segment
+	dq 0x00aff3000000ffff
 ; User mode code segment
 	dq 0x00affb000000ffff
-; User mode data segment
-	dq 0x00aff3000000ffff 
 align 1
 TSS:
 	dq 0,0
