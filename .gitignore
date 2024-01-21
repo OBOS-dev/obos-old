@@ -19,3 +19,4 @@
 /disk.img
 /scripts/mount_disk_image.sh
 /scripts/umount_disk_image.sh
+/documentation/doxygen
