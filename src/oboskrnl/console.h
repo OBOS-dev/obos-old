@@ -107,12 +107,21 @@ namespace obos
 		/// <param name="framebuffer">A pointer to where the framebuffer should be stored.</param>
 		OBOS_EXPORT void GetFramebuffer(con_framebuffer* framebuffer) const;
 		/// <summary>
+		/// Sets the back buffer to draw to.
+		/// </summary>
+		/// <param name="buffer">The new back buffer.</param>
+		OBOS_EXPORT void SetBackBuffer(const con_framebuffer& buffer);
+		/// <summary>
+		/// Gets the back buffer.
+		/// </summary>
+		/// <param name="buffer">A pointer to where the back buffer should be stored.</param>
+		/// <returns></returns>
+		OBOS_EXPORT void GetBackBuffer(con_framebuffer* buffer) const;
+		/// <summary>
 		/// Retrieves the console bounds.
 		/// </summary>
 		/// <param name="horizontal">A pointer to where the horizontal bounds should be stored.</param>
 		/// <param name="vertical">A pointer to where the vertical bounds should be stored.</param>
-		OBOS_EXPORT void SetBackBuffer(const con_framebuffer& buffer);
-		OBOS_EXPORT void GetBackBuffer(con_framebuffer* buffer) const;
 		OBOS_EXPORT void GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical) const;
 
 		OBOS_EXPORT void Unlock() { m_lock.Unlock(); };

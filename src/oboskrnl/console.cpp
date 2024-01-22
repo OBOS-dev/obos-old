@@ -15,6 +15,7 @@
 #include <multitasking/arch.h>
 
 #include <allocators/liballoc.h>
+#include <allocators/vmm/vmm.h>
 
 namespace obos
 {	
@@ -33,7 +34,14 @@ namespace obos
 		m_nCharsVertical = output.height / 16;
 		m_lock.CanUseMultitasking(lockCanUseMultitasking);
 		if (CanAllocateMemory())
+		{
 			m_modificationArray = new uint32_t[m_nCharsVertical];
+			m_backbuffer.height = output.height;
+			m_backbuffer.width = output.width;
+			m_backbuffer.pitch = m_backbuffer.width * 4;
+			m_backbuffer.addr = (uint32_t*)memory::VirtualAllocator{ nullptr }.VirtualAlloc(nullptr, m_backbuffer.width * m_backbuffer.height * sizeof(uint32_t), memory::PROT_NO_COW_ON_ALLOCATE);
+			SetDrawBuffer(true);
+		}
 	}
 
 	void Console::ConsoleOutput(const char* string)
@@ -96,12 +104,14 @@ namespace obos
 		if (clearConsole)
 		{
 			utils::dwMemset(m_drawingBuffer->addr, backgroundColour, static_cast<size_t>(m_drawingBuffer->height) * m_drawingBuffer->width);
-			utils::dwMemset(m_modificationArray, 0xffffffff, m_nCharsVertical);
+			if (m_modificationArray)
+				utils::dwMemset(m_modificationArray, 0xffffffff, m_nCharsVertical);
 		}
 		if (backgroundColour != m_backgroundColour && !clearConsole)
 		{
 			fillBackgroundTransparent(*m_drawingBuffer, backgroundColour, m_backgroundColour);
-			utils::dwMemset(m_modificationArray, 0xffffffff, m_nCharsVertical);
+			if (m_modificationArray)
+				utils::dwMemset(m_modificationArray, 0xffffffff, m_nCharsVertical);
 		}
 				
 		m_foregroundColour = foregroundColour;

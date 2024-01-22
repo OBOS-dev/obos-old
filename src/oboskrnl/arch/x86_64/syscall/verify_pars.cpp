@@ -22,6 +22,8 @@ namespace obos
 	{
 		bool canAccessUserMemory(const void* addr, size_t size, bool hasToWrite)
 		{
+			if (!addr)
+				return false;
 			memory::VirtualAllocator vallocator = ((process::Process*)getCPULocal()->currentThread->owner);
 			bool checkUsermode = ((process::Process*)getCPULocal()->currentThread->owner)->isUsermode;
 			size_t nPagesToCheck = ((size + 0xfff) & ~0xfff) / 4096;

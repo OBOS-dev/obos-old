@@ -11,7 +11,9 @@ global _start
 global thrStart
 
 section .rodata
-path: db "1:/test.txt",0x00
+path: db "1:/splash.txt",0x00
+failureMessage: db "Could not load 1:/splash.txt.",0x10,0x00
+failureMessageSz equ $-failureMessage
 section .bss
 readFileBuf:
 resb 4096
@@ -36,13 +38,23 @@ dq 0,0
 generalFileQueryParameters:
 .handle:
 dq 0,0
+setColourParameters:
+.foreground:
+dq 0xCCCCCCCC,0
+.background:
+dq 0,0
+.clearConsole:
+dq 1,0
+consoleOutputParameters:
+.str: dq readFileBuf, 0
+.sz: dq 0,0
 section .text
 align 0x1
 
 _start:
     push rbp
     mov rbp, rsp
-    sub rsp, 8
+    sub rsp, 0x10
     ; Stack frame is as follows:
     ; Difference from rbp | Description
     ;                -0x8 | Return address
@@ -50,7 +62,15 @@ _start:
     ;                 0x8 | File handle
     ;                0x10 | File size
 
-    ; Open a file handle to 1:/test.txt
+    ; Initialize the console.
+    mov rax, 25
+    xor rdi,rdi
+    syscall
+    mov rax, 32
+    mov rdi, setColourParameters
+    syscall
+    
+    ; Open a file handle to 1:/splash.txt
     mov rax, 13
     xor rdi,rdi
     syscall
@@ -72,26 +92,40 @@ _start:
     mov [rbp-0x10], rax
     and rax, 0xfff ; Ensure the count to read is less than 0x1000
     mov [readFileParameters.nToRead], rax
+    mov [consoleOutputParameters.sz], rax
     mov rax, 15
     mov rdi, readFileParameters
     syscall
     cmp rax, 0
     jz .failure
 
+    ; Dump the contents of the file.
+    mov rax, 26
+    mov rdi, consoleOutputParameters
+    syscall
+
     xor rax,rax
     jmp .exit
 
+    ; Set the exit code.
 .failure:
-    ; Close the handle.
+    mov qword [consoleOutputParameters.str], failureMessage
+    mov qword [consoleOutputParameters.sz], failureMessageSz
+    mov rax, 26
+    mov rdi, consoleOutputParameters
+    syscall
+    mov rax, 1
+.exit:
+    ; Close the file handle.
+    push rax
     mov rax, 22
     mov rdi, generalFileQueryParameters
     syscall
     mov rax, 24
     mov rdi, generalFileQueryParameters
     syscall
-    ; Set the exit code.
-    mov rax, 1
-.exit:
+    pop rax
+
     ; ExitThread(0);
     push 0
     push rax

@@ -51,6 +51,7 @@ namespace obos
 				ret->parent->children.head = ret;
 			ret->parent->children.tail = ret;
 			ret->parent->children.size++;
+			ret->console = &g_kernelConsole;
 			
 			return ret;
 		}

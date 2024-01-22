@@ -12,6 +12,7 @@
 #include <arch/x86_64/syscall/thread.h>
 #include <arch/x86_64/syscall/file.h>
 #include <arch/x86_64/syscall/handle.h>
+#include <arch/x86_64/syscall/console.h>
 
 namespace obos
 {
@@ -24,6 +25,7 @@ namespace obos
 			for (uint16_t currentSyscall = 13; currentSyscall < 23; RegisterSyscall(currentSyscall++, (uintptr_t)FileHandleSyscallHandler));
 			RegisterSyscall(23, (uintptr_t)ThreadSyscallHandler);
 			RegisterSyscall(24, (uintptr_t)SyscallInvalidateHandle);
+			for (uint16_t currentSyscall = 25; currentSyscall < 38; RegisterSyscall(currentSyscall++, (uintptr_t)ConsoleSyscallHandler));
 		}
 		void RegisterSyscall(uint16_t n, uintptr_t func)
 		{
