@@ -8,14 +8,14 @@
 - [ ] NVME Driver.
 - [x] A FAT driver.
 - [ ] Ext2/3/4 Driver.
-- [ ] Support for USB.
-- [ ] Support for ACPI power management.
 - [ ] POSIX Compatibility Layer
 - [ ] Porting mlibc.
+- [ ] A terminal.
+- [ ] Support for USB.
+- [ ] Support for ACPI power management.
 - [ ] Porting binutils and GCC to the os, and making a GCC target for the os.
 - [ ] Porting CMake and Make.
 - [ ] Porting tar.
-- [ ] A terminal.
 - [ ] A network stack.
 - [ ] An audio stack.
 - [ ] A GUI.
