@@ -9,7 +9,7 @@
 #include <memory_manipulation.h>
 
 #include <arch/x86_64/syscall/handle.h>
-#include <arch/x86_64/syscall/file.h>
+#include <arch/x86_64/syscall/vfs/file.h>
 #include <arch/x86_64/syscall/verify_pars.h>
 
 #include <vfs/fileManip/fileHandle.h>
@@ -41,7 +41,6 @@ namespace obos
 					SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 					return false;
 				}
-				// TODO: Test
 				auto pageSize = memory::VirtualAllocator::GetPageSize();
 				if (!canAccessUserMemory(pars->path, pageSize, false))
 				{

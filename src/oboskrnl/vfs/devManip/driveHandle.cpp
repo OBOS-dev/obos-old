@@ -176,7 +176,7 @@ namespace obos
                 *_nSectorsRead = nSectorsRead;
             return true;
         }
-        bool DriveHandle::WriteSectors(void* buff, size_t* _nSectorsWritten, uoff_t _lbaOffset, size_t nSectorsToWrite)
+        bool DriveHandle::WriteSectors(const void* buff, size_t* _nSectorsWritten, uoff_t _lbaOffset, size_t nSectorsToWrite)
         {
             if (!m_node || m_flags & FLAGS_CLOSED)
             {

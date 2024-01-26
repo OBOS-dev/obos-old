@@ -40,7 +40,7 @@ namespace obos
             OBOS_EXPORT bool OpenDrive(const char* path, OpenOptions options = OPTIONS_DEFAULT);
 
             OBOS_EXPORT bool ReadSectors(void* buff, size_t* nSectorsRead, uoff_t lbaOffset, size_t nSectors) const;
-            OBOS_EXPORT bool WriteSectors(void* buff, size_t* nSectorsWritten, uoff_t lbaOffset, size_t nSectors);
+            OBOS_EXPORT bool WriteSectors(const void* buff, size_t* nSectorsWritten, uoff_t lbaOffset, size_t nSectors);
 
             OBOS_EXPORT uint32_t GetDriveId() const;
             OBOS_EXPORT uint32_t GetPartitionId() const;

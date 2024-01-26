@@ -10,10 +10,12 @@
 
 #include <arch/x86_64/syscall/register.h>
 #include <arch/x86_64/syscall/thread.h>
-#include <arch/x86_64/syscall/file.h>
 #include <arch/x86_64/syscall/handle.h>
 #include <arch/x86_64/syscall/console.h>
 #include <arch/x86_64/syscall/vmm.h>
+
+#include <arch/x86_64/syscall/vfs/file.h>
+#include <arch/x86_64/syscall/vfs/disk.h>
 
 namespace obos
 {
@@ -28,6 +30,7 @@ namespace obos
 			RegisterSyscall(24, (uintptr_t)SyscallInvalidateHandle);
 			for (uint16_t currentSyscall = 25; currentSyscall < 38; RegisterSyscall(currentSyscall++, (uintptr_t)ConsoleSyscallHandler));
 			for (uint16_t currentSyscall = 39; currentSyscall < 45; RegisterSyscall(currentSyscall++, (uintptr_t)VMMSyscallHandler));
+			for (uint16_t currentSyscall = 46; currentSyscall < 55; RegisterSyscall(currentSyscall++, (uintptr_t)DriveSyscallHandler));
 		}
 		void RegisterSyscall(uint16_t n, uintptr_t func)
 		{
