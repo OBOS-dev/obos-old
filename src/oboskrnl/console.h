@@ -19,6 +19,7 @@ namespace obos
 		uint32_t width = 0;
 		uint32_t height = 0;
 		uint32_t pitch = 0;
+		locks::Mutex *lock;
 	};
 
 	class Console
@@ -140,17 +141,13 @@ namespace obos
 		uint32_t m_terminalY = 0;
 		uint32_t m_nCharsHorizontal = 0;
 		uint32_t m_nCharsVertical = 0;
-		uint32_t m_foregroundColour = 0;
-		uint32_t m_backgroundColour = 0;
+		uint32_t m_foregroundColour = 0x00CCCCCC; // R: 0xCC, G: 0xCC, B: 0xCC, A: 0x00
+		uint32_t m_backgroundColour = 0x00000000;
 		uint8_t* m_font = nullptr;
 		uint32_t* m_modificationArray = nullptr; // The size of this array should be m_nCharsVertical, or nullptr when it doesn't exist.
 		// Only incremented by ConsoleOutput(char ch) when 'ch' is newline. Incremented by ConsoleOutput(const char*) or ConsoleOutput(const char*,size_t)
 		size_t m_nCallsSinceLastSwap = 0;
-#ifdef OBOS_DEBUG
 		constexpr static size_t maxCountsUntilSwap = 1;
-#else
-		constexpr static size_t maxCountsUntilSwap = 5;
-#endif
 		locks::Mutex m_lock;
 	};
 	extern OBOS_EXPORT Console g_kernelConsole;

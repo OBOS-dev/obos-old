@@ -38,7 +38,7 @@ namespace obos
 					alignas(0x10) size_t stackSize; 
 					alignas(0x10) void(*entry)(uintptr_t); 
 					alignas(0x10) uintptr_t userdata;
-					alignas(0x10) uint64_t affinity;
+					alignas(0x10) __uint128_t affinity;
 					alignas(0x10) void* process;
 					alignas(0x10) bool startPaused;
 				} *pars = (_pars*)args;
@@ -148,11 +148,16 @@ namespace obos
 			return handle->OpenThread(tid);
 		}
 
-		bool SyscallCreateThread(user_handle hnd, uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity, void* process, bool startPaused)
+		bool SyscallCreateThread(user_handle hnd, uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, __uint128_t affinity, void* process, bool startPaused)
 		{
 			if (!ProcessVerifyHandle(nullptr, hnd, ProcessHandleType::THREAD_HANDLE))
 			{
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return false;
+			}
+			if ((uintptr_t)entry > 0xffff'8000'0000'0000)
+			{
+				SetLastError(OBOS_ERROR_ACCESS_DENIED);
 				return false;
 			}
 			thread::ThreadHandle* handle = (thread::ThreadHandle*)ProcessGetHandleObject(nullptr, hnd);

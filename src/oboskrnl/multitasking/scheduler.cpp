@@ -31,7 +31,7 @@ namespace obos
 		Thread::ThreadList g_priorityLists[4];
 		uint64_t g_schedulerFrequency = 1000;
 		uint64_t g_timerTicks = 0;
-		uint64_t g_defaultAffinity = 0;
+		__uint128_t g_defaultAffinity = 0;
 		locks::Mutex g_coreGlobalSchedulerLock;
 
 		bool g_initialized = false;
@@ -142,7 +142,7 @@ namespace obos
 				thread = thread->next_run;
 			}
 		}
-		static size_t DEFINE_IN_SECTION getCpusInScheduler()
+		/*static */size_t DEFINE_IN_SECTION getCpusInScheduler()
 		{
 			size_t nCpusInScheduler = 0;
 			for (size_t i = 0; i < g_nCPUs; i++)
@@ -157,14 +157,40 @@ namespace obos
 			if (getCPULocal()->schedulerLock)
 				return;
 
-			lock:
-			if (!g_coreGlobalSchedulerLock.Lock(0, false))
+			//lock:
+			//if (!g_coreGlobalSchedulerLock.Lock(0, false))
+			//{
+			//	if (!getCpusInScheduler())
+			//	{
+			//		g_coreGlobalSchedulerLock.Unlock();
+			//		goto lock;
+			//	}
+			//	auto switchToIdleTask = [&]() {
+			//		currentThread->lastTimePreempted = g_timerTicks;
+			//		currentThread->status |= THREAD_STATUS_CAN_RUN;
+			//		currentThread->status &= ~THREAD_STATUS_RUNNING;
+			//		currentThread->affinity = currentThread->ogAffinity;
+			//		Thread* newThread = getCPULocal()->idleThread;
+			//		newThread->status = (newThread->status & ~THREAD_STATUS_CAN_RUN) | THREAD_STATUS_RUNNING;
+			//		getCPULocal()->currentThread = newThread;
+			//		switchToThreadImpl(&newThread->context, newThread);
+			//		return;
+			//		};
+			//	if (currentThread)
+			//		if (ThreadCanRun((thread::Thread*)currentThread))
+			//			return;
+			//		else
+			//			switchToIdleTask();
+			//	else {}
+			//	return;
+			//}
+			//
+			atomic_set((bool*)&getCPULocal()->schedulerLock);
+
+			////OBOS_ASSERTP(getCpusInScheduler() < 2, "");
+			if (getCpusInScheduler() != 1)
 			{
-				if (!getCpusInScheduler())
-				{
-					g_coreGlobalSchedulerLock.Unlock();
-					goto lock;
-				}
+				atomic_clear((bool*)&getCPULocal()->schedulerLock);
 				auto switchToIdleTask = [&]() {
 					currentThread->lastTimePreempted = g_timerTicks;
 					currentThread->status |= THREAD_STATUS_CAN_RUN;
@@ -183,15 +209,6 @@ namespace obos
 						switchToIdleTask();
 				else {}
 				return;
-			}
-			
-			atomic_set((bool*)&getCPULocal()->schedulerLock);
-
-			//OBOS_ASSERTP(getCpusInScheduler() < 2, "");
-			if (getCpusInScheduler() != 1)
-			{
-				atomic_clear((bool*)&getCPULocal()->schedulerLock);
-				goto lock;
 			}
 
 			if (currentThread)
@@ -238,9 +255,9 @@ namespace obos
 			OBOS_ASSERTP(!inSchedulerFunction(newThread), "Thread (tid %d) was preempted while in the scheduler!\n", "", newThread->tid);
 			if (newThread == currentThread)
 			{
-				currentThread->affinity = ((uint64_t)1 << getCPULocal()->cpuId);
+				currentThread->affinity = ((__uint128_t)1 << getCPULocal()->cpuId);
 				currentThread->status = (currentThread->status & ~THREAD_STATUS_CAN_RUN) | THREAD_STATUS_RUNNING;
-				g_coreGlobalSchedulerLock.Unlock();
+				//g_coreGlobalSchedulerLock.Unlock();
 				atomic_clear((bool*)&getCPULocal()->schedulerLock);
 				return;
 			}
@@ -250,7 +267,7 @@ namespace obos
 			getCPULocal()->currentThread = newThread;
 			newThread->timeSliceIndex = newThread->timeSliceIndex + 1;
 			newThread->status = (newThread->status & ~THREAD_STATUS_CAN_RUN) | THREAD_STATUS_RUNNING;
-			g_coreGlobalSchedulerLock.Unlock();
+			//g_coreGlobalSchedulerLock.Unlock();
 			atomic_clear((bool*)&getCPULocal()->schedulerLock);
 			switchToThreadImpl((taskSwitchInfo*)&newThread->context, newThread);
 		}

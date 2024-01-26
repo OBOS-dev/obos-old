@@ -19,6 +19,7 @@ namespace obos
 			FILE_HANDLE,
 			DRIVE_HANDLE,
 			THREAD_HANDLE,
+			VALLOCATOR_HANDLE,
 		};
 		using user_handle = uint64_t;
 		using handle = utils::pair<void*, ProcessHandleType>;

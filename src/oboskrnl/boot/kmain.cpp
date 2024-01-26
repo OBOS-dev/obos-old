@@ -46,6 +46,7 @@ namespace obos
 	{
 		DirectoryEntry* SearchForNode(DirectoryEntry* root, void* userdata, bool(*compare)(DirectoryEntry* current, void* userdata));
 	}
+	thread::ThreadHandle kBootThread;
 	void kmain_common(byte* initrdDriverData, size_t initrdDriverSize)
 	{
 		logger::log("Multitasking initialized! In \"%s\" now.\n", __func__);
@@ -77,6 +78,8 @@ namespace obos
 		// Reconstruct the liballoc's allocator with the kernel process, to avoid future problems with liballoc in user mode.
 		g_liballocVirtualAllocator.~VirtualAllocator();
 		new (&g_liballocVirtualAllocator) memory::VirtualAllocator{ kernelProc };
+
+		kBootThread.OpenThread(thread::GetTID());
 
 		logger::log("%s: Loading the initrd driver.\n", __func__);
 		SetLastError(0);
@@ -247,8 +250,17 @@ namespace obos
 			(void(*)(uintptr_t))entry,
 			0,
 			thread::g_defaultAffinity,
-			proc
+			proc,
+			true
 		);
+		thread::Thread* _initProgramMainThread = (thread::Thread*)initProgramMainThread.GetUnderlyingObject();
+		_initProgramMainThread->blockCallback.callback = [](thread::Thread*, void* udata)
+			{
+				thread::ThreadHandle* kBootThread = (thread::ThreadHandle*)udata;
+				return kBootThread->GetThreadStatus() == thread::THREAD_STATUS_DEAD;
+			};
+		_initProgramMainThread->blockCallback.userdata = &kBootThread;
+		_initProgramMainThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;
 		initProgramMainThread.CloseHandle();
 		logger::log("%s: Done early-kernel boot process!\n", __func__);
 		thread::ExitThread(0);

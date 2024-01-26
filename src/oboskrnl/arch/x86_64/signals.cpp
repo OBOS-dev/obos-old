@@ -30,7 +30,7 @@ namespace obos
         {
             on->flags |= thread::THREAD_FLAGS_IN_SIGNAL;
             bool isRunning = on->status & thread::THREAD_STATUS_RUNNING;
-            uint32_t affinity = on->affinity;
+            __uint128_t affinity = on->affinity;
             on->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_PAUSED;
             if (isRunning)
             {

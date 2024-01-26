@@ -43,12 +43,6 @@ namespace obos
 		
 		bool ThreadHandle::OpenThread(uint32_t tid)
 		{
-			if (tid == 1)
-			{
-				// The idle task is protected.
-				SetLastError(OBOS_ERROR_ACCESS_DENIED);
-				return false;
-			}
 			void* obj = nullptr;
 			obj = lookForThreadInList(g_priorityLists[0], tid);
 			if(!obj)
@@ -62,10 +56,11 @@ namespace obos
 				SetLastError(OBOS_ERROR_NO_SUCH_OBJECT);
 				return false;
 			}
+			m_obj = obj;
 			return true;
 		}
 
-		bool ThreadHandle::CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity, void* _process, bool startPaused)
+		bool ThreadHandle::CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, __uint128_t affinity, void* _process, bool startPaused)
 		{
 			if (m_obj)
 			{

@@ -35,9 +35,8 @@ namespace obos
 			auto &handleTable = proc->context.handleTable;
 			// Find the smallest handle value.
 			user_handle handleValue = 0;
-			for (auto iter = handleTable.begin(); iter; iter++)
-				if (auto curr = (*(*iter).key); curr < handleValue)
-					handleValue = curr;
+			if (handleTable.end())
+				handleValue = *(*handleTable.end()).key + 1;
 			handleTable.emplace_at(handleValue, { objectAddress, type });
 			return handleValue;
 		}
@@ -112,6 +111,9 @@ namespace obos
 				break;
 			case obos::syscalls::ProcessHandleType::THREAD_HANDLE:
 				delete (thread::ThreadHandle*)val;
+				break;
+			case obos::syscalls::ProcessHandleType::VALLOCATOR_HANDLE:
+				delete (memory::VirtualAllocator*)val;
 				break;
 			default:
 				break;

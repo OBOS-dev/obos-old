@@ -26,6 +26,17 @@ namespace obos
 {
 	namespace memory
 	{
+		static void IteratePages(
+			uintptr_t* headPM,
+			uintptr_t* currentPM,
+			uint8_t level,
+			uintptr_t start,
+			uintptr_t end,
+			bool(*callback)(uintptr_t userdata, uintptr_t* pm, uintptr_t virt, uintptr_t entry),
+			uintptr_t userdata,
+			uintptr_t* indices // must be an array of at least 4 entries (anything over is ignored).
+		);
+
 		uintptr_t DecodeProtectionFlags(uintptr_t _flags)
 		{
 			_flags &= PROT_ALL_BITS_SET;
@@ -233,22 +244,53 @@ namespace obos
 		}
 		void* _Impl_FindUsableAddress(process::Process* proc, size_t nPages)
 		{
-			constexpr uintptr_t USER_BASE    = 0x0000000000001000;
-			constexpr uintptr_t USER_LIMIT   = 0x00007fffffffffff;
-			constexpr uintptr_t KERNEL_BASE  = 0xffffffff00000000;
+			constexpr uintptr_t USER_BASE = 0x0000000000001000;
+			constexpr uintptr_t USER_LIMIT = 0x00007fffffffffff;
+			constexpr uintptr_t KERNEL_BASE = 0xffffffff00000000;
 			constexpr uintptr_t KERNEL_LIMIT = 0xffffffffffffd000;
+			auto callBack =
+				[](uintptr_t _userdata, uintptr_t*, uintptr_t virt, uintptr_t)->bool
+				{
+					uintptr_t* userdata = (uintptr_t*)_userdata;
+					uintptr_t& base = userdata[0];
+					uintptr_t& ret = userdata[2];
+					uintptr_t& lastAddress = userdata[3];
+					size_t& nPages = userdata[4];
+					if (virt < base)
+						return true;
+					if (((virt - lastAddress) / 4096) >= nPages + 1)
+					{
+						ret = lastAddress /* if we set it to 'virt', we would be referring to an already mapped page */;
+						return false;
+					}
+					lastAddress = virt;
+					return true;
+				};
 			pageMapTuple tuple = GetPageMapFromProcess(proc);
 			bool& isUserProcess = tuple.isUserMode;
 			PageMap*& pageMap = tuple.pageMap;
+			if (isUserProcess)
+				asm("nop");
 			const uintptr_t base = isUserProcess ? USER_BASE : KERNEL_BASE;
 			const uintptr_t limit = isUserProcess ? USER_LIMIT : KERNEL_LIMIT;
-			uintptr_t addr = base;
-			for (; addr < limit; addr += 0x1000)
-				if (CanAllocatePages((void*)addr, nPages, pageMap))
-					break;
-			if (addr == limit)
-				return nullptr;
-			return (void*)addr;
+			uintptr_t indices[4] = {};
+			uintptr_t userdata[] = {
+				base /* base */, 
+				limit /* limit */, 
+				limit /* address found */,
+				base/* last address */, 
+				nPages /* number of pages that should be free */,
+			};
+			uintptr_t* pml4 = pageMap->getPageMap();
+			IteratePages(pml4, pml4, 3, base, limit, callBack , (uintptr_t)&userdata, indices);
+			if (userdata[2] == limit)
+			{
+				// Try again
+				IteratePages(pml4, pml4, 3, base, limit, callBack, (uintptr_t)&userdata, indices);
+				if (userdata[2] == limit)
+					return nullptr;
+			}
+			return (void*)(userdata[2] + ((size_t)(base != userdata[2]) * 0x1000));
 		}
 		void* _Impl_ProcVirtualAlloc(process::Process* proc, void* _base, size_t nPages, uintptr_t protFlags, uint32_t* status)
 		{
@@ -506,33 +548,48 @@ namespace obos
 			uintptr_t* headPM, 
 			uintptr_t* currentPM,
 			uint8_t level,
+			uintptr_t start,
 			uintptr_t end,
-			void(*callback)(uintptr_t* pm, uintptr_t virt, uintptr_t entry),
+			bool(*callback)(uintptr_t userdata, uintptr_t* pm, uintptr_t virt, uintptr_t entry),
+			uintptr_t userdata,
 			uintptr_t *indices // must be an array of at least 4 entries (anything over is ignored).
 			)
 		{
 			size_t index = 0;
-			size_t nToIterate = 512;
+			size_t endIndex = 512;
 			if (level == 3)
-				nToIterate = PageMap::addressToIndex(end, level);
+			{
+				index = PageMap::addressToIndex(start, level);
+				endIndex = PageMap::addressToIndex(end, level) + 1;
+			}
 			if (currentPM)
 			{
-				for (; index < nToIterate; index++)
+				for (indices[level] = index; indices[level] < endIndex; indices[level]++)
 				{
-					if (!((mapPageTable(currentPM)[index]) & 1))
+					if (!((mapPageTable(currentPM)[indices[level]]) & 1))
 						continue;
-					indices[level] = index;
-					if (level == 0)
+					uintptr_t entry = (mapPageTable(currentPM)[indices[level]]);
+					bool isHugePage = ((level == 2 || level == 1) && (entry & ((uintptr_t)1 << 7)));
+					if (level == 0 || isHugePage)
 					{
-						uintptr_t virt = 0;
+						uintptr_t virt = (indices[3] >= 0x100) ? 0xffff'8000'0000'0000 : 0 /* respect the canonical hole */;
 						virt |= (indices[3] << 39);
 						virt |= (indices[2] << 30);
-						virt |= (indices[1] << 21);
-						virt |= (indices[0] << 12);
-						callback(headPM, virt, (mapPageTable(currentPM)[index]));
+						if (level != 2)
+						{
+							virt |= (indices[1] << 21);
+							if (level != 1)
+								virt |= (indices[0] << 12);
+						}
+						if (!callback(userdata, headPM, virt, entry))
+						{
+							// Set all the indices to 512 to stop iteration.
+							indices[0] = indices[1] = indices[2] = indices[3] = 512;
+							return;
+						}
 						continue;
 					}
-					IteratePages(headPM, (uintptr_t*)((mapPageTable(currentPM)[index]) & 0xFFFFFFFFFF000), level - 1, end, callback, indices);
+					IteratePages(headPM, (uintptr_t*)(entry & 0xFFFFFFFFFF000), level - 1, start, end, callback, userdata, indices);
 				}
 			}
 		}
@@ -545,11 +602,11 @@ namespace obos
 			if (!isUserProcess)
 				return false;
 			uintptr_t* pml4 = _pageMap->getPageMap();
-			[[maybe_unused]] uintptr_t start = 0, end = 0x7FFFFFFFFFFF;
+			uintptr_t start = 0, end = 0x7FFFFFFFFFFF;
 			// Iterate over the page tables, going into them if present == true.
 			uintptr_t indices[4];
-			IteratePages(pml4, pml4, 3, end, 
-			[](uintptr_t *pm, uintptr_t virt, uintptr_t entry)
+			IteratePages(pml4, pml4, 3, start, end, 
+			[](uintptr_t, uintptr_t *pm, uintptr_t virt, uintptr_t entry)
 			{
 				PageMap* _pm = (PageMap*)pm;
 				uintptr_t _pml2Phys = (uintptr_t)_pm->getL2PageMapEntryAt(virt) & 0xFFFFFFFFFF000;
@@ -557,7 +614,8 @@ namespace obos
 					freePhysicalPage(entry & 0xFFFFFFFFFF000);
 				mapPageTable((uintptr_t*)_pml2Phys)[PageMap::addressToIndex(virt, 0)] = 0;
 				freePagingStructures(mapPageTable((uintptr_t*)_pml2Phys), _pml2Phys, _pm, virt);
-			}, indices);
+				return true;
+			}, 0, indices);
 			return true;
 		}
     }

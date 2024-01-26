@@ -109,8 +109,8 @@ namespace obos
 				} *pars = (_par*)args;
 				if (!canAccessUserMemory(pars, sizeof(*pars), false))
 					return 0;
-				if (!canAccessUserMemory(pars->par1, sizeof(*pars->par2), false) ||
-					!canAccessUserMemory(pars->par1, sizeof(*pars->par2), false))
+				if ((pars->par1 && !canAccessUserMemory(pars->par1, sizeof(*pars->par1), true)) ||
+					(pars->par2 && !canAccessUserMemory(pars->par1, sizeof(*pars->par2), true)))
 					return 0;
 				v_pu32_pu32(pars->par1, pars->par2);
 				break;

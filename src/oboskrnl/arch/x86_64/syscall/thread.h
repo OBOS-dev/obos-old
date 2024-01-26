@@ -44,7 +44,7 @@ namespace obos
 		/// <param name="process">Which process to create the thread as.</param>
 		/// <param name="startPaused">Whether the thread should be paused when it starts.</param>
 		/// <returns>Whether the function succeeded or not.</returns>
-		bool SyscallCreateThread(user_handle hnd, uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity, void* process, bool startPaused);
+		bool SyscallCreateThread(user_handle hnd, uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, __uint128_t affinity, void* process, bool startPaused);
 
 		/// <summary>
 		/// Syscall Number: 3<para></para>

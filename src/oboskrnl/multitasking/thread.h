@@ -24,19 +24,19 @@ namespace obos
 	{
 		enum thrStatus
 		{
-			THREAD_STATUS_DEAD                   = 0x01,
-			THREAD_STATUS_CAN_RUN                = 0x02,
-			THREAD_STATUS_BLOCKED                = 0x04,
-			THREAD_STATUS_PAUSED                 = 0x08,
+			THREAD_STATUS_DEAD = 0x01,
+			THREAD_STATUS_CAN_RUN = 0x02,
+			THREAD_STATUS_BLOCKED = 0x04,
+			THREAD_STATUS_PAUSED = 0x08,
 			THREAD_STATUS_CLEAR_TIME_SLICE_INDEX = 0x10,
-			THREAD_STATUS_RUNNING                = 0x20,
+			THREAD_STATUS_RUNNING = 0x20,
 		};
 		enum thrFlags
 		{
-			THREAD_FLAGS_IN_SIGNAL               = 0x01,
-			THREAD_FLAGS_SINGLE_STEPPING         = 0x02,
-			THREAD_FLAGS_CALLING_BLOCK_CALLBACK  = 0x04,
-			THREAD_FLAGS_IS_EXITING_PROCESS      = 0x08,
+			THREAD_FLAGS_IN_SIGNAL = 0x01,
+			THREAD_FLAGS_SINGLE_STEPPING = 0x02,
+			THREAD_FLAGS_CALLING_BLOCK_CALLBACK = 0x04,
+			THREAD_FLAGS_IS_EXITING_PROCESS = 0x08,
 		};
 		enum thrPriority
 		{
@@ -85,10 +85,10 @@ namespace obos
 			ThreadList* threadList; // A pointer to the process' thread list.
 			taskSwitchInfo context;
 			// If a bit is set, the cpu corresponding to that bit number can run the thread.
-			// This limits the kernel to 64 cores.
-			uint64_t affinity, ogAffinity;
+			// This limits the kernel to 128 cores.
+			__uint128_t affinity, ogAffinity;
 			uint32_t flags;
 			void* driverIdentity = nullptr;
 		} OBOS_ALIGN(4);
-	}
+	};
 }

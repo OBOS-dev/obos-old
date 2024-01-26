@@ -2,7 +2,7 @@
 
 # Copyright (c) 2023-2024 Omar Berrow
 
-add_executable(test_program "entry.asm" "dummy.c")
+add_executable(test_program "syscall.asm" "main.cpp")
 
 target_compile_options(test_program
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>

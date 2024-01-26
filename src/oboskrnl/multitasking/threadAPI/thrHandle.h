@@ -43,7 +43,7 @@ namespace obos
 			/// <param name="process">Which process to create the thread as.</param>
 			/// <param name="startPaused">Whether the thread should be paused when it starts.</param>
 			/// <returns>Whether the function succeeded or not.</returns>
-			OBOS_EXPORT bool CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, uint64_t affinity = g_defaultAffinity, void* process = nullptr, bool startPaused = false);
+			OBOS_EXPORT bool CreateThread(uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, __uint128_t affinity = g_defaultAffinity, void* process = nullptr, bool startPaused = false);
 
 			/// <summary>
 			/// Pauses the thread.

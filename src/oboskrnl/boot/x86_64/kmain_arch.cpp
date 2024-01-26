@@ -35,6 +35,8 @@
 
 #include <multitasking/scheduler.h>
 
+#include <multitasking/locks/mutex.h>
+
 #define CPUID_FSGSBASE (1)
 #define CPUID_SMEP (1<<7)
 #define CPUID_SMAP (1<<20)
@@ -71,6 +73,8 @@ namespace obos
 
 	void enableSMEP_SMAP();
 
+	locks::Mutex g_framebufferLock;
+
 	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console. This also must enable the scheduler.
 	void arch_kmain()
 	{
@@ -85,6 +89,8 @@ namespace obos
 		framebuffer.width = framebuffer_request.response->framebuffers[0]->width;
 		framebuffer.height = framebuffer_request.response->framebuffers[0]->height;
 		framebuffer.pitch = framebuffer_request.response->framebuffers[0]->pitch;
+		framebuffer.lock = &g_framebufferLock;
+		new (&g_framebufferLock) locks::Mutex{};
 		for (size_t i = 0; i < module_request.response->module_count; i++)
 		{
 			if (utils::strcmp(module_request.response->modules[i]->path, "/obos/font.bin"))

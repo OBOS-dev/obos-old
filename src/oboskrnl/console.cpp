@@ -168,7 +168,7 @@ namespace obos
 	void Console::GetConsoleBounds(uint32_t* horizontal, uint32_t* vertical) const
 	{
 		if (horizontal)
-		*horizontal = m_nCharsHorizontal;
+			*horizontal = m_nCharsHorizontal;
 		if(vertical)
 			*vertical = m_nCharsVertical;
 	}
@@ -178,6 +178,8 @@ namespace obos
 		m_nCallsSinceLastSwap = 0;
 		if (!m_backbuffer.addr)
 			return;
+		if (m_framebuffer.lock)
+			m_framebuffer.lock->Lock();
 		if (!m_modificationArray)
 		{
 			if ((m_framebuffer.pitch / 4) != m_backbuffer.width)
@@ -185,9 +187,13 @@ namespace obos
 				// Oh come on!
 				for (size_t y = 0; y < m_framebuffer.height; y++)
 					utils::dwMemcpy(m_framebuffer.addr + y * m_framebuffer.pitch / 4, m_backbuffer.addr + y * m_backbuffer.width, m_framebuffer.width);
+				if (m_framebuffer.lock)
+					m_framebuffer.lock->Unlock();
 				return;
 			}
 			utils::dwMemcpy(m_framebuffer.addr, m_backbuffer.addr, m_backbuffer.height * m_backbuffer.width);
+			if (m_framebuffer.lock)
+				m_framebuffer.lock->Unlock();
 			return;
 		}
 		const size_t bitLength = (sizeof(*m_modificationArray) * 4);
@@ -201,6 +207,8 @@ namespace obos
 					utils::dwMemcpy(m_framebuffer.addr + y * m_framebuffer.pitch / 4, m_backbuffer.addr + y * m_backbuffer.width, m_framebuffer.width);
 			}
 		}
+		if (m_framebuffer.lock)
+			m_framebuffer.lock->Unlock();
 		utils::dwMemset(m_modificationArray, 0, m_nCharsVertical);
 	}
 	void Console::SetDrawBuffer(bool isBackbuffer)
@@ -249,6 +257,8 @@ namespace obos
 	{
 		if (!m_drawingBuffer->addr)
 			return;
+		if (m_drawingBuffer->lock)
+			m_drawingBuffer->lock->Lock();
 		if (m_modificationArray)
 			m_modificationArray[y / (sizeof(*m_modificationArray) * 4)] |= 1<<(y % (sizeof(*m_modificationArray) * 4));
 		switch (ch)
@@ -277,5 +287,7 @@ namespace obos
 			putChar(ch, x++, y, foregroundColour, backgroundColour);
 			break;
 		}
+		if (m_drawingBuffer->lock)
+			m_drawingBuffer->lock->Unlock();
 	}
 }
