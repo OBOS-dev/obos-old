@@ -85,7 +85,9 @@ namespace obos
 			{
 				uintptr_t entry = allocatePhysicalPage();
 				uintptr_t _flags = saveFlagsAndCLI();
-				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL4PageMapEntryAt(address) & 0xFFFFFFFFFF000));
+				uintptr_t physAddr = (uintptr_t)pageMap->getL4PageMapEntryAt(address) & g_physAddrMask;
+				OBOS_ASSERTP(physAddr < ((uintptr_t)1 << GetPhysicalAddressBits()), "physAddr: %p",, physAddr);
+				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(physAddr));
 				_pageMap[PageMap::addressToIndex(address, 2)] = entry | flags;
 				utils::memzero(mapPageTable((uintptr_t*)entry), 4096);
 				restorePreviousInterruptStatus(_flags);
@@ -100,7 +102,7 @@ namespace obos
 				if (!(entry & ((uintptr_t)1 << 1)) && (flags & ((uintptr_t)1 << 1)))
 					entry |= ((uintptr_t)1 << 1);
 				uintptr_t _flags = saveFlagsAndCLI();
-				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL4PageMapEntryAt(address) & 0xFFFFFFFFFF000));
+				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL4PageMapEntryAt(address) & g_physAddrMask));
 				_pageMap[PageMap::addressToIndex(address, 2)] = entry;
 				restorePreviousInterruptStatus(_flags);
 			}
@@ -108,7 +110,9 @@ namespace obos
 			{
 				uintptr_t entry = allocatePhysicalPage();
 				uintptr_t _flags = saveFlagsAndCLI();
-				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL3PageMapEntryAt(address) & 0xFFFFFFFFFF000));
+				uintptr_t physAddr = (uintptr_t)pageMap->getL3PageMapEntryAt(address) & g_physAddrMask;
+				OBOS_ASSERTP(physAddr < ((uintptr_t)1 << GetPhysicalAddressBits()), "physAddr: %p", , physAddr);
+				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(physAddr));
 				_pageMap[PageMap::addressToIndex(address, 1)] = entry | flags;
 				utils::memzero(mapPageTable((uintptr_t*)entry), 4096);
 				restorePreviousInterruptStatus(_flags);
@@ -123,11 +127,11 @@ namespace obos
 				if (!(entry & ((uintptr_t)1 << 1)) && (flags & ((uintptr_t)1 << 1)))
 					entry |= ((uintptr_t)1 << 1);
 				uintptr_t _flags = saveFlagsAndCLI();
-				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL3PageMapEntryAt(address) & 0xFFFFFFFFFF000));
+				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL3PageMapEntryAt(address) & g_physAddrMask));
 				_pageMap[PageMap::addressToIndex(address, 1)] = entry;
 				restorePreviousInterruptStatus(_flags);
 			}
-			uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL2PageMapEntryAt(address) & 0xFFFFFFFFFF000));
+			uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>((uintptr_t)pageMap->getL2PageMapEntryAt(address) & g_physAddrMask));
 			return _pageMap;
 		}
 
@@ -162,7 +166,7 @@ namespace obos
 		}
 		static uintptr_t EncodeProtectionFlags(uintptr_t entry)
 		{
-			entry &= (~0xFFFFFFFFFF000);
+			entry &= (~g_physAddrMask);
 			uintptr_t ret = 0;
 			if (entry & 1)
 				ret |= PROT_IS_PRESENT;
@@ -185,14 +189,14 @@ namespace obos
 			if (utils::memcmp(_pageMap, (uint32_t)0, 4096))
 			{
 				freePhysicalPage(_pageMapPhys);
-				uintptr_t _pageMap2Phys = (uintptr_t)pageMap->getL3PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
+				uintptr_t _pageMap2Phys = (uintptr_t)pageMap->getL3PageMapEntryAt(addr) & g_physAddrMask;
 				uintptr_t flags = saveFlagsAndCLI();
 				uintptr_t* _pageMap2 = mapPageTable((uintptr_t*)_pageMap2Phys);
 				_pageMap2[PageMap::addressToIndex(addr, 1)] = 0;
 				if (utils::memcmp(_pageMap2, (uint32_t)0, 4096))
 				{
 					freePhysicalPage((uintptr_t)_pageMap2Phys);
-					uintptr_t _pageMap3Phys = (uintptr_t)pageMap->getL4PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
+					uintptr_t _pageMap3Phys = (uintptr_t)pageMap->getL4PageMapEntryAt(addr) & g_physAddrMask;
 					uintptr_t* _pageMap3 = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMap3Phys));
 					_pageMap3[PageMap::addressToIndex(addr, 2)] = 0;
 					if (utils::memcmp(_pageMap3, (uint32_t)0, 4096))
@@ -246,8 +250,8 @@ namespace obos
 		{
 			constexpr uintptr_t USER_BASE = 0x0000000000001000;
 			constexpr uintptr_t USER_LIMIT = 0x00007fffffffffff;
-			constexpr uintptr_t KERNEL_BASE = 0xffffffff00000000;
-			constexpr uintptr_t KERNEL_LIMIT = 0xffffffffffffd000;
+			constexpr uintptr_t KERNEL_BASE = 0xffffffff00000000 - 0x1000;
+			constexpr uintptr_t KERNEL_LIMIT = 0xffffffffffffc000;
 			auto callBack =
 				[](uintptr_t _userdata, uintptr_t*, uintptr_t virt, uintptr_t)->bool
 				{
@@ -290,7 +294,7 @@ namespace obos
 				if (userdata[2] == limit)
 					return nullptr;
 			}
-			return (void*)(userdata[2] + ((size_t)(base != userdata[2]) * 0x1000));
+			return (void*)(userdata[2] + 0x1000);
 		}
 		void* _Impl_ProcVirtualAlloc(process::Process* proc, void* _base, size_t nPages, uintptr_t protFlags, uint32_t* status)
 		{
@@ -359,11 +363,11 @@ namespace obos
 			uintptr_t eflags = saveFlagsAndCLI();
 			for (uintptr_t addr = base; addr != (base + nPages * 4096); addr += 4096)
 			{
-				uintptr_t _pageMapPhys = (uintptr_t)pageMap->getL2PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
+				uintptr_t _pageMapPhys = (uintptr_t)pageMap->getL2PageMapEntryAt(addr) & g_physAddrMask;
 				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMapPhys));
 				uintptr_t entry = _pageMap[PageMap::addressToIndex(addr, 0)];
 				if (!(entry & ((uintptr_t)1 << 9)))
-					freePhysicalPage(entry & 0xFFFFFFFFFF000);
+					freePhysicalPage(entry & g_physAddrMask);
 				_pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMapPhys));
 				_pageMap[PageMap::addressToIndex(addr, 0)] = 0;
 				freePagingStructures(_pageMap, _pageMapPhys, pageMap, addr);
@@ -398,14 +402,14 @@ namespace obos
 			uintptr_t base = (uintptr_t)_base & (~0xfff);
 			for (uintptr_t addr = base; addr != (base + nPages * 4096); addr += 4096)
 			{
-				uintptr_t _pageMapPhys = (uintptr_t)pageMap->getL2PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
+				uintptr_t _pageMapPhys = (uintptr_t)pageMap->getL2PageMapEntryAt(addr) & g_physAddrMask;
 				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMapPhys));
 				uintptr_t entry = _pageMap[PageMap::addressToIndex(addr, 0)];
 				uintptr_t newEntry = 0;
 				if (entry & ((uintptr_t)1 << 9))
 					newEntry = 1 | (_flags << 52) | ((uintptr_t)1 << 9) | ((uintptr_t)1 << 63);
 				else
-					newEntry = (entry & 0xFFFFFFFFFF000) | DecodeProtectionFlags(_flags) | 1;
+					newEntry = (entry & g_physAddrMask) | DecodeProtectionFlags(_flags) | 1;
 				_pageMap = allocatePagingStructures(addr, pageMap, DecodeProtectionFlags(_flags) | 1);
 				_pageMap[PageMap::addressToIndex(addr, 0)] = newEntry;
 				invlpg(addr);
@@ -468,7 +472,7 @@ namespace obos
 		{
 			uintptr_t addr = (uintptr_t)_addr;
 			uintptr_t eflags = saveFlagsAndCLI();
-			uintptr_t _pageMapPhys = (uintptr_t)pageMap->getL2PageMapEntryAt(addr) & 0xFFFFFFFFFF000;
+			uintptr_t _pageMapPhys = (uintptr_t)pageMap->getL2PageMapEntryAt(addr) & g_physAddrMask;
 			uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMapPhys));
 			_pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(_pageMapPhys));
 			_pageMap[PageMap::addressToIndex(addr, 0)] = 0;
@@ -515,7 +519,7 @@ namespace obos
 			uintptr_t eflags = saveFlagsAndCLI();
 			for (uintptr_t dest = (uintptr_t)remoteDest & ~0xfff; dest < (((uintptr_t)remoteDest & ~0xfff) + nPagesDest * 4096); dest += 4096)
 			{
-				uintptr_t* pageTable = mapPageTable((uintptr_t*)((uintptr_t)pageMap->getL2PageMapEntryAt(dest) & 0xFFFFFFFFFF000));
+				uintptr_t* pageTable = mapPageTable((uintptr_t*)((uintptr_t)pageMap->getL2PageMapEntryAt(dest) & g_physAddrMask));
 				uintptr_t& pageTableEntry = pageTable[PageMap::addressToIndex(dest, 0)];
 				uintptr_t _pageTableEntry = pageTable[PageMap::addressToIndex(dest, 0)];
 				if (pageTableEntry & ((uintptr_t)1 << 9))
@@ -524,15 +528,15 @@ namespace obos
 					uintptr_t entry = 0;
 					entry |= allocatePhysicalPage();
 					void* entry_addr = _Impl_FindUsableAddress(nullptr, 1);
-					MapPhysicalAddress(getCurrentPageMap(), _pageTableEntry & 0xFFFFFFFFFF000, entry_addr, ((uintptr_t)1) | ((uintptr_t)2) | ((uintptr_t)1 << 63));
+					MapPhysicalAddress(getCurrentPageMap(), _pageTableEntry & g_physAddrMask, entry_addr, ((uintptr_t)1) | ((uintptr_t)2) | ((uintptr_t)1 << 63));
 					utils::memcpy(memory::mapPageTable((uintptr_t*)entry), entry_addr, 4096);
 					UnmapAddress(getCurrentPageMap(), entry_addr);
 					entry |= DecodeProtectionFlags(_pageTableEntry >> 52) | 1;
-					pageTable = mapPageTable((uintptr_t*)((uintptr_t)pageMap->getL2PageMapEntryAt(dest) & 0xFFFFFFFFFF000));
+					pageTable = mapPageTable((uintptr_t*)((uintptr_t)pageMap->getL2PageMapEntryAt(dest) & g_physAddrMask));
 					pageTable[PageMap::addressToIndex(dest, 0)] = entry;
 				}
-				pageTable = mapPageTable((uintptr_t*)((uintptr_t)pageMap->getL2PageMapEntryAt(dest) & 0xFFFFFFFFFF000));
-				MapPhysicalAddress(getCurrentPageMap(), pageTableEntry & 0xFFFFFFFFFF000, realDest, ((uintptr_t)1) | ((uintptr_t)2) | ((uintptr_t)1 << 63));
+				pageTable = mapPageTable((uintptr_t*)((uintptr_t)pageMap->getL2PageMapEntryAt(dest) & g_physAddrMask));
+				MapPhysicalAddress(getCurrentPageMap(), pageTableEntry & g_physAddrMask, realDest, ((uintptr_t)1) | ((uintptr_t)2) | ((uintptr_t)1 << 63));
 				realDest = (void*)((uintptr_t)realDest + 4096);
 			}
 			restorePreviousInterruptStatus(eflags);
@@ -589,7 +593,7 @@ namespace obos
 						}
 						continue;
 					}
-					IteratePages(headPM, (uintptr_t*)(entry & 0xFFFFFFFFFF000), level - 1, start, end, callback, userdata, indices);
+					IteratePages(headPM, (uintptr_t*)(entry & g_physAddrMask), level - 1, start, end, callback, userdata, indices);
 				}
 			}
 		}
@@ -609,9 +613,9 @@ namespace obos
 			[](uintptr_t, uintptr_t *pm, uintptr_t virt, uintptr_t entry)
 			{
 				PageMap* _pm = (PageMap*)pm;
-				uintptr_t _pml2Phys = (uintptr_t)_pm->getL2PageMapEntryAt(virt) & 0xFFFFFFFFFF000;
+				uintptr_t _pml2Phys = (uintptr_t)_pm->getL2PageMapEntryAt(virt) & g_physAddrMask;
 				if (!(entry & ((uintptr_t)1 << 9)))
-					freePhysicalPage(entry & 0xFFFFFFFFFF000);
+					freePhysicalPage(entry & g_physAddrMask);
 				mapPageTable((uintptr_t*)_pml2Phys)[PageMap::addressToIndex(virt, 0)] = 0;
 				freePagingStructures(mapPageTable((uintptr_t*)_pml2Phys), _pml2Phys, _pm, virt);
 				return true;

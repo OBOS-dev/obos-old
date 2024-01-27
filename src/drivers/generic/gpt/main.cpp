@@ -79,8 +79,10 @@ extern "C" uint32_t crc32_bytes_from_previous(void* data, size_t sz, uint32_t pr
 #if defined(__x86_64__) || defined(_WIN64)
 #include <x86_64-utils/asm.h>
 static bool _x86_64_initialized_crc32 = false;
-extern "C" uint32_t crc32_bytes_from_previous_accelerated(void* data, size_t sz, uint32_t previousChecksum);
 uint32_t crctab[256];
+
+// For future reference, we cannot hardware-accelerate the crc32 algorithm as x86-64's crc32 uses a different polynomial than that of GPT.
+
 void crcInit()
 {
     uint32_t crc = 0;
@@ -119,25 +121,6 @@ extern "C" uint32_t crc32_bytes(void* data, size_t sz)
     }
     return crc((char*)data, sz);
 }
-asm(
-    ".intel_syntax noprefix\n"
-    "crc32_bytes_from_previous_accelerated:\n"
-    "   push rbp\n"
-    "   mov rbp, rsp\n"
-    "   xor rax,rax\n"
-    "   mov rcx, rsi\n"
-    "   test rcx,rcx\n"
-    "   jz crc32_bytesDone\n"
-    "   mov rax,rdx\n"
-    "   crc32_bytesLoop:\n"
-    "       crc32 rax, byte ptr [rdi]\n"
-    "       inc rdi\n"
-    "       loop crc32_bytesLoop\n"
-    "   crc32_bytesDone:\n"
-    "   leave\n"
-    "   ret\n"
-    ".att_syntax prefix\n"
-);
 #endif
 
 bool RegisterGPTPartitionsOnDrive(uint32_t driveId, size_t* oNPartitions, driverInterface::partitionInfo** oPartInfo)

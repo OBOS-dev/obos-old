@@ -29,6 +29,12 @@ namespace obos
 	uint8_t g_lapicIDs[256];
 	uint8_t g_nCores = 0;
 	static bool is32BitTables = false;
+	struct ioapic_redirection
+	{
+		uint8_t source;
+		uint32_t globalSystemInterrupt;
+	} g_ioapicRedirectionEntries[256];
+	size_t g_szIoapicRedirectionEntries = 0;
 
 	void RemapPIC()
 	{
@@ -48,6 +54,7 @@ namespace obos
 	extern volatile limine_hhdm_request hhdm_offset;
 	volatile LAPIC* g_localAPICAddr = nullptr;
 	volatile HPET* g_HPETAddr = nullptr;
+	volatile IOAPIC* g_ioAPICAddr = nullptr;
 	uint64_t g_hpetFrequency = 0;
 
 	template<typename T>
@@ -76,15 +83,24 @@ namespace obos
 		case 1:
 		{
 			acpi::MADT_EntryType1* entry = (acpi::MADT_EntryType1*)entryHeader;
-			ioapicAddressOut = (void*)(uintptr_t)entry->ioapicAddress;
-			if (is32BitTables)
-				ioapicAddressOut = (void*)((uintptr_t)ioapicAddressOut & 0xffffffff);
+			if (!ioapicAddressOut)
+			{
+				// Only support one IOAPIC, ignore all others.
+				ioapicAddressOut = (void*)(uintptr_t)entry->ioapicAddress;
+				if (is32BitTables)
+					ioapicAddressOut = (void*)((uintptr_t)ioapicAddressOut & 0xffffffff);
+			}
 			ret = sizeof(acpi::MADT_EntryType1);
 			break;
 		}
 		case 2:
+		{
+			acpi::MADT_EntryType2* entry = (acpi::MADT_EntryType2*)entryHeader;
+			OBOS_ASSERTP(g_szIoapicRedirectionEntries != (sizeof(g_ioapicRedirectionEntries) / sizeof(ioapic_redirection)), "Ran out of space in the ioapic redirection table.");
+			g_ioapicRedirectionEntries[g_szIoapicRedirectionEntries++] = { entry->irqSource, entry->globalSystemInterrupt };
 			ret = sizeof(acpi::MADT_EntryType2);
 			break;
+		}
 		case 3:
 			ret = sizeof(acpi::MADT_EntryType3);
 			break;
@@ -130,6 +146,10 @@ namespace obos
 				ProcessEntryHeader(entryHeader, lapicAddress, ioapicAddress, g_nCores, &g_processorIDs[0], &g_lapicIDs[0]);
 			logger::log("Found %d cores, local apic address: %p, io apic address: %p.\n", g_nCores, lapicAddress, ioapicAddress);
 			g_localAPICAddr = mapToHHDM((LAPIC*)lapicAddress);
+			g_ioAPICAddr = mapToHHDM((IOAPIC*)ioapicAddress);
+			// Write 0 to the ioapic's id field.
+			g_ioAPICAddr->ioregsel = 0x00;
+			g_ioAPICAddr->iowin = 0;
 		}
 		uint64_t msr = rdmsr(IA32_APIC_BASE);
 		msr |= ((uint64_t)1 << 11) | ((uint64_t)isBSP << 8);
@@ -276,5 +296,67 @@ namespace obos
 			return;
 		}
 		logger::panic(nullptr, "No MADT Table found in the acpi tables.\n");
+	}
+	static uint8_t getRedirectionEntryIndex(uint8_t irq)
+	{
+		for (size_t i = 0; i < g_szIoapicRedirectionEntries; i++)
+			if (g_ioapicRedirectionEntries[i].source == irq)
+				return g_ioapicRedirectionEntries[i].globalSystemInterrupt;
+		return irq;
+	}
+#define GetIOAPICRegisterOffset(reg) ((uint8_t)(uintptr_t)(&((IOAPIC_Registers*)nullptr)->reg) / 4)
+	bool MapIRQToVector(uint8_t irq, uint8_t vector)
+	{
+		uintptr_t flags = saveFlagsAndCLI();
+		uint32_t maximumRedirectionEntries = GetIOAPICRegisterOffset(ioapicVersion);
+		g_ioAPICAddr->ioregsel = maximumRedirectionEntries;
+		maximumRedirectionEntries = (g_ioAPICAddr->iowin >> 16) & 0xff;
+		uint8_t redirectionEntryIndex = getRedirectionEntryIndex(irq);
+		if (redirectionEntryIndex > (maximumRedirectionEntries + 1))
+		{
+			restorePreviousInterruptStatus(flags);
+			return false;
+		}
+		uint64_t _redirectionEntry = 0;
+		uint64_t redirectionEntryOffset = GetIOAPICRegisterOffset(redirectionEntries[redirectionEntryIndex]);
+		g_ioAPICAddr->ioregsel = redirectionEntryOffset;
+		_redirectionEntry = g_ioAPICAddr->iowin;
+		g_ioAPICAddr->ioregsel = redirectionEntryOffset + 1;
+		_redirectionEntry |= ((uint64_t)g_ioAPICAddr->iowin << 32);
+		IOAPIC_RedirectionEntry *redirectionEntry = (IOAPIC_RedirectionEntry*)&_redirectionEntry;
+		redirectionEntry->delMod = 0b000 /* Fixed */;
+		redirectionEntry->destMode = false /* Physical Mode */;
+		redirectionEntry->mask = false /* Unmasked */;
+		redirectionEntry->vector = vector;
+		redirectionEntry->destination.physical.lapicId = 0;
+		g_ioAPICAddr->ioregsel = redirectionEntryOffset;
+		g_ioAPICAddr->iowin = _redirectionEntry;
+		g_ioAPICAddr->ioregsel = redirectionEntryOffset + 1;
+		g_ioAPICAddr->iowin = _redirectionEntry >> 32;
+		restorePreviousInterruptStatus(flags);
+		return true;
+
+	}
+	OBOS_EXPORT bool MaskIRQ(uint8_t irq, bool mask)
+	{
+		uint32_t maximumRedirectionEntries = GetIOAPICRegisterOffset(ioapicVersion);
+		g_ioAPICAddr->ioregsel = maximumRedirectionEntries;
+		maximumRedirectionEntries = (g_ioAPICAddr->iowin >> 16) & 0xff;
+		uint8_t redirectionEntryIndex = getRedirectionEntryIndex(irq);
+		if (redirectionEntryIndex > (maximumRedirectionEntries + 1))
+			return false;
+		uint64_t _redirectionEntry = 0;
+		uint64_t redirectionEntryOffset = GetIOAPICRegisterOffset(redirectionEntries[redirectionEntryIndex]);
+		g_ioAPICAddr->ioregsel = redirectionEntryOffset;
+		_redirectionEntry = g_ioAPICAddr->iowin;
+		g_ioAPICAddr->ioregsel = redirectionEntryOffset + 4;
+		_redirectionEntry |= ((uint64_t)g_ioAPICAddr->iowin << 32);
+		IOAPIC_RedirectionEntry* redirectionEntry = (IOAPIC_RedirectionEntry*)&_redirectionEntry;
+		redirectionEntry->mask = mask;
+		g_ioAPICAddr->ioregsel = redirectionEntryOffset;
+		g_ioAPICAddr->iowin = _redirectionEntry;
+		g_ioAPICAddr->ioregsel = redirectionEntryOffset + 4;
+		g_ioAPICAddr->iowin = _redirectionEntry >> 32;
+		return true;
 	}
 }

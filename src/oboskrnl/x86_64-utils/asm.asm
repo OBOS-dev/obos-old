@@ -315,39 +315,55 @@ _ZN4obos14atomic_cmpxchgEPbbb:
 	lock cmpxchg byte [rdi], dl
 	setz al
 	ret
+
+; For the bsf/bsr functions, the rep prefix is added so that if the cpu running the kernel understands the lzcnt/tzcnt instructions, they're used instead of bsf/bsr,
+; as they're more performant.
+
 _ZN4obos3bsfEj:
-	bsf eax, edi
+	pushfq
+	rep bsf eax, edi
+	popfq
 	ret
 _ZN4obos3bsfEm:
-	bsf rax, rdi
+	pushfq
+	rep bsf rax, rdi
+	popfq
 	ret
 _ZN4obos3bsfEo:
+	pushfq
 	xor rax, rax
-	bsf rax, rdi
+	rep bsf rax, rdi
 	mov rdx, 1
 	mov rcx, rax
 	shl rdx, cl
 	test rdi, rdx
 	jnz .ret
-	bsf rax, rsi
+	rep bsf rax, rsi
 .ret:
+	popfq
 	ret
 _ZN4obos3bsrEj:
-	bsr eax, edi
+	pushfq
+	rep bsr eax, edi
+	popfq
 	ret
 _ZN4obos3bsrEm:
-	bsr rax, rdi
+	pushfq
+	rep bsr rax, rdi
+	popfq
 	ret
 _ZN4obos3bsrEo:
+	pushfq
 	xor rax, rax
-	bsr rax, rdi
+	rep bsr rax, rdi
 	mov rdx, 1
 	mov rcx, rax
 	shl rdx, cl
 	test rdi, rdx
 	jnz .ret
-	bsr rax, rsi
+	rep bsr rax, rsi
 .ret:
+	popfq
 	ret
 global _ZN4obos9getEflagsEv
 _ZN4obos9getEflagsEv:

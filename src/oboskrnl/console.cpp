@@ -202,7 +202,7 @@ namespace obos
 			if ((m_modificationArray[ty / bitLength] >> (ty % bitLength)) & 1)
 			{
 				// Copy the line.
-				uint32_t cy = ty * 16;
+				uint32_t cy = ty * 16 + ((size_t)(ty != ((size_t)m_nCharsVertical - 1)) * 4);
 				for (uint32_t y = cy; y < (cy + 16); y++)
 					utils::dwMemcpy(m_framebuffer.addr + y * m_framebuffer.pitch / 4, m_backbuffer.addr + y * m_backbuffer.width, m_framebuffer.width);
 			}

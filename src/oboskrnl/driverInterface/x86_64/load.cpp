@@ -34,14 +34,14 @@ namespace obos
 	extern volatile limine_module_request module_request;
 	namespace driverInterface
 	{
-		static const char* getElfString(process::loader::Elf64_Ehdr* elfHeader, uintptr_t index)
+		static const char* getElfString(const process::loader::Elf64_Ehdr* elfHeader, uintptr_t index)
 		{
 			const char* startAddress = reinterpret_cast<const char*>(elfHeader);
 			process::loader::Elf64_Shdr* stringTable = reinterpret_cast<process::loader::Elf64_Shdr*>(const_cast<char*>(startAddress) + elfHeader->e_shoff);
 			stringTable += elfHeader->e_shstrndx;
 			return startAddress + stringTable->sh_offset + index;
 		}
-		static bool CheckModuleExecutable(byte* file, size_t size)
+		static bool CheckModuleExecutable(const byte* file, size_t size)
 		{
 			using namespace process::loader;
 			if (size < sizeof(Elf64_Ehdr))
@@ -72,7 +72,7 @@ namespace obos
 			}
 			return true;
 		}
-		driverHeader* _CheckModuleImpl(byte* file, size_t size, uintptr_t* headerVirtAddr)
+		const driverHeader* _CheckModuleImpl(const byte* file, size_t size, uintptr_t* headerVirtAddr)
 		{
 			using namespace process::loader;
 
@@ -80,8 +80,8 @@ namespace obos
 				return nullptr;
 			
 			Elf64_Ehdr* elfHeader = (Elf64_Ehdr*)file;
-			process::loader::Elf64_Shdr* iter = reinterpret_cast<process::loader::Elf64_Shdr*>(file + elfHeader->e_shoff);
-			process::loader::Elf64_Shdr* currentSection = nullptr;
+			const process::loader::Elf64_Shdr* iter = reinterpret_cast<const process::loader::Elf64_Shdr*>(file + elfHeader->e_shoff);
+			const process::loader::Elf64_Shdr* currentSection = nullptr;
 
 			for (size_t i = 0; i < elfHeader->e_shnum; i++, iter++)
 			{
@@ -97,7 +97,7 @@ namespace obos
 				SetLastError(OBOS_ERROR_NOT_A_DRIVER);
 				return nullptr;
 			}
-			driverHeader* header = reinterpret_cast<driverHeader*>(file + currentSection->sh_offset);
+			const driverHeader* header = reinterpret_cast<const driverHeader*>(file + currentSection->sh_offset);
 			if (header->magicNumber != OBOS_DRIVER_HEADER_MAGIC)
 			{
 				SetLastError(OBOS_ERROR_NOT_A_DRIVER);
@@ -170,8 +170,8 @@ namespace obos
 		}
 		struct tables
 		{
-			process::loader::Elf64_Shdr* symtab_section;
-			process::loader::Elf64_Shdr* strtab_section;
+			const process::loader::Elf64_Shdr* symtab_section;
+			const process::loader::Elf64_Shdr* strtab_section;
 		};
 		static tables GetKernelSymbolStringTables()
 		{
@@ -203,12 +203,12 @@ namespace obos
 				return { nullptr,nullptr };
 			return { symtab_section,strtab_section };
 		}
-		static tables GetDriverSymbolStringTables(byte* file)
+		static tables GetDriverSymbolStringTables(const byte* file)
 		{
-			process::loader::Elf64_Ehdr* eheader = (process::loader::Elf64_Ehdr*)file;
-			process::loader::Elf64_Shdr* iter = reinterpret_cast<process::loader::Elf64_Shdr*>(file + eheader->e_shoff);
-			process::loader::Elf64_Shdr* symtab_section = nullptr;
-			process::loader::Elf64_Shdr* strtab_section = nullptr;
+			const process::loader::Elf64_Ehdr* eheader = (process::loader::Elf64_Ehdr*)file;
+			const process::loader::Elf64_Shdr* iter = reinterpret_cast<const process::loader::Elf64_Shdr*>(file + eheader->e_shoff);
+			const process::loader::Elf64_Shdr* symtab_section = nullptr;
+			const process::loader::Elf64_Shdr* strtab_section = nullptr;
 
 			for (size_t i = 0; i < eheader->e_shnum; i++, iter++)
 			{
@@ -238,7 +238,7 @@ namespace obos
 		{
 			return symbolTable + index;
 		}
-		static bool LoadModuleAndRelocate(byte* file, [[maybe_unused]] size_t size, uintptr_t& _baseAddress, uintptr_t& entry)
+		static bool LoadModuleAndRelocate(const byte* file, [[maybe_unused]] size_t size, uintptr_t& _baseAddress, uintptr_t& entry)
 		{
 			// Load the program headers.
 			using namespace process::loader;
@@ -573,14 +573,14 @@ namespace obos
 			return true;
 		}
 		utils::Hashmap<uint32_t, driverIdentity*> g_driverInterfaces;
-		driverHeader* CheckModule(byte* file, size_t size)
+		driverHeader* CheckModule(const byte* file, size_t size)
 		{
-			return _CheckModuleImpl(file, size, nullptr);
+			return (driverHeader*)_CheckModuleImpl(file, size, nullptr);
 		}
-		bool LoadModule(byte* file, size_t size, thread::ThreadHandle** mainThread)
+		bool LoadModule(const byte* file, size_t size, thread::ThreadHandle** mainThread)
 		{
 			uintptr_t headerVirtAddr = 0;
-			driverHeader* header = _CheckModuleImpl(file, size, &headerVirtAddr);
+			driverHeader* header = (driverHeader*)_CheckModuleImpl(file, size, &headerVirtAddr);
 			if (!header)
 				return false;
 			if (!header->functionTable.GetServiceType)

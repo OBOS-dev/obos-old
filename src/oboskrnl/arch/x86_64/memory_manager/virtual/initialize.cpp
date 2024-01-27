@@ -37,6 +37,7 @@ namespace obos
 		static uintptr_t s_pageTable[512] alignas(4096);
 		uintptr_t s_pageTablePhys = 0;
 		uintptr_t s_pageDirectoryPhys = 0;
+		uintptr_t g_physAddrMask = 0;
 		uintptr_t DecodeProtectionFlags(uintptr_t _flags);
 
 
@@ -64,7 +65,8 @@ namespace obos
 		{
 			uintptr_t flags = saveFlagsAndCLI();
 			at &= ~0xfff;
-			OBOS_ASSERTP((uintptr_t)getPageMap() < ((uint64_t)1 << GetPhysicalAddressBits()), "");
+			if ((uintptr_t)getPageMap() > ((uint64_t)1 << GetPhysicalAddressBits()))
+				return nullptr;
 			uintptr_t* pageMap = mapPageTable(getPageMap());
 			uintptr_t* ret = (uintptr_t*)pageMap[addressToIndex(at, 3)];
 			restorePreviousInterruptStatus(flags);
@@ -73,9 +75,9 @@ namespace obos
 		uintptr_t* PageMap::getL3PageMapEntryAt(uintptr_t at)
 		{
 			at &= ~0xfff;
-			uintptr_t rawPtr = (uintptr_t)getL4PageMapEntryAt(at) & 0xFFFFFFFFFF000;
-			OBOS_ASSERTP(rawPtr < ((uint64_t)1 << GetPhysicalAddressBits()), "");
-			if (!rawPtr)
+			uintptr_t rawPtr = (uintptr_t)getL4PageMapEntryAt(at) & g_physAddrMask;
+			//OBOS_ASSERTP(rawPtr < ((uint64_t)1 << GetPhysicalAddressBits()), "");
+			if (!rawPtr || rawPtr > ((uint64_t)1 << GetPhysicalAddressBits()))
 				return nullptr;
 			uintptr_t flags = saveFlagsAndCLI();
 			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
@@ -87,9 +89,8 @@ namespace obos
 		{
 			at &= ~0xfff;
 			uintptr_t flags = saveFlagsAndCLI();
-			uintptr_t rawPtr = (uintptr_t)getL3PageMapEntryAt(at) & 0xFFFFFFFFFF000;
-			OBOS_ASSERTP(rawPtr < ((uint64_t)1 << GetPhysicalAddressBits()), "");
-			if (!rawPtr)
+			uintptr_t rawPtr = (uintptr_t)getL3PageMapEntryAt(at) & g_physAddrMask;
+			if (!rawPtr || rawPtr > ((uint64_t)1 << GetPhysicalAddressBits()))
 				return nullptr;
 			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
 			uintptr_t *ret = (uintptr_t*)pageMap[addressToIndex(at, 1)];
@@ -100,9 +101,9 @@ namespace obos
 		{
 			at &= ~0xfff;
 			uintptr_t flags = saveFlagsAndCLI();
-			uintptr_t rawPtr = (uintptr_t)getL2PageMapEntryAt(at) & 0xFFFFFFFFFF000;
+			uintptr_t rawPtr = (uintptr_t)getL2PageMapEntryAt(at) & g_physAddrMask;
 			OBOS_ASSERTP(rawPtr < ((uint64_t)1 << GetPhysicalAddressBits()), "");
-			if (!rawPtr)
+			if (!rawPtr || rawPtr > ((uint64_t)1 << GetPhysicalAddressBits()))
 				return nullptr;
 			uintptr_t* pageMap = mapPageTable((uintptr_t*)rawPtr);
 			uintptr_t* ret = (uintptr_t*)pageMap[addressToIndex(at, 0)];
@@ -125,11 +126,12 @@ namespace obos
 		}
 		void InitializeVirtualMemoryManager()
 		{
+			g_physAddrMask = (((uint64_t)1 << GetPhysicalAddressBits()) - 1) << 12;
 			PageMap* kernelPageMap = getCurrentPageMap();
 			PageMap* newKernelPageMap = (PageMap*)allocatePhysicalPage();
 			uintptr_t* pPageMap = (uintptr_t*)newKernelPageMap;
-			s_pageTablePhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageTable) & 0xFFFFFFFFFF000;
-			s_pageDirectoryPhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageDirectory) & 0xFFFFFFFFFF000;
+			s_pageTablePhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageTable) & g_physAddrMask;
+			s_pageDirectoryPhys = (uintptr_t)kernelPageMap->getL1PageMapEntryAt((uintptr_t)&s_pageDirectory) & g_physAddrMask;
 			utils::memzero(mapPageTable(pPageMap), 4096);
 			mapPageTable(pPageMap)[511] = (uintptr_t)kernelPageMap->getL4PageMapEntryAt(0xffffffff80000000);
 			mapPageTable(pPageMap)[PageMap::addressToIndex(0xffff800000000000, 3)] = (uintptr_t)kernelPageMap->getL4PageMapEntryAt(0xffff800000000000);
@@ -137,7 +139,7 @@ namespace obos
 			mapPageTable(
 				reinterpret_cast<uintptr_t*>(
 					(uintptr_t)newKernelPageMap->getL4PageMapEntryAt(0xfffffffffffff000) 
-					& 0xFFFFFFFFFF000)
+					& g_physAddrMask)
 				)
 				[PageMap::addressToIndex(0xfffffffffffff000, 2)] = s_pageDirectoryPhys | 3;
 			newKernelPageMap->switchToThis();
@@ -146,12 +148,15 @@ namespace obos
 			freePhysicalPage((uintptr_t)kernelPageMap);
 			g_localAPICAddr = (volatile LAPIC*)((uintptr_t)g_localAPICAddr - hhdm_offset.response->offset);
 			g_HPETAddr = (volatile HPET*)((uintptr_t)g_HPETAddr - hhdm_offset.response->offset);
+			g_ioAPICAddr = (volatile IOAPIC*)((uintptr_t)g_ioAPICAddr - hhdm_offset.response->offset);
 			MapPhysicalAddress(newKernelPageMap, (uintptr_t)g_localAPICAddr, (void*)0xffffffffffffe000, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
 			// Do it twice. Why, I don't know. But that fixes the problem
 			MapPhysicalAddress(newKernelPageMap, (uintptr_t)g_localAPICAddr, (void*)0xffffffffffffe000, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
 			MapPhysicalAddress(newKernelPageMap, (uintptr_t)g_HPETAddr, (void*)0xffffffffffffd000, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
+			MapPhysicalAddress(newKernelPageMap, (uintptr_t)g_ioAPICAddr, (void*)0xffffffffffffc000, DecodeProtectionFlags(PROT_DISABLE_CACHE | PROT_IS_PRESENT));
 			g_localAPICAddr = (volatile LAPIC*)0xffffffffffffe000;
 			g_HPETAddr = (volatile HPET*)0xffffffffffffd000;
+			g_ioAPICAddr = (volatile IOAPIC*)0xffffffffffffc000;
 			g_initialized = true;
 		}
 		bool CPUSupportsExecuteDisable()

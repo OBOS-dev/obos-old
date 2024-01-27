@@ -75,26 +75,16 @@ namespace obos
 			}
 			if (!affinity)
 				affinity = thread::g_defaultAffinity;
-			Thread::ThreadList* priorityList;
-			switch (priority)
+			constexpr static Thread::ThreadList* priorityListTable[] = {
+				g_priorityLists + 0, g_priorityLists + 1,
+				g_priorityLists + 2, g_priorityLists + 3,
+			};
+			if ((size_t)__builtin_ctz(priority) >= (sizeof(priorityListTable) / sizeof(priorityListTable[0])))
 			{
-			case THREAD_PRIORITY_IDLE:
-				priorityList = g_priorityLists + 0;
-				break;
-			case THREAD_PRIORITY_LOW:
-				priorityList = g_priorityLists + 1;
-				break;
-			case THREAD_PRIORITY_NORMAL:
-				priorityList = g_priorityLists + 2;
-				break;
-			case THREAD_PRIORITY_HIGH:
-				priorityList = g_priorityLists + 3;
-				break;
-			default:
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
-				break;
 			}
+			Thread::ThreadList* const priorityList = priorityListTable[__builtin_ctz(priority)];
 
 			process::Process* tproc = _process ? (process::Process*)_process : (process::Process*)getCPULocal()->currentThread->owner;
 
@@ -104,7 +94,7 @@ namespace obos
 
 			thread->tid = g_nextTid++;
 			thread->status = THREAD_STATUS_CAN_RUN | ((uint32_t)startPaused * THREAD_STATUS_PAUSED);
-			thread->priority = THREAD_PRIORITY_NORMAL;
+			thread->priority = priority;
 			thread->exitCode = 0;
 			thread->lastError = 0;
 			thread->priorityList = priorityList;

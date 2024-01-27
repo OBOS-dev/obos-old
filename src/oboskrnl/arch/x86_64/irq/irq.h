@@ -7,13 +7,10 @@
 #pragma once
 
 #include <int.h>
+#include <export.h>
 
 namespace obos
-{
-	void InitializeIrq(bool isBSP);
-	void SendEOI();
-
-	struct LAPIC
+{	struct LAPIC
 	{
 		alignas(0x10) const uint8_t resv1[0x20];
 		alignas(0x10) uint32_t lapicID;
@@ -132,11 +129,65 @@ namespace obos
 		HPET_Timer timer0, timer1, timer2;
 		// 0x160-0x400 are for timers 0-31
 	};
+	struct IOAPIC_RedirectionEntry
+	{
+		uint8_t vector;
+		uint8_t delMod : 3;
+		bool destMode : 1;
+		const bool delivStatus : 1;
+		bool intPol : 1;
+		const bool remoteIRR : 1;
+		bool triggerMode : 1;
+		bool mask : 1;
+		const uint64_t padding : 39;
+		union
+		{
+			struct
+			{
+				uint8_t setOfProcessors;
+			} __attribute__((packed)) logical;
+			struct
+			{
+				uint8_t resv1 : 4;
+				uint8_t lapicId : 4;
+			} __attribute__((packed)) physical;
+		} __attribute__((packed)) destination;
+	} __attribute__((packed));
+	struct IOAPIC_Registers
+	{
+		struct {
+			const uint32_t resv1 : 24;
+			uint8_t ioapicID : 4;
+			const uint8_t resv2 : 4;
+		} __attribute__((packed)) ioapicId;
+		struct
+		{
+			const uint8_t version;
+			const uint8_t resv1;
+			const uint8_t maximumRedirectionEntries;
+			const uint8_t resv2;
+		} __attribute__((packed)) ioapicVersion;
+		struct
+		{
+			const uint32_t resv1 : 24;
+			const uint8_t ioapicID : 4;
+			const uint8_t resv2 : 4;
+		} __attribute__((packed)) ioapicArbitrationID;
+		uint32_t resv1[13];
+		IOAPIC_RedirectionEntry redirectionEntries[];
+	} __attribute__((packed));
+	struct IOAPIC
+	{
+		alignas(0x10) uint8_t ioregsel;
+		alignas(0x10) uint32_t iowin;
+	};
 	static_assert(sizeof(LAPIC) == 0x400, "struct LAPIC has an invalid size.");
+	static_assert(sizeof(IOAPIC_RedirectionEntry) == 8, "struct IOAPIC_RedirectionEntry has an invalid size.");
 	static_assert(sizeof(HPET) == 0x160, "struct HPET has an invalid size.");
 	static_assert(sizeof(HPET_Timer) == 32, "struct HPET_Timer has an invalid size.");
 	
 	extern volatile LAPIC* g_localAPICAddr; 
+	extern volatile IOAPIC* g_ioAPICAddr;
 	extern volatile HPET* g_HPETAddr;
 	extern uint64_t g_hpetFrequency;
 
@@ -158,5 +209,9 @@ namespace obos
 		SIPI,
 	};
 
-	void SendIPI(DestinationShorthand shorthand, DeliveryMode deliveryMode, uint8_t vector = 0, uint8_t _destination = 0);
+	void InitializeIrq(bool isBSP);
+	OBOS_EXPORT void SendIPI(DestinationShorthand shorthand, DeliveryMode deliveryMode, uint8_t vector = 0, uint8_t _destination = 0);
+	OBOS_EXPORT void SendEOI();
+	OBOS_EXPORT bool MapIRQToVector(uint8_t irq, uint8_t vector);
+	OBOS_EXPORT bool MaskIRQ(uint8_t irq, bool mask = false);
 }

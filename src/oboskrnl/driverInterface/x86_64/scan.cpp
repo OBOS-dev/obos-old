@@ -77,7 +77,7 @@ namespace obos
 			return utils::strcmp(first.fullPath.data(), second.fullPath.data());
 		}
 		
-		driverHeader* CheckModule(byte* file, size_t size);
+		driverHeader* CheckModule(const byte* file, size_t size);
 		struct pciDevice
 		{
 			uint8_t classCode : 8;

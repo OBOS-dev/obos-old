@@ -358,6 +358,6 @@ extern "C" void _start()
 	// }
 	done:
     g_driverHeader.driver_initialized = true;
-	while (g_driverHeader.driver_finished_loading);
+	while (!g_driverHeader.driver_finished_loading);
 	thread::ExitThread(exitCode);
 }

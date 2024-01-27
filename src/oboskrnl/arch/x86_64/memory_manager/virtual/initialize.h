@@ -49,5 +49,7 @@ namespace obos
 		// We don't export this because by the time a driver gets loaded it will be true.
 
 		extern bool g_initialized;
+
+		extern OBOS_EXPORT uintptr_t g_physAddrMask;
 	}
 }

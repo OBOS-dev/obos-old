@@ -7,6 +7,7 @@
 #pragma once
 
 #include <int.h>
+#include <export.h>
 
 #define BITFIELD_FROM_BIT(n) (1<<n)
 
@@ -81,6 +82,6 @@ namespace obos
 		uintptr_t rsp, ss;
 	};
 
-	void RegisterInterruptHandler(byte interrupt, void(*handler)(interrupt_frame* frame));
+	OBOS_EXPORT void RegisterInterruptHandler(byte interrupt, void(*handler)(interrupt_frame* frame));
 	void RegisterInterruptInIDT(int n, void(*handler)());
 }

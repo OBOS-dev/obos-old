@@ -61,6 +61,6 @@ extern "C" void _start()
 	logger::log("InitRD Driver: Initializing filesystem cache.\n");
 	InitializeFilesystemCache();
 	g_driverHeader.driver_initialized = true;
-	while (g_driverHeader.driver_finished_loading);
+	while (!g_driverHeader.driver_finished_loading);
 	thread::ExitThread(0);
 }

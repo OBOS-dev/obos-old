@@ -37,6 +37,7 @@ namespace obos
 			uintptr_t flags = saveFlagsAndCLI();
 			info->cr3 = (void*)memory::allocatePhysicalPage();
 			uintptr_t* newPageMap = memory::mapPageTable((uintptr_t*)info->cr3);
+			utils::memzero(newPageMap, 4096);
 			uintptr_t* pageMap = memory::mapPageTable((uintptr_t*)memory::getCurrentPageMap());
 			for (size_t pml4I = memory::PageMap::addressToIndex(0xffff'8000'0000'0000, 3); pml4I < 512; pml4I++)
 				newPageMap[pml4I] = pageMap[pml4I];

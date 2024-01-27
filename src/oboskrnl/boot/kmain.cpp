@@ -244,11 +244,12 @@ namespace obos
 			logger::panic(nullptr, "%s: While calling LoadElfFile(), Could not load '%S'. GetLastError: %d.\n", __func__, initProgramPath, GetLastError());
 #endif
 		thread::ThreadHandle initProgramMainThread;
+		char* program_arguments = (char*)proc->vallocator.Memcpy(proc->vallocator.VirtualAlloc(nullptr, initProgramPath.length() + 1, memory::PROT_USER_MODE_ACCESS), initProgramPath.data(), initProgramPath.length());
 		initProgramMainThread.CreateThread(
 			4,
 			0x10000,
 			(void(*)(uintptr_t))entry,
-			0,
+			(uintptr_t)program_arguments,
 			thread::g_defaultAffinity,
 			proc,
 			true
