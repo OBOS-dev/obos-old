@@ -64,12 +64,16 @@ namespace obos
 	{
 		m_lock.Lock();
 		__ImplConsoleOutputChar(ch, m_foregroundColour, m_backgroundColour, m_terminalX, m_terminalY);
+		if ((m_nCallsSinceLastSwap += (ch == '\n')) >= maxCountsUntilSwap)
+			SwapBuffers();
 		m_lock.Unlock();
 	}
 	void Console::ConsoleOutput(char ch, uint32_t& x, uint32_t& y)
 	{
 		m_lock.Lock();
 		__ImplConsoleOutputChar(ch, m_foregroundColour, m_backgroundColour, x, y);
+		if ((m_nCallsSinceLastSwap += (ch == '\n')) >= maxCountsUntilSwap)
+			SwapBuffers();
 		m_lock.Unlock();
 	}
 
@@ -77,6 +81,8 @@ namespace obos
 	{
 		m_lock.Lock();
 		__ImplConsoleOutputChar(ch, foregroundColour, backgroundColour, x, y);
+		if ((m_nCallsSinceLastSwap += (ch == '\n')) >= maxCountsUntilSwap)
+			SwapBuffers();
 		m_lock.Unlock();
 	}
 
@@ -259,8 +265,6 @@ namespace obos
 			return;
 		if (m_drawingBuffer->lock)
 			m_drawingBuffer->lock->Lock();
-		if (m_modificationArray)
-			m_modificationArray[y / (sizeof(*m_modificationArray) * 4)] |= 1<<(y % (sizeof(*m_modificationArray) * 4));
 		switch (ch)
 		{
 		case '\n':
@@ -287,6 +291,8 @@ namespace obos
 			putChar(ch, x++, y, foregroundColour, backgroundColour);
 			break;
 		}
+		if (m_modificationArray)
+			m_modificationArray[y / (sizeof(*m_modificationArray) * 4)] |= 1<<(y % (sizeof(*m_modificationArray) * 4));
 		if (m_drawingBuffer->lock)
 			m_drawingBuffer->lock->Unlock();
 	}

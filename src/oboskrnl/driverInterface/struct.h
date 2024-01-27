@@ -45,6 +45,41 @@ namespace obos
 			// Hidden
 			FILE_ATTRIBUTES_HIDDEN = 32,
 		};
+		enum class SpecialKeys
+		{
+			INVALID,
+			SHIFT = 0x100,
+			RIGHT_CONTROL,
+			RIGHT_ALT,
+			RIGHT_GUI,
+			LEFT_CONTROL,
+			LEFT_ALT,
+			LEFT_GUI,
+			NUMLOCK,
+			PRINT_SCREEN,
+			PAGE_UP,
+			PAGE_DOWN,
+			HOME,
+			END,
+			INSERT,
+			F1,
+			F2,
+			F3,
+			F4,
+			F5,
+			F6,
+			F7,
+			F8,
+			F9,
+			F10,
+			F11,
+			F12,
+			CAPS_LOCK,
+			UP_ARROW, DOWN_ARROW,
+			LEFT_ARROW, RIGHT_ARROW,
+			DELETE,
+			SCROLL_LOCK,
+		};
 		struct partitionInfo
 		{
 			uint32_t id;
@@ -129,9 +164,10 @@ namespace obos
 				} storageDevice;
 				struct
 				{
+					// If cap locks is clicked, this should first return cap locks, then all letters should be capitalized, or un-capitalized.
 					bool(*ReadCharacter)(
 						uint64_t deviceId,
-						char* ch
+						uint16_t* ch // Bottom Byte: Ascii Character, Top Key: Special Key (see enum SpecialKeys).
 						);
 					void* unused[maxCallbacks - 1]; // Add padding
 				} userInputDevice;

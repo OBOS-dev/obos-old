@@ -9,6 +9,8 @@
 #include <vector.h>
 #include <console.h>
 
+#include <new>
+
 #include <x86_64-utils/asm.h>
 
 #include <driverInterface/struct.h>
@@ -29,9 +31,7 @@ static void keyboardInterrupt(interrupt_frame*);
 
 byte sendCommand(uint32_t nCommands, ...);
 
-// Should take 2 pages.
-byte g_keyBuffer[8192] = {};
-size_t g_keyBufferPosition = 0;
+utils::Vector<uint16_t> g_keyBuffer;
 
 struct
 {
@@ -41,6 +41,8 @@ struct
 	bool isShiftPressed : 1;
 } flags = { 0,0,0,0 };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 __attribute__((section(OBOS_DRIVER_HEADER_SECTION_NAME))) driverInterface::driverHeader g_driverHeader = {
 	.magicNumber = driverInterface::OBOS_DRIVER_HEADER_MAGIC,
 	.driverId = 5,
@@ -56,9 +58,12 @@ __attribute__((section(OBOS_DRIVER_HEADER_SECTION_NAME))) driverInterface::drive
 		},
 	},
 };
+#pragma GCC diagnostic pop
 
 extern "C" void _start()
 {
+	new (&g_keyBuffer) utils::Vector<uint16_t>{};
+
 	// Register the IRQ
 	RegisterInterruptHandler(0x21, keyboardInterrupt);
 	MapIRQToVector(1, 0x21);
@@ -67,7 +72,7 @@ extern "C" void _start()
 	sendCommand(2, 0xF3, 0);
 
 	// Set scancode set 1.
-	sendCommand(2, 0xF0, 1);
+	sendCommand(2, 0xF0, 0);
 
 	// Enable scanning.
 	sendCommand(1, 0xF4);
@@ -80,20 +85,45 @@ extern "C" void _start()
 	thread::ExitThread(0);
 }
 
+static bool isExtendedScancode = false;
 static void keyboardInterrupt(interrupt_frame*)
 {
 	byte scancode = inb(0x60);
 
-	bool wasReleased = (scancode & 0x80) == 0x80;
-	
 	char ch = 0;
 	
+	if (scancode == 0xE0)
+		isExtendedScancode = true;
 	if (scancode > 0xD8)
 	{
 		SendEOI();
 		return;
 	}
+	if (isExtendedScancode)
+	{
+		bool wasReleased = (scancode & 0x80) == 0x80;
+		if (wasReleased)
+			scancode &= ~(0x80);
+		if (g_keys[scancode].skipExtended)
+		{
+			isExtendedScancode = false;
+			goto skip_extended_processing;
+		}
+		driverInterface::SpecialKeys key = driverInterface::SpecialKeys::INVALID;
+		if (scancode == 0x5b)
+			key = driverInterface::SpecialKeys::LEFT_GUI;
+		else if (scancode == 0x5c)
+			key = driverInterface::SpecialKeys::RIGHT_GUI;
+		else
+			key = g_keys[scancode].extendedCh;
+		g_keyBuffer.push_back((uint16_t)key);
+		isExtendedScancode = false;
+		SendEOI();
+		return;
+	}
 
+	skip_extended_processing:
+	bool wasReleased = (scancode & 0x80) == 0x80;
 	if (wasReleased)
 		scancode &= ~(0x80);
 
@@ -101,23 +131,37 @@ static void keyboardInterrupt(interrupt_frame*)
 
 	g_keys[scancode].isPressed = !wasReleased;
 	g_keys[scancode].nPressed++;
-	if(g_keys[scancode].ch && g_keys[scancode].isPressed)
+	if (g_keys[scancode].isPressed)
 	{
-		bool isUppercase = flags.isCapsLock || flags.isShiftPressed;
-		if (flags.isCapsLock && flags.isShiftPressed)
-			isUppercase = false;
+		if (scancode == 0x1d)
+		{
+			g_keyBuffer.push_back(ch << 8);
+			goto skip;
+		}
+		if (ch)
+		{
+			bool isUppercase = flags.isCapsLock || flags.isShiftPressed;
+			if (flags.isCapsLock && flags.isShiftPressed)
+				isUppercase = false;
 
-		char newKey = 0;
-		if(ch < 'A' || ch > 'Z')
-			newKey = ch;
-		else
-			newKey = isUppercase ? ch : (ch - 'A') + 'a';
-		if (flags.isShiftPressed && (ch < 'A' || ch > 'Z') && g_keys[scancode].shiftAlias)
-			newKey = g_keys[scancode].shiftAlias;
-		if(newKey)
-			g_keyBuffer[g_keyBufferPosition++] = newKey;
+			char newKey = 0;
+			if (ch < 'A' || ch > 'Z')
+				newKey = ch;
+			else
+				newKey = isUppercase ? ch : (ch - 'A') + 'a';
+			if (flags.isShiftPressed && (ch < 'A' || ch > 'Z') && g_keys[scancode].shiftAlias)
+				newKey = g_keys[scancode].shiftAlias;
+			if (newKey)
+			{
+				g_keyBuffer.push_back(newKey);
+				g_kernelConsole.ConsoleOutput(newKey);
+			}
+		}
+		else if (g_keys[scancode].extendedCh != driverInterface::SpecialKeys::INVALID)
+			g_keyBuffer.push_back((uint16_t)g_keys[scancode].extendedCh);
 	}
 
+	skip:
 	if (scancode == 0x2A || scancode == 0x36)
 		flags.isShiftPressed = !wasReleased;
 
