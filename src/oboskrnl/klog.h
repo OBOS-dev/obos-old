@@ -31,22 +31,10 @@ namespace obos
 			ERROR_RED = 0xcc3300,
 			PANIC_RED = 0xac1616,
 		};
-		// Format specifiers:
-		// %e: Change padding for %x and %X
-		// %d: Prints a intptr_t (as decimal).
-		// %i: Same as %d
-		// %u: Print an uintptr_t (as decimal).
-		// %x: Print hex number (lowercase, unsigned).
-		// %X: Print hex number (uppercase, unsigned).
-		// %c: Print character.
-		// %s: Print string (const char*)
-		// %S: Print string (utils::String)
-		// %p: Print pointer as a hex number with a padding of sizeof(uintptr_t) * 2
-		// %%: Prints a '%'
-		OBOS_EXPORT size_t printf_impl(void(*printCallback)(char ch, void* userdata), void* userdata, const char* format, va_list list);
 
 		OBOS_EXPORT size_t printf(const char* format, ...);
 		OBOS_EXPORT size_t vprintf(const char* format, va_list list);
+		OBOS_EXPORT size_t vsprintf(char* dest, const char* format, va_list list);
 		OBOS_EXPORT size_t sprintf(char* dest, const char* format, ...);
 
 		constexpr const char* DEBUG_PREFIX_MESSAGE = "[Debug] ";

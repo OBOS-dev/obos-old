@@ -59,6 +59,32 @@ namespace obos
             return ((ind(0xCFC) >> ((offset & 2) * 8)));
         }
 
+        void pciWriteByteRegister(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint8_t data)
+        {
+            uint32_t address;
+            uint32_t lbus = (uint32_t)bus;
+            uint32_t lslot = (uint32_t)slot;
+            uint32_t lfunc = (uint32_t)func;
+
+            address = (uint32_t)((lbus << 16) | (lslot << 11) |
+                (lfunc << 8) | (offset & 0xFC) | ((uint32_t)0x80000000));
+
+            outd(0xCF8, address);
+            outb(0xCFC, data);
+        }
+        void pciWriteWordRegister(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint16_t data)
+        {
+            uint32_t address;
+            uint32_t lbus = (uint32_t)bus;
+            uint32_t lslot = (uint32_t)slot;
+            uint32_t lfunc = (uint32_t)func;
+
+            address = (uint32_t)((lbus << 16) | (lslot << 11) |
+                (lfunc << 8) | (offset & 0xFC) | ((uint32_t)0x80000000));
+
+            outd(0xCF8, address);
+            outw(0xCFC, data);
+        }
         void pciWriteDwordRegister(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint32_t data)
         {
             uint32_t address;

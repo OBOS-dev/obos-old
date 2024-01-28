@@ -166,12 +166,12 @@ namespace obos
 				logger::warning("Ignoring driver %s of type %d.\n", driverPath, header->driverType);
 				continue;
 			}
-			logger::log("Loading filesystem driver %S.\n", driverPath);
+			logger::log("Loading filesystem driver %s.\n", driverPath.data());
 			if (!driverInterface::LoadModule((byte*)fdata, drvFilesize, nullptr))
 			{
 				fdrv.Close();
 				delete[] fdata;
-				logger::warning("Could not load driver %S.\n", driverPath);
+				logger::warning("Could not load driver %s.\n", driverPath.data());
 				continue;
 			}
 			delete[] fdata;
@@ -193,8 +193,8 @@ namespace obos
 			delete[] path;
 			for (size_t _part = 0; _part < nPartitions; _part++)
 			{
-				char* partPath = new char[logger::sprintf(nullptr, "%SP%d:/", dPath, _part)];
-				logger::sprintf(partPath, "%SP%d:/", dPath, _part);
+				char* partPath = new char[logger::sprintf(nullptr, "%*sP%d:/", dPath.length(), dPath.data(), _part)];
+				logger::sprintf(partPath, "%*sP%d:/", dPath.length(), dPath.data(), _part);
 				part.OpenDrive(partPath);
 				const char* fsName = nullptr;
 				part.QueryPartitionInfo(nullptr, nullptr, &fsName);
@@ -226,14 +226,14 @@ namespace obos
 		if (!kcfg.GetElement("INIT_PROGRAM"))
 			logger::panic(nullptr, "Missing required property \"INIT_PROGRAM\" in 0:/boot.cfg.\n");
 		const utils::String &initProgramPath = kcfg.GetElement("INIT_PROGRAM")->string;
-		logger::log("%s: Attempting load of init program '%S'.\n", __func__, initProgramPath);
+		logger::log("%s: Attempting load of init program '%s'.\n", __func__, initProgramPath.data());
 		vfs::FileHandle handle;
 		if (!handle.Open(initProgramPath.data(), vfs::FileHandle::OPTIONS_READ_ONLY))
-			logger::panic(nullptr, "%s: Open(): Could not find init program '%S'. GetLastError: %d.\n", __func__, initProgramPath, GetLastError());
+			logger::panic(nullptr, "%s: Open(): Could not find init program '%s'. GetLastError: %d.\n", __func__, initProgramPath.data(), GetLastError());
 		utils::String initProgramContents;
 		initProgramContents.resize(handle.GetFileSize());
 		if (!handle.Read(initProgramContents.data(), initProgramContents.length(), false))
-			logger::panic(nullptr, "%s: While calling Read(): Could not load init program '%S'. GetLastError: %d.\n", __func__, initProgramPath, GetLastError());
+			logger::panic(nullptr, "%s: While calling Read(): Could not load init program '%s'. GetLastError: %d.\n", __func__, initProgramPath.data(), GetLastError());
 		process::Process* proc = process::CreateProcess(true);
 		uintptr_t entry = 0;
 		uintptr_t baseAddress = 0;
@@ -241,7 +241,7 @@ namespace obos
 #if defined(__x86_64__) || defined(_WIN64)
 		using namespace process::loader;
 		if (LoadElfFile((byte*)initProgramContents.data(), initProgramContents.length(), entry, baseAddress, proc->vallocator, false) != 0)
-			logger::panic(nullptr, "%s: While calling LoadElfFile(), Could not load '%S'. GetLastError: %d.\n", __func__, initProgramPath, GetLastError());
+			logger::panic(nullptr, "%s: While calling LoadElfFile(), Could not load '%s'. GetLastError: %d.\n", __func__, initProgramPath.data(), GetLastError());
 #endif
 		thread::ThreadHandle initProgramMainThread;
 		char* program_arguments = (char*)proc->vallocator.Memcpy(proc->vallocator.VirtualAlloc(nullptr, initProgramPath.length() + 1, memory::PROT_USER_MODE_ACCESS), initProgramPath.data(), initProgramPath.length());

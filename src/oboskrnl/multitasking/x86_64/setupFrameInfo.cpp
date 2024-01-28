@@ -20,7 +20,7 @@
 
 #include <limine.h>
 
-#include <vector.h>
+#include <utils/vector.h>
 
 #define BIT(n) (1<<n)
 

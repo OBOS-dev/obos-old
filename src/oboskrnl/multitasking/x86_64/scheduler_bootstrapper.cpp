@@ -7,7 +7,7 @@
 #include <int.h>
 #include <klog.h>
 #include <memory_manipulation.h>
-#include <hashmap.h>
+#include <utils/hashmap.h>
 
 #include <arch/interrupt.h>
 
@@ -39,10 +39,11 @@ namespace obos
 	{
 		extern void schedule();
 
+		// Do not make static, as this function is used in drivers/generic/acpi/impl.cpp:uacpi_kernel_stall() and calibrateTimer()
 		uint64_t configureHPET(uint64_t freq)
 		{
-			uint64_t comparatorValue = g_HPETAddr->mainCounterValue + (g_hpetFrequency / freq);
 			g_HPETAddr->generalConfig &= ~(1<<0);
+			uint64_t comparatorValue = g_HPETAddr->mainCounterValue + (g_hpetFrequency / freq);
 			g_HPETAddr->timer0.timerComparatorValue = comparatorValue;
 			if (g_HPETAddr->timer0.timerConfigAndCapabilities & (1<<3))
 				g_HPETAddr->timer0.timerConfigAndCapabilities &= ~(1<<2);

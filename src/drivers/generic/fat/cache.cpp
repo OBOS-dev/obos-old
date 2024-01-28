@@ -6,9 +6,9 @@
 
 #include <int.h>
 #include <klog.h>
-#include <hashmap.h>
-#include <vector.h>
-#include <string.h>
+#include <utils/hashmap.h>
+#include <utils/vector.h>
+#include <utils/string.h>
 
 #include <vfs/devManip/driveHandle.h>
 #include <vfs/devManip/driveIterator.h>
@@ -356,8 +356,8 @@ namespace fatDriver
 			delete[] path;
 			for (size_t part = 0; part < nPartitions; part++)
 			{
-				char* partPath = new char[logger::sprintf(nullptr, "%SP%d:/", dPath, part)];
-				logger::sprintf(partPath, "%SP%d:/", dPath, part);
+				char* partPath = new char[logger::sprintf(nullptr, "%*sP%d:/", dPath.length(), dPath.data(), part)];
+				logger::sprintf(partPath, "%*sP%d:/", dPath.length(), dPath.data(), part);
 				partHandle.OpenDrive(partPath);
 				logger::log("FAT Driver: Probing partition at %s.\n", partPath);
 				delete[] partPath;

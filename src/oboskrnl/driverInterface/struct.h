@@ -12,7 +12,7 @@
 
 #include <multitasking/threadAPI/thrHandle.h>
 
-#include <vector.h>
+#include <utils/vector.h>
 
 #define OBOS_DRIVER_HEADER_SECTION_NAME ".obosDriverHeader"
 
@@ -28,6 +28,7 @@ namespace obos
 			OBOS_SERVICE_TYPE_USER_INPUT_DEVICE, OBOS_SERVICE_TYPE_VIRTUAL_USER_INPUT_DEVICE,
 			OBOS_SERVICE_TYPE_COMMUNICATION, OBOS_SERVICE_TYPE_VIRTUAL_COMMUNICATION,
 			OBOS_SERVICE_TYPE_PARTITION_MANAGER,
+			OBOS_SERVICE_TYPE_KERNEL_EXTENSION,
 		};
 		enum fileAttributes
 		{

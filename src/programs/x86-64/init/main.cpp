@@ -212,15 +212,15 @@ size_t strCountToDelimiter(const char* str, char ch, bool stopAtZero)
 int main(char* path)
 {
 	char* bootRootDirectory = (char*)memcpy(path + strlen(path), path, strCountToDelimiter(path, '/', true) + 1);
-	char* ps2KeyboardDriverPath = (char*)memcpy(bootRootDirectory + strlen(bootRootDirectory), bootRootDirectory, strlen(bootRootDirectory));
-	memcpy(ps2KeyboardDriverPath + strlen(ps2KeyboardDriverPath), "obos/ps2KeyboardDriver", 23);
+	char* driverPath = (char*)memcpy(bootRootDirectory + strlen(bootRootDirectory), bootRootDirectory, strlen(bootRootDirectory));
+	memcpy(driverPath + strlen(driverPath), "obos/acpiDriver", 16);
 	ClearConsole(0);
 	// Load the keyboard driver.
-	ConsoleOutput("[Init] Loading the ps2 keyboard driver. Path: ");
-	ConsoleOutput(ps2KeyboardDriverPath);
+	ConsoleOutput("[Init] Loading the acpi driver. Path: ");
+	ConsoleOutput(driverPath);
 	ConsoleOutput("\n");
 	uintptr_t fileHandle = MakeFileHandle();
-	if (!OpenFile(fileHandle, ps2KeyboardDriverPath, 1 /* Read Only */))
+	if (!OpenFile(fileHandle, driverPath, 1 /* Read Only */))
 	{
 		ConsoleOutput("[Init] Could not open file! Aborting...\n");
 		return GetLastError();

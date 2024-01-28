@@ -86,7 +86,7 @@ namespace obos
 				uintptr_t entry = allocatePhysicalPage();
 				uintptr_t _flags = saveFlagsAndCLI();
 				uintptr_t physAddr = (uintptr_t)pageMap->getL4PageMapEntryAt(address) & g_physAddrMask;
-				OBOS_ASSERTP(physAddr < ((uintptr_t)1 << GetPhysicalAddressBits()), "physAddr: %p",, physAddr);
+				OBOS_ASSERTP(physAddr < ((uintptr_t)1 << GetPhysicalAddressBits()), "physAddr: 0x%p",, physAddr);
 				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(physAddr));
 				_pageMap[PageMap::addressToIndex(address, 2)] = entry | flags;
 				utils::memzero(mapPageTable((uintptr_t*)entry), 4096);
@@ -111,7 +111,7 @@ namespace obos
 				uintptr_t entry = allocatePhysicalPage();
 				uintptr_t _flags = saveFlagsAndCLI();
 				uintptr_t physAddr = (uintptr_t)pageMap->getL3PageMapEntryAt(address) & g_physAddrMask;
-				OBOS_ASSERTP(physAddr < ((uintptr_t)1 << GetPhysicalAddressBits()), "physAddr: %p", , physAddr);
+				OBOS_ASSERTP(physAddr < ((uintptr_t)1 << GetPhysicalAddressBits()), "physAddr: 0x%p", , physAddr);
 				uintptr_t* _pageMap = mapPageTable(reinterpret_cast<uintptr_t*>(physAddr));
 				_pageMap[PageMap::addressToIndex(address, 1)] = entry | flags;
 				utils::memzero(mapPageTable((uintptr_t*)entry), 4096);

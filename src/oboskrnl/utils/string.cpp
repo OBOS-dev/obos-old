@@ -5,7 +5,7 @@
 */
 
 #include <int.h>
-#include <string.h>
+#include <utils/string.h>
 #include <memory_manipulation.h>
 
 #include <allocators/liballoc.h>

@@ -13,9 +13,9 @@
 
 #include <driverInterface/x86_64/enumerate_pci.h>
 
-#include <hashmap.h>
-#include <vector.h>
-#include <string.h>
+#include <utils/hashmap.h>
+#include <utils/vector.h>
+#include <utils/string.h>
 
 #include <x86_64-utils/asm.h>
 
@@ -152,7 +152,7 @@ namespace obos
 				auto driver = (*iter).key;
 				if (g_driverInterfaces.contains(driver->header->driverId))
 					continue;
-				logger::debug("%s: Loading driver %S\n", __func__, driver->fullPath);
+				logger::debug("%s: Loading driver %s\n", __func__, driver->fullPath.data());
 				vfs::FileHandle file;
 				file.Open(driver->fullPath.data(), vfs::FileHandle::OPTIONS_READ_ONLY);
 				// Load the driver's data.

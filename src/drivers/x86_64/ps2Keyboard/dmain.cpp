@@ -6,7 +6,7 @@
 
 #include <int.h>
 #include <klog.h>
-#include <vector.h>
+#include <utils/vector.h>
 #include <console.h>
 
 #include <new>

@@ -9,9 +9,9 @@
 // Utility to parse the kernel config file.
 
 #include <int.h>
-#include <hashmap.h>
-#include <vector.h>
-#include <string.h>
+#include <utils/hashmap.h>
+#include <utils/vector.h>
+#include <utils/string.h>
 
 namespace obos
 {

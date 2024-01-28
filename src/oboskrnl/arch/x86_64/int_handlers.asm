@@ -218,7 +218,7 @@ extern _ZN4obos8syscalls14g_syscallTableE
 ; (out) rdx: Upper 64 bits of the return value.
 ; Registers are preserved except for rax, rdx, rcx, and r9-r11.
 section .rodata
-panic_format_syscall_kernel: db "Kernel mode thread %d (rip: %p) used syscall!", 0x0A, 0x00
+panic_format_syscall_kernel: db "Kernel mode thread %d (rip: 0x%p) used syscall!", 0x0A, 0x00
 section .text
 extern _ZN4obos6logger5panicEPvPKcz
 syscall_instruction_handler:

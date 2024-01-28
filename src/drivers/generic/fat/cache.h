@@ -7,9 +7,9 @@
 #pragma once
 
 #include <int.h>
-#include <hashmap.h>
-#include <vector.h>
-#include <pair.h>
+#include <utils/hashmap.h>
+#include <utils/vector.h>
+#include <utils/pair.h>
 
 #define fat32FirstSectorOfCluster(cluster, bpb, first_data_sector) (uint32_t)((((cluster) - 2) * (bpb).sectorsPerCluster) + (first_data_sector))
 

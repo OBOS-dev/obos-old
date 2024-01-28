@@ -6,9 +6,9 @@
 
 #include <int.h>
 #include <klog.h>
-#include <hashmap.h>
-#include <vector.h>
-#include <pair.h>
+#include <utils/hashmap.h>
+#include <utils/vector.h>
+#include <utils/pair.h>
 
 #include <boot/cfg.h>
 
