@@ -117,13 +117,15 @@ namespace obos
 		fpuInit();
 		logger::info("%s: Initializing SSE.\n", __func__);
 		initSSE();
-		uint32_t unused = 0, rbx = 0;
-		__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
-		OBOS_ASSERTP(rbx & CPUID_FSGSBASE, "The current CPU doesn't support wr*sbase/rd*sbase!\n");
 		logger::info("%s: Enabling SMEP/SMAP if supported.\n", __func__);
 		enableSMEP_SMAP();
-		logger::info("%s: Enabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
-		setCR4(getCR4() | CR4_FSGSBASE);
+		uint32_t unused = 0, rbx = 0;
+		__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
+		if (rbx & CPUID_FSGSBASE)
+		{
+			logger::info("%s: Enabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
+			setCR4(getCR4() | CR4_FSGSBASE);
+		}
 		logger::info("%s: Initializing \"syscall/sysret\" instructions.\n", __func__);
 		initialize_syscall_instruction();
 		logger::info("%s: Registering all syscalls.\n", __func__);

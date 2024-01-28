@@ -227,8 +227,7 @@ syscall_instruction_handler:
 	; r10 and r9 is the only register we are going to be using before saving all registers.
 	mov r10, rsp
 	; $RSP = GetCurrentCpuLocalPtr()->currentThread->context.syscallStackBottom + 0x4000
-	rdgsbase r9
- 	mov r9, [r9+0x10]
+	mov r9, [gs:0x10]
 	mov r9, [r9+0x370]
 	add r9, 0x4000
 	mov rsp, r9
@@ -247,8 +246,7 @@ syscall_instruction_handler:
 	stac
 
 .check_kmode:
-	rdgsbase r10
-	mov r10, [r10+0x10]
+	mov r10, [gs:0x10]
 	mov r9, [r10+0x130]
 	cmp r9, 0x10
 	jne .call
