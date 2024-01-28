@@ -77,7 +77,13 @@ namespace obos
 			volatile Thread* currentThread = getCPULocal()->currentThread;
 			if (!getCPULocal()->schedulerLock && currentThread)
 			{
-				utils::dwMemcpy((uint32_t*)&currentThread->context.frame, (uint32_t*)frame, sizeof(interrupt_frame) / 4); // save the interrupt frame
+				utils::memcpy((void*)&currentThread->context.frame, frame, sizeof(interrupt_frame)); // save the interrupt frame
+				OBOS_ASSERT(
+					currentThread->context.frame.rdx != 0x200283 &&
+					currentThread->context.frame.rdx != 0x200287,
+					"Thread %d has a suspicious rdx value! rdx: 0x%016x, rflags: 0x%016x\n",, 
+					currentThread->tid, currentThread->context.frame.rdx,
+					((x86_64_flags*)&currentThread->context.frame.rflags)->get());
 				_fxsave((byte(*)[512])currentThread->context.fpuState);
 			}
 			_callScheduler();

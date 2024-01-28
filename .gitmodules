@@ -1,3 +1,4 @@
 [submodule "src/drivers/generic/acpi/uACPI"]
 	path = src/drivers/generic/acpi/uACPI
 	url = https://github.com/UltraOS/uACPI.git
+	branch = field-rw-support

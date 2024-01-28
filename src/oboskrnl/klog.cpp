@@ -330,6 +330,8 @@ namespace obos
 		}
 		size_t vsprintf(char* dest, const char* format, va_list list)
 		{
+			if (!dest)
+				return stbsp_vsnprintf(dest, 0, format, list);
 			return stbsp_vsprintf(dest, format, list);
 		}
 
