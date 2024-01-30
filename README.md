@@ -12,7 +12,7 @@
 - [ ] Porting mlibc.
 - [ ] A terminal.
 - [ ] Support for USB.
-- [ ] Support for ACPI power management.
+- [x] Support for ACPI power management.
 - [ ] Porting binutils and GCC to the os, and making a GCC target for the os.
 - [ ] Porting CMake and Make.
 - [ ] Porting tar.
