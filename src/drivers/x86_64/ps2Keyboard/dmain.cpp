@@ -167,11 +167,7 @@ static void keyboardInterrupt(interrupt_frame*)
 			if (flags.isShiftPressed && (ch < 'A' || ch > 'Z') && g_keys[scancode].shiftAlias)
 				newKey = g_keys[scancode].shiftAlias;
 			if (newKey)
-			{
 				g_keyBuffer.push_back(newKey);
-				g_kernelConsole.ConsoleOutput(newKey);
-				g_kernelConsole.SwapBuffers();
-			}
 		}
 		else if (g_keys[scancode].extendedCh != driverInterface::SpecialKeys::INVALID)
 			g_keyBuffer.push_back((uint16_t)g_keys[scancode].extendedCh);
