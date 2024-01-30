@@ -321,6 +321,7 @@ extern "C" {
 			outw(port, value);
 			return UACPI_STATUS_OK;
 		case 4:
+			outd(port, value);
 			return UACPI_STATUS_OK;
 		case 8:
 			outd(port, value);
