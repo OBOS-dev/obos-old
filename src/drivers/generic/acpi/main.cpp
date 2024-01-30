@@ -9,13 +9,14 @@
 #include <export.h>
 #include <limine.h>
 
-#include <driverInterface/struct.h>
+#include <multitasking/thread.h>
 
-#include <uacpi/internal/tables.h>
+
 #include <uacpi/uacpi.h>
 
-#include <x86_64-utils/asm.h>
-#include <arch/x86_64/memory_manager/virtual/initialize.h>
+#include <uacpi/internal/tables.h>
+
+#include <uacpi/kernel_api.h>
 
 using namespace obos;
 
@@ -35,66 +36,64 @@ extern "C" uacpi_status
 uacpi_table_find(struct uacpi_table_identifiers* id,
 	struct uacpi_table** out_table);
 
-driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
-	.magicNumber = obos::driverInterface::OBOS_DRIVER_HEADER_MAGIC,
-	.driverId = 6,
-	.driverType = obos::driverInterface::OBOS_SERVICE_TYPE_KERNEL_EXTENSION,
-	.requests = driverInterface::driverHeader::REQUEST_SET_STACK_SIZE,
-	.stackSize = 0x10000,
-	.functionTable = {
-		.GetServiceType = []()->driverInterface::serviceType { return driverInterface::serviceType::OBOS_SERVICE_TYPE_KERNEL_EXTENSION; },
-	}
-};
-
 #define verify_status(st) \
 if (st != UACPI_STATUS_OK)\
-{\
-	obos::logger::error("UACPI Failed! Status code: %d, error message: %s\n", st, uacpi_status_to_string(st));\
-	goto done;\
-}
+	obos::logger::panic(nullptr, "uACPI Failed! Status code: %d, error message: %s\n", st, uacpi_status_to_string(st));
 
-extern "C" void _start()
+namespace obos
 {
-	g_driverHeader.driver_initialized = true;
-	while (!g_driverHeader.driver_finished_loading)
-		;
-
+	void InitializeUACPI()
 	{
 		uacpi_init_params params = {
 			(uintptr_t)rsdp_request.response->address - hhdm_offset.response->offset,
-			{ UACPI_LOG_TRACE, 0 }
+			{ UACPI_LOG_INFO, 0 }
 		};
 		uacpi_status st = uacpi_initialize(&params);
 		verify_status(st);
-
+	
 		st = uacpi_namespace_load();
 		verify_status(st);
-
+	
 		st = uacpi_namespace_initialize();
 		verify_status(st);
-
+	}
+	bool EnterSleepState(int sleepState)
+	{
+		if (sleepState < 0 || sleepState > 5)
+			return false;
+		char objectName[5] = {};
+		logger::sprintf(objectName, "_S%d_", sleepState);
 		uacpi_object* ret = nullptr;
-		uacpi_eval(nullptr, "_S5_", nullptr, &ret);
-		// grab the first and the second entry of the package
+		uacpi_status st = uacpi_eval(nullptr, objectName, nullptr, &ret);
+		if (st != UACPI_STATUS_OK)
+			return false;
 
 		auto* obj = uacpi_create_object(UACPI_OBJECT_INTEGER);
-		obj->integer = 5;
-		auto args = uacpi_args{ &obj, 1 };
-		uacpi_eval(nullptr, "_PTS", &args, nullptr);
-		verify_status(st);
+		obj->integer = sleepState;
+		uacpi_args args{ &obj, 1 };
+		st = uacpi_eval(nullptr, "_PTS", &args, nullptr);
+		if (st != UACPI_STATUS_OK && st != UACPI_STATUS_NOT_FOUND)
+			return false;
 
 		uacpi_table* t = nullptr;
-		uacpi_table_identifiers id{};
-		id.signature.text[0] = 'F';
-		id.signature.text[1] = 'A';
-		id.signature.text[2] = 'C';
-		id.signature.text[3] = 'P';
-		uacpi_table_find(&id, &t);
-		auto fadt = (acpi_fadt*)memory::mapPageTable((uintptr_t*)t->phys_addr);
-		outw(fadt->pm1a_cnt_blk, (ret->package->objects[0]->integer << 10) | ((uint64_t)1 << 13));
+		st = uacpi_table_find_by_type(UACPI_TABLE_TYPE_FADT, &t);
+		if (st != UACPI_STATUS_OK)
+			return false;
+		acpi_fadt* fadt = (acpi_fadt*)t->hdr;
+		uacpi_handle pm1a_cnt_blk_hnd{}, pm1b_cnt_blk_hnd{};
+		if (uacpi_kernel_io_map(fadt->pm1a_cnt_blk, 2, &pm1a_cnt_blk_hnd) != UACPI_STATUS_OK)
+			return false;
+		if (fadt->pm1a_cnt_blk)
+			if (uacpi_kernel_io_map(fadt->pm1a_cnt_blk, 2, &pm1b_cnt_blk_hnd) != UACPI_STATUS_OK)
+				return false;
+		uacpi_kernel_io_write(pm1a_cnt_blk_hnd, 0, 2, (ret->package->objects[0]->integer << 10) | ((uint64_t)1 << 13));
 		if (fadt->pm1b_cnt_blk)
-			outw(fadt->pm1b_cnt_blk, (ret->package->objects[1]->integer << 10) | ((uint64_t)1 << 13));
+			uacpi_kernel_io_write(pm1b_cnt_blk_hnd, 0, 2, (ret->package->objects[1]->integer << 10) | ((uint64_t)1 << 13));
+		uacpi_object_unref(obj);
+		uacpi_kernel_io_unmap(pm1a_cnt_blk_hnd);
+		if (fadt->pm1b_cnt_blk)
+			uacpi_kernel_io_unmap(pm1b_cnt_blk_hnd);
+		return true;
 	}
-	done:
-	thread::ExitThread(0);
+
 }

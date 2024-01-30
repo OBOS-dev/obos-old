@@ -159,18 +159,21 @@ extern "C" {
 	{
 		return 10000 /* 1ms is 1000000ns, so we divide that to get 10000 ticks. */;
 	}
+#if defined(__x86_64__) || defined(_WIN64)
+#pragma GCC push_options
+#pragma GCC target("sse")
 	void uacpi_kernel_stall(uacpi_u8 usec)
 	{
-#if defined(__x86_64__) || defined(_WIN64)
 		byte fpuState[512] = {};
 		asm volatile("fxsave (%0)" : : "r"(fpuState):);
 		for (uint64_t comparatorValue = thread::configureHPET(1/(usec/1000000.f)); g_HPETAddr->mainCounterValue < comparatorValue;)
 			pause();
 		asm volatile("fxrstor (%0)" : : "r"(fpuState):);
+	}
+#pragma GCC pop_options
 #else
 #error Implement uacpi_kernel_stall for the current architecture!
 #endif
-	}
 	void uacpi_kernel_sleep(uacpi_u64 msec)
 	{
 		auto currentThread = thread::GetCurrentCpuLocalPtr()->currentThread;
@@ -327,5 +330,20 @@ extern "C" {
 			break;
 		}
 		return UACPI_STATUS_INVALID_ARGUMENT;
+	}
+	uacpi_status uacpi_kernel_handle_firmware_request(uacpi_firmware_request* req)
+	{
+		switch (req->type)
+		{
+		case UACPI_FIRMWARE_REQUEST_TYPE_BREAKPOINT:
+			break;
+		case UACPI_FIRMWARE_REQUEST_TYPE_FATAL:
+			logger::panic(nullptr,
+				"Your bios fucked up, so now you have to deal with the consequences, also known as possible data loss. Firmware Error Code: 0x%016x, argument: %x016x\n",
+				req->fatal.code, req->fatal.arg);
+			break;
+		default:
+			break;
+		}
 	}
 }

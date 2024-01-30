@@ -236,6 +236,9 @@ syscall_instruction_handler:
 .save:
 	pushaq_syscalli
 	mov rbp, rsp
+
+	; Enable interrupts.
+	sti
 	
 	; if(GetCurrentCpuLocal()->currentThread->context.ss == 0x10)
 	;	obos::logger::panic(nullptr, panic_format_syscall_kernel, GetCurrentCpuLocal()->currentThread->tid, GetCurrentCpuLocal()->currentThread->context.frame.rip);

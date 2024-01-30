@@ -13,6 +13,8 @@
 
 #include <driverInterface/x86_64/enumerate_pci.h>
 
+#include <multitasking/process/x86_64/loader/elfStructures.h>
+
 #include <utils/hashmap.h>
 #include <utils/vector.h>
 #include <utils/string.h>
@@ -29,6 +31,13 @@
 #include <vfs/devManip/sectorStore.h>
 
 #include <multitasking/process/x86_64/loader/elfStructures.h>
+
+extern "C"
+{
+#include <uacpi/uacpi.h>
+#include <uacpi/internal/namespace.h>
+#include <uacpi/internal/utilities.h>
+}
 
 namespace obos
 {
@@ -150,6 +159,93 @@ namespace obos
 			for(auto iter = driversToLoad.begin(); iter; iter++)
 			{
 				auto driver = (*iter).key;
+				if (g_driverInterfaces.contains(driver->header->driverId))
+					continue;
+				logger::debug("%s: Loading driver %s\n", __func__, driver->fullPath.data());
+				vfs::FileHandle file;
+				file.Open(driver->fullPath.data(), vfs::FileHandle::OPTIONS_READ_ONLY);
+				// Load the driver's data.
+				size_t size = file.GetFileSize();
+				char* data = new char[size + 1];
+				file.Read(data, size);
+				file.Close();
+				// Load the driver.
+				if (!LoadModule((byte*)data, size, nullptr))
+				{
+					// Oh no! Anyway...
+					delete[] data;
+					continue;
+				}
+				logger::debug("%s: Loaded driver.\n", __func__, driver->fullPath);
+				delete[] data;
+			}
+		}
+		static uacpi_ns_iteration_decision ACPIIteratorCallback(void* user, uacpi_namespace_node* node)
+		{
+			uacpi_char* dhid = nullptr;
+			uacpi_pnp_id_list deviceCompatibleIDs{};
+			auto userdata = (utils::Vector<LoadableDriver*>**)user;
+			auto obj = uacpi_namespace_node_get_object(node);
+			if (obj->type != UACPI_OBJECT_DEVICE)
+				return UACPI_NS_ITERATION_DECISION_CONTINUE;
+			utils::memzero(&deviceCompatibleIDs, sizeof(deviceCompatibleIDs));
+			uacpi_eval_hid(node, &dhid);
+			uacpi_eval_cid(node, &deviceCompatibleIDs);
+			if (!dhid)
+				return UACPI_NS_ITERATION_DECISION_CONTINUE;
+			for (auto& currentDriver : *userdata[0])
+			{
+				bool possibleToLoad = false;
+				for (size_t currentCID = 0; currentCID < currentDriver->header->acpiInfo.nCompatibleIDs; currentCID++)
+				{
+					const char* cid = currentDriver->header->acpiInfo.compatibleIDs[currentCID];
+					if (utils::strcmp(cid, dhid))
+					{
+						possibleToLoad = true;
+						break;
+					}
+					for (size_t currentDCID = 0; currentDCID < deviceCompatibleIDs.num_entries; currentDCID++)
+					{
+						const char* dcid = deviceCompatibleIDs.ids[currentDCID];
+						if (utils::strcmp(dcid, cid))
+						{
+							currentDCID = deviceCompatibleIDs.num_entries;
+							possibleToLoad = true;
+							break;
+						}
+					}
+				}
+				if (!currentDriver->header->acpiInfo.nHardwareIDs)
+					goto noHID;
+				for (size_t i = 0; i < currentDriver->header->acpiInfo.nHardwareIDs; i++)
+				{
+					const char* hid = currentDriver->header->acpiInfo.hardwareIDs[i];
+					if (utils::strcmp(hid, dhid))
+					{
+						possibleToLoad = true;
+						break;
+					}
+				}
+			noHID:
+				if (!possibleToLoad)
+					continue;
+				userdata[1]->push_back(currentDriver);
+			}
+			return UACPI_NS_ITERATION_DECISION_CONTINUE;
+		}
+		static void ScanACPINamespace(const utils::Vector<LoadableDriver>& driverList)
+		{
+			utils::Vector<LoadableDriver*> acpiDrivers;
+			utils::Vector<LoadableDriver*> driversToLoad;
+			utils::Vector<LoadableDriver*>* userdata[2] = { &acpiDrivers, &driversToLoad };
+			for (auto& drv : driverList)
+				if (drv.header->howToIdentifyDevice & (1 << 1) && drv.header->acpiInfo.nHardwareIDs)
+					acpiDrivers.push_back(&drv);
+			if (!acpiDrivers.length())
+				return;
+			uacpi_namespace_for_each_node_depth_first(uacpi_namespace_root(), ACPIIteratorCallback, userdata);
+			for (auto& driver : driversToLoad)
+			{
 				if (g_driverInterfaces.contains(driver->header->driverId))
 					continue;
 				logger::debug("%s: Loading driver %s\n", __func__, driver->fullPath.data());
@@ -340,7 +436,7 @@ namespace obos
 						continue;
 					}
 					// If it is, add it to the list.
-					driverHeader* header = new driverHeader;
+					driverHeader* header = new driverHeader{};
 					utils::memcpy(header, fheader, sizeof(driverHeader));
 					drivers.push_back(LoadableDriver{ path, header });
 					delete[] _file;
@@ -348,6 +444,9 @@ namespace obos
 				delete[] path;
 				file.Close();
 			}
+			// Scan the ACPI namespace.
+			ScanACPINamespace(drivers);
+			// Scan the PCI bus.
 			ScanPCIBus(drivers);
 			// Look for partitions, and load the partition drivers.
 			ScanDrivesForPartitions(drivers);

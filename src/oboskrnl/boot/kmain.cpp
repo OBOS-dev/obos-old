@@ -34,6 +34,11 @@
 
 #if defined(__x86_64__) || defined(_WIN64)
 #include <multitasking/process/x86_64/loader/elf.h>
+#include <arch/x86_64/irq/irq.h>
+namespace obos
+{
+	bool EnterSleepState(int state);
+}
 #endif
 
 #define LITERAL(str) (char*)(str), sizeof((str))
@@ -42,10 +47,6 @@ extern obos::memory::VirtualAllocator g_liballocVirtualAllocator;
 
 namespace obos
 {
-	namespace vfs
-	{
-		DirectoryEntry* SearchForNode(DirectoryEntry* root, void* userdata, bool(*compare)(DirectoryEntry* current, void* userdata));
-	}
 	thread::ThreadHandle kBootThread;
 	void kmain_common(byte* initrdDriverData, size_t initrdDriverSize)
 	{

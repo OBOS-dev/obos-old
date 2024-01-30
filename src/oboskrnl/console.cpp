@@ -208,7 +208,7 @@ namespace obos
 			if ((m_modificationArray[ty / bitLength] >> (ty % bitLength)) & 1)
 			{
 				// Copy the line.
-				uint32_t cy = ty * 16 + ((size_t)(ty != ((size_t)m_nCharsVertical - 1)) * 4);
+				uint32_t cy = ty * 16/* + ((size_t)(ty != ((size_t)m_nCharsVertical - 1)) * 4)*/;
 				for (uint32_t y = cy; y < (cy + 16); y++)
 					utils::dwMemcpy(m_framebuffer.addr + y * m_framebuffer.pitch / 4, m_backbuffer.addr + y * m_backbuffer.width, m_framebuffer.width);
 			}
@@ -226,7 +226,7 @@ namespace obos
 		int cy;
 		int mask[8] = { 128,64,32,16,8,4,2,1 };
 		const uint8_t* glyph = m_font + (int)ch * 16;
-		y = y * 16 + 16;
+		y = y * 16 + 12;
 		x <<= 3;
 		if (x > m_drawingBuffer->width)
 			x = 0;
@@ -280,6 +280,8 @@ namespace obos
 			x += 4 - (x % 4);
 			break;
 		case '\b':
+			if (!x)
+				break;
 			putChar(' ', --x, y, foregroundColour, backgroundColour);
 			break;
 		case ' ':

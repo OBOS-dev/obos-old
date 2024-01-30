@@ -17,9 +17,9 @@ qemu-system-x86_64 ^
 -smp cores=8,threads=1,sockets=1 ^
 -drive if=pflash,format=raw,unit=1,file=ovmf/OVMF_VARS_4M.fd ^
 -drive if=pflash,format=raw,unit=0,file=ovmf/OVMF_CODE_4M.fd,readonly=on ^
--M smm=off ^
 -d int ^
 -D qemu_log.txt
+rem -M smm=off ^
 rem -no-reboot
 rem -no-shutdown
 

@@ -29,6 +29,12 @@ using namespace obos;
 
 static void keyboardInterrupt(interrupt_frame*);
 
+#ifdef __GNUC__
+#define DEFINE_IN_SECTION __attribute__((section(OBOS_DRIVER_HEADER_SECTION_NAME))) 
+#else
+#define DEFINE_IN_SECTION
+#endif
+
 byte sendCommand(uint32_t nCommands, ...);
 
 utils::Vector<uint16_t> g_keyBuffer;
@@ -41,9 +47,11 @@ struct
 	bool isShiftPressed : 1;
 } flags = { 0,0,0,0 };
 
+const char* g_hardwareIDs[] = { "MSF0001", nullptr };
+const char* g_compIDs[] = { "PNP0303", nullptr };
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
-__attribute__((section(OBOS_DRIVER_HEADER_SECTION_NAME))) driverInterface::driverHeader g_driverHeader = {
+volatile driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 	.magicNumber = driverInterface::OBOS_DRIVER_HEADER_MAGIC,
 	.driverId = 5,
 	.driverType = driverInterface::OBOS_SERVICE_TYPE_USER_INPUT_DEVICE,
@@ -56,6 +64,13 @@ __attribute__((section(OBOS_DRIVER_HEADER_SECTION_NAME))) driverInterface::drive
 				.unused = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,}
 			},
 		},
+	},
+	.howToIdentifyDevice = (1<<1), /* ACPI Namespace */
+	.acpiInfo = {
+		.hardwareIDs = { "PNP0303" },
+		.nHardwareIDs = 1,
+		.compatibleIDs = { "PNP0303" },
+		.nCompatibleIDs = 1,
 	},
 };
 #pragma GCC diagnostic pop
@@ -133,7 +148,7 @@ static void keyboardInterrupt(interrupt_frame*)
 	g_keys[scancode].nPressed++;
 	if (g_keys[scancode].isPressed)
 	{
-		if (scancode == 0x1d)
+		if (scancode == 0x1d || scancode == 0x2a)
 		{
 			g_keyBuffer.push_back(ch << 8);
 			goto skip;
@@ -155,6 +170,7 @@ static void keyboardInterrupt(interrupt_frame*)
 			{
 				g_keyBuffer.push_back(newKey);
 				g_kernelConsole.ConsoleOutput(newKey);
+				g_kernelConsole.SwapBuffers();
 			}
 		}
 		else if (g_keys[scancode].extendedCh != driverInterface::SpecialKeys::INVALID)

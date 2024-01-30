@@ -73,6 +73,10 @@ namespace obos
 
 	void enableSMEP_SMAP();
 
+	void InitializeUACPI();
+	bool EnterSleepState(int sleepState);
+	bool g_uacpiInitialized = false;
+
 	locks::Mutex g_framebufferLock;
 
 	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console. This also must enable the scheduler.
@@ -142,6 +146,9 @@ namespace obos
 
 		g_kernelConsole.SetBackBuffer(backbuffer);
 		g_kernelConsole.SetDrawBuffer(true);
+		logger::log("%s: Initializing uACPI.\n", __func__);
+		InitializeUACPI();
+		g_uacpiInitialized = true;
 		logger::info("%s: Initializing the scheduler.\n", __func__);
 		thread::InitializeScheduler();
 		logger::panic(nullptr, "Failed to initialize the scheduler.");

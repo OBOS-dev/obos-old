@@ -307,6 +307,8 @@ namespace obos
 #define GetIOAPICRegisterOffset(reg) ((uint8_t)(uintptr_t)(&((IOAPIC_Registers*)nullptr)->reg) / 4)
 	bool MapIRQToVector(uint8_t irq, uint8_t vector)
 	{
+		if (!g_ioAPICAddr)
+			return false;
 		uintptr_t flags = saveFlagsAndCLI();
 		uint32_t maximumRedirectionEntries = GetIOAPICRegisterOffset(ioapicVersion);
 		g_ioAPICAddr->ioregsel = maximumRedirectionEntries;

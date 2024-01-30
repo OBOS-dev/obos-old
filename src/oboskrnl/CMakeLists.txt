@@ -48,7 +48,7 @@ target_link_options(oboskrnl
 	PUBLIC ${TARGET_LINKER_OPTIONS}
 )
 
-target_link_libraries(oboskrnl PUBLIC ${LIBGCC})
+target_link_libraries(oboskrnl PRIVATE ${LIBGCC} PRIVATE acpiDriver)
 
 target_compile_definitions(oboskrnl PUBLIC OBOS_KERNEL=1)
 

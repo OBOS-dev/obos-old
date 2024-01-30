@@ -19,8 +19,16 @@
 
 #include <allocators/liballoc.h>
 
-#if defined(__x86_64__) && defined(E9_HACK)
+#if (defined(__x86_64__) || defined(_WIN64))
 #include <x86_64-utils/asm.h>
+#include <arch/x86_64/irq/irq.h>
+#include <arch/x86_64/interrupt.h>
+namespace obos
+{
+	void EarlyKPanic();
+	bool EnterSleepState(int sleepState);
+	extern bool g_uacpiInitialized;
+}
 #endif
 
 #define STB_SPRINTF_NOFLOAT 1
@@ -274,8 +282,9 @@ namespace obos
 			for (size_t i = 0; i < (size_t)len; i++)
 			{
 				g_kernelConsole.ConsoleOutput(buf[i]);
-#if E9_HACK && defined(__x86_64__)
+#if E9_HACK && (defined(__x86_64__) || defined(_WIN64))
 				outb(0xE9, buf[i]);
+				outb(0x3f8, buf[i]);
 #endif
 			}
 			return (char*)buf;
@@ -403,6 +412,18 @@ namespace obos
 				stackTrace(stackTraceParameter);
 			else
 				warning("No stack trace avaliable.");
+#if defined(__x86_64__) || defined(_WIN64)
+			RegisterInterruptHandler(0x21, [](interrupt_frame*) {
+				if (!g_uacpiInitialized)
+					EarlyKPanic();
+				else
+					EnterSleepState(5);
+				logger::warning("Software %s failed, manual shutdown is required (holding down the power button).", g_uacpiInitialized ? "shutdown" : "reboot");
+				});
+			MapIRQToVector(1, 0x21);
+			sti();
+			printf("Press any key to %s...\n", g_uacpiInitialized ? "shutdown" : "reboot");
+#endif
 			g_kernelConsole.SwapBuffers();
 			thread::StopCPUs(true);
 			while (1);
