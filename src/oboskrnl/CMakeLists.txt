@@ -6,7 +6,7 @@ set (oboskrnl_sources "boot/kmain.cpp" "console.cpp" "klog.cpp" "allocators/liba
 					  "multitasking/scheduler.cpp" "error.cpp" "multitasking/threadAPI/thrHandle.cpp" "multitasking/process/process.cpp"
 				      "vfs/mount/mount.cpp" "vfs/fileManip/fileHandle.cpp" "multitasking/locks/mutex.cpp" "allocators/vmm/vmm.cpp"
 					  "driverInterface/register_drive.cpp" "vfs/fileManip/directoryIterator.cpp" "vfs/devManip/driveHandle.cpp" "boot/cfg.cpp"
-					  "string.cpp" "vfs/devManip/driveIterator.cpp")
+					  "utils/string.cpp" "vfs/devManip/driveIterator.cpp")
 
 add_executable(oboskrnl ${oboskrnl_platformSpecificSources} ${oboskrnl_sources})
 
@@ -48,7 +48,7 @@ target_link_options(oboskrnl
 	PUBLIC ${TARGET_LINKER_OPTIONS}
 )
 
-target_link_libraries(oboskrnl PUBLIC ${LIBGCC})
+target_link_libraries(oboskrnl PRIVATE ${LIBGCC} PRIVATE acpiDriver)
 
 target_compile_definitions(oboskrnl PUBLIC OBOS_KERNEL=1)
 

@@ -6,7 +6,7 @@
 
 #include <int.h>
 #include <error.h>
-#include <vector.h>
+#include <utils/vector.h>
 #include <klog.h>
 
 #include <vfs/mount/mount.h>

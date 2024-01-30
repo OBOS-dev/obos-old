@@ -108,7 +108,7 @@ namespace obos
 		static const char* setupRegisterResponse(interrupt_frame* frame)
 		{
 			constexpr const char* const format =
-				"%e%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%e%x%x%x%x%x%x%x"
+				"%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%e%x%x%x%x%x%x%x"
 			    /*"%s%s%s%s%s%s%s%s" 
 				"%s%s%s%s%s%s%s"*/;
 			/*constexpr const char* const reg_empty = "xxxxxxxxxxxxxxxx";

@@ -73,6 +73,10 @@ namespace obos
 
 	void enableSMEP_SMAP();
 
+	void InitializeUACPI();
+	bool EnterSleepState(int sleepState);
+	bool g_uacpiInitialized = false;
+
 	locks::Mutex g_framebufferLock;
 
 	// Responsible for: Setting up the CPU-Specific features. Setting up IRQs. Initialising the memory manager, and the console. This also must enable the scheduler.
@@ -117,13 +121,15 @@ namespace obos
 		fpuInit();
 		logger::info("%s: Initializing SSE.\n", __func__);
 		initSSE();
-		uint32_t unused = 0, rbx = 0;
-		__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
-		OBOS_ASSERTP(rbx & CPUID_FSGSBASE, "The current CPU doesn't support wr*sbase/rd*sbase!\n");
 		logger::info("%s: Enabling SMEP/SMAP if supported.\n", __func__);
 		enableSMEP_SMAP();
-		logger::info("%s: Enabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
-		setCR4(getCR4() | CR4_FSGSBASE);
+		uint32_t unused = 0, rbx = 0;
+		__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
+		if (rbx & CPUID_FSGSBASE)
+		{
+			logger::info("%s: Enabling \"WRFSBASE/WRGSBASE\" instructions.\n", __func__);
+			setCR4(getCR4() | CR4_FSGSBASE);
+		}
 		logger::info("%s: Initializing \"syscall/sysret\" instructions.\n", __func__);
 		initialize_syscall_instruction();
 		logger::info("%s: Registering all syscalls.\n", __func__);
@@ -140,6 +146,9 @@ namespace obos
 
 		g_kernelConsole.SetBackBuffer(backbuffer);
 		g_kernelConsole.SetDrawBuffer(true);
+		logger::log("%s: Initializing uACPI.\n", __func__);
+		InitializeUACPI();
+		g_uacpiInitialized = true;
 		logger::info("%s: Initializing the scheduler.\n", __func__);
 		thread::InitializeScheduler();
 		logger::panic(nullptr, "Failed to initialize the scheduler.");

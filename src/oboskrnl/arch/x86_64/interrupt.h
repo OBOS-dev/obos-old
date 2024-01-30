@@ -35,7 +35,11 @@ namespace obos
 			RFLAGS_VINTERRUPT_PENDING = BITFIELD_FROM_BIT(20),
 			RFLAGS_CPUID = BITFIELD_FROM_BIT(21),
 		};
-		explicit operator uintptr_t() { return m_bitfield; }
+		explicit operator uintptr_t() const { return m_bitfield; }
+		uintptr_t get() const 
+		{
+			return m_bitfield;
+		}
 		x86_64_flags() = default;
 		x86_64_flags(uintptr_t flags)
 		{

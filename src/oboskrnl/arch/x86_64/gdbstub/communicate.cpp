@@ -156,7 +156,7 @@ namespace obos
 			data[packet.len + 2] = '\0';
 			data[packet.len + 3] = '\0';
 			data[packet.len + 4] = '\0';
-			logger::sprintf(data + packet.len + 2, "%e%x", 2, mod256(data + 1, len - 5));
+			logger::sprintf(data + packet.len + 2, "%02x", mod256(data + 1, len - 5));
 			// Send the packet.
 			send:
 			m_lockConnection();

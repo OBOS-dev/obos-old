@@ -131,7 +131,7 @@ namespace obos
 				if (thread->status & THREAD_STATUS_BLOCKED)
 				{
 					while (thread->flags & THREAD_FLAGS_CALLING_BLOCK_CALLBACK);
-					OBOS_ASSERTP(!(thread->status & THREAD_STATUS_RUNNING), "Thread (tid %d) is both blocked and running (status 0x%e%X)!\n","", thread->tid, 4, thread->status);
+					OBOS_ASSERTP(!(thread->status & THREAD_STATUS_RUNNING), "Thread (tid %d) is both blocked and running (status 0x%04X)!\n","", thread->tid, thread->status);
 					thread->flags |= THREAD_FLAGS_CALLING_BLOCK_CALLBACK;
 					bool ret = callBlockCallbackOnThread(&thread->context, (bool(*)(void*,void*))thread->blockCallback.callback, thread, thread->blockCallback.userdata);
 					thread->flags &= ~THREAD_FLAGS_CALLING_BLOCK_CALLBACK;
@@ -247,8 +247,8 @@ namespace obos
 			}
 			if (foundHighPriority == 2)
 				newThread = getCPULocal()->idleThread;
-			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_BLOCKED), "Thread (tid %d) is both blocked and is trying to be run! Status 0x%e%X\n", "", newThread->tid, 4, newThread->status);
-			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_PAUSED), "Thread (tid %d) is both paused and is trying to be run! Status 0x%e%X\n", "", newThread->tid, 4, newThread->status);
+			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_BLOCKED), "Thread (tid %d) is both blocked and is trying to be run! Status 0x%04X\n", "", newThread->tid, newThread->status);
+			OBOS_ASSERTP(!(newThread->status & THREAD_STATUS_PAUSED), "Thread (tid %d) is both paused and is trying to be run! Status 0x%04X\n", "", newThread->tid, newThread->status);
 			if (newThread != currentThread)
 				if ((newThread->status & THREAD_STATUS_RUNNING))
 					goto find;

@@ -8,7 +8,7 @@
 
 #include <driverInterface/register_drive.h>
 
-#include <vector.h>
+#include <utils/vector.h>
 
 #include <allocators/liballoc.h>
 

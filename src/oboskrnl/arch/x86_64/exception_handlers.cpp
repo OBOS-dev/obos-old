@@ -93,7 +93,7 @@ namespace obos
 			tid = pid = (uint32_t)-1;
 		// Bug mitigation.
 		// Sometimes we page fault while accessing the lapic, even though that's impossible.
-		if ((faultAddress >= (uintptr_t)g_localAPICAddr && faultAddress <= 0xfffffffffffff000) && !(frame->errorCode >> 4) && !((frame->errorCode << 2)))
+		if ((faultAddress >= (uintptr_t)g_localAPICAddr && faultAddress < 0xfffffffffffff000) && !(frame->errorCode >> 4) && !((frame->errorCode << 2)))
 			return;
 		// If in user mode...
 		if ((frame->errorCode >> 2) & 1)
@@ -107,16 +107,16 @@ namespace obos
 			EarlyKPanic();
 		logger::panic(
 			nullptr,
-			"Page fault in %s-mode at %p (cpu %d, pid %d, tid %d) while trying to %s a %s page. The address of this page is %p. Error code: %d. whileInScheduler = %s\nPTE: %p, PDE: %p, PDPE: %p, PME: %p.\nDumping registers:\n"
-			"\tRDI: %p, RSI: %p, RBP: %p\n"
-			"\tRSP: %p, RBX: %p, RDX: %p\n"
-			"\tRCX: %p, RAX: %p, RIP: %p\n"
-			"\t R8: %p,  R9: %p, R10: %p\n"
-			"\tR11: %p, R12: %p, R13: %p\n"
-			"\tR14: %p, R15: %p, RFL: %p\n"
-			"\t SS: %p,  DS: %p,  CS: %p\n"
-			"\tCR0: %p, CR2: %p, CR3: %p\n"
-			"\tCR4: %p, CR8: %p, EFER: %p\n",
+			"Page fault in %s-mode at 0x%p (cpu %d, pid %d, tid %d) while trying to %s a %s page. The address of this page is 0x%p. Error code: %d. whileInScheduler = %s\nPTE: 0x%p, PDE: 0x%p, PDPE: 0x%p, PME: 0x%p.\nDumping registers:\n"
+			"\tRDI: 0x%p, RSI: 0x%p, RBP: 0x%p\n"
+			"\tRSP: 0x%p, RBX: 0x%p, RDX: 0x%p\n"
+			"\tRCX: 0x%p, RAX: 0x%p, RIP: 0x%p\n"
+			"\t R8: 0x%p,  R9: 0x%p, R10: 0x%p\n"
+			"\tR11: 0x%p, R12: 0x%p, R13: 0x%p\n"
+			"\tR14: 0x%p, R15: 0x%p, RFL: 0x%p\n"
+			"\t SS: 0x%p,  DS: 0x%p,  CS: 0x%p\n"
+			"\tCR0: 0x%p, CR2: 0x%p, CR3: 0x%p\n"
+			"\tCR4: 0x%p, CR8: 0x%p, EFER: 0x%p\n",
 			(frame->errorCode & ((uintptr_t)1 << 2)) ? "user" : "kernel",
 			frame->rip,
 			cpuId,
@@ -191,14 +191,14 @@ namespace obos
 			EarlyKPanic();
 		logger::panic(
 			nullptr,
-			"Exception %d at %p (cpu %d, pid %d, tid %d). Error code: %d.\nDumping registers:\n"
-			"\tRDI: %p, RSI: %p, RBP: %p\n"
-			"\tRSP: %p, RBX: %p, RDX: %p\n"
-			"\tRCX: %p, RAX: %p, RIP: %p\n"
-			"\t R8: %p,  R9: %p, R10: %p\n"
-			"\tR11: %p, R12: %p, R13: %p\n"
-			"\tR14: %p, R15: %p, RFL: %p\n"
-			"\t SS: %p,  DS: %p,  CS: %p\n",
+			"Exception %d at 0x%p (cpu %d, pid %d, tid %d). Error code: %d.\nDumping registers:\n"
+			"\tRDI: 0x%p, RSI: 0x%p, RBP: 0x%p\n"
+			"\tRSP: 0x%p, RBX: 0x%p, RDX: 0x%p\n"
+			"\tRCX: 0x%p, RAX: 0x%p, RIP: 0x%p\n"
+			"\t R8: 0x%p,  R9: 0x%p, R10: 0x%p\n"
+			"\tR11: 0x%p, R12: 0x%p, R13: 0x%p\n"
+			"\tR14: 0x%p, R15: 0x%p, RFL: 0x%p\n"
+			"\t SS: 0x%p,  DS: 0x%p,  CS: 0x%p\n",
 			frame->intNumber,
 			frame->rip,
 			cpuId,

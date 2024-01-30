@@ -12,7 +12,7 @@
 
 #include <multitasking/threadAPI/thrHandle.h>
 
-#include <vector.h>
+#include <utils/vector.h>
 
 #define OBOS_DRIVER_HEADER_SECTION_NAME ".obosDriverHeader"
 
@@ -28,6 +28,7 @@ namespace obos
 			OBOS_SERVICE_TYPE_USER_INPUT_DEVICE, OBOS_SERVICE_TYPE_VIRTUAL_USER_INPUT_DEVICE,
 			OBOS_SERVICE_TYPE_COMMUNICATION, OBOS_SERVICE_TYPE_VIRTUAL_COMMUNICATION,
 			OBOS_SERVICE_TYPE_PARTITION_MANAGER,
+			OBOS_SERVICE_TYPE_KERNEL_EXTENSION,
 		};
 		enum fileAttributes
 		{
@@ -88,7 +89,7 @@ namespace obos
 		};
 		struct ftable
 		{
-			static constexpr size_t maxCallbacks = 10 - 1; // The max - GetServiceType
+			static constexpr size_t maxCallbacks = 10 - 1; // The max - 1 function, GetServiceType
 			serviceType(*GetServiceType)();
 			union
 			{
@@ -219,12 +220,14 @@ namespace obos
 				REQUEST_INITRD_LOCATION = 1,
 				REQUEST_SET_STACK_SIZE = 2,
 				REQUEST_NO_MAIN_THREAD = 4,
+				REQUEST_ACPI_NODE = 8,
 			};
 			uint64_t requests;
 			size_t stackSize; // SET_STACK_SIZE_REQUEST
 			ftable functionTable;
 			/// <summary>
-			/// Bit 0: PCI
+			/// Bit 0: PCI<para></para>
+			/// Bit 1: ACPI Namespace
 			/// </summary>
 			uint32_t howToIdentifyDevice;
 			struct __driverInfoPciInfo
@@ -245,7 +248,24 @@ namespace obos
 				/// </summary>
 				__uint128_t progIf;
 			};
+			struct __driverInfoAcpiInfo
+			{
+				// If all these conditions are true, the driver is loaded.
+				// "X" means this field doesn't matter.
+				// N Matches Comp | Device ID Match | Device ID Exists |
+				//            >=1 | Yes             | XXXXXXXXXXXXXXXX |
+				
+				// A pointer to a list of strings, which represent hardware IDs.
+				// There can be zero hardware ids.
+				char hardwareIDs[32][32] = {};
+				size_t nHardwareIDs;
+				// A pointer to a list of strings, which represent hardware IDs.
+				// There must be at least one compatible id.
+				char compatibleIDs[32][32] = {};
+				size_t nCompatibleIDs;
+			};
 			__driverInfoPciInfo pciInfo;
+			__driverInfoAcpiInfo acpiInfo;
 			struct
 			{
 				void* addr;

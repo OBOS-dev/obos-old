@@ -8,7 +8,7 @@
 
 #include <int.h>
 
-#include <hashmap.h>
+#include <utils/hashmap.h>
 
 #include <multitasking/threadAPI/thrHandle.h>
 

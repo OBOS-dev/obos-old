@@ -102,8 +102,8 @@ void hexdump(void* _buff, size_t nBytes, const size_t width = 31)
 	byte* buff = (byte*)_buff;
 	logger::printf("         Address: ");
 	for(byte i = 0; i < ((byte)width) + 1; i++)
-		logger::printf("%e%x ", 2, i);
-	logger::printf("\n%e%x: ", 16, buff);
+		logger::printf("%02x ", i);
+	logger::printf("\n%016x: ", buff);
 	for (size_t i = 0, chI = 0; i < nBytes; i++, chI++)
 	{
 		if (printCh)
@@ -127,14 +127,14 @@ void hexdump(void* _buff, size_t nBytes, const size_t width = 31)
 			logger::printf("%c", ch);
 		}
 		else
-			logger::printf("%e%x ", 2, buff[i]);
+			logger::printf("%02x ", buff[i]);
 		if (chI == static_cast<size_t>(width + (!(i < (width + 1)) || printCh)))
 		{
 			chI = 0;
 			if (!printCh)
 				i -= (width + 1);
 			else
-				logger::printf(" |\n%e%x: ", 16, &buff[i + 1]);
+				logger::printf(" |\n%016x: ", &buff[i + 1]);
 			printCh = !printCh;
 			if (printCh)
 				logger::printf("\t| ");
@@ -316,13 +316,11 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 		vallocator.VirtualFree((void*)response, 4096);
 		// Register the drive with the kernel.
 		portDescriptor.kernelID = portDescriptor.driveType == Port::DRIVE_TYPE_SATA ? driverInterface::RegisterDrive() : 0xffffffff;
-		logger::info("AHCI: Found %s drive at port %d. Kernel drive ID: %d, sector count: %e0x%X, sector size %e0x%X.\n",
+		logger::info("AHCI: Found %s drive at port %d. Kernel drive ID: %d, sector count: 0x%016X, sector size 0x%08X.\n",
 			portDescriptor.driveType == Port::DRIVE_TYPE_SATA ? "SATA" : "SATAPI",
 			port,
 			portDescriptor.kernelID,
-			16,
 			nSectors,
-			8,
 			portDescriptor.sectorSize);
 		portDescriptor.nSectors = nSectors;
 	}

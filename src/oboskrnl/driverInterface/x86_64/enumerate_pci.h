@@ -18,6 +18,8 @@ namespace obos
 		OBOS_EXPORT uint8_t  pciReadByteRegister(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
 		OBOS_EXPORT uint16_t pciReadWordRegister(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
 		OBOS_EXPORT uint32_t pciReadDwordRegister(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset);
+		OBOS_EXPORT void pciWriteByteRegister(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint8_t data);
+		OBOS_EXPORT void pciWriteWordRegister(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint16_t data);
 		OBOS_EXPORT void pciWriteDwordRegister(uint8_t bus, uint8_t slot, uint8_t func, uint8_t offset, uint32_t data);
 		OBOS_EXPORT void enumerateBus(
 			uint8_t bus,

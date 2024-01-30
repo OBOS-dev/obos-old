@@ -163,9 +163,9 @@ namespace obos
 				if (frame->rip > (void*)0xffffffff00000000)
 					addr2func(frame->rip, functionName, functionStart);
 				if(functionName)
-					printf("\t%p: %s+%d\n", frame->rip, functionName, (uintptr_t)frame->rip - functionStart);
+					printf("\t0x%p: %s+%d\n", frame->rip, functionName, (uintptr_t)frame->rip - functionStart);
 				else
-					printf("\t%p: External Code\n", frame->rip);
+					printf("\t0x%p: External Code\n", frame->rip);
 				frame = frame->down;
 			}
 		}

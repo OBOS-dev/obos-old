@@ -27,7 +27,7 @@ namespace obos
         {
             if (m_node || !(m_flags & FLAGS_CLOSED))
             {
-                logger::debug("%s: m_node = %p, m_flags = %p", __func__, m_node, m_flags);
+                logger::debug("%s: m_node = 0x%p, m_flags = 0x%p", __func__, m_node, m_flags);
                 SetLastError(OBOS_ERROR_ALREADY_EXISTS);
                 return false;
             }

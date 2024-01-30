@@ -186,9 +186,9 @@ namespace obos
 	static_assert(sizeof(HPET) == 0x160, "struct HPET has an invalid size.");
 	static_assert(sizeof(HPET_Timer) == 32, "struct HPET_Timer has an invalid size.");
 	
-	extern volatile LAPIC* g_localAPICAddr; 
-	extern volatile IOAPIC* g_ioAPICAddr;
-	extern volatile HPET* g_HPETAddr;
+	extern OBOS_EXPORT volatile LAPIC* g_localAPICAddr; 
+	extern OBOS_EXPORT volatile IOAPIC* g_ioAPICAddr;
+	extern OBOS_EXPORT volatile HPET* g_HPETAddr;
 	extern uint64_t g_hpetFrequency;
 
 	enum class DestinationShorthand

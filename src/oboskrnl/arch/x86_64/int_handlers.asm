@@ -218,7 +218,7 @@ extern _ZN4obos8syscalls14g_syscallTableE
 ; (out) rdx: Upper 64 bits of the return value.
 ; Registers are preserved except for rax, rdx, rcx, and r9-r11.
 section .rodata
-panic_format_syscall_kernel: db "Kernel mode thread %d (rip: %p) used syscall!", 0x0A, 0x00
+panic_format_syscall_kernel: db "Kernel mode thread %d (rip: 0x%p) used syscall!", 0x0A, 0x00
 section .text
 extern _ZN4obos6logger5panicEPvPKcz
 syscall_instruction_handler:
@@ -227,8 +227,7 @@ syscall_instruction_handler:
 	; r10 and r9 is the only register we are going to be using before saving all registers.
 	mov r10, rsp
 	; $RSP = GetCurrentCpuLocalPtr()->currentThread->context.syscallStackBottom + 0x4000
-	rdgsbase r9
- 	mov r9, [r9+0x10]
+	mov r9, [gs:0x10]
 	mov r9, [r9+0x370]
 	add r9, 0x4000
 	mov rsp, r9
@@ -237,6 +236,9 @@ syscall_instruction_handler:
 .save:
 	pushaq_syscalli
 	mov rbp, rsp
+
+	; Enable interrupts.
+	sti
 	
 	; if(GetCurrentCpuLocal()->currentThread->context.ss == 0x10)
 	;	obos::logger::panic(nullptr, panic_format_syscall_kernel, GetCurrentCpuLocal()->currentThread->tid, GetCurrentCpuLocal()->currentThread->context.frame.rip);
@@ -247,8 +249,7 @@ syscall_instruction_handler:
 	stac
 
 .check_kmode:
-	rdgsbase r10
-	mov r10, [r10+0x10]
+	mov r10, [gs:0x10]
 	mov r9, [r10+0x130]
 	cmp r9, 0x10
 	jne .call

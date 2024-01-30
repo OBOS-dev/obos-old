@@ -84,7 +84,7 @@ pageBlock* allocateNewPageBlock(size_t nPages)
 		blockAddr = blockAddr + pageBlockTail->nPagesAllocated * g_liballocVirtualAllocator.GetPageSize();
 	pageBlock* blk = (pageBlock*)g_liballocVirtualAllocator.VirtualAlloc((void*)blockAddr, nPages * obos::memory::VirtualAllocator::GetPageSize(), 0);
 	if(!blk)
-		obos::logger::panic(nullptr, "Could not allocate a pageBlock at %p.\n", liballoc_base + totalPagesAllocated * g_liballocVirtualAllocator.GetPageSize());
+		obos::logger::panic(nullptr, "Could not allocate a pageBlock at 0x%p.\n", liballoc_base + totalPagesAllocated * g_liballocVirtualAllocator.GetPageSize());
 	blk->magic = PAGEBLOCK_MAGIC;
 	blk->nPagesAllocated = nPages;
 	totalPagesAllocated += nPages;
@@ -256,13 +256,13 @@ extern "C" {
 				currentPageBlock->lastBlock = block->prev;
 			if (!block)
 			{
-				OBOS_ASSERTP(currentPageBlock->highestBlock->magic == MEMBLOCK_MAGIC, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: %p!", "",
+				OBOS_ASSERTP(currentPageBlock->highestBlock->magic == MEMBLOCK_MAGIC, "Kernel heap corruption detected for block 0x%p, allocAddr: 0x%p, sizeBlock: 0x%p!", "",
 					currentPageBlock->highestBlock,
 					currentPageBlock->highestBlock->allocAddr,
 					currentPageBlock->highestBlock->size);
 				uintptr_t addr = (uintptr_t)currentPageBlock->highestBlock->allocAddr;
 				addr += currentPageBlock->highestBlock->size;
-				OBOS_ASSERTP(addr > 0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: %p!", "",
+				OBOS_ASSERTP(addr > 0xfffffffff0000000, "Kernel heap corruption detected for block 0x%p, allocAddr: 0x%p, sizeBlock: 0x%p!", "",
 					currentPageBlock->highestBlock,
 					currentPageBlock->highestBlock->allocAddr,
 					currentPageBlock->highestBlock->size);
@@ -360,6 +360,9 @@ extern "C" {
 	}
 	void kfree(void* ptr)
 	{
+		if (!ptr)
+			return;
+
 		makeSafeLock(lock);
 
 		memBlock* block = (memBlock*)ptr;
@@ -382,7 +385,7 @@ extern "C" {
 			}
 			if (block->next)
 			{
-				OBOS_ASSERTP(block->next > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
+				OBOS_ASSERTP(block->next > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block 0x%p, allocAddr: 0x%p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
 				block->next->prev = block->prev;
 			}
 		next1:
@@ -393,7 +396,7 @@ extern "C" {
 			}
 			if (block->prev)
 			{
-				OBOS_ASSERTP(block->prev > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block %p, allocAddr: %p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
+				OBOS_ASSERTP(block->prev > (void*)0xfffffffff0000000, "Kernel heap corruption detected for block 0x%p, allocAddr: 0x%p, sizeBlock: 0x%X!", "", block, block->allocAddr, block->size);
 				block->prev->next = block->next;
 			}
 		next2:

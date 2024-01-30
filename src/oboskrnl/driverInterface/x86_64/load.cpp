@@ -24,7 +24,7 @@
 
 #include <multitasking/process/process.h>
 
-#include <vector.h>
+#include <utils/vector.h>
 
 #define getCPULocal() ((thread::cpu_local*)thread::getCurrentCpuLocalPtr())
 

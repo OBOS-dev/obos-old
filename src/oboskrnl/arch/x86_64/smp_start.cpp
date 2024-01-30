@@ -105,7 +105,10 @@ namespace obos
 			fpuInit();
 			initSSE();
 			enableSMEP_SMAP();
-			setCR4(getCR4() | CR4_FSGSBASE);
+			uint32_t unused = 0, rbx = 0;
+			__cpuid__(0x7, 0, &unused, &rbx, &unused, &unused);
+			if (rbx & CPUID_FSGSBASE)
+				setCR4(getCR4() | CR4_FSGSBASE);
 			setupTimerInterrupt();
 			initialize_syscall_instruction();
 			atomic_set(&info->initialized);

@@ -38,6 +38,6 @@ extern "C" [[noreturn]] void __stack_chk_fail(void)
 		where = current->rip;
 	}
 	skip:
-	obos::logger::panic(nullptr, "Stack corruption detected at %p.\n", where);
+	obos::logger::panic(nullptr, "Stack corruption detected at 0x%p.\n", where);
 }
 #endif

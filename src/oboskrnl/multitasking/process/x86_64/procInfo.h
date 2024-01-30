@@ -7,7 +7,7 @@
 #pragma once
 
 #include <arch/x86_64/syscall/handle.h>
-#include <hashmap.h>
+#include <utils/hashmap.h>
 
 namespace obos
 {

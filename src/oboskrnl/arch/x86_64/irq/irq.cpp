@@ -21,7 +21,7 @@
 
 namespace obos
 {
-	limine_rsdp_request rsdp_request = {
+	volatile limine_rsdp_request rsdp_request = {
 		.id = LIMINE_RSDP_REQUEST,
 		.revision = 1,
 	};
@@ -144,7 +144,7 @@ namespace obos
 			void* ioapicAddress = nullptr;
 			for (; entryHeader != end; entryHeader = reinterpret_cast<acpi::MADT_EntryHeader*>(reinterpret_cast<uintptr_t>(entryHeader) + entryHeader->length))
 				ProcessEntryHeader(entryHeader, lapicAddress, ioapicAddress, g_nCores, &g_processorIDs[0], &g_lapicIDs[0]);
-			logger::log("Found %d cores, local apic address: %p, io apic address: %p.\n", g_nCores, lapicAddress, ioapicAddress);
+			logger::log("Found %d cores, local apic address: 0x%p, io apic address: 0x%p.\n", g_nCores, lapicAddress, ioapicAddress);
 			g_localAPICAddr = mapToHHDM((LAPIC*)lapicAddress);
 			g_ioAPICAddr = mapToHHDM((IOAPIC*)ioapicAddress);
 			// Write 0 to the ioapic's id field.
@@ -307,6 +307,8 @@ namespace obos
 #define GetIOAPICRegisterOffset(reg) ((uint8_t)(uintptr_t)(&((IOAPIC_Registers*)nullptr)->reg) / 4)
 	bool MapIRQToVector(uint8_t irq, uint8_t vector)
 	{
+		if (!g_ioAPICAddr)
+			return false;
 		uintptr_t flags = saveFlagsAndCLI();
 		uint32_t maximumRedirectionEntries = GetIOAPICRegisterOffset(ioapicVersion);
 		g_ioAPICAddr->ioregsel = maximumRedirectionEntries;

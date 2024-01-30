@@ -6,7 +6,7 @@
 
 #include <int.h>
 #include <error.h>
-#include <hashmap.h>
+#include <utils/hashmap.h>
 
 #include <arch/x86_64/syscall/handle.h>
 #include <arch/x86_64/syscall/verify_pars.h>
