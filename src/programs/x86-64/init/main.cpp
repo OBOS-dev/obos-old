@@ -97,12 +97,13 @@ void pageFaultHandler()
 	uintptr_t cr2 = 0;
 	asm volatile("mov %%cr2, %0;" : "=r"(cr2) : : );
 	printf("\nPage fault! CR2: 0x%p\n", cr2);
+	SwapBuffers();
 	while (1);
 }
 
 int main(char* path)
 {
-	char* bootRootDirectory = (char*)memcpy(path + strlen(path) + 1, path, strCountToDelimiter(path, '/', true) + 1);
+	char* bootRootDirecrtory = (char*)memcpy(path + strlen(path) + 1, path, strCountToDelimiter(path, '/', true) + 1);
 	ClearConsole(0);
 	RegisterSignal(0, (uintptr_t)pageFaultHandler);
 	uintptr_t keyboardHandle = MakeFileHandle();
@@ -127,9 +128,10 @@ int main(char* path)
 				continue;
 			}
 			size_t filesize = GetFilesize(filehandle);
-			char* buff = new char[filesize];
+			char* buff = new char[filesize + 1];
+			buff[filesize] = 0;
 			ReadFile(filehandle, buff, filesize, false);
-			printf("%.*s\n", filesize, buff);
+			ConsoleOutput(buff);
 			CloseFileHandle(filehandle);
 			InvalidateHandle(filehandle);
 			delete[] buff;

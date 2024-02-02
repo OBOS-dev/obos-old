@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#define STB_SPRINTF_MIN 1
 #define STB_SPRINTF_IMPLEMENTATION
 #include "stb_sprintf.h"
 

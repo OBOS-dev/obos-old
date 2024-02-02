@@ -25,6 +25,7 @@ void ConsoleOutput(const char* str);
 void SetColour(uint32_t foregroundColour, uint32_t backgroundColour, bool clearConsole = false);
 void GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour);
 void ClearConsole(uint32_t background);
+void SwapBuffers();
 
 uintptr_t MakeThreadHandle();
 bool CreateThread(uintptr_t hnd, uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, __uint128_t affinity, void* process, bool startPaused);
@@ -161,6 +162,10 @@ void ClearConsole(uint32_t background)
 	uint32_t foreground = 0;
 	GetColour(&foreground, nullptr);
 	SetColour(foreground, background, true);
+}
+void SwapBuffers()
+{
+	syscall(57, nullptr);
 }
 
 uintptr_t MakeThreadHandle()

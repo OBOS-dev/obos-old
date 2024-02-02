@@ -27,8 +27,10 @@ namespace obos
 		.id = LIMINE_MEMMAP_REQUEST,
 		.revision = 1
 	};
+	extern volatile limine_hhdm_request hhdm_offset;
 	namespace memory
 	{
+		uintptr_t hhdm_base, hhdm_end;
 		struct MemoryNode
 		{
 			MemoryNode *next, *prev;
@@ -43,6 +45,7 @@ namespace obos
 		void InitializePhysicalMemoryManager()
 		{
 			new (&g_pmmLock) locks::Mutex{ false };
+			hhdm_base = hhdm_offset.response->offset;
 			for (size_t i = 0; i < mmap_request.response->entry_count; i++)
 			{
 				if (mmap_request.response->entries[i]->type != LIMINE_MEMMAP_USABLE)
@@ -65,6 +68,10 @@ namespace obos
 				newNode->nPages = size / 0x1000;
 				g_memoryTail = newNodePhys;
 			}
+			auto& lastMMAPEntry = 
+				mmap_request.response->entries[mmap_request.response->entry_count - 1]
+			;
+			hhdm_end = hhdm_base + (uintptr_t)lastMMAPEntry->base + (lastMMAPEntry->length / 4096) * 4096 + 4096;
 		}
 #pragma GCC pop_options
 
@@ -121,6 +128,10 @@ namespace obos
 			g_nMemoryNodes++;
 			g_pmmLock.Unlock();
 			return true;
+		}
+		bool PageInHHDM(uintptr_t addr)
+		{
+			return (addr >= hhdm_base) && (addr < hhdm_end);
 		}
 	}
 }

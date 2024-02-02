@@ -11,12 +11,14 @@
 
 #include <multitasking/thread.h>
 
+extern "C"
+{
+	#include <uacpi/uacpi.h>
 
-#include <uacpi/uacpi.h>
+	#include <uacpi/internal/tables.h>
 
-#include <uacpi/internal/tables.h>
-
-#include <uacpi/kernel_api.h>
+	#include <uacpi/kernel_api.h>
+}
 
 using namespace obos;
 
@@ -31,10 +33,6 @@ namespace obos
 	extern OBOS_EXPORT volatile limine_rsdp_request rsdp_request;
 	extern OBOS_EXPORT volatile limine_hhdm_request hhdm_offset;
 }
-
-extern "C" uacpi_status
-uacpi_table_find(struct uacpi_table_identifiers* id,
-	struct uacpi_table** out_table);
 
 #define verify_status(st) \
 if (st != UACPI_STATUS_OK)\
