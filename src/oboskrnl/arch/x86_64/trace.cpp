@@ -97,7 +97,9 @@ namespace obos
 				driverInterface::obosDriverSymbol* symbol = nullptr;
 				for (auto iter = driverInterface::g_driverInterfaces.begin(); iter; iter++)
 				{
-					if (!(&(*iter)))
+					if (!(iter))
+						continue;
+					if (!(*iter).value)
 						continue;
 					if ((symbol = searchDriver(*(*iter).value)))
 						break;

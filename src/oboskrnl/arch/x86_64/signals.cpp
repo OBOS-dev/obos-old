@@ -5,6 +5,7 @@
 */
 
 #include <int.h>
+#include <klog.h>
 #include <error.h>
 
 #include <multitasking/thread.h>
@@ -42,7 +43,9 @@ namespace obos
             uintptr_t previousRip = on->context.frame.rip;
             on->context.frame.rip = (uintptr_t)handler;
             uintptr_t* returnAddress = (uintptr_t*)(on->context.frame.rsp -= 8);
+            setAC();
             *returnAddress = previousRip;
+            clearAC();
             on->status = thread::THREAD_STATUS_CAN_RUN;
         }
 
@@ -53,6 +56,7 @@ namespace obos
                 SetLastError(OBOS_ERROR_INVALID_PARAMETER);
                 return false;
             }
+            logger::debug("Calling signal %d on thread %d, process id %d. Action on fail: Abort.\n", sig, on->tid, ((process::Process*)on->owner)->pid);
             auto process = (Process*)on->owner;
             auto handler = process->signal_table[sig];
             if (!handler)
@@ -70,6 +74,7 @@ namespace obos
                 SetLastError(OBOS_ERROR_INVALID_PARAMETER);
                 return false;
             }
+            logger::debug("Calling signal %d on thread %d, process id %d. Action on fail: Terminate thread's process.\n", sig, on->tid, ((process::Process*)on->owner)->pid);
             auto process = (Process*)on->owner;
             auto handler = process->signal_table[sig];
             if (handler)

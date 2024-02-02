@@ -7,186 +7,12 @@
 #include <stdint.h>
 #include <stddef.h>
 
-extern "C" uintptr_t syscall(uint64_t syscallNo, void* args);
+#define OBOS_SYSCALL_IMPL
+#include "syscall.h"
+#include "liballoc.h"
+#include "logger.h"
 
 uintptr_t g_vAllocator = 0xffff'ffff'ffff'ffff;
-
-uintptr_t MakeFileHandle()
-{
-	return syscall(13, nullptr);
-}
-bool OpenFile(uintptr_t hnd, const char* path, uint32_t options)
-{
-	struct _par
-	{
-		alignas(0x10) uintptr_t hnd;
-		alignas(0x10) const char* path;
-		alignas(0x10) uint32_t options;
-	} pars{ hnd, path, options };
-	return syscall(14, &pars);
-}
-bool ReadFile(uintptr_t hnd, char* buff, size_t nToRead, bool peek = false)
-{
-	struct _par
-	{
-		alignas(0x10) uintptr_t hnd;
-		alignas(0x10) char* data;
-		alignas(0x10) size_t nToRead;
-		alignas(0x10) bool peek;
-	} pars{ hnd, buff, nToRead, peek };
-	return syscall(15, &pars);
-}
-size_t GetFilesize(uintptr_t hnd)
-{
-	uintptr_t pars[2] = { hnd, 0 };
-	return syscall(19, &pars);
-}
-bool CloseFileHandle(uintptr_t hnd)
-{
-	uintptr_t pars[2] = { hnd, 0 };
-	return syscall(22, &pars);
-}
-
-uintptr_t CreateVirtualAllocator(void* unused = nullptr)
-{
-	unused = nullptr;
-	struct
-	{
-		alignas(0x10) void* unused;
-	} par{ unused };
-	return syscall(39, &par);
-}
-void* VirtualAlloc(uintptr_t hnd, void* base, size_t size, uintptr_t flags)
-{
-	struct
-	{
-		alignas(0x10) uintptr_t hnd;
-		alignas(0x10) void* base; 
-		alignas(0x10) size_t size;
-		alignas(0x10) uintptr_t flags;
-	} par{};
-	par.hnd = hnd;
-	par.base = base;
-	par.size = size;
-	par.flags = flags;
-	return (void*)syscall(40, &par);
-}
-void* VirtualFree(uintptr_t hnd, void* base, size_t size)
-{
-	struct
-	{
-		alignas(0x10) uintptr_t hnd;
-		alignas(0x10) void* base; 
-		alignas(0x10) size_t size;
-	} par{};
-	par.hnd = hnd;
-	par.base = base;
-	par.size = size;
-	return (void*)syscall(41, &par);
-}
-
-bool InitializeConsole()
-{
-	return syscall(25, nullptr);
-}
-void ConsoleOutput(const char* str)
-{
-	size_t sz = 0;
-	for (; str[sz]; sz++);
-	struct
-	{
-		alignas(0x10) const char* str;
-		alignas(0x10) size_t sz;
-	} par{};
-	par.str = str;
-	par.sz = sz;
-	syscall(26, &par);
-}
-void SetColour(uint32_t foregroundColour, uint32_t backgroundColour, bool clearConsole = false)
-{
-	struct _par
-	{
-		alignas(0x10) uint32_t par1;
-		alignas(0x10) uint32_t par2;
-		alignas(0x10) bool clearConsole;
-	} pars{ foregroundColour, backgroundColour, clearConsole };
-	syscall(32, &pars);
-}
-void GetColour(uint32_t* foregroundColour, uint32_t* backgroundColour)
-{
-	struct _par
-	{
-		alignas(0x10) uint32_t* par1;
-		alignas(0x10) uint32_t* par2;
-	} pars{ foregroundColour, backgroundColour };
-	syscall(33, &pars);
-}
-void ClearConsole(uint32_t background)
-{
-	uint32_t foreground = 0;
-	GetColour(&foreground, nullptr);
-	SetColour(foreground, background, true);
-}
-
-uintptr_t MakeThreadHandle()
-{
-	return syscall(0, nullptr);
-}
-bool CreateThread(uintptr_t hnd, uint32_t priority, size_t stackSize, void(*entry)(uintptr_t), uintptr_t userdata, __uint128_t affinity, void* process, bool startPaused)
-{
-	struct _pars
-	{
-		alignas(0x10) uintptr_t hnd;
-		alignas(0x10) uint32_t priority;
-		alignas(0x10) size_t stackSize;
-		alignas(0x10) void(*entry)(uintptr_t);
-		alignas(0x10) uintptr_t userdata;
-		alignas(0x10) __uint128_t affinity;
-		alignas(0x10) void* process;
-		alignas(0x10) bool startPaused;
-	} pars{
-		hnd, priority, stackSize, entry, userdata, affinity, process, startPaused
-	};
-	return syscall(2, &pars);
-}
-uint32_t GetThreadStatus(uintptr_t hnd)
-{
-	uintptr_t pars[2] = { hnd, 0 };
-	return syscall(7, &pars);
-}
-uint32_t GetThreadExitCode(uintptr_t hnd)
-{
-	uintptr_t pars[2] = { hnd, 0 };
-	return syscall(8, &pars);
-}
-bool CloseThreadHandle(uintptr_t hnd)
-{
-	uintptr_t pars[2] = { hnd, 0 };
-	return syscall(23, &pars);
-}
-
-bool InvalidateHandle(uintptr_t hnd)
-{
-	struct
-	{
-		alignas(0x10) uintptr_t hnd;
-	} par{ hnd };
-	return syscall(24, &par);
-}
-
-bool LoadModule(const uint8_t* data, size_t size)
-{
-	struct _pars
-	{
-		alignas(0x10) const uint8_t* data;
-		alignas(0x10) size_t size;
-	} pars = { data,size };
-	return syscall(57, &pars);
-}
-uint32_t GetLastError()
-{
-	return syscall(55, nullptr);
-}
 
 void *memcpy(void* dest, const void* src, size_t size)
 {
@@ -194,6 +20,13 @@ void *memcpy(void* dest, const void* src, size_t size)
 	const uint8_t* _src = (uint8_t*)src;
 	for (size_t i = 0; i < size; i++)
 		_dest[i] = _src[i];
+	return dest;
+}
+void* memzero(void* dest, size_t size)
+{
+	uint8_t* _dest = (uint8_t*)dest;
+	for (size_t i = 0; i < size; i++)
+		_dest[i] = 0;
 	return dest;
 }
 size_t strlen(const char* str)
@@ -208,15 +41,102 @@ size_t strCountToDelimiter(const char* str, char ch, bool stopAtZero)
 	for (; str[ret] != ch && (str[ret] && stopAtZero); ret++);
 	return ret;
 }
+bool memcmp(const void* blk1, const void* blk2, size_t size)
+{
+	uint8_t* _blk1 = (uint8_t*)blk1;
+	uint8_t* _blk2 = (uint8_t*)blk2;
+	for (size_t i = 0; i < size; i++)
+		if (_blk1[i] != _blk2[i])
+			return false;
+	return true;
+}
+bool strcmp(const char* str1, const char* str2)
+{
+	if (strlen(str1) != strlen(str2))
+		return false;
+	return memcmp(str1, str2, strlen(str1));
+}
 static char* itoa(intptr_t value, char* result, int base);
 static char* itoa_unsigned(uintptr_t value, char* result, int base);
+
+// Doesn't work with normal file handles.
+char* getline(uintptr_t khandle)
+{
+	char ch[3] = {};
+	size_t size = 0;
+	char* res = (char*)malloc(++size);
+	res[0] = 0;
+	while (1)
+	{
+		while (Eof(khandle));
+		ReadFile(khandle, ch, 2, false);
+		if (!(ch[1] & (1 << 0)))
+		{
+			ConsoleOutput(ch);
+			if (ch[0] == '\n')
+				break;
+			if (ch[0] == '\b')
+			{
+				if (size == 1)
+					continue;
+				res = (char*)realloc(res, size -= 1);
+				res[size - 1] = 0;
+				continue;
+			}
+			res = (char*)realloc(res, ++size);
+			res[size - 2] = ch[0];
+			res[size - 1] = 0;
+		}
+		ch[0] = ch[1] = ch[2] = 0;
+	}
+	return res;
+}
+
+void pageFaultHandler()
+{
+	uintptr_t cr2 = 0;
+	asm volatile("mov %%cr2, %0;" : "=r"(cr2) : : );
+	printf("\nPage fault! CR2: 0x%p\n", cr2);
+	while (1);
+}
 
 int main(char* path)
 {
 	char* bootRootDirectory = (char*)memcpy(path + strlen(path) + 1, path, strCountToDelimiter(path, '/', true) + 1);
-	/*char* driverPath = (char*)memcpy(bootRootDirectory + strlen(bootRootDirectory), bootRootDirectory, strlen(bootRootDirectory));
-	memcpy(driverPath + strlen(driverPath), "obos/acpiDriver", 16);*/
 	ClearConsole(0);
+	RegisterSignal(0, (uintptr_t)pageFaultHandler);
+	uintptr_t keyboardHandle = MakeFileHandle();
+	OpenFile(keyboardHandle, "K0", 0);
+	while (1)
+	{
+		char* currentLine = getline(keyboardHandle);
+		size_t commandSz = strCountToDelimiter(currentLine, ' ', true);
+		char* command = (char*)memcpy(new char[commandSz + 1], currentLine, commandSz);
+		char* argPtr = currentLine + commandSz + 1;
+		if (strcmp(command, "echo"))
+		{
+			printf("%s\n", argPtr);
+		}
+		else if (strcmp(command, "cat"))
+		{
+			uintptr_t filehandle = MakeFileHandle();
+			if (!OpenFile(filehandle, argPtr, 1))
+			{
+				printf("Could not open %s. GetLastError: %d\n", argPtr, GetLastError());
+				InvalidateHandle(filehandle);
+				continue;
+			}
+			size_t filesize = GetFilesize(filehandle);
+			char* buff = new char[filesize];
+			ReadFile(filehandle, buff, filesize, false);
+			printf("%.*s\n", filesize, buff);
+			CloseFileHandle(filehandle);
+			InvalidateHandle(filehandle);
+			delete[] buff;
+		}
+		free(currentLine);
+		delete[] command;
+	}
 	return 0;
 }
 

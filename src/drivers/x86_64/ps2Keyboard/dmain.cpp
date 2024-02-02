@@ -14,6 +14,7 @@
 #include <x86_64-utils/asm.h>
 
 #include <driverInterface/struct.h>
+#include <driverInterface/register.h>
 
 #include <stdarg.h>
 
@@ -37,8 +38,6 @@ static void keyboardInterrupt(interrupt_frame*);
 
 byte sendCommand(uint32_t nCommands, ...);
 
-utils::Vector<uint16_t> g_keyBuffer;
-
 struct
 {
 	bool isScrollLock : 1;
@@ -58,12 +57,6 @@ volatile driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 	.requests = 0,
 	.functionTable = {
 		.GetServiceType = []()->driverInterface::serviceType { return driverInterface::serviceType::OBOS_SERVICE_TYPE_USER_INPUT_DEVICE; },
-		.serviceSpecific = {
-			.userInputDevice = {
-				.ReadCharacter = nullptr,
-				.unused = {nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,}
-			},
-		},
 	},
 	.howToIdentifyDevice = (1<<1), /* ACPI Namespace */
 	.acpiInfo = {
@@ -75,10 +68,10 @@ volatile driverInterface::driverHeader DEFINE_IN_SECTION g_driverHeader = {
 };
 #pragma GCC diagnostic pop
 
+uint32_t g_keyboardKernelId = 0;
+
 extern "C" void _start()
 {
-	new (&g_keyBuffer) utils::Vector<uint16_t>{};
-
 	// Register the IRQ
 	RegisterInterruptHandler(0x21, keyboardInterrupt);
 	MapIRQToVector(1, 0x21);
@@ -95,6 +88,9 @@ extern "C" void _start()
 	// Clear all keyboard LEDs.
 	sendCommand(2, 0xED, 0b000);
 
+	// Tell the kernel there is a keyboard.
+	g_keyboardKernelId = driverInterface::RegisterDevice(driverInterface::DeviceType::UserInput);
+
 	g_driverHeader.driver_initialized = true;
 	while (!g_driverHeader.driver_finished_loading);
 	thread::ExitThread(0);
@@ -105,7 +101,7 @@ static void keyboardInterrupt(interrupt_frame*)
 {
 	byte scancode = inb(0x60);
 
-	char ch = 0;
+	uint16_t ch = 0;
 	
 	if (scancode == 0xE0)
 		isExtendedScancode = true;
@@ -130,8 +126,8 @@ static void keyboardInterrupt(interrupt_frame*)
 		else if (scancode == 0x5c)
 			key = driverInterface::SpecialKeys::RIGHT_GUI;
 		else
-			key = g_keys[scancode].extendedCh;
-		g_keyBuffer.push_back((uint16_t)key);
+			key = (driverInterface::SpecialKeys)g_keys[scancode].extendedCh;
+		driverInterface::WriteByteToInputDeviceBuffer(g_keyboardKernelId, (uint16_t)key);
 		isExtendedScancode = false;
 		SendEOI();
 		return;
@@ -148,18 +144,18 @@ static void keyboardInterrupt(interrupt_frame*)
 	g_keys[scancode].nPressed++;
 	if (g_keys[scancode].isPressed)
 	{
-		if (scancode == 0x1d || scancode == 0x2a)
+		/*if (scancode == 0x1d || scancode == 0x2a)
 		{
-			g_keyBuffer.push_back(ch << 8);
+			driverInterface::WriteByteToInputDeviceBuffer(g_keyboardKernelId, ch);
 			goto skip;
-		}
+		}*/
 		if (ch)
 		{
 			bool isUppercase = flags.isCapsLock || flags.isShiftPressed;
 			if (flags.isCapsLock && flags.isShiftPressed)
 				isUppercase = false;
 
-			char newKey = 0;
+			uint16_t newKey = 0;
 			if (ch < 'A' || ch > 'Z')
 				newKey = ch;
 			else
@@ -167,13 +163,13 @@ static void keyboardInterrupt(interrupt_frame*)
 			if (flags.isShiftPressed && (ch < 'A' || ch > 'Z') && g_keys[scancode].shiftAlias)
 				newKey = g_keys[scancode].shiftAlias;
 			if (newKey)
-				g_keyBuffer.push_back(newKey);
+				driverInterface::WriteByteToInputDeviceBuffer(g_keyboardKernelId, newKey);
 		}
-		else if (g_keys[scancode].extendedCh != driverInterface::SpecialKeys::INVALID)
-			g_keyBuffer.push_back((uint16_t)g_keys[scancode].extendedCh);
+		else if (g_keys[scancode].extendedCh != (uint16_t)driverInterface::SpecialKeys::INVALID)
+			driverInterface::WriteByteToInputDeviceBuffer(g_keyboardKernelId, (uint16_t)g_keys[scancode].extendedCh);
 	}
 
-	skip:
+	//skip:
 	if (scancode == 0x2A || scancode == 0x36)
 		flags.isShiftPressed = !wasReleased;
 
@@ -230,14 +226,12 @@ byte sendCommand(uint32_t nCommands, ...)
 			outb(0x60, c);
 		}
 		ret = inb(0x60);
-		if (ret == RESEND && commands[0] != 0xF0 /* Set scancode set.*/)
-			for (size_t i = 0; ret != ACK && i < 10; ret = inb(0x60), i++);
 		if (ret == ACK)
-		{
-			va_end(list);
 			break;
-		}
-
+		if (ret == RESEND)
+			continue;
+		// Assume abort.
+		break;
 	}
 	return ret;
 }

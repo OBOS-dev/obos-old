@@ -10,6 +10,8 @@
 
 #include <driverInterface/struct.h>
 
+#include <allocators/slab.h>
+
 namespace obos
 {
 	namespace vfs
@@ -82,6 +84,27 @@ namespace obos
 			bool isInitrd = false;
 			driverInterface::driverIdentity* filesystemDriver = nullptr; // The filesystem driver to invoke.
 			uint32_t otherMountPointsReferencing = 0;
+
+			void* operator new(size_t)
+			{
+				return ImplSlabAllocate(ObjectTypes::MountPoint);
+			}
+			void operator delete(void* ptr)
+			{
+				ImplSlabFree(ObjectTypes::MountPoint, ptr);
+			}
+			void* operator new[](size_t sz)
+			{
+				return ImplSlabAllocate(ObjectTypes::MountPoint, sz / sizeof(MountPoint));
+			}
+			void operator delete[](void* ptr, size_t sz)
+			{
+				ImplSlabFree(ObjectTypes::MountPoint, ptr, sz / sizeof(MountPoint));
+			}
+			[[nodiscard]] void* operator new(size_t, void* ptr) noexcept { return ptr; }
+			[[nodiscard]] void* operator new[](size_t, void* ptr) noexcept { return ptr; }
+			void operator delete(void*, void*) noexcept {}
+			void operator delete[](void*, void*) noexcept {}
 		};
 		struct HandleListNode
 		{
@@ -106,6 +129,26 @@ namespace obos
 			DirectoryEntry* linkedNode = nullptr; // Only non-null when direntType == DIRECTORY_ENTRY_TYPE_SYMLINK
 			struct MountPoint* mountPoint = nullptr;
 			HandleList fileHandlesReferencing{};
+			void* operator new(size_t)
+			{
+				return ImplSlabAllocate(ObjectTypes::DirectoryEntry);
+			}
+			void operator delete(void* ptr)
+			{
+				ImplSlabFree(ObjectTypes::DirectoryEntry, ptr);
+			}
+			void* operator new[](size_t sz)
+			{
+				return ImplSlabAllocate(ObjectTypes::DirectoryEntry, sz / sizeof(DirectoryEntry));
+			}
+			void operator delete[](void* ptr, size_t sz)
+			{
+				ImplSlabFree(ObjectTypes::DirectoryEntry, ptr, sz / sizeof(DirectoryEntry));
+			}
+			[[nodiscard]] void* operator new(size_t, void* ptr) noexcept { return ptr; }
+			[[nodiscard]] void* operator new[](size_t, void* ptr) noexcept { return ptr; }
+			void operator delete(void*, void*) noexcept {}
+			void operator delete[](void*, void*) noexcept {}
 		};
 		struct Directory : public DirectoryEntry
 		{
@@ -128,6 +171,26 @@ namespace obos
 			driverInterface::driverIdentity* filesystemDriver;
 			const char* friendlyFilesystemName = "UNKNOWN";
 			PartitionEntry *next = nullptr, *prev = nullptr;
+			void* operator new(size_t)
+			{
+				return ImplSlabAllocate(ObjectTypes::PartitionEntry);
+			}
+			void operator delete(void* ptr)
+			{
+				ImplSlabFree(ObjectTypes::PartitionEntry, ptr);
+			}
+			void* operator new[](size_t sz)
+			{
+				return ImplSlabAllocate(ObjectTypes::PartitionEntry, sz / sizeof(PartitionEntry));
+			}
+			void operator delete[](void* ptr, size_t sz)
+			{
+				ImplSlabFree(ObjectTypes::PartitionEntry, ptr, sz / sizeof(PartitionEntry));
+			}
+			[[nodiscard]] void* operator new(size_t, void* ptr) noexcept { return ptr; }
+			[[nodiscard]] void* operator new[](size_t, void* ptr) noexcept { return ptr; }
+			void operator delete(void*, void*) noexcept {}
+			void operator delete[](void*, void*) noexcept {}
 		};
 		struct DriveEntry : public VFSNode
 		{
@@ -141,6 +204,27 @@ namespace obos
 			size_t nPartitions = 0;
 			HandleList handlesReferencing;
 			DriveEntry *next, *prev;
+
+			void* operator new(size_t )
+			{
+				return ImplSlabAllocate(ObjectTypes::DriveEntry);
+			}
+			void operator delete(void* ptr)
+			{
+				ImplSlabFree(ObjectTypes::DriveEntry, ptr);
+			}
+			void* operator new[](size_t sz)
+			{
+				return ImplSlabAllocate(ObjectTypes::DriveEntry, sz / sizeof(DriveEntry));
+			}
+			void operator delete[](void* ptr, size_t sz)
+			{
+				ImplSlabFree(ObjectTypes::DriveEntry, ptr, sz / sizeof(DriveEntry));
+			}
+			[[nodiscard]] void* operator new(size_t, void* ptr) noexcept { return ptr; }
+			[[nodiscard]] void* operator new[](size_t, void* ptr) noexcept { return ptr; }
+			void operator delete(void*, void*) noexcept {}
+			void operator delete[](void*, void*) noexcept {}
 		};
 		struct DriveList
 		{

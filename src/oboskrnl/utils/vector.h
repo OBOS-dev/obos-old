@@ -137,13 +137,13 @@ namespace obos
 			}
 			T& push_back(const T& val)
 			{
-				if ((m_sz + 1) > m_capacity)
+				if ((m_sz + 1) > m_capacity || !m_ptr)
 				{
 					m_capacity += m_capacityIncrement;
 					m_ptr = (T*)krealloc(m_ptr, m_capacity * sizeof(T));
 				}
 #ifdef OBOS_DEBUG
-				OBOS_ASSERTP(m_ptr > (void*)0xfffffffff0000000, "");
+				OBOS_ASSERTP(m_ptr != nullptr, "");
 #endif
 				m_ptr[m_sz++] = val;
 				return m_ptr[m_sz - 1];

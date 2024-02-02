@@ -97,7 +97,11 @@ namespace obos
 		{
 			utils::Hashmap<
 				LoadableDriver, pciDevice, utils::defaultEquals<LoadableDriver>, LoadableDriver::hasher> driversToLoad;
-			uintptr_t udata[2] = { (uintptr_t)&driverList, (uintptr_t)&driversToLoad };
+			utils::Vector<LoadableDriver*> pciDrivers;
+			for (auto& drv : driverList)
+				if (drv.header->howToIdentifyDevice & (1 << 0))
+					pciDrivers.push_back(&drv);
+			uintptr_t udata[2] = { (uintptr_t)&pciDrivers, (uintptr_t)&driversToLoad };
 			for (uint16_t bus = 0; bus < 256; bus++)
 				enumerateBus((uint8_t)bus, [](
 					void* userData, uint8_t, uint8_t, uint8_t,
@@ -106,7 +110,7 @@ namespace obos
 					uint8_t progIF)->bool
 					{
 						uintptr_t* udata = (uintptr_t*)userData;
-						const utils::Vector<LoadableDriver>& driverList = *(utils::Vector<LoadableDriver>*)udata[0];
+						const utils::Vector<LoadableDriver*>& driverList = *(utils::Vector<LoadableDriver*>*)udata[0];
 						utils::Hashmap<
 							LoadableDriver, pciDevice>& driversToLoad = *((utils::Hashmap<
 								LoadableDriver, pciDevice>*)udata[1]);
@@ -115,14 +119,14 @@ namespace obos
 						};
 						for (auto& driver : driverList)
 						{
-							if (driversToLoad.contains(driver))
+							if (driversToLoad.contains(*driver))
 								continue;
-							if (driver.header->howToIdentifyDevice & 1)
+							if (driver->header->howToIdentifyDevice & 1)
 							{
-								if (driver.header->pciInfo.classCode == dev.classCode)
+								if (driver->header->pciInfo.classCode == dev.classCode)
 								{
 									bool found = true;
-									__uint128_t drv_subclass = driver.header->pciInfo.subclass;
+									__uint128_t drv_subclass = driver->header->pciInfo.subclass;
 									for (uint8_t csubclass = bsf(drv_subclass); 
 												 csubclass != subclass;
 												 csubclass = bsf(drv_subclass))
@@ -136,7 +140,7 @@ namespace obos
 									}
 									if (!found)
 										continue;
-									__uint128_t drv_progIf = driver.header->pciInfo.progIf;
+									__uint128_t drv_progIf = driver->header->pciInfo.progIf;
 									for (uint8_t cprogIF = bsf(drv_progIf); 
 												 cprogIF != progIF;
 												 cprogIF = bsf(drv_progIf))
@@ -150,7 +154,7 @@ namespace obos
 									}
 									if (!found)
 										continue;
-									driversToLoad.emplace_at(driver, dev);
+									driversToLoad.emplace_at(*driver, dev);
 								}
 							}
 						}
@@ -192,7 +196,10 @@ namespace obos
 			uacpi_eval_hid(node, &dhid);
 			uacpi_eval_cid(node, &deviceCompatibleIDs);
 			if (!dhid)
+			{
+				uacpi_release_pnp_id_list(&deviceCompatibleIDs);
 				return UACPI_NS_ITERATION_DECISION_CONTINUE;
+			}
 			for (auto& currentDriver : *userdata[0])
 			{
 				bool possibleToLoad = false;
@@ -231,6 +238,8 @@ namespace obos
 					continue;
 				userdata[1]->push_back(currentDriver);
 			}
+			uacpi_release_pnp_id_list(&deviceCompatibleIDs);
+			uacpi_kernel_free(dhid);
 			return UACPI_NS_ITERATION_DECISION_CONTINUE;
 		}
 		static void ScanACPINamespace(const utils::Vector<LoadableDriver>& driverList)
@@ -331,6 +340,7 @@ namespace obos
 				mbrDriver.Close();
 				if (!LoadModule(fdata, filesize, nullptr))
 					logger::panic(nullptr, "Could not load the MBR driver. GetLastError: %d\n", GetLastError());
+				delete[] fdata;
 			}
 			next:
 			if (gptDrives.length())
@@ -348,6 +358,7 @@ namespace obos
 				gptDriver.Close();
 				if (!LoadModule(fdata, filesize, nullptr))
 					logger::panic(nullptr, "Could not load the GPT driver. GetLastError: %d\n", GetLastError());
+				delete[] fdata;
 			}
 		done:
 			driverIdentity *gptDriver = nullptr, *mbrDriver = nullptr;

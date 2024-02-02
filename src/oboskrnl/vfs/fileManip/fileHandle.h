@@ -30,9 +30,9 @@ namespace obos
 			};
 			enum Flags
 			{
-				//FLAGS_REACHED_EOF = 0b1,
-				FLAGS_ALLOW_WRITE = 0b10,
-				FLAGS_CLOSED = 0b100,
+				FLAGS_IS_INPUT_DEVICE = 0x1,
+				FLAGS_ALLOW_WRITE = 0x2,
+				FLAGS_CLOSED = 0x4,
 			};
 		public:
 			FileHandle() = default;
@@ -77,7 +77,7 @@ namespace obos
 			/// <summary>
 			/// Gets the file's size.
 			/// </summary>
-			/// <returns>The file's size.</returns>
+			/// <returns>The file's size, or (size_t)-1 on failure</returns>
 			size_t GetFileSize() const;
 			/// <summary>
 			/// Gets the path of the parent directory of the file.
@@ -91,7 +91,7 @@ namespace obos
 			/// </summary>
 			/// <param name="count">How much to adjust the position by</param>
 			/// <param name="from">Where to add "count".</param>
-			/// <returns>The old file position.</returns>
+			/// <returns>The old file position, or (uoff_t)-1 on failure.</returns>
 			uoff_t SeekTo(off_t count, SeekPlace from = SEEKPLACE_BEG);
 
 			/// <summary>

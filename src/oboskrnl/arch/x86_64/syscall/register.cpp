@@ -13,6 +13,7 @@
 #include <arch/x86_64/syscall/handle.h>
 #include <arch/x86_64/syscall/console.h>
 #include <arch/x86_64/syscall/vmm.h>
+#include <arch/x86_64/syscall/signals.h>
 
 #include <arch/x86_64/syscall/verify_pars.h>
 
@@ -93,6 +94,7 @@ namespace obos
 			for (uint16_t currentSyscall = 46; currentSyscall < 55; RegisterSyscall(currentSyscall++, (uintptr_t)DriveSyscallHandler));
 			for (uint16_t currentSyscall = 55; currentSyscall < 57; RegisterSyscall(currentSyscall++, (uintptr_t)ErrorSyscallHandler));
 			RegisterSyscall(57, (uintptr_t)LoadModuleSyscallHandler);
+			for (uint16_t currentSyscall = 57; currentSyscall < 59; RegisterSyscall(currentSyscall++, (uintptr_t)SignalsSyscallHandler));
 
 		}
 		void RegisterSyscall(uint16_t n, uintptr_t func)

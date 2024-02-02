@@ -17,6 +17,9 @@
 
 #include <multitasking/process/process.h>
 
+#include <driverInterface/input_device.h>
+#include <driverInterface/register.h>
+
 namespace obos
 {
 	namespace vfs
@@ -78,6 +81,31 @@ namespace obos
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
 				return false;
 			}
+			if (*path == 'K')
+			{
+				// User input device.
+				uint32_t id = getMountId(path + 1, utils::strlen(path + 1));
+				auto entry = (driverInterface::InputDevice*)driverInterface::GetUserInputDevice(id);
+				if (!entry)
+				{
+					SetLastError(OBOS_ERROR_VFS_FILE_NOT_FOUND);
+					return false;
+				}
+				HandleListNode* node = new HandleListNode{};
+				node->handle = this;
+				if (entry->fileHandlesReferencing.tail)
+					entry->fileHandlesReferencing.tail->next = node;
+				if (!entry->fileHandlesReferencing.head)
+					entry->fileHandlesReferencing.head = node;
+				node->prev = entry->fileHandlesReferencing.tail;
+				entry->fileHandlesReferencing.tail = node;
+				entry->fileHandlesReferencing.size++;
+				m_nodeInFileHandlesReferencing = node;
+				m_node = entry;
+				m_pathNode = entry;
+				m_flags = FLAGS_IS_INPUT_DEVICE;
+				return true;
+			}
 			if (!strContains(path, ':'))
 			{
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
@@ -137,13 +165,17 @@ namespace obos
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
 			}
-			DirectoryEntry* node = (DirectoryEntry*)m_node;
 			if (Eof())
 			{
 				SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
 				return false;
 			}
-			if (__TestEof(m_currentFilePos + (nToRead - 1)))
+			bool canReadAll = false;
+			if ((m_flags & FLAGS_IS_INPUT_DEVICE))
+				canReadAll = !(__TestEof(m_currentFilePos + (nToRead / 2) - 1));
+			else
+				canReadAll = !(__TestEof(m_currentFilePos + (nToRead - 1)));
+			if (!canReadAll)
 			{
 				SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
 				return false;
@@ -154,23 +186,41 @@ namespace obos
 
 			if (data)
 			{
-				auto& functions = node->mountPoint->filesystemDriver->functionTable.serviceSpecific.filesystem;
+				if (!(m_flags & FLAGS_IS_INPUT_DEVICE))
+				{
+					DirectoryEntry* node = (DirectoryEntry*)m_node;
+					auto& functions = node->mountPoint->filesystemDriver->functionTable.serviceSpecific.filesystem;
 
-				uint64_t driveId = node->mountPoint->partition ? node->mountPoint->partition->drive->driveId : 0;
-				uint8_t drivePartitionId = node->mountPoint->partition ? node->mountPoint->partition->partitionId : 0;
+					uint64_t driveId = node->mountPoint->partition ? node->mountPoint->partition->drive->driveId : 0;
+					uint8_t drivePartitionId = node->mountPoint->partition ? node->mountPoint->partition->partitionId : 0;
 
-				ret = functions.ReadFile(
+					ret = functions.ReadFile(
 						driveId,
 						drivePartitionId,
 						node->path,
 						m_currentFilePos,
 						nToRead,
 						data);
-				if (!ret)
-					SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
-				if (ret && !peek)
-					m_currentFilePos += nToRead;
+				}
+				else
+				{
+					if (nToRead % 2)
+					{
+						SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+						return false;
+					}
+					driverInterface::InputDevice* node = (driverInterface::InputDevice*)m_node;
+					// Copy with an iterator to avoid a race condition where node->data.data() gets reallocated while data is being copied.
+					//utils::memcpy(data, node->data.data(), nToRead);
+					nToRead /= 2;
+					for (size_t i = 0; i < nToRead; i++)
+						*((uint16_t*)(data + i * 2)) = node->data[i + m_currentFilePos];
+				}
 			}
+			if (!ret)
+				SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
+			if (ret && !peek)
+				m_currentFilePos += nToRead;
 			return ret;
 		}
 		bool FileHandle::Write()
@@ -181,8 +231,6 @@ namespace obos
 
 		bool FileHandle::Eof() const
 		{
-			// const DirectoryEntry* node = (DirectoryEntry*)m_node;
-			// return m_currentFilePos + 1 >= node->filesize;
 			return __TestEof(m_currentFilePos);
 		}
 		size_t FileHandle::GetFileSize() const
@@ -192,6 +240,11 @@ namespace obos
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return 0;
 			}
+			if (m_flags & FLAGS_IS_INPUT_DEVICE)
+			{
+				SetLastError(OBOS_ERROR_VFS_INVALID_OPERATION_ON_OBJECT);
+				return (size_t)-1;
+			}
 			return ((DirectoryEntry*)m_node)->filesize;
 		}
 		void FileHandle::GetParent(char* path, size_t* sizePath)
@@ -199,6 +252,11 @@ namespace obos
 			if (m_flags & FLAGS_CLOSED)
 			{
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return;
+			}
+			if (m_flags & FLAGS_IS_INPUT_DEVICE)
+			{
+				SetLastError(OBOS_ERROR_VFS_INVALID_OPERATION_ON_OBJECT);
 				return;
 			}
 			DirectoryEntry* node = (DirectoryEntry*)m_node;
@@ -217,7 +275,12 @@ namespace obos
 			if (m_flags & FLAGS_CLOSED)
 			{
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
-				return 0;
+				return (uoff_t)-1;
+			}
+			if (m_flags & FLAGS_IS_INPUT_DEVICE)
+			{
+				SetLastError(OBOS_ERROR_VFS_INVALID_OPERATION_ON_OBJECT);
+				return (uoff_t)-1;
 			}
 			DirectoryEntry* node = (DirectoryEntry*)m_node;
 			uoff_t ret = GetPos();
@@ -250,18 +313,36 @@ namespace obos
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
 			}
-			DirectoryEntry* node = (DirectoryEntry*)m_node;
-			HandleListNode* nodeInFHR = (HandleListNode*)m_nodeInFileHandlesReferencing;
-			if (nodeInFHR->next)
-				nodeInFHR->next->prev = nodeInFHR->prev;
-			if (nodeInFHR->prev)
-				nodeInFHR->prev->next = nodeInFHR->next;
-			if (node->fileHandlesReferencing.head == nodeInFHR)
-				node->fileHandlesReferencing.head = nodeInFHR->next;
-			if (node->fileHandlesReferencing.tail == nodeInFHR)
-				node->fileHandlesReferencing.tail = nodeInFHR->prev;
-			node->fileHandlesReferencing.size--;
-			delete nodeInFHR;
+			if (m_flags & FLAGS_IS_INPUT_DEVICE)
+			{
+				HandleListNode* nodeInFHR = (HandleListNode*)m_nodeInFileHandlesReferencing;
+				driverInterface::InputDevice* node = (driverInterface::InputDevice*)m_node;
+				if (nodeInFHR->next)
+					nodeInFHR->next->prev = nodeInFHR->prev;
+				if (nodeInFHR->prev)
+					nodeInFHR->prev->next = nodeInFHR->next;
+				if (node->fileHandlesReferencing.head == nodeInFHR)
+					node->fileHandlesReferencing.head = nodeInFHR->next;
+				if (node->fileHandlesReferencing.tail == nodeInFHR)
+					node->fileHandlesReferencing.tail = nodeInFHR->prev;
+				node->fileHandlesReferencing.size--;
+				delete nodeInFHR;
+			}
+			else
+			{
+				HandleListNode* nodeInFHR = (HandleListNode*)m_nodeInFileHandlesReferencing;
+				DirectoryEntry* node = (DirectoryEntry*)m_node;
+				if (nodeInFHR->next)
+					nodeInFHR->next->prev = nodeInFHR->prev;
+				if (nodeInFHR->prev)
+					nodeInFHR->prev->next = nodeInFHR->next;
+				if (node->fileHandlesReferencing.head == nodeInFHR)
+					node->fileHandlesReferencing.head = nodeInFHR->next;
+				if (node->fileHandlesReferencing.tail == nodeInFHR)
+					node->fileHandlesReferencing.tail = nodeInFHR->prev;
+				node->fileHandlesReferencing.size--;
+				delete nodeInFHR;
+			}
 			m_nodeInFileHandlesReferencing = m_pathNode = m_node = nullptr;
 			m_currentFilePos = 0;
 
@@ -271,6 +352,11 @@ namespace obos
 
 		bool FileHandle::__TestEof(uoff_t pos) const
 		{
+			if (m_flags & FLAGS_IS_INPUT_DEVICE)
+			{
+				const driverInterface::InputDevice* node = (driverInterface::InputDevice*)m_node;
+				return pos >= node->data.length();
+			}
 			const DirectoryEntry* node = (DirectoryEntry*)m_node;
 			return pos >= node->filesize;
 		}

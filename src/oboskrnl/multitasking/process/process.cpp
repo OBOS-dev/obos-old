@@ -55,18 +55,62 @@ namespace obos
 			
 			return ret;
 		}
-		static bool ExitProcessCallback(thread::Thread* thr, Process* process)
+#ifdef __x86_64__
+		extern "C" bool _Impl_ExitProcessCallback();
+		asm(
+			".intel_syntax noprefix;"
+			".extern _ZN4obos11SetTSSStackEPv;"
+			".extern _ZN4obos11SetTSSStackEPv;"
+			".extern _ZN4obos7process19ExitProcessCallbackEPNS_6thread6ThreadEPNS0_7ProcessE;"
+			".global _Impl_ExitProcessCallback;"
+			"_Impl_ExitProcessCallback:;"
+			"	push rdi;"
+			"	push rsi;"
+			"	lea rdi, [rsp+0x10];"
+			"	call _ZN4obos6SetISTEPv;"
+			"	lea rdi, [rsp+0x10];"
+			"	call _ZN4obos11SetTSSStackEPv;"
+			"	pop rsi;"
+			"	pop rdi;"
+			"	call _ZN4obos7process19ExitProcessCallbackEPNS_6thread6ThreadEPNS0_7ProcessE;"
+			"	jmp $;"
+			".att_syntax prefix;"
+		);
+#endif
+		bool ExitProcessCallback(thread::Thread* thr, Process* process)
 		{
 			process->vallocator.FreeUserProcessAddressSpace();
 			bool isThrDead = thr->status == thread::THREAD_STATUS_DEAD;
-			if (thr->flags & thread::THREAD_FLAGS_IS_EXITING_PROCESS)
-				delete thr;
-			if (isThrDead)
+			if (thr->flags & thread::THREAD_FLAGS_IS_EXITING_PROCESS && !isThrDead)
 			{
-				thread::startTimer(0);
-				thread::callScheduler(false); // noreturn.
+				thr->exitCode = 0;
+				thr->status = thread::THREAD_STATUS_DEAD;
+				thr->flags = 0;
+				if (thr->prev_run)
+					thr->prev_run->next_run = thr->next_run;
+				if (thr->next_run)
+					thr->next_run->prev_run = thr->prev_run;
+				if (thr->priorityList->head == thr)
+					thr->priorityList->head = thr->next_run;
+				if (thr->priorityList->tail == thr)
+					thr->priorityList->tail = thr->prev_run;
+				thr->priorityList->size--;
+				if (!thr->references)
+				{
+					if (thr->prev_list)
+						thr->prev_list->next_list = thr->next_list;
+					if (thr->next_list)
+						thr->next_list->prev_list = thr->prev_list;
+					if (thr->threadList->head == thr)
+						thr->threadList->head = thr->next_list;
+					if (thr->threadList->tail == thr)
+						thr->threadList->tail = thr->prev_list;
+					thr->threadList->size--;
+					delete thr;
+				}
 			}
-			thread::ExitThread(0);
+			thread::startTimer(0);
+			thread::callScheduler(false);
 			while (1);
 			return false;
 		}
@@ -105,7 +149,11 @@ namespace obos
 			else
 			{
 				currentThread->flags |= thread::THREAD_FLAGS_IS_EXITING_PROCESS;
+#ifndef __x86_64__
 				putThreadAtFunctionWithCPUTempStack(currentThread, (void*)ExitProcessCallback, currentThread, process);
+#else
+				putThreadAtFunctionWithCPUTempStack(currentThread, (void*)_Impl_ExitProcessCallback, currentThread, process);
+#endif
 			}
 			return true; // Only reached if currentThread->owner != process
 		}

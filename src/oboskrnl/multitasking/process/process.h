@@ -14,6 +14,7 @@
 #include <multitasking/process/arch.h>
 
 #include <allocators/vmm/vmm.h>
+#include <allocators/slab.h>
 
 #include <multitasking/process/signals.h>
 
@@ -50,6 +51,26 @@ namespace obos
 			Process* next_child;
 			memory::VirtualAllocator vallocator{ this };
 			void(*signal_table[SIGMAX])();
+			void* operator new(size_t )
+			{
+				return ImplSlabAllocate(ObjectTypes::Process);
+			}
+			void operator delete(void* ptr)
+			{
+				ImplSlabFree(ObjectTypes::Process, ptr);
+			}
+			void* operator new[](size_t sz)
+			{
+				return ImplSlabAllocate(ObjectTypes::Process, sz / sizeof(Process));
+			}
+			void operator delete[](void* ptr, size_t sz)
+			{
+				ImplSlabFree(ObjectTypes::Process, ptr, sz / sizeof(Process));
+			}
+			[[nodiscard]] void* operator new(size_t, void* ptr) noexcept { return ptr; }
+			[[nodiscard]] void* operator new[](size_t, void* ptr) noexcept { return ptr; }
+			void operator delete(void*, void*) noexcept {}
+			void operator delete[](void*, void*) noexcept {}
 		};
 		extern Process::ProcessList g_processes;
 		Process* CreateProcess(bool isUsermode);

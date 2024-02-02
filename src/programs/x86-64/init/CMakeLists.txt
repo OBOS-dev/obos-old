@@ -2,7 +2,7 @@
 
 # Copyright (c) 2023-2024 Omar Berrow
 
-add_executable(init "../common/syscall.asm" "main.cpp")
+add_executable(init "../common/syscall.asm" "main.cpp" "liballoc.cpp" "liballoc.h" "syscall.h" "stb_sprintf.h" "logger.h" "logger.cpp")
 
 target_compile_options(init
 	PRIVATE $<$<COMPILE_LANGUAGE:CXX,C>:-fno-stack-protector -fno-stack-check -fno-lto>

@@ -23,6 +23,7 @@
 #include <arch/x86_64/memory_manager/physical/allocate.h>
 
 #include <arch/x86_64/irq/irq.h>
+#include <arch/x86_64/irq/timer.h>
 
 #include <multitasking/process/signals.h>
 
@@ -43,7 +44,7 @@ namespace obos
 	{
 		extern locks::Mutex g_coreGlobalSchedulerLock;
 	}
-	bool g_halt;
+	bool g_halt, g_unMask;
 	static size_t s_kModeExceptions = 0;
 	static constexpr const size_t kmodeExceptionsLimit = 3;
 	void exception14(interrupt_frame* frame)
@@ -62,6 +63,16 @@ namespace obos
 				newEntry |= flags;
 				memory::UnmapAddress(pageMap, (void*)faultAddress);
 				memory::MapEntry(pageMap, newEntry, (void*)faultAddress);
+				return;
+			}
+			if ((entry & ((uintptr_t)1 << 1)) && (frame->errorCode & ((uintptr_t)1 << 1)))
+			{
+				invlpg(faultAddress);
+				return;
+			}
+			if ((entry & ((uintptr_t)1 << 63)) && (frame->errorCode & ((uintptr_t)1 << 4)))
+			{
+				invlpg(faultAddress);
 				return;
 			}
 		}
@@ -213,10 +224,21 @@ namespace obos
 			frame->ss, frame->ds, frame->cs
 		);
 	}
-	[[noreturn]] void nmiHandler(interrupt_frame*)
+	void nmiHandler(interrupt_frame* frame)
 	{
 		if (g_halt)
+		{
+			SendEOI();
+			MaskTimer(false);
 			haltCPU();
+		}
+		if (g_unMask)
+		{
+			g_unMask = false;
+			frame->rflags.setBit(x86_64_flags::RFLAGS_INTERRUPT_ENABLE);
+			SendEOI();
+			return;
+		}
 		logger::panic(nullptr, "NMI thrown by the hardware. System control port: %d.\n", inb(0x92) | (inb(0x61) << 8));
 	}
 	void RegisterExceptionHandlers()

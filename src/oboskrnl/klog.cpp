@@ -28,6 +28,7 @@ namespace obos
 	void EarlyKPanic();
 	bool EnterSleepState(int sleepState);
 	extern bool g_uacpiInitialized;
+	extern bool g_unMask, g_halt;
 }
 #endif
 
@@ -418,10 +419,13 @@ namespace obos
 					EarlyKPanic();
 				else
 					EnterSleepState(5);
-				logger::warning("Software %s failed, manual shutdown is required (holding down the power button).", g_uacpiInitialized ? "shutdown" : "reboot");
+				logger::warning("Software %s failed, manual shutdown is required (holding down the power button).\n", g_uacpiInitialized ? "shutdown" : "reboot");
 				});
 			MapIRQToVector(1, 0x21);
-			sti();
+			// Tell the first core to enable interrupts.
+			g_unMask = true;
+			g_halt = false;
+			SendIPI(DestinationShorthand::None, DeliveryMode::NMI, 2, 0);
 			printf("Press any key to %s...\n", g_uacpiInitialized ? "shutdown" : "reboot");
 #endif
 			g_kernelConsole.SwapBuffers();

@@ -14,6 +14,8 @@
 
 #include <utils/vector.h>
 
+#include <allocators/slab.h>
+
 #define OBOS_DRIVER_HEADER_SECTION_NAME ".obosDriverHeader"
 
 namespace obos
@@ -165,15 +167,6 @@ namespace obos
 				} storageDevice;
 				struct
 				{
-					// If cap locks is clicked, this should first return cap locks, then all letters should be capitalized, or un-capitalized.
-					bool(*ReadCharacter)(
-						uint64_t deviceId,
-						uint16_t* ch // Bottom Byte: Ascii Character, Top Key: Special Key (see enum SpecialKeys).
-						);
-					void* unused[maxCallbacks - 1]; // Add padding
-				} userInputDevice;
-				struct
-				{
 					bool(*InitializeConnection)(
 						uint64_t deviceId,
 						void* driverSpecificParameters,
@@ -209,6 +202,26 @@ namespace obos
 			ftable functionTable;
 			struct driverHeader* header;
 			utils::Vector<obosDriverSymbol> symbols;
+			void* operator new(size_t )
+			{
+				return ImplSlabAllocate(ObjectTypes::DriverIdentity);
+			}
+			void operator delete(void* ptr)
+			{
+				ImplSlabFree(ObjectTypes::DriverIdentity, ptr);
+			}
+			void* operator new[](size_t sz)
+			{
+				return ImplSlabAllocate(ObjectTypes::DriverIdentity, sz / sizeof(driverIdentity));
+			}
+			void operator delete[](void* ptr, size_t sz)
+			{
+				ImplSlabFree(ObjectTypes::DriverIdentity, ptr, sz / sizeof(driverIdentity));
+			}
+			[[nodiscard]] void* operator new(size_t, void* ptr) noexcept { return ptr; }
+			[[nodiscard]] void* operator new[](size_t, void* ptr) noexcept { return ptr; }
+			void operator delete(void*, void*) noexcept {}
+			void operator delete[](void*, void*) noexcept {}
 		};
 		struct driverHeader
 		{

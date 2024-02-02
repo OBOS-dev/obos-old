@@ -259,7 +259,12 @@ namespace obos
 		_initProgramMainThread->blockCallback.callback = [](thread::Thread*, void* udata)
 			{
 				thread::ThreadHandle* kBootThread = (thread::ThreadHandle*)udata;
-				return kBootThread->GetThreadStatus() == thread::THREAD_STATUS_DEAD;
+				if (kBootThread->GetThreadStatus() == thread::THREAD_STATUS_DEAD)
+				{
+					kBootThread->CloseHandle();
+					return true;
+				}
+				return false;
 			};
 		_initProgramMainThread->blockCallback.userdata = &kBootThread;
 		_initProgramMainThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;

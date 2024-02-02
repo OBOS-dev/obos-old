@@ -141,6 +141,11 @@ namespace obos
 		/// A mount on a partition with an unrecognized filesystem was made.
 		/// </summary>
 		OBOS_ERROR_VFS_UNRECOGNIZED_PARTITION_FS,
+		/// <summary>
+		/// An invalid operation was made on an object.<para></para>
+		/// For example, this can be a seek on a file handle that refers to a user input device.
+		/// </summary>
+		OBOS_ERROR_VFS_INVALID_OPERATION_ON_OBJECT,
 
 		OBOS_ERROR_HIGHEST_VALUE,
 	};

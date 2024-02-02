@@ -21,6 +21,8 @@ namespace obos
 	OBOS_EXPORT void cli();
 	OBOS_EXPORT void sti();
 	OBOS_EXPORT void hlt();
+	OBOS_EXPORT void setAC();
+	OBOS_EXPORT void clearAC();
 
 	OBOS_EXPORT void pause();
  	

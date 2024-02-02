@@ -15,10 +15,10 @@ typedef struct _key
 	uint32_t scanCode;
 	size_t nPressed;
 	bool isPressed;
-	char ch;
+	uint16_t ch;
 	char shiftAlias;
 	bool skipExtended = false;
-	obos::driverInterface::SpecialKeys extendedCh; // Shift by 8 to get the SpecialKey enum version.
+	uint16_t extendedCh;
 } key;
 
 extern key g_keys[89];

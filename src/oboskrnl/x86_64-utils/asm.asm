@@ -14,6 +14,8 @@ global _ZN4obos3cliEv
 global _ZN4obos3stiEv
 global _ZN4obos3hltEv
 global _ZN4obos5pauseEv
+global _ZN4obos5setACEv
+global _ZN4obos7clearACEv
 global _ZN4obos4int1Ev
 global _ZN4obos4int3Ev
 global _ZN4obos6getCR2Ev
@@ -79,6 +81,38 @@ _ZN4obos3hltEv:
 	ret
 _ZN4obos5pauseEv:
 	pause
+	ret
+_ZN4obos5setACEv:
+	push rbp
+	mov rbp, rsp
+	push rdx
+
+	mov eax, 7
+	xor ecx, ecx
+	cpuid
+	test rdx, (1<<20)
+	jz .done
+	stac
+
+.done:
+	pop rdx
+	leave
+	ret
+_ZN4obos7clearACEv:
+	push rbp
+	mov rbp, rsp
+	push rdx
+
+	mov eax, 7
+	xor ecx, ecx
+	cpuid
+	test rdx, (1<<20)
+	jz .done
+	clac
+
+.done:
+	pop rdx
+	leave
 	ret
 _ZN4obos4int3Ev:
 	int3

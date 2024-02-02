@@ -57,6 +57,8 @@ namespace obos
 				return false;
 			}
 			m_obj = obj;
+			Thread* thr = GET_THREAD;
+			thr->references++;
 			return true;
 		}
 
@@ -104,6 +106,7 @@ namespace obos
 				thread->ogAffinity = affinity;
 			thread->driverIdentity = thread::GetCurrentCpuLocalPtr()->currentThread->driverIdentity;
 			setupThreadContext(&thread->context, &thread->stackInfo, (uintptr_t)entry, userdata, stackSize, &tproc->vallocator, tproc);
+			thread->references++;
 			uintptr_t val = stopTimer();
 
 			if(priorityList->tail)
@@ -350,6 +353,8 @@ namespace obos
 		{
 			volatile Thread*& currentThread = getCPULocal()->currentThread;
 			uintptr_t exitCode = (uintptr_t)_exitCode;
+			if (!SlabHasObject(ObjectTypes::Thread, (void*)currentThread))
+				goto exit;
 			currentThread->exitCode = exitCode;
 			currentThread->status = THREAD_STATUS_DEAD;
 			currentThread->flags = 0;
@@ -378,7 +383,9 @@ namespace obos
 					auto proc = (process::Process*)currentThread->owner;
 					process::TerminateProcess(proc, true);
 				}
+				delete currentThread;
 			}
+			exit:
 			memory::VirtualAllocator* valloc = &((process::Process*)currentThread->owner)->vallocator;
 			freeThreadStackInfo((void*)&currentThread->stackInfo, valloc);
 			startTimer(0);
@@ -393,7 +400,7 @@ namespace obos
 		[[noreturn]] void ExitThread(uint32_t exitCode)
 		{
 			stopTimer();
-			callBlockCallbackOnThread((taskSwitchInfo*)&getCPULocal()->currentThread->context, ExitThreadImpl, (void*)(uintptr_t)exitCode, nullptr);
+			process::putThreadAtFunctionWithCPUTempStack((Thread*)getCPULocal()->currentThread, (void*)ExitThreadImpl, (void*)(uintptr_t)exitCode, nullptr);
 			while (1);
 		}
 }

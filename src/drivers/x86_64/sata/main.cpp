@@ -9,7 +9,7 @@
 #include <memory_manipulation.h>
 
 #include <driverInterface/struct.h>
-#include <driverInterface/register_drive.h>
+#include <driverInterface/register.h>
 
 #include <multitasking/threadAPI/thrHandle.h>
 
@@ -315,7 +315,7 @@ void InitializeAHCI(uint32_t*, uint8_t bus, uint8_t slot, uint8_t function)
 		portDescriptor.driveType = pPort->sig == SATA_SIG_ATA ? Port::DRIVE_TYPE_SATA : Port::DRIVE_TYPE_SATAPI;
 		vallocator.VirtualFree((void*)response, 4096);
 		// Register the drive with the kernel.
-		portDescriptor.kernelID = portDescriptor.driveType == Port::DRIVE_TYPE_SATA ? driverInterface::RegisterDrive() : 0xffffffff;
+		portDescriptor.kernelID = portDescriptor.driveType == Port::DRIVE_TYPE_SATA ? driverInterface::RegisterDevice(driverInterface::DeviceType::Drive) : 0xffffffff;
 		logger::info("AHCI: Found %s drive at port %d. Kernel drive ID: %d, sector count: 0x%016X, sector size 0x%08X.\n",
 			portDescriptor.driveType == Port::DRIVE_TYPE_SATA ? "SATA" : "SATAPI",
 			port,

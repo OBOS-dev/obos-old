@@ -7,6 +7,7 @@
 #pragma once
 
 #include <int.h>
+#include <allocators/slab.h>
 
 #include <multitasking/arch.h>
 
@@ -89,6 +90,26 @@ namespace obos
 			__uint128_t affinity, ogAffinity;
 			uint32_t flags;
 			void* driverIdentity = nullptr;
+			void* operator new(size_t)
+			{
+				return ImplSlabAllocate(ObjectTypes::Thread);
+			}
+			void operator delete(void* ptr)
+			{
+				ImplSlabFree(ObjectTypes::Thread, ptr);
+			}
+			void* operator new[](size_t sz)
+			{
+				return ImplSlabAllocate(ObjectTypes::Thread, sz / sizeof(Thread));
+			}
+			void operator delete[](void* ptr, size_t sz)
+			{
+				ImplSlabFree(ObjectTypes::Thread, ptr, sz / sizeof(Thread));
+			}
+			[[nodiscard]] void* operator new(size_t, void* ptr) noexcept { return ptr; }
+			[[nodiscard]] void* operator new[](size_t, void* ptr) noexcept { return ptr; }
+				void operator delete(void*, void*) noexcept {}
+			void operator delete[](void*, void*) noexcept {}
 		} OBOS_ALIGN(4);
 	};
 }

@@ -217,7 +217,8 @@ namespace obos
 			bool isUserProcess = false;
 			if (proc)
 			{
-				OBOS_ASSERTP((uintptr_t)proc > 0xfffffffff0000000, "");
+				// The slab allocator allocates in a different range as liballoc.
+				//OBOS_ASSERTP((uintptr_t)proc > 0xfffffffff0000000, "");
 				isUserProcess = proc->isUsermode;
 				pageMap = (PageMap*)proc->context.cr3;
 			}
