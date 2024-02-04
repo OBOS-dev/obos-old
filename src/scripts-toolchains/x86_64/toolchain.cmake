@@ -56,7 +56,7 @@ set (oboskrnl_platformSpecificSources
 	"arch/x86_64/gdbstub/communicate.cpp" "arch/x86_64/gdbstub/stub.cpp" "arch/x86_64/signals.cpp" "driverInterface/x86_64/scan.cpp"
 	"driverInterface/x86_64/enumerate_pci.cpp" "arch/x86_64/syscall/handle.cpp" "arch/x86_64/syscall/thread.cpp" "arch/x86_64/syscall/verify_pars.cpp"
 	"arch/x86_64/syscall/vfs/file.cpp" "arch/x86_64/syscall/sconsole.cpp" "arch/x86_64/syscall/syscall_vmm.cpp" "arch/x86_64/syscall/vfs/disk.cpp"
-	"arch/x86_64/syscall/sys_signals.cpp"
+	"arch/x86_64/syscall/sys_signals.cpp" "arch/x86_64/syscall/power_management.cpp" "arch/x86_64/syscall/vfs/dir.cpp"
 )
 
 set (OBOS_ARCHITECTURE "x86_64")

@@ -30,7 +30,18 @@ namespace obos
 
 			operator bool() { return m_currentNode; }
 
-			~DirectoryIterator() {}
+			bool Close();
+
+			~DirectoryIterator() 
+			{ 
+				if (m_currentNode && m_directoryNode)
+					Close();
+			}
+
+			// This can be a mount point, or a directory entry. Beware!
+			void* GetDirectoryNode() const { return m_directoryNode; }
+			// This should only ever be a directory entry.
+			void* GetCurrentNode() const { return m_currentNode; }
 		private:
 			void* m_directoryNode = nullptr;
 			void* m_currentNode = nullptr;

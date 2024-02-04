@@ -25,7 +25,11 @@
 #include <allocators/vmm/vmm.h>
 #include <allocators/vmm/arch.h>
 
-#include <uACPI/kernel_api.h>
+#include <uacpi/kernel_api.h>
+
+extern "C" uacpi_status
+uacpi_table_find(struct uacpi_table_identifiers* id,
+	struct uacpi_table** out_table);
 
 using namespace obos;
 
@@ -346,5 +350,6 @@ extern "C" {
 		default:
 			break;
 		}
+		return UACPI_STATUS_OK;
 	}
 }

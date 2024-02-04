@@ -72,6 +72,7 @@ namespace obos
 			GeneralFSNode(NodeType type) : VFSNode{ type }
 			{}
 			struct DirectoryEntry *next = nullptr, *prev = nullptr; // used for the children.
+			// If this is moved to DirectoryEntry, don't forget to change how SyscallDirectoryIteratorGetParent() works, or you won't have a good time.
 			struct DirectoryEntry *parent = nullptr;
 			DirectoryEntryList children{};
 		};

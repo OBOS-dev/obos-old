@@ -26,5 +26,11 @@ namespace obos
 		/// <param name="addr">The address of the page to free</param>
 		/// <returns>true on success, otherwise false.</returns>
 		OBOS_EXPORT bool freePhysicalPage(uintptr_t addr, size_t nPages = 1);
+		/// <summary>
+		/// Queries whether a page is in the HHDM or not.
+		/// </summary>
+		/// <param name="addr">The address of the page to check.</param>
+		/// <returns>true if the page is in the HHDM, otherwise false.</returns>
+		OBOS_EXPORT bool PageInHHDM(uintptr_t addr);
 	}
 }

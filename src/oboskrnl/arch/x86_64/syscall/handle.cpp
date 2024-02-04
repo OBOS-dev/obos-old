@@ -18,7 +18,9 @@
 #include <multitasking/threadAPI/thrHandle.h>
 
 #include <vfs/devManip/driveHandle.h>
+
 #include <vfs/fileManip/fileHandle.h>
+#include <vfs/fileManip/directoryIterator.h>
 
 namespace obos
 {
@@ -32,11 +34,10 @@ namespace obos
 				!objectAddress)
 				return 0xffffffffffffffff;
 			process::Process* proc = (process::Process*)_proc;
+			locks::SafeMutex lock_guard{ &proc->context.handleTableLock };
+			lock_guard.Lock();
 			auto &handleTable = proc->context.handleTable;
-			// Find the smallest handle value.
-			user_handle handleValue = 0;
-			if (handleTable.end())
-				handleValue = *(*handleTable.end()).key + 1;
+			user_handle handleValue = proc->context.nextHandleValue++;
 			handleTable.emplace_at(handleValue, { objectAddress, type });
 			return handleValue;
 		}
@@ -48,6 +49,7 @@ namespace obos
 				return nullptr;
 			void* ret = ProcessGetHandleObject(_proc, handle);
 			process::Process* proc = (process::Process*)_proc;
+			locks::SafeMutex lock_guard{ &proc->context.handleTableLock };
 			auto& handleTable = proc->context.handleTable;
 			handleTable.remove(handle);
 			return ret;
@@ -114,6 +116,9 @@ namespace obos
 				break;
 			case obos::syscalls::ProcessHandleType::VALLOCATOR_HANDLE:
 				delete (memory::VirtualAllocator*)val;
+				break;
+			case obos::syscalls::ProcessHandleType::DIRECTORY_ITERATOR_HANDLE:
+				delete (vfs::DirectoryIterator*)val;
 				break;
 			default:
 				break;
