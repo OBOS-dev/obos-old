@@ -81,7 +81,7 @@ namespace obos
 			thread::Thread* m_ownerThread;
 		};
 
-		struct SafeMutex
+		struct SafeMutex final
 		{
 		public:
 			SafeMutex() = delete;

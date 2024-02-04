@@ -40,6 +40,18 @@ uint32_t GetLastError();
 
 bool RegisterSignal(uint32_t signal, uintptr_t handler);
 
+uintptr_t MakeDirectoryIterator();
+bool DirectoryIteratorOpen(uintptr_t hnd, const char* path);
+bool DirectoryIteratorNext(uintptr_t hnd);
+bool DirectoryIteratorPrevious(uintptr_t hnd);
+bool DirectoryIteratorGet(uintptr_t hnd, char* oPath, size_t* oPathSize);
+bool DirectoryIteratorEnd(uintptr_t hnd, bool* status);
+bool DirectoryIteratorClose(uintptr_t hnd);
+bool DirectoryIteratorGetParent(uintptr_t hnd, char* path, size_t* size);
+
+[[noreturn]] void Shutdown();
+[[noreturn]] void Reboot();
+
 #ifdef OBOS_SYSCALL_IMPL
 extern "C" uintptr_t syscall(uint64_t syscallNo, void* args);
 uintptr_t MakeFileHandle()
@@ -235,5 +247,73 @@ bool RegisterSignal(uint32_t signal, uintptr_t handler)
 		alignas(0x10) uintptr_t uhandler;
 	} par{ signal, handler };
 	return syscall(57, &par);
+}
+[[noreturn]] void Shutdown()
+{
+	syscall(59, nullptr);
+	while (1);
+}
+[[noreturn]] void Reboot()
+{
+	syscall(60, nullptr);
+	while (1);
+}
+
+uintptr_t MakeDirectoryIterator()
+{
+	return syscall(61, nullptr);
+}
+bool DirectoryIteratorOpen(uintptr_t hnd, const char* path)
+{
+	struct _par
+	{
+		alignas(0x10) uintptr_t hnd;
+		alignas(0x10) const char* path;
+	} par{ hnd, path };
+	return syscall(66, &par);
+}
+bool DirectoryIteratorNext(uintptr_t hnd)
+{
+	uintptr_t pars[2] = { hnd, 0 };
+	return syscall(62, &pars);
+}
+bool DirectoryIteratorPrevious(uintptr_t hnd)
+{
+	uintptr_t pars[2] = { hnd, 0 };
+	return syscall(63, &pars);
+}
+bool DirectoryIteratorGet(uintptr_t hnd, char* oPath, size_t* oPathSize)
+{
+	struct _par
+	{
+		alignas(0x10) uintptr_t hnd;
+		alignas(0x10) char* oPath;
+		alignas(0x10) size_t* oPathSize;
+	} par{ hnd, oPath, oPathSize };
+	return syscall(64, &par);
+}
+bool DirectoryIteratorEnd(uintptr_t hnd, bool* status)
+{
+	struct _par
+	{
+		alignas(0x10) uintptr_t hnd;
+		alignas(0x10) bool* status;
+	} par{ hnd, status };
+	return syscall(65, &par);
+}
+bool DirectoryIteratorClose(uintptr_t hnd)
+{
+	uintptr_t pars[2] = { hnd, 0 };
+	return syscall(67, &pars);
+}
+bool DirectoryIteratorGetParent(uintptr_t hnd, char* path, size_t* size)
+{
+	struct _par
+	{
+		alignas(0x10) uintptr_t hnd;
+		alignas(0x10) char* oPath;
+		alignas(0x10) size_t* oPathSize;
+	} par{ hnd, path, size };
+	return syscall(68, &par);
 }
 #endif

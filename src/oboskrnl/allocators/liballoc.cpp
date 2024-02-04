@@ -59,7 +59,7 @@ struct pageBlock
 	alignas (0x10) memBlock* lastBlock = nullptr;
 	alignas (0x10) memBlock* highestBlock = nullptr;
 	alignas (0x10) size_t nMemBlocks = 0;
-	
+
 	alignas (0x10) size_t nBytesUsed = 0;
 	alignas (0x10) size_t nPagesAllocated = 0;
 } *pageBlockHead = nullptr, *pageBlockTail = nullptr;
@@ -240,61 +240,22 @@ extern "C" {
 		if (!currentPageBlock->firstBlock)
 			block = (memBlock*)(currentPageBlock + 1);
 		else
-		{
-			// Look for a free address.
-			memBlock* current = (memBlock*)(currentPageBlock + 1);
-			while (current != nullptr && current < currentPageBlock->lastBlock)
+		{	
+			if (currentPageBlock->highestBlock->magic != MEMBLOCK_MAGIC)
 			{
-				if (current->magic != MEMBLOCK_DEAD)
-				{
-					current = current->next;
-					continue;
-				}
-				if (current->size >= (amountNeeded - sizeof(memBlock)))
-				{
-					block = current;
-					break;
-				}
-				current = current->next;
+				memBlock* highestBlock = nullptr;
+				for (auto blk = currentPageBlock->firstBlock; blk; blk = blk->next)
+					if (blk > highestBlock && currentPageBlock->highestBlock != blk)
+						highestBlock = blk;
+				currentPageBlock->highestBlock = highestBlock;
+				OBOS_ASSERTP(currentPageBlock->highestBlock->magic == MEMBLOCK_MAGIC, "Kernel heap corruption detected for block 0x%p, allocAddr: 0x%p, sizeBlock: 0x%p!", "",
+					currentPageBlock->highestBlock,
+					currentPageBlock->highestBlock->allocAddr,
+					currentPageBlock->highestBlock->size);
 			}
-			if (currentPageBlock->lastBlock->magic == MEMBLOCK_DEAD && !block)
-			{
-				block = currentPageBlock->lastBlock;
-			}
-			// This may seem redundant, but it's possible that the loop chose the last block.
-			if (block == currentPageBlock->lastBlock)
-				currentPageBlock->lastBlock = block->prev;
-			if (!block)
-			{
-				if (currentPageBlock->highestBlock->magic != MEMBLOCK_MAGIC)
-				{
-					memBlock* highestBlock = nullptr;
-					for (auto blk = currentPageBlock->firstBlock; blk; blk = blk->next)
-						if (blk > highestBlock && currentPageBlock->highestBlock != blk)
-							highestBlock = blk;
-					currentPageBlock->highestBlock = highestBlock;
-					OBOS_ASSERTP(currentPageBlock->highestBlock->magic == MEMBLOCK_MAGIC, "Kernel heap corruption detected for block 0x%p, allocAddr: 0x%p, sizeBlock: 0x%p!", "",
-						currentPageBlock->highestBlock,
-						currentPageBlock->highestBlock->allocAddr,
-						currentPageBlock->highestBlock->size);
-				}
-				uintptr_t addr = (uintptr_t)currentPageBlock->highestBlock->allocAddr;
-				addr += currentPageBlock->highestBlock->size;
-				// The base of liballoc is now dynamic and not bound to a specific address.
-				/*if (addr > 0xfffffffff0000000)
-				{
-					memBlock* highestBlock = nullptr;
-					for (auto blk = currentPageBlock->firstBlock; blk; blk = blk->next)
-						if (blk > highestBlock && currentPageBlock->highestBlock != blk)
-							highestBlock = blk;
-					currentPageBlock->highestBlock = highestBlock;
-					OBOS_ASSERTP(addr > 0xfffffffff0000000, "Kernel heap corruption detected for block 0x%p, allocAddr: 0x%p, sizeBlock: 0x%p!", "",
-						currentPageBlock->highestBlock,
-						currentPageBlock->highestBlock->allocAddr,
-						currentPageBlock->highestBlock->size);
-				}*/
-				block = (memBlock*)addr;
-			}
+			uintptr_t addr = (uintptr_t)currentPageBlock->highestBlock->allocAddr;
+			addr += currentPageBlock->highestBlock->size;
+			block = (memBlock*)addr;
 		}
 
 		obos::utils::memzero(block, sizeof(*block));
@@ -350,22 +311,6 @@ extern "C" {
 			block->size = newSize;
 			obos::utils::memzero((byte*)ptr + oldSize, oldSize - newSize);
 			return ptr;
-		}
-		if (block->pageBlock->highestBlock == block)
-		{
-			if (!(((memBlock*)((byte*)(block + 1) + oldSize))->magic != MEMBLOCK_MAGIC))
-			{
-				memBlock* highestBlock = nullptr;
-				for (auto blk = block->pageBlock->firstBlock; blk; blk = blk->next)
-					if (blk > highestBlock && block != blk)
-						highestBlock = blk;
-				block->pageBlock->highestBlock = highestBlock;
-				OBOS_ASSERTP(((memBlock*)((byte*)(block + 1) + oldSize))->magic != MEMBLOCK_MAGIC,
-					"Kernel heap corruption detected for block 0x%p, allocAddr: 0x%p, sizeBlock: 0x%p!", ,
-					block,
-					block->allocAddr,
-					block->size);
-			}
 		}
 		if (
 			block->pageBlock->highestBlock == block &&

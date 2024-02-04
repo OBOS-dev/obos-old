@@ -46,6 +46,7 @@
 
 extern "C" void fpuInit();
 extern "C" void initialize_syscall_instruction();
+extern "C" void reset_idt();
 
 uint64_t limine_base_revision[3] = { 0xf9562b2d5c95a6c8, 0x6a7b384944536bdc, 1 };
 
@@ -164,7 +165,8 @@ namespace obos
 	}
 	void EarlyKPanic()
 	{
-		outb(0x64, 0xFE);
+		reset_idt();
+		int3();
 		cli();
 		while (1)
 			hlt();

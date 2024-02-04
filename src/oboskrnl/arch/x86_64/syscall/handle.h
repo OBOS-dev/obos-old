@@ -20,9 +20,11 @@ namespace obos
 			DRIVE_HANDLE,
 			THREAD_HANDLE,
 			VALLOCATOR_HANDLE,
+			DIRECTORY_ITERATOR_HANDLE,
 		};
 		using user_handle = uint64_t;
 		using handle = utils::pair<void*, ProcessHandleType>;
+		constexpr user_handle USER_HANDLE_MAX = UINT64_MAX;
 		/// <summary>
 		/// Registers a handle for a process at a certain address with a certain type.
 		/// </summary>

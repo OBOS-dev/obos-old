@@ -350,5 +350,6 @@ extern "C" {
 		default:
 			break;
 		}
+		return UACPI_STATUS_OK;
 	}
 }

@@ -31,11 +31,13 @@ void* memzero(void* dest, size_t size)
 }
 size_t strlen(const char* str)
 {
+	if (!str)
+		return 0;
 	size_t ret = 0;
 	for (; str[ret]; ret++);
 	return ret;
 }
-size_t strCountToDelimiter(const char* str, char ch, bool stopAtZero)
+size_t strCountToDelimiter(const char* str, char ch, bool stopAtZero = true)
 {
 	size_t ret = 0;
 	for (; str[ret] != ch && (str[ret] && stopAtZero); ret++);
@@ -56,10 +58,7 @@ bool strcmp(const char* str1, const char* str2)
 		return false;
 	return memcmp(str1, str2, strlen(str1));
 }
-static char* itoa(intptr_t value, char* result, int base);
-static char* itoa_unsigned(uintptr_t value, char* result, int base);
-
-// Doesn't work with normal file handles.
+// Doesn't work with normal file handles, only with keyboard file handles.
 char* getline(uintptr_t khandle)
 {
 	char ch[3] = {};
@@ -72,23 +71,25 @@ char* getline(uintptr_t khandle)
 		ReadFile(khandle, ch, 2, false);
 		if (!(ch[1] & (1 << 0)))
 		{
-			ConsoleOutput(ch);
 			if (ch[0] == '\n')
 				break;
 			if (ch[0] == '\b')
 			{
 				if (size == 1)
 					continue;
+				ConsoleOutput(ch);
 				res = (char*)realloc(res, size -= 1);
 				res[size - 1] = 0;
 				continue;
 			}
+			ConsoleOutput(ch);
 			res = (char*)realloc(res, ++size);
 			res[size - 2] = ch[0];
 			res[size - 1] = 0;
 		}
 		ch[0] = ch[1] = ch[2] = 0;
 	}
+	printf("\n");
 	return res;
 }
 
@@ -100,16 +101,143 @@ void pageFaultHandler()
 	SwapBuffers();
 	while (1);
 }
+static bool isNumber(char ch)
+{
+	char temp = ch - '0';
+	return temp >= 0 && temp < 10;
+}
+static bool isNumber(const char* str, size_t size = 0)
+{
+	if (!size)
+		size = strlen(str);
+	for (size_t i = 0; i < size; i++)
+		if (!isNumber(str[i]))
+			return false;
+	return true;
+}
+void dividePathToTokens(const char* filepath, const char**& tokens, size_t& nTokens, bool useOffset = true)
+{
+	for (; filepath[0] == '/'; filepath++);
+	nTokens = 1;
+	for (size_t i = 0; filepath[i]; i++)
+		nTokens += filepath[i] == '/';
+	for (int i = strlen(filepath) - 1; filepath[i] == '/'; i--)
+		nTokens--;
+	tokens = (const char**)(new char* [nTokens]);
+	tokens[0] = filepath;
+	for (size_t i = 0, nTokensCounted = 0; filepath[i] && nTokensCounted < nTokens; i++)
+	{
+		if (filepath[i] == '/' || i == 0)
+		{
+			if (!useOffset)
+			{
+				size_t szCurrentToken = strCountToDelimiter(filepath + i + (i != 0), '/');
+				tokens[nTokensCounted++] = (const char*)memcpy(memzero(new char[szCurrentToken + 1], szCurrentToken + 1), filepath + i + (i != 0), szCurrentToken);
+			}
+			else
+			{
+				tokens[nTokensCounted++] = filepath + i + (i != 0);
+			}
+		}
+	}
+}
+//static uint64_t dec2bin(const char* str, size_t size)
+//{
+//	uint64_t ret = 0;
+//	for (size_t i = 0; i < size; i++)
+//	{
+//		if ((str[i] - '0') < 0 || (str[i] - '0') > 9)
+//			continue;
+//		ret *= 10;
+//		ret += str[i] - '0';
+//	}
+//	return ret;
+//}
+
+void hexdump(void* _buff, size_t nBytes, const size_t width = 31);
+
+char* relativePathToAbsolute(const char* filepath, const char* currentDirectory)
+{
+	size_t nTokens = 0;
+	const char** tokens = nullptr;
+	dividePathToTokens(filepath, tokens, nTokens, false);
+	if (!nTokens)
+		return nullptr;
+	if (strCountToDelimiter(tokens[0], ':') != strlen(tokens[0]) && currentDirectory)
+	{
+		auto ret = relativePathToAbsolute(filepath, nullptr);
+		for (size_t i = 0; i < nTokens; i++)
+			delete[] tokens[i];
+		delete[] tokens;
+		return ret;
+	}
+	// Process the path.
+	if (currentDirectory)
+	{
+		const char** newTokens = nullptr;
+		size_t nNewTokens = 0;
+		dividePathToTokens(currentDirectory, newTokens, nNewTokens, false);
+		newTokens = (const char**)realloc(newTokens, (nNewTokens + nTokens) * sizeof(const char*));
+		for (size_t i = nNewTokens; i < (nTokens + nNewTokens); i++)
+			newTokens[i] = tokens[i - nNewTokens];
+		delete[] tokens;
+		nTokens += nNewTokens;
+		tokens = newTokens;
+	}
+	for (size_t i = 0, nContinuousDoubleDots = 0; i < nTokens; i++)
+	{
+		if (strcmp(tokens[i], "."))
+		{
+			delete[] (tokens[i]);
+			tokens[i] = nullptr;
+		}
+		if (strcmp(tokens[i], ".."))
+		{
+			nContinuousDoubleDots++;
+			delete[] (tokens[i]);
+			tokens[i] = nullptr;
+			uint32_t tokenToDestroy = (i + 1 - nContinuousDoubleDots * 2);
+			if (tokenToDestroy > 0 && tokenToDestroy < nTokens)
+			{
+				const char*& path = tokens[tokenToDestroy];
+				delete[] path;
+				path = nullptr;
+			}
+		}
+		else
+			nContinuousDoubleDots = 0;
+	}
+	char* path = nullptr;
+	size_t szPath = 0;
+	for (size_t i = 0; i < nTokens; i++)
+	{
+		if (!tokens[i])
+			continue;
+		size_t tokenLen = strlen(tokens[i]);
+		path = (char*)realloc(path, szPath + tokenLen + 1);
+		memcpy(path + szPath, tokens[i], tokenLen);
+		szPath += strlen(tokens[i]);
+		path[szPath++] = '/';
+		delete[] tokens[i];
+	}
+	path = (char*)realloc(path, ++szPath);
+	path[szPath - 1] = 0;
+	delete[] tokens;
+	return path;
+}
 
 int main(char* path)
 {
-	char* bootRootDirecrtory = (char*)memcpy(path + strlen(path) + 1, path, strCountToDelimiter(path, '/', true) + 1);
+	char* bootRootDirectory = (char*)memcpy(path + strlen(path) + 1, path, strCountToDelimiter(path, '/', true) + 1);
+	char* currentDirectory = bootRootDirectory;
 	ClearConsole(0);
 	RegisterSignal(0, (uintptr_t)pageFaultHandler);
 	uintptr_t keyboardHandle = MakeFileHandle();
 	OpenFile(keyboardHandle, "K0", 0);
 	while (1)
 	{
+		printf("%.*s>", strlen(currentDirectory) - 1, currentDirectory);
+		SwapBuffers();
 		char* currentLine = getline(keyboardHandle);
 		size_t commandSz = strCountToDelimiter(currentLine, ' ', true);
 		char* command = (char*)memcpy(new char[commandSz + 1], currentLine, commandSz);
@@ -120,22 +248,116 @@ int main(char* path)
 		}
 		else if (strcmp(command, "cat"))
 		{
+			char* filepath = relativePathToAbsolute(argPtr, currentDirectory);
+			if (filepath[(strlen(filepath) - 1)] == '/')
+				filepath[(strlen(filepath) - 1)] = 0;
 			uintptr_t filehandle = MakeFileHandle();
-			if (!OpenFile(filehandle, argPtr, 1))
+			if (!OpenFile(filehandle, filepath, 1))
 			{
-				printf("Could not open %s. GetLastError: %d\n", argPtr, GetLastError());
+				printf("Could not open %s. GetLastError: %d\n", filepath ? filepath : "(null)", GetLastError());
+				if (filepath != nullptr)
+					delete[] filepath;
 				InvalidateHandle(filehandle);
-				continue;
+				goto done;
 			}
 			size_t filesize = GetFilesize(filehandle);
 			char* buff = new char[filesize + 1];
 			buff[filesize] = 0;
 			ReadFile(filehandle, buff, filesize, false);
 			ConsoleOutput(buff);
+			ConsoleOutput("\n");
 			CloseFileHandle(filehandle);
 			InvalidateHandle(filehandle);
+			delete[] filepath;
 			delete[] buff;
 		}
+		else if (strcmp(command, "shutdown"))
+		{
+			Shutdown();
+		}
+		else if (strcmp(command, "reboot"))
+		{
+			Reboot();
+		}
+		else if (strcmp(command, "broot"))
+		{
+			printf("%s\n", bootRootDirectory);
+		}
+		else if (strcmp(command, "cd"))
+		{
+			if (!strlen(argPtr))
+			{
+				printf("%s\n", currentDirectory);
+				goto done;
+			}
+			char* newCurrentDirectory = relativePathToAbsolute(argPtr, currentDirectory);
+			uintptr_t directoryIterator = MakeDirectoryIterator();
+			if (!DirectoryIteratorOpen(directoryIterator, newCurrentDirectory))
+			{
+				delete[] newCurrentDirectory;
+				InvalidateHandle(directoryIterator);
+				goto done;
+			}
+			DirectoryIteratorClose(directoryIterator);
+			InvalidateHandle(directoryIterator);
+			if (bootRootDirectory != currentDirectory)
+				delete[] currentDirectory;
+			currentDirectory = newCurrentDirectory;
+		}
+		else if (strcmp(command, "ls"))
+		{
+			const char* dirToList = strlen(argPtr) ? relativePathToAbsolute(argPtr, currentDirectory) : currentDirectory;
+			printf("Listing of directory %s\n", dirToList);
+			uintptr_t directoryIterator = MakeDirectoryIterator();
+			if (!DirectoryIteratorOpen(directoryIterator, dirToList))
+			{
+				printf("Could not open directory %s. GetLastError: %d\n", dirToList, GetLastError());
+				if (currentDirectory != dirToList)
+					delete[] dirToList;
+				goto done;
+			}
+			for (; !DirectoryIteratorEnd(directoryIterator, nullptr); DirectoryIteratorNext(directoryIterator))
+			{
+				char* currentPath = nullptr;
+				size_t szCurrentPath = 0;
+				DirectoryIteratorGet(directoryIterator, currentPath, &szCurrentPath);
+				DirectoryIteratorGet(directoryIterator, (char*)memzero(currentPath = new char[szCurrentPath + 1], szCurrentPath), &szCurrentPath);
+				printf("%s\n", currentPath);
+				delete[] currentPath;
+			}
+			if (currentDirectory != dirToList)
+				delete[] dirToList;
+			DirectoryIteratorClose(directoryIterator);
+			InvalidateHandle(directoryIterator);
+		}
+		else if (strcmp(command, "hexdump"))
+		{
+			char* filepath = relativePathToAbsolute(argPtr, currentDirectory);
+			if (filepath[(strlen(filepath) - 1)] == '/')
+				filepath[(strlen(filepath) - 1)] = 0;
+			uintptr_t filehandle = MakeFileHandle();
+			if (!OpenFile(filehandle, filepath, 1))
+			{
+				printf("Could not open %s. GetLastError: %d\n", filepath ? filepath : "(null)", GetLastError());
+				if (filepath != nullptr)
+					delete[] filepath;
+				InvalidateHandle(filehandle);
+				goto done;
+			}
+			size_t filesize = GetFilesize(filehandle);
+			char* buff = new char[filesize + 1];
+			buff[filesize] = 0;
+			ReadFile(filehandle, buff, filesize, false);
+			hexdump(buff, filesize, 16);
+			ConsoleOutput("\n");
+			CloseFileHandle(filehandle);
+			InvalidateHandle(filehandle);
+			delete[] filepath;
+			delete[] buff;
+		}
+		else
+			printf("Invalid command %s.\n", command);
+		done:
 		free(currentLine);
 		delete[] command;
 	}
@@ -152,81 +374,55 @@ extern "C" void _start(char* path)
 	} par{};
 	par.exitCode = main(path);
 	if (par.exitCode != 0)
-	{
-		ConsoleOutput("[Init] main failed with exit code: ");
-		char str[12] = {};
-		itoa(par.exitCode, str, 10);
-		ConsoleOutput(str);
-		ConsoleOutput("\n");
-	}
+		printf("[Init] main failed with exit code %d.\n", par.exitCode);
 	InvalidateHandle(g_vAllocator);
 	syscall(12, &par); // ExitThread
 }
-static void strreverse(char* begin, int size)
+
+typedef uint8_t byte;
+
+void hexdump(void* _buff, size_t nBytes, const size_t width)
 {
-	int i = 0;
-	char tmp = 0;
-
-	for (i = 0; i < size / 2; i++)
+	bool printCh = false;
+	byte* buff = (byte*)_buff;
+	printf("         Address: ");
+	for (byte i = 0; i < ((byte)width) + 1; i++)
+		printf("%02x ", i);
+	printf("\n%016x: ", buff);
+	for (size_t i = 0, chI = 0; i < nBytes; i++, chI++)
 	{
-		tmp = begin[i];
-		begin[i] = begin[size - i - 1];
-		begin[size - i - 1] = tmp;
+		if (printCh)
+		{
+			char ch = buff[i];
+			switch (ch)
+			{
+			case '\n':
+			case '\t':
+			case '\r':
+			case '\b':
+			case '\a':
+			case '\0':
+			{
+				ch = '.';
+				break;
+			}
+			default:
+				break;
+			}
+			printf("%c", ch);
+		}
+		else
+			printf("%02x ", buff[i]);
+		if (chI == static_cast<size_t>(width + (!(i < (width + 1)) || printCh)))
+		{
+			chI = 0;
+			if (!printCh)
+				i -= (width + 1);
+			else
+				printf(" |\n%016x: ", &buff[i + 1]);
+			printCh = !printCh;
+			if (printCh)
+				printf("\t| ");
+		}
 	}
-}
-// Credit: http://www.strudel.org.uk/itoa/
-static char* itoa_unsigned(uintptr_t value, char* result, int base)
-{
-	// check that the base if valid
-
-	if (base < 2 || base > 16)
-	{
-		*result = 0;
-		return result;
-	}
-
-	char* out = result;
-
-	uintptr_t quotient = value;
-
-	do
-	{
-
-		uintptr_t abs = /*(quotient % base) < 0 ? (-(quotient % base)) : */(quotient % base);
-
-		*out = "0123456789abcdef"[abs];
-
-		++out;
-
-		quotient /= base;
-
-	} while (quotient);
-
-	strreverse(result, out - result);
-
-	return result;
-
-}
-static char* itoa(intptr_t value, char* result, int base) {
-	// check that the base if valid
-	if (base < 2 || base > 36) { *result = '\0'; return result; }
-
-	char* ptr = result, * ptr1 = result, tmp_char;
-	intptr_t tmp_value;
-
-	do {
-		tmp_value = value;
-		value /= base;
-		*ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz"[35 + (tmp_value - value * base)];
-	} while (value);
-
-	// Apply negative sign
-	if (tmp_value < 0) *ptr++ = '-';
-	*ptr-- = '\0';
-	while (ptr1 < ptr) {
-		tmp_char = *ptr;
-		*ptr-- = *ptr1;
-		*ptr1++ = tmp_char;
-	}
-	return result;
 }

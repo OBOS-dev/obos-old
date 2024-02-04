@@ -17,10 +17,10 @@ qemu-system-x86_64 ^
 -smp cores=8,threads=1,sockets=1 ^
 -d int ^
 -D qemu_log.txt
+rem -drive if=pflash,format=raw,unit=1,file=ovmf/OVMF_VARS_4M.fd
+rem -drive if=pflash,format=raw,unit=0,file=ovmf/OVMF_CODE_4M.fd,readonly=on
 rem -M smm=off ^
 rem -no-reboot
 rem -no-shutdown
-rem -drive if=pflash,format=raw,unit=1,file=ovmf/OVMF_VARS_4M.fd ^
-rem -drive if=pflash,format=raw,unit=0,file=ovmf/OVMF_CODE_4M.fd,readonly=on ^
 
 cd scripts

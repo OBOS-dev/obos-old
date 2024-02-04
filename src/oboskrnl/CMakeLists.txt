@@ -67,6 +67,10 @@ if (UNIX OR GENERATE_BUILD_FILES_FOR_UNIX)
 		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/gptDriver
 		COMMAND cp -u ${OUTPUT_DIR}/fatDriver ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/fatDriver
 		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/fatDriver
+		COMMAND cp -u ${CMAKE_SOURCE_DIR}/limine/limine-bios*.sys ${CMAKE_SOURCE_DIR}/isodir/limine/
+		COMMAND cp -u ${CMAKE_SOURCE_DIR}/limine/limine-bios*.bin ${CMAKE_SOURCE_DIR}/isodir/limine/
+		COMMAND cp -u ${CMAKE_SOURCE_DIR}/limine/limine-uefi-cd.bin ${CMAKE_SOURCE_DIR}/isodir/limine/
+		COMMAND ${OBJCOPY} -g ${CMAKE_SOURCE_DIR}/isodir/obos/initrd/fatDriver
 		COMMAND cd scripts
 		COMMAND ./make_initrd.sh
 		COMMAND cd ..
@@ -100,6 +104,9 @@ else (WIN32)
 		COMMAND ${OBJCOPY} -g isodir/obos/initrd/gptDriver > NUL 2>&1
 		COMMAND copy /Y "${OUTPUT_DIR}\\fatDriver" "${SOURCE_DIRECTORY}\\isodir\\obos\\initrd\\fatDriver" > NUL 2>&1
 		COMMAND ${OBJCOPY} -g isodir/obos/initrd/fatDriver > NUL 2>&1
+		COMMAND copy /Y ${SOURCE_DIRECTORY}\\limine\\limine-bios*.sys ${SOURCE_DIRECTORY}\\isodir\\limine\\ > NUL 2>&1
+		COMMAND copy /Y ${SOURCE_DIRECTORY}\\limine\\limine-bios*.bin ${SOURCE_DIRECTORY}\\isodir\\limine\\ > NUL 2>&1
+		COMMAND copy /Y ${SOURCE_DIRECTORY}\\limine\\limine-uefi-cd.bin ${SOURCE_DIRECTORY}\\isodir\\limine\\ > NUL 2>&1
 		COMMAND cd scripts
 		COMMAND make_initrd.bat
 		COMMAND cd ..

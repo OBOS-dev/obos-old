@@ -21,7 +21,11 @@
 #include <x86_64-utils/asm.h>
 
 #include <vfs/devManip/driveHandle.h>
+
 #include <vfs/fileManip/fileHandle.h>
+#include <vfs/fileManip/directoryIterator.h>
+
+#include <allocators/vmm/vmm.h>
 
 namespace obos
 {
@@ -61,9 +65,16 @@ namespace obos
 				case obos::syscalls::ProcessHandleType::THREAD_HANDLE:
 					delete (thread::ThreadHandle*)hnd_val.first;
 					break;
+				case obos::syscalls::ProcessHandleType::VALLOCATOR_HANDLE:
+					delete (memory::VirtualAllocator*)hnd_val.first;
+					break;
+				case obos::syscalls::ProcessHandleType::DIRECTORY_ITERATOR_HANDLE:
+					delete (vfs::DirectoryIterator*)hnd_val.first;
+					break;
 				default:
 					break;
 				}
+
 			}
 			info->handleTable.erase();
 		}

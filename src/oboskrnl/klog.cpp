@@ -54,7 +54,7 @@ namespace obos
 		static bool isNumber(char ch)
 		{
 			char temp = ch - '0';
-			return temp > 0 && temp < 10;
+			return temp >= 0 && temp < 10;
 		}
 		static uint64_t dec2bin(const char* str, size_t size)
 		{
