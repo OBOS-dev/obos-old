@@ -24,6 +24,7 @@ namespace obos
 {
 	namespace vfs
 	{
+		bool pathStrcmp(const char* p1, const char* p2);
 		// Do not make these next three functions static, as it's used in many places.
 		bool strContains(const char* str, char ch)
 		{
@@ -127,11 +128,16 @@ namespace obos
 			realPath += utils::strCountToChar(path, ':');
 			realPath += utils::strCountToChar(path, '/');
 			DirectoryEntry* entry = SearchForNode(point->children.head, (void*)realPath, [](DirectoryEntry* current, void* userdata)->bool {
-				return utils::strcmp(current->path.str, (const char*)userdata);
+				return pathStrcmp(current->path.str, (const char*)userdata);
 				});
 			if (!entry)
 			{
 				SetLastError(OBOS_ERROR_VFS_FILE_NOT_FOUND);
+				return false;
+			}
+			if (entry->direntType == DIRECTORY_ENTRY_TYPE_DIRECTORY)
+			{
+				SetLastError(OBOS_ERROR_VFS_INVALID_OPERATION_ON_OBJECT);
 				return false;
 			}
 			m_pathNode = entry;

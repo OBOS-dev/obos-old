@@ -34,6 +34,11 @@
                 "description": "Load the kernel binary.",
                 "text": "-file-exec-and-symbols /Code/obos/out/oboskrnl",
                 "ignoreFailures": true
+            },
+            {
+                "description": "Load the init program binary.",
+                "text": "-file-exec-and-symbols /Code/obos/out/init",
+                "ignoreFailures": false
             }
         ],
        },

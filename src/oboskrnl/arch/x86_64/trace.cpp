@@ -20,11 +20,14 @@
 
 #include <arch/interrupt.h>
 
+#include <arch/x86_64/memory_manager/physical/allocate.h>
+
 #define CR4_SMAP ((uintptr_t)1<<21)
 
 namespace obos
 {
 	extern volatile limine_module_request module_request;
+	extern volatile limine_hhdm_request hhdm_offset;
 	volatile limine_kernel_file_request kernel_file = {
 		.id = LIMINE_KERNEL_FILE_REQUEST,
 		.revision = 1,
@@ -125,6 +128,7 @@ namespace obos
 			if (getCR4() & CR4_SMAP)
 				restorePreviousInterruptStatus(getEflags() | x86_64_flags::RFLAGS_ALIGN_CHECK); // Ensure that we won't page fault while accessing a user stack
 			volatile stack_frame* frame = parameter ? (volatile stack_frame*)parameter : (volatile stack_frame*)__builtin_frame_address(0);
+			if (!memory::PageInHHDM((uintptr_t)frame))
 			{
 				uintptr_t attrib = 0;
 				valloc.VirtualGetProtection((void*)frame, 1, &attrib);
@@ -139,6 +143,8 @@ namespace obos
 				{
 					if (!frame->down)
 						continue;
+					if (memory::PageInHHDM((uintptr_t)frame))
+						continue;
 					uintptr_t attrib = 0;
 					valloc.VirtualGetProtection((void*)frame->down, 1, &attrib);
 					if (!attrib)
@@ -150,6 +156,8 @@ namespace obos
 				else
 					break;
 			}
+			frame = parameter ? (volatile stack_frame*)parameter : (volatile stack_frame*)__builtin_frame_address(0);
+			if (!memory::PageInHHDM((uintptr_t)frame))
 			{
 				frame = parameter ? (volatile stack_frame*)parameter : (volatile stack_frame*)__builtin_frame_address(0);
 				uintptr_t attrib = 0;

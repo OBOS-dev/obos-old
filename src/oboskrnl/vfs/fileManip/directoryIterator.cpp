@@ -18,12 +18,46 @@ namespace obos
 {
 	namespace vfs
 	{
+		void dividePathToTokens(const char* filepath, const char**& tokens, size_t& nTokens, bool useOffset = true);
+		bool pathStrcmp(const char* p1, const char* p2)
+		{
+			for (; *p1 == '/'; p1++);
+			for (; *p2 == '/'; p2++);
+			const char** p1Tok = nullptr;
+			size_t nP1Tok = 0;
+			const char** p2Tok = nullptr;
+			size_t nP2Tok = 0;
+			vfs::dividePathToTokens(p1, p1Tok, nP1Tok, false);
+			vfs::dividePathToTokens(p2, p2Tok, nP2Tok, false);
+			bool ret = true;
+			if (nP1Tok != nP2Tok)
+			{
+				ret = false;
+				goto finish;
+			}
+			for (size_t i = 0; i < nP1Tok; i++)
+			{
+				if (!utils::strcmp(p1Tok[i], p2Tok[i]))
+				{
+					ret = false;
+					goto finish;
+				}
+			}
+		finish:
+			for (size_t i = 0; i < nP1Tok; i++)
+				delete[] p1Tok[i];
+			for (size_t i = 0; i < nP2Tok; i++)
+				delete[] p2Tok[i];
+			delete[] p1Tok;
+			delete[] p2Tok;
+			return ret;
+		}
 		extern bool strContains(const char* str, char ch);
 		extern uint32_t getMountId(const char* path, size_t size = 0);
 		extern DirectoryEntry* SearchForNode(DirectoryEntry* root, void* userdata, bool(*compare)(DirectoryEntry* current, void* userdata));
 		bool DirectoryIterator::OpenAt(const char* path)
 		{
-			if (m_currentNode)
+			if (m_currentNode || m_directoryNode)
 			{
 				SetLastError(OBOS_ERROR_ALREADY_EXISTS);
 				return 0;
@@ -56,11 +90,16 @@ namespace obos
 			if (*realPath)
 			{
 				DirectoryEntry* entry = SearchForNode(point->children.head, (void*)realPath, [](DirectoryEntry* current, void* userdata)->bool {
-					return utils::strcmp(current->path.str, (const char*)userdata);
+					return pathStrcmp(current->path.str, (const char*)userdata);
 				});
 				if (!entry)
 				{
 					SetLastError(OBOS_ERROR_VFS_FILE_NOT_FOUND);
+					return false;
+				}
+				if (entry->direntType != DIRECTORY_ENTRY_TYPE_DIRECTORY)
+				{
+					SetLastError(OBOS_ERROR_VFS_INVALID_OPERATION_ON_OBJECT);
 					return false;
 				}
 				while (entry->direntType == DIRECTORY_ENTRY_TYPE_SYMLINK)
@@ -139,6 +178,17 @@ namespace obos
 			const char* ret = operator*();
 			m_currentNode = entry->prev;
 			return ret;
+		}
+		bool DirectoryIterator::Close()
+		{
+			if (!m_currentNode || !m_directoryNode)
+			{
+				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
+				return false;
+			}
+			m_currentNode = nullptr; 
+			m_directoryNode = nullptr;
+			return true;
 		}
 	}
 }

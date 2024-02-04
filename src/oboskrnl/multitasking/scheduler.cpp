@@ -187,6 +187,18 @@ namespace obos
 			//
 			atomic_set((bool*)&getCPULocal()->schedulerLock);
 
+			if (currentThread)
+			{
+				if (currentThread == getCPULocal()->idleThread && currentThread->status & THREAD_STATUS_BLOCKED)
+				{
+					// Wait for the idle thread to be unblocked, then continue running.
+					while (!currentThread->blockCallback.callback((Thread*)currentThread, currentThread->blockCallback.userdata));
+					currentThread->status &= ~THREAD_STATUS_BLOCKED;
+					atomic_clear((bool*)&getCPULocal()->schedulerLock);
+					return;
+				}
+			}
+
 			////OBOS_ASSERTP(getCpusInScheduler() < 2, "");
 			if (getCpusInScheduler() != 1)
 			{
