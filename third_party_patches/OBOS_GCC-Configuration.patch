@@ -1,0 +1,49 @@
+From a59fe543eda09ae0a733780dc9a04d2270e92387 Mon Sep 17 00:00:00 2001
+From: Omar Berrow <omarkberrow@gmail.com>
+Date: Thu, 8 Feb 2024 19:49:50 -0500
+Subject: [PATCH] Update
+
+---
+ gcc/config/obos.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/gcc/config/obos.h b/gcc/config/obos.h
+index 8898ce3912b..148dc08fd76 100644
+--- a/gcc/config/obos.h
++++ b/gcc/config/obos.h
+@@ -22,28 +22,28 @@ do {\
+     builtin_define("__INT32_TYPE__=signed int");\
+     if (LONG_TYPE_SIZE == 64)\
+         builtin_define("__INT64_TYPE__=signed long int");\
+-    else
++    else\
+         builtin_define("__INT64_TYPE__=signed long long int");\
+     builtin_define("__UINT8_TYPE__=unsigned char");\
+     builtin_define("__UINT16_TYPE__=unsigned short int");\
+     builtin_define("__UINT32_TYPE__=unsigned int");\
+     if (LONG_TYPE_SIZE == 64)\
+         builtin_define("__UINT64_TYPE__=unsigned long int");\
+-    else
++    else\
+         builtin_define("__UINT64_TYPE__=unsigned long long int");\
+     builtin_define("__INT_LEAST8_TYPE__=signed char");\
+     builtin_define("__INT_LEAST16_TYPE__=signed short int");\
+     builtin_define("__INT_LEAST32_TYPE__=signed int");\
+     if (LONG_TYPE_SIZE == 64)\
+         builtin_define("__INT_LEAST64_TYPE__=signed long int");\
+-    else
++    else\
+         builtin_define("__INT_LEAST64_TYPE__=signed long long int");\
+     builtin_define("__UINT_LEAST8_TYPE__=unsigned char");\
+     builtin_define("__UINT_LEAST16_TYPE__=unsigned short int");\
+     builtin_define("__UINT_LEAST32_TYPE__=unsigned int");\
+     if (LONG_TYPE_SIZE == 64)\
+         builtin_define("__UINT_LEAST64_TYPE__=unsigned long int");\
+-    else
++    else\
+         builtin_define("__UINT_LEAST64_TYPE__=unsigned long long int");\
+     builtin_define("__INT_FAST8_TYPE__=signed char");\
+     if (LONG_TYPE_SIZE == 64)\
+-- 
+2.40.1.windows.1
+

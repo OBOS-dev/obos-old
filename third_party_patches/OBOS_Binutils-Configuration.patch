@@ -1,0 +1,39 @@
+From ecffe072ad4ff9ddd6d67064cf289b6d4b0f4a0c Mon Sep 17 00:00:00 2001
+From: Omar Berrow <omarkberrow@gmail.com>
+Date: Thu, 8 Feb 2024 16:08:12 -0500
+Subject: [PATCH] Fix config
+
+---
+ bfd/config.bfd   | 2 +-
+ ld/configure.tgt | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/bfd/config.bfd b/bfd/config.bfd
+index 8b79c1c4350..d833b24a322 100644
+--- a/bfd/config.bfd
++++ b/bfd/config.bfd
+@@ -237,7 +237,7 @@ esac
+ case "${targ}" in
+ # START OF targmatch.h
+ #ifdef BFD64
+-  x86_64-*-myos*)
++  x86_64-*-obos*)
+     targ_defvec=x86_64_elf64_vec
+     targ_selvecs=i386_elf32_vec
+     want64=true
+diff --git a/ld/configure.tgt b/ld/configure.tgt
+index f8201d052d4..ab2eef587cb 100644
+--- a/ld/configure.tgt
++++ b/ld/configure.tgt
+@@ -1022,7 +1022,7 @@ x86_64-*-linux-*)	targ_emul=elf_x86_64
+ 			;;
+ x86_64-*-obos*)
+ 			targ_emul=elf_x86_64_obos
+-			targ_extra_emuls="elf_i386_obos elf_x86_64 elf_i386"
++			targ_extra_emuls="elf_x86_64_obos elf_x86_64 elf_i386"
+ 			;;
+ x86_64-*-redox*)	targ_emul=elf_x86_64
+ 			targ_extra_emuls=elf_i386
+-- 
+2.40.1.windows.1
+
