@@ -3,7 +3,7 @@
 - [x] A module loader/interface
 - [x] An initrd driver
 - [x] A VFS
-- [ ] PS2 Keyboard driver
+- [x] PS2 Keyboard driver
 - [x] AHCI Driver
 - [ ] NVME Driver.
 - [x] A FAT driver.
@@ -13,7 +13,8 @@
 - [ ] A terminal.
 - [ ] Support for USB.
 - [x] Support for ACPI power management.
-- [ ] Porting binutils and GCC to the os, and making a GCC target for the os.
+- [x] Making a GCC/Binutils target for the os.
+- [ ] Porting binutils and GCC to the os.
 - [ ] Porting CMake and Make.
 - [ ] Porting tar.
 - [ ] A network stack.
