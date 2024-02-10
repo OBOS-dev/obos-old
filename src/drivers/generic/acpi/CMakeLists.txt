@@ -25,7 +25,7 @@ set_property (TARGET acpiDriver PROPERTY CXX_STANDARD 20)
 
 set_target_properties(acpiDriver PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}")
 
-target_compile_definitions(acpiDriver PRIVATE OBOS_DRIVER=1)
+target_compile_definitions(acpiDriver PRIVATE OBOS_DRIVER=1 PRIVATE UACPI_OVERRIDE_ARCH_HELPERS=1)
 
 target_include_directories(acpiDriver PRIVATE "${CMAKE_SOURCE_DIR}/src/oboskrnl")
 target_include_directories(acpiDriver PRIVATE "${CMAKE_SOURCE_DIR}/limine")

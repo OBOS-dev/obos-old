@@ -13,6 +13,12 @@
 
 namespace obos
 {
+#ifndef VFS_VFSVODE_H_INCLUDED
+	namespace vfs
+	{
+		struct DirectoryEntry;
+	}
+#endif
 	namespace memory
 	{
 		enum VAllocStatus
@@ -47,6 +53,14 @@ namespace obos
 			MEMCPY_SUCCESS,
 			MEMCPY_DESTINATION_PFAULT,
 			MEMCPY_SOURCE_PFAULT,
+		};
+		enum MapFileStatus
+		{
+			MAPFILESTATUS_SUCCESS,
+			MAPFILESTATUS_INVALID_PARAMETER,
+			MAPFILESTATUS_BASE_ADDRESS_USED,
+			MAPFILESTATUS_ACCESS_DENIED,
+			MAPFILESTATUS_UNIMPLEMENTED,
 		};
 		/// <summary>
 		/// Finds a free region of nPages size as "proc."
@@ -91,6 +105,18 @@ namespace obos
 		/// <param name="flags">(out) A pointer to an array of size nPages * sizeof(uintptr_t) to store the flags in.</param>
 		/// <param name="status">(out) The function's status (enum VGetProtStatus)</param>
 		void _Impl_ProcVirtualGetProtection(process::Process* proc, void* base, size_t nPages, uintptr_t* flags, uint32_t* status);
+		/// <summary>
+		/// Maps a directory entry to memory.
+		/// </summary>
+		/// <param name="proc">The process to map as.</param>
+		/// <param name="base">The base address.</param>
+		/// <param name="size">How much from the file to map.</param>
+		/// <param name="protFlags">The protection flags.</param>
+		/// <param name="entry">The directory entry to map. This must be a file entry.</param>
+		/// <param name="off">The offset into the file to map.</param>
+		/// <param name="status">(out) The function's status (enum VAllocStatus)</param>
+		/// <returns>The base address, or nullptr on failure.</returns>
+		void* _Impl_ProcMapFileNodeToAddress(process::Process* proc, void* base, size_t size, uintptr_t protFlags, vfs::DirectoryEntry *entry, uintptr_t off, uint32_t *status);
 
 		/// <summary>
 		/// Checks if the address is valid.
@@ -120,7 +146,7 @@ namespace obos
 		/// Frees the user process's address space.
 		/// </summary>
 		/// <param name="proc">The process. This cannot be a wildcard (nullptr).</param>
-		/// <returns>Whether the function succedeed (true) or not (false).</returns>
+		/// <returns>Whether the function succeeded (true) or not (false).</returns>
 		bool _Impl_FreeUserProcessAddressSpace(process::Process* proc);
 	}
 }

@@ -8,6 +8,8 @@
 #include <klog.h>
 #include <error.h>
 
+#include <x86_64-utils/asm.h>
+
 #include <arch/x86_64/syscall/register.h>
 #include <arch/x86_64/syscall/thread.h>
 #include <arch/x86_64/syscall/handle.h>
@@ -24,6 +26,9 @@
 
 #include <driverInterface/load.h>
 #include <driverInterface/struct.h>
+
+#define MSR_GS_BASE 0xC0000101
+#define MSR_FS_BASE 0xC0000100
 
 namespace obos
 {
@@ -84,6 +89,34 @@ namespace obos
 			delete[] kData;
 			return ret;
 		}
+		void wrgsfsbase(uint64_t, void* args)
+		{
+			struct _par
+			{
+				alignas(0x10) uintptr_t val;
+				alignas(0x10) bool gsBase;
+			} *par = (_par*)args;
+			if (!canAccessUserMemory(par, sizeof(*par), false))
+				return;
+			if (par->gsBase)
+				wrmsr(MSR_GS_BASE, par->val);
+			else
+				wrmsr(MSR_FS_BASE, par->val);
+		}
+		uintptr_t rdgsfsbase(uint64_t, void* args)
+		{
+			struct _par
+			{
+				alignas(0x10) bool gsBase;
+			} *par = (_par*)args;
+			if (!canAccessUserMemory(par, sizeof(*par), false))
+				return 0;
+			if (par->gsBase)
+				return rdmsr(MSR_GS_BASE);
+			else
+				return rdmsr(MSR_FS_BASE);
+			return 0;
+		}
 		uintptr_t g_syscallTable[g_syscallTableLimit + 1];
 		void RegisterSyscalls()
 		{
@@ -99,7 +132,8 @@ namespace obos
 			for (uint16_t currentSyscall = 57; currentSyscall < 59; RegisterSyscall(currentSyscall++, (uintptr_t)SignalsSyscallHandler));
 			for (uint16_t currentSyscall = 59; currentSyscall < 61; RegisterSyscall(currentSyscall++, (uintptr_t)PMSyscallHandler));
 			for (uint16_t currentSyscall = 61; currentSyscall < 69; RegisterSyscall(currentSyscall++, (uintptr_t)DirectorySyscallHandler));
-
+			RegisterSyscall(69, (uintptr_t)wrgsfsbase);
+			RegisterSyscall(70, (uintptr_t)rdgsfsbase);
 		}
 		void RegisterSyscall(uint16_t n, uintptr_t func)
 		{

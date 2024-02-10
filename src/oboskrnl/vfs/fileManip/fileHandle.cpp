@@ -17,6 +17,8 @@
 
 #include <multitasking/process/process.h>
 
+#include <multitasking/cpu_local.h>
+
 #include <driverInterface/input_device.h>
 #include <driverInterface/register.h>
 
@@ -171,10 +173,45 @@ namespace obos
 				SetLastError(OBOS_ERROR_UNOPENED_HANDLE);
 				return false;
 			}
+			auto waitForData = [&]()->bool
+				{
+					//// TODO: Make this work with normal file handles.
+					//if (m_flags & FLAGS_IS_INPUT_DEVICE)
+					//{
+					//	// Wait for the buffer to grow.
+					//	driverInterface::InputDevice* node = (driverInterface::InputDevice*)m_node;
+					//	uintptr_t udata[] = { (uintptr_t)node, (uintptr_t)this, nToRead };
+					//	auto currentThread = thread::GetCurrentCpuLocalPtr()->currentThread;
+					//	currentThread->blockCallback.callback = [](thread::Thread*, void* udata)->bool
+					//		{
+					//			uintptr_t *data = (uintptr_t*)udata;
+					//			auto _this = (FileHandle*)data[1];
+					//			auto off = _this->GetPos();
+					//			size_t nToRead = data[2];
+					//			nToRead /= 2;
+					//			driverInterface::InputDevice* node = (driverInterface::InputDevice*)data[0];
+					//			return (off < node->data.length()) && ((off + nToRead) < node->data.length());
+					//		};
+					//	currentThread->blockCallback.userdata = udata;
+					//	currentThread->status = thread::THREAD_STATUS_CAN_RUN | thread::THREAD_STATUS_BLOCKED;
+					//	currentThread->timeSliceIndex = 0;
+					//	currentThread->lastTimePreempted = 0;
+					//	thread::callScheduler(false);
+					//	return true;
+					//}
+					uint32_t divisor = 1;
+					if (m_flags & FLAGS_IS_INPUT_DEVICE)
+						divisor = 2;
+					while (__TestEof(m_currentFilePos) && __TestEof(m_currentFilePos + nToRead / divisor));
+					return true;
+				};
 			if (Eof())
 			{
-				SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
-				return false;
+				if (!waitForData())
+				{
+					SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
+					return false;
+				}
 			}
 			bool canReadAll = false;
 			if ((m_flags & FLAGS_IS_INPUT_DEVICE))
@@ -183,8 +220,11 @@ namespace obos
 				canReadAll = !(__TestEof(m_currentFilePos + (nToRead - 1)));
 			if (!canReadAll)
 			{
-				SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
-				return false;
+				if (!waitForData())
+				{
+					SetLastError(OBOS_ERROR_VFS_READ_ABORTED);
+					return false;
+				}
 			}
 			if (!nToRead)
 				return true;

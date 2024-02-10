@@ -145,7 +145,7 @@ namespace obos
 				if (i != 1)
 					g_cpuInfo[i].startup_stack.addr = (char*)g_cpuInfo[i - 1].startup_stack.addr + 0x4000;
 				else
-					g_cpuInfo[i].startup_stack.addr = (void*)0xFFFFFFFF90008000;
+					g_cpuInfo[i].startup_stack.addr = (void*)0xFFFFFFFF90010000;
 				g_cpuInfo[i].arch_specific.mapPageTableBase = g_cpuInfo[i - 1].arch_specific.mapPageTableBase + 0x1000;
 				g_cpuInfo[i].temp_stack.addr = (char*)g_cpuInfo[i - 1].temp_stack.addr + 0x4000;
 				g_cpuInfo[i].cpuId = i;

@@ -12,6 +12,8 @@
 
 #include <allocators/slab.h>
 
+#define VFS_VFSVODE_H_INCLUDED 1
+
 namespace obos
 {
 	namespace vfs
@@ -117,6 +119,19 @@ namespace obos
 			HandleListNode *head = nullptr, *tail = nullptr;
 			size_t size = 0;
 		};
+		struct AddressSpaceNode
+		{
+			AddressSpaceNode *next = nullptr, *prev = nullptr;
+			void* addr;
+			size_t off, countBytes;
+			HandleListNode *node;
+			void* owner;
+		};
+		struct AddressSpaceList
+		{
+			AddressSpaceNode *head, *tail;
+			size_t nNodes;
+		};
 		struct DirectoryEntry : public GeneralFSNode
 		{
 			DirectoryEntry() : GeneralFSNode{ VFS_NODE_DIRECTORY_ENTRY }
@@ -150,6 +165,7 @@ namespace obos
 			[[nodiscard]] void* operator new[](size_t, void* ptr) noexcept { return ptr; }
 			void operator delete(void*, void*) noexcept {}
 			void operator delete[](void*, void*) noexcept {}
+			AddressSpaceList regionsMapped;
 		};
 		struct Directory : public DirectoryEntry
 		{

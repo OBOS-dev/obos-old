@@ -78,13 +78,10 @@ namespace obos
 			if (!getCPULocal()->schedulerLock && currentThread)
 			{
 				utils::memcpy((void*)&currentThread->context.frame, frame, sizeof(interrupt_frame)); // save the interrupt frame
-				OBOS_ASSERT(
-					currentThread->context.frame.rdx != 0x200283 &&
-					currentThread->context.frame.rdx != 0x200287,
-					"Thread %d has a suspicious rdx value! rdx: 0x%016x, rflags: 0x%016x\n",, 
-					currentThread->tid, currentThread->context.frame.rdx,
-					((x86_64_flags*)&currentThread->context.frame.rflags)->get());
 				_fxsave((byte(*)[512])currentThread->context.fpuState);
+				currentThread->context.fsbase = rdmsr(0xC0000100 /*FS.Base*/);
+				// Use KernelGSBase so that we get the gs base saved by the user, and not the kernel's gs base.
+				currentThread->context.gsbase = rdmsr(0xC0000102 /*KernelGSBase*/);
 			}
 			_callScheduler();
 		}

@@ -67,7 +67,6 @@ char* getline(uintptr_t khandle)
 	res[0] = 0;
 	while (1)
 	{
-		while (Eof(khandle));
 		ReadFile(khandle, ch, 2, false);
 		if (!(ch[1] & (1 << 0)))
 		{
@@ -226,6 +225,18 @@ char* relativePathToAbsolute(const char* filepath, const char* currentDirectory)
 	return path;
 }
 
+constexpr const char* help_message =
+"	echo string: Prints a string onto the terminal.\n"
+"	cat path: Prints a file's contents onto the terminal.\n"
+"	shutdown, exit: Shuts down the computer\n"
+"	reboot: Reboots the computer.\n"
+"	broot: Prints the boot root directory (The directory the current program was loaded in)\n"
+"	cd [path]: Prints the current directory, if there are no arguments, or changes the working directory to [path].\n"
+"	ls [path]: Prints the files in the current directory, if there are no arguments, or prints the files in the directory specified in [path]\n"
+"	hexdump path: Prints the hex bytes of a file.\n"
+"	help: Prints this help message"
+;
+
 int main(char* path)
 {
 	char* bootRootDirectory = (char*)memcpy(path + strlen(path) + 1, path, strCountToDelimiter(path, '/', true) + 1);
@@ -238,6 +249,7 @@ int main(char* path)
 	{
 		printf("%.*s>", strlen(currentDirectory) - 1, currentDirectory);
 		SwapBuffers();
+		// TODO: Add some way for the arrow keys to switch between previously typed commands.
 		char* currentLine = getline(keyboardHandle);
 		size_t commandSz = strCountToDelimiter(currentLine, ' ', true);
 		char* command = (char*)memcpy(new char[commandSz + 1], currentLine, commandSz);
@@ -271,7 +283,7 @@ int main(char* path)
 			delete[] filepath;
 			delete[] buff;
 		}
-		else if (strcmp(command, "shutdown"))
+		else if (strcmp(command, "shutdown") || strcmp(command, "exit"))
 		{
 			Shutdown();
 		}
@@ -294,6 +306,7 @@ int main(char* path)
 			uintptr_t directoryIterator = MakeDirectoryIterator();
 			if (!DirectoryIteratorOpen(directoryIterator, newCurrentDirectory))
 			{
+				printf("No such directory %s.\n", newCurrentDirectory);
 				delete[] newCurrentDirectory;
 				InvalidateHandle(directoryIterator);
 				goto done;
@@ -355,8 +368,10 @@ int main(char* path)
 			delete[] filepath;
 			delete[] buff;
 		}
+		else if (strcmp(command, "help"))
+			printf("Valid commands:\n%s\n", help_message);
 		else
-			printf("Invalid command %s.\n", command);
+			printf("Invalid command %s.\nValid commands:\n%s\n", command, help_message);
 		done:
 		free(currentLine);
 		delete[] command;

@@ -291,6 +291,9 @@ namespace obos
 		
 			memory::VirtualAllocator valloc{ nullptr };
 
+			if (!StartCPUs())
+				logger::panic(nullptr, "Could not start the other CPUs.\n");
+
 			Thread* kernelMainThread = new Thread{};
 
 			kernelMainThread->tid = g_nextTid++;
@@ -317,9 +320,6 @@ namespace obos
 			g_priorityLists[2].nextThreadList = g_priorityLists + 3;
 			g_priorityLists[1].nextThreadList = g_priorityLists + 2;
 			g_priorityLists[0].nextThreadList = g_priorityLists + 1;
-
-			if (!StartCPUs())
-				logger::panic(nullptr, "Could not start the other cores.");
 			
 			for (size_t i = 0; i < g_nCPUs; i++)
 				g_defaultAffinity |= (uint64_t)1 << g_cpuInfo[i].cpuId;

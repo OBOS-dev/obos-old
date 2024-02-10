@@ -8,12 +8,14 @@
 
 #include <int.h>
 
+#include <vfs/off_t.h>
+
+#define VFS_FILEMANIP_FILEHANDLE_H_INCLUDED
+
 namespace obos
 {
 	namespace vfs
 	{
-		typedef intptr_t off_t;
-		typedef uintptr_t uoff_t;
 		class FileHandle
 		{
 		public:
@@ -100,6 +102,12 @@ namespace obos
 			/// <returns>Whether the file could be closed (true) or not (false). If it fails, use GetLastError for an error code.</returns>
 			bool Close();
 
+			// Do not use these functions unless you know what you're doing.
+
+			void* GetResolvedNode() const { return m_pathNode; }
+			void* GetFileNode() const { return m_node; }
+			void* GetHandleNode() const { return m_nodeInFileHandlesReferencing; }
+			
 			~FileHandle() 
 			{
 				if (m_flags & FLAGS_CLOSED || !m_node) 

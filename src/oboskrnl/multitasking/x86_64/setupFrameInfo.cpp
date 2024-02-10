@@ -49,6 +49,8 @@ namespace obos
 			info->frame.rip = entry;
 			info->frame.rdi = userdata;
 			info->frame.rbp = 0;
+			info->fsbase = 0;
+			info->gsbase = isUsermodeProgram ? 0 : rdmsr(0xC0000101 /* GS.Base */);
 			if (entry != (uintptr_t)kmain_common)
 			{
 				uintptr_t stackProtFlags = memory::PROT_NO_COW_ON_ALLOCATE;

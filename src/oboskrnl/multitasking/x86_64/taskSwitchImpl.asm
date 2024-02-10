@@ -53,7 +53,24 @@ _ZN4obos6thread18switchToThreadImplEPNS0_14taskSwitchInfoEPNS0_6ThreadE:
 	call _ZN4obos7SendEOIEv
 
 	cli
-	
+
+	; FSBase
+	mov eax, [rsi+0x378]
+	mov edx, [rsi+0x37c]
+	mov ecx, 0xC0000100
+	wrmsr
+
+	cmp qword [rdi+0x138], 0x10
+	jne .not_kernel_mode
+	cmp qword [rdi+0x120], 0x8
+	jne .not_kernel_mode
+	; GSBase
+	mov eax, [rsi+0x380]
+	mov edx, [rsi+0x384]
+	mov ecx, 0xC0000101
+	wrmsr
+.not_kernel_mode:
+
 	mov rax, [rdi]
 	mov cr3, rax
 	push rdi

@@ -15,7 +15,10 @@
 #include <multitasking/cpu_local.h>
 
 #include <memory_manipulation.h>
-#include "vmm.h"
+
+#include <vfs/vfsNode.h>
+
+#include <vfs/fileManip/fileHandle.h>
 
 namespace obos
 {
@@ -175,6 +178,104 @@ namespace obos
 				break;
 			case VGETPROT_INVALID_PARAMETER:
 				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				break;
+			default:
+				break;
+			}
+			return ret;
+		}
+		
+		static vfs::DirectoryEntry* ResolveDirectoryEntryFromFileHandle(vfs::FileHandle* file)
+		{
+			if (file->GetFlags() & vfs::FileHandle::FLAGS_IS_INPUT_DEVICE)
+				return nullptr;
+			return (vfs::DirectoryEntry*)file->GetFileNode();
+		}
+		void* VirtualAllocator::VirtualMapFile(void* _base, size_t size, vfs::uoff_t offset, vfs::FileHandle* file, uintptr_t flags)
+		{
+			if (!m_pageSize)
+				m_pageSize = _Impl_GetPageSize();
+			_base = (void*)ROUND_ADDRESS_DOWN(_base, m_pageSize);
+			if (!_Impl_IsValidAddress(_base))
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return nullptr;
+			}
+			const size_t nPages = size / m_pageSize + ((size % m_pageSize) != 0);
+			if (!nPages)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return nullptr;
+			}
+			if (!_base)
+			{
+				_base = _Impl_FindUsableAddress(m_owner, nPages);
+				if (!_base)
+				{
+					SetLastError(OBOS_ERROR_NO_FREE_REGION);
+					return nullptr;
+				}
+			}
+			auto entry = ResolveDirectoryEntryFromFileHandle(file);
+			if (!entry)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return nullptr;
+			}
+			if (entry->direntType == vfs::DIRECTORY_ENTRY_TYPE_DIRECTORY)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return nullptr;
+			}
+			if (offset >= entry->filesize)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return nullptr;
+			}
+			if ((offset + size - 1) >= entry->filesize)
+			{
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				return nullptr;
+			}
+			if (entry->fileAttrib & driverInterface::FILE_ATTRIBUTES_READ_ONLY || !(file->GetFlags() & vfs::FileHandle::FLAGS_ALLOW_WRITE))
+				flags |= PROT_READ_ONLY;
+			uint32_t status = 0;
+			void* ret = _Impl_ProcMapFileNodeToAddress(m_owner, _base, size, flags, entry, offset, &status);
+			switch (status)
+			{
+			case MAPFILESTATUS_SUCCESS:
+			{
+				vfs::AddressSpaceNode* node = new vfs::AddressSpaceNode{};
+				node->addr = ret;
+				node->countBytes = size;
+				node->off = offset;
+				node->node = (vfs::HandleListNode*)file->GetHandleNode();
+				node->owner = m_owner ? m_owner : thread::GetCurrentCpuLocalPtr()->currentThread->owner;
+				
+				if (entry->regionsMapped.tail)
+					entry->regionsMapped.tail->next = node;
+				if(!entry->regionsMapped.head)
+					entry->regionsMapped.head = node;
+				node->prev = entry->regionsMapped.tail;
+				entry->regionsMapped.tail = node;
+				entry->regionsMapped.nNodes++;
+				break;
+			}
+			case MAPFILESTATUS_INVALID_PARAMETER:
+				SetLastError(OBOS_ERROR_INVALID_PARAMETER);
+				ret = nullptr;
+				break;
+			case MAPFILESTATUS_ACCESS_DENIED:
+				SetLastError(OBOS_ERROR_ACCESS_DENIED);
+				ret = nullptr;
+				break;
+			case MAPFILESTATUS_BASE_ADDRESS_USED:
+				SetLastError(OBOS_ERROR_BASE_ADDRESS_USED);
+				ret = nullptr;
+				break;
+			case MAPFILESTATUS_UNIMPLEMENTED:
+				SetLastError(OBOS_ERROR_UNIMPLEMENTED_FEATURE);
+				ret = nullptr;
 				break;
 			default:
 				break;

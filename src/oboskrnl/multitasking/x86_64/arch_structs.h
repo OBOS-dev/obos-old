@@ -21,6 +21,7 @@ namespace obos
 			interrupt_frame frame;
 			alignas(0x10) uint8_t fpuState[512];
 			void* syscallStackBottom;
+			uintptr_t fsbase, gsbase;
 		};
 		struct cpu_local_arch
 		{

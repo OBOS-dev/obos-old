@@ -9,6 +9,8 @@
 #include <int.h>
 #include <export.h>
 
+#include <vfs/off_t.h>
+
 #define ALLOCATORS_VMM_VMM_H_INCLUDED 1
 
 namespace obos
@@ -17,6 +19,12 @@ namespace obos
 	namespace process
 	{
 		struct Process;
+	}
+#endif
+#ifndef VFS_FILEMANIP_FILEHANDLE_H_INCLUDED
+	namespace vfs
+	{
+		class FileHandle;
 	}
 #endif
 	namespace memory
@@ -44,7 +52,7 @@ namespace obos
 			/// </summary>
 			PROT_DISABLE_CACHE = 0b10000,
 			/// <summary>
-			/// Whether the pages are present. This is ignored in VirtualAlloc and VirtualProtect
+			/// Whether the pages are present. This is only used in VirtualGetProtection.
 			/// </summary>
 			PROT_IS_PRESENT = 0b100000,
 			PROT_ALL_BITS_SET = 0b111111,
@@ -65,7 +73,7 @@ namespace obos
 			/// <param name="base">The base address to allocate at.</param>
 			/// <param name="size">The amount of bytes (rounded to the nearest page size) to allocate at base.</param>
 			/// <param name="flags">The initial protection flags.</param>
-			/// <returns>"base" if base isn't nullptr. If base is nullptr, the function finds a base address. </returns>
+			/// <returns>"base" if base isn't nullptr. If base is nullptr, the function finds a base address. If this function fails, it returns nullptr.</returns>
 			OBOS_EXPORT void* VirtualAlloc(void* base, size_t size, uintptr_t flags);
 			/// <summary>
 			/// Free nPages pages at base.
@@ -90,6 +98,16 @@ namespace obos
 			/// <param name="flags">A pointer to a buffer of the size "sizeof(PageProtectionFlags) * sizeToPageCount(size)" to store the protection in.</param>
 			/// <returns>false on failure, otherwise true. If this function fails, use GetLastError for extra error information.</returns>
 			OBOS_EXPORT bool VirtualGetProtection(void* base, size_t size, uintptr_t* flags);
+			/// <summary>
+			/// Maps a file into memory.
+			/// </summary>
+			/// <param name="base">The base address to allocate at.</param>
+			/// <param name="size">The amount of bytes (rounded to the nearest page size) to allocate at base. This must be within the file limits.</param>
+			/// <param name="offset">The offset into the file.</param>
+			/// <param name="file">A file handle representing the file to allocate.</param>
+			/// <param name="flags">The initial protection flags.</param>
+			/// <returns>"base" if base isn't nullptr. If base is nullptr, the function finds a base address. If this function fails, it returns nullptr.</returns>
+			OBOS_EXPORT void* VirtualMapFile(void* base, size_t size, vfs::uoff_t offset, vfs::FileHandle* file, uintptr_t flags);
 
 			/// <summary>
 			/// Copies a buffer from this program to the other process.

@@ -39,6 +39,8 @@ namespace obos
 		uintptr_t* allocatePagingStructures(uintptr_t address, PageMap* pageMap);
 		void* MapEntry(PageMap* pageMap, uintptr_t entry, void* to);
 		void UnmapAddress(PageMap* pageMap, void* _addr);
+		// Returns true when the page fault was handled properly and addr was successfully mapped, otherwise false.
+		extern bool mapFilePFHandler(uintptr_t addr, memory::PageMap* pageMap, uintptr_t errorCode);
 	}
 	namespace thread
 	{
@@ -52,6 +54,13 @@ namespace obos
 		uintptr_t entry = 0;
 		memory::PageMap* pageMap = memory::getCurrentPageMap();
 		uintptr_t faultAddress = (uintptr_t)getCR2() & ~0xfff;
+		if (!(frame->errorCode & 1) && !(frame->errorCode & ((uintptr_t)1<<3)))
+		{
+			entry = (uintptr_t)pageMap->getL1PageMapEntryAt(faultAddress);
+			if (entry & ((uintptr_t)1<<10))
+				if (memory::mapFilePFHandler(faultAddress, pageMap, frame->errorCode))
+					return;
+		}
 		if (frame->errorCode & 1)
 		{
 			entry = (uintptr_t)pageMap->getL1PageMapEntryAt(faultAddress);

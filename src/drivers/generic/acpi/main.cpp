@@ -11,6 +11,10 @@
 
 #include <multitasking/thread.h>
 
+#ifdef __x86_64__
+#include <x86_64-utils/asm.h>
+#endif
+
 extern "C"
 {
 	#include <uacpi/uacpi.h>
@@ -18,6 +22,7 @@ extern "C"
 	#include <uacpi/internal/tables.h>
 
 	#include <uacpi/kernel_api.h>
+	#include <uacpi/sleep.h>
 }
 
 using namespace obos;
@@ -59,7 +64,22 @@ namespace obos
 	{
 		if (sleepState < 0 || sleepState > 5)
 			return false;
-		char objectName[5] = {};
+		uacpi_status ret;
+
+		ret = uacpi_prepare_for_sleep_state((uacpi_sleep_state)sleepState);
+		if (uacpi_unlikely_error(ret))
+			return false;
+
+#ifdef __x86_64__
+		cli();
+#endif
+		ret = uacpi_enter_sleep_state((uacpi_sleep_state)sleepState);
+#ifdef __x86_64__
+		sti();
+#endif
+		return ret == UACPI_STATUS_OK;
+		// Keep this code as a souvenir of when uACPI didn't have sleep helpers when I (Omar Berrow) had implemented it.
+		/*char objectName[5] = {};
 		logger::sprintf(objectName, "_S%d_", sleepState);
 		uacpi_object* ret = nullptr;
 		uacpi_status st = uacpi_eval(nullptr, objectName, nullptr, &ret);
@@ -102,7 +122,7 @@ namespace obos
 		uacpi_kernel_io_unmap(pm1a_cnt_blk_hnd);
 		if (fadt->pm1b_cnt_blk)
 			uacpi_kernel_io_unmap(pm1b_cnt_blk_hnd);
-		return true;
+		return true;*/
 	}
 
 }

@@ -50,6 +50,72 @@ namespace obos
 }
 
 extern "C" {
+	uacpi_status uacpi_kernel_raw_memory_read(uacpi_phys_addr address, uacpi_u8 byte_width, uacpi_u64* out_value)
+	{
+		void* addr = uacpi_kernel_map(address, byte_width);
+		if (byte_width == 1)
+			*out_value = *(uint8_t*)addr;
+		else if (byte_width == 2)
+			*out_value = *(uint16_t*)addr;
+		else if (byte_width == 4)
+			*out_value = *(uint32_t*)addr;
+		else if (byte_width == 8)
+			*out_value = *(uint64_t*)addr;
+		else
+			return UACPI_STATUS_INVALID_ARGUMENT;
+		return UACPI_STATUS_OK;
+	}
+	uacpi_status uacpi_kernel_raw_memory_write(
+		uacpi_phys_addr address, uacpi_u8 byte_width, uacpi_u64 in_value
+	)
+	{
+		void* addr = uacpi_kernel_map(address, byte_width);
+		if (byte_width == 1)
+			*(uint8_t*)addr = in_value;
+		else if (byte_width == 2)
+			*(uint16_t*)addr = in_value;
+		else if (byte_width == 4)
+			*(uint32_t*)addr = in_value;
+		else if (byte_width == 8)
+			*(uint64_t*)addr = in_value;
+		else
+			return UACPI_STATUS_INVALID_ARGUMENT;
+		return UACPI_STATUS_OK;
+	}
+
+	uacpi_status uacpi_kernel_raw_io_read(
+		uacpi_io_addr address, uacpi_u8 byte_width, uacpi_u64* out_value
+	)
+	{
+		if (byte_width == 1)
+			*out_value = inb(address);
+		else if (byte_width == 2)
+			*out_value = inw(address);
+		else if (byte_width == 4)
+			*out_value = ind(address);
+		else if (byte_width == 8)
+			*out_value = ((uint64_t)ind(address) | ((uint64_t)ind(address + 4) << 32));
+		else
+			return UACPI_STATUS_INVALID_ARGUMENT;
+		return UACPI_STATUS_OK;
+	}
+	uacpi_status uacpi_kernel_raw_io_write(
+		uacpi_io_addr address, uacpi_u8 byte_width, uacpi_u64 in_value
+	)
+	{
+		if (byte_width == 1)
+			outb(address, in_value);
+		else if (byte_width == 2)
+			outw(address, in_value);
+		else if (byte_width == 4)
+			outd(address, in_value);
+		else if (byte_width == 8)
+		{ outd(address, in_value); outd(address + 4, in_value >> 32); }
+		else
+			return UACPI_STATUS_INVALID_ARGUMENT;
+		return UACPI_STATUS_OK;
+	}
+
 	uacpi_status uacpi_kernel_pci_read(
 		uacpi_pci_address* address, uacpi_size offset,
 		uacpi_u8 byte_width, uacpi_u64* value
@@ -200,8 +266,12 @@ extern "C" {
 		for (size_t i = 0; i < nPages; i++)
 			memory::MapPhysicalAddress(memory::getCurrentPageMap(), _addr + i * 4096, (byte*)ret + i * 4096, memory::DecodeProtectionFlags(memory::PROT_IS_PRESENT | memory::PROT_DISABLE_CACHE));
 #endif
-		return (byte*)ret + addr % pageSize;*/
+return (byte*)ret + addr % pageSize;*/
+#ifdef __x86_64__
 		return memory::mapPageTable((uintptr_t*)addr);
+#else
+		return nullptr;
+#endif
 	}
 	// Does nothing, as we don't need to un-map from the hhdm.
 	void uacpi_kernel_unmap(void*, uacpi_size)

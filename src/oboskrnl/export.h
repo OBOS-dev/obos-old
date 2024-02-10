@@ -14,5 +14,5 @@
 #elif defined(OBOS_KERNEL)
 #	define OBOS_EXPORT
 #else
-#	error You should not be including kernel headers.
+#	define OBOS_EXPORT
 #endif
